@@ -1,0 +1,130 @@
+﻿@{
+    ViewData["Title"] = "Approval Config";
+}
+
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">Approval Config</span>
+        <button type="button" class="btn btn-sm btn-primary float-end rounded-5" id="btnAdd" data-action="Add">
+            <span class="fa fa-plus"></span>&nbsp;&nbsp;Add
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-2">
+                <label>Status</label>
+                <select id="ListStatus" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label>Api Name</label>
+                <select id="ListApiId" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <div class="btn-group">
+                    <button type="button" id="btnSearch" class="btn btn-sm btn-filter btn-outline-success" title="Search">
+                        <span class="fa fa-search"></span>
+                    </button>
+                    <button type="button" id="btnPrint" class="btn btn-sm btn-filter btn-outline-secondary" title="Print">
+                        <span class="fa fa-print"></span>
+                    </button>
+                    <button type="button" id="btnExport" class="btn btn-sm btn-filter btn-outline-primary" title="Export To Excel">
+                        <span class="fa fa-file-excel"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-md-12">
+                <table id="tableApprovalConfig" class="table table-bordered table-hover table-default" data-sort-name="ApiDesc" data-unique-id="Id">
+                    <thead>
+                        <tr>
+                            <th data-formatter="tableApprovalConfigSlNo" class="text-center">#</th>
+                            <th data-sortable="true" data-field="ApiDesc">Api Name</th>
+                            <th data-formatter="tableApprovalHtmlString">Approval Seq.</th>
+                            <th data-sortable="true" data-field="CreatedAt" data-formatter="tableApprovalConfigCreatedByAndAt" class="text-nowrap">Created By & At</th>
+                            <th data-sortable="true" data-field="UpdatedAt" data-formatter="tableApprovalConfigUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
+                            <th data-sortable="true" data-field="StatusDesc" data-formatter="tableApprovalConfigStatus" class="Status text-center">Status</th>
+                            <th data-formatter="tableApprovalConfigAction" data-events="tableApprovalConfigActionEvent" class="not-print text-center">
+                                <i class="fa fa-list-check"></i>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="modalApprovalConfig" class="modal fade" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Approval Config / Add</span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle" inert>
+                        <span class="fa fa-minus"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body pt-3" style="min-height:75vh;">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card shadow-lg">
+                            <div class="card-header">
+                                <span class="card-title">Approval Role</span>
+                            </div>
+                            <div class="card-body pt-2">
+                                <div id="ApprovalRole" class="approval-role">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card shadow-lg">
+                            <div class="card-header">
+                                <span class="card-title">Draw Approval Config</span>
+                            </div>
+                            <div class="card-body pt-2">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label>Api Name</label>
+                                        <select id="ApiId" class="form-control form-control-sm mb-2 required" data-search="true" data-size="4">
+                                        </select>                                        
+                                    </div>                                                                        
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div id="ApprovalConfig" class="approval-config watermark-container" ondrop="ApprovalConfig.drop(event)" ondragover="ApprovalConfig.allowDrop(event)">
+                                            <div class="watermark-text">Drop Here</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnSave" class="btn btn-sm btn-success rounded-5">
+                    <span class="fa fa-save"></span>&nbsp;&nbsp;Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script type="text/javascript" asp-append-version="true" src="~/script/ApprovalConfig.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            ApprovalConfig.init();
+        });
+    </script>
+}

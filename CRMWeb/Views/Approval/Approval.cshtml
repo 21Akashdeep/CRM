@@ -1,0 +1,122 @@
+﻿@{
+    ViewData["Title"] = "Approval";
+}
+<div class="card shadow">
+    <div class="card-header">
+        <span class="card-title">Approval / View</span>        
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-2">
+                <label>Status</label>
+                <select id="ListStatus" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label>Date Range</label>
+                <div class="input-group input-group-sm">
+                    <input type="text" id="DateRange" class="form-control form-control-sm pe-1" style="font-size:12px; height:31px;" />
+                    <span class="input-group-text date-range-picker"><i class="fa fa-calendar"></i></span>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label>APi Name</label>
+                <select id="ListApiId" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label>Req. No.</label>
+                <select id="ListReqId" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <div class="btn-group">
+                    <button type="button" id="btnSearch" class="btn btn-sm btn-filter btn-outline-success" title="Search">
+                        <span class="fa fa-search"></span>
+                    </button>
+                    <button type="button" id="btnPrint" class="btn btn-sm btn-filter btn-outline-secondary" title="Print">
+                        <span class="fa fa-print"></span>
+                    </button>
+                    <button type="button" id="btnExport" class="btn btn-sm btn-filter btn-outline-primary" title="Export To Excel">
+                        <span class="fa fa-file-excel"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-md-12">
+                <table id="tableApproval" class="table table-bordered table-hover table-default" border="1" data-sort-name="ReqNo" data-unique-id="Id">
+                    <thead>
+                        <tr>
+                            <th data-sortable="false" data-formatter="tableApprovalSlNo" class="text-center">#</th>                            
+                            <th data-sortable="true" data-field="ReqNo">Request No.</th>
+                            <th data-sortable="true" data-field="Date" data-formatter="tableApprovalDate" class="text-nowrap">Request Date</th>
+                            <th data-sortable="true" data-field="ApiName">Request For</th>
+                            <th data-sortable="true" data-field="UserName">Approver Name</th>
+                            <th data-sortable="true" data-field="DepartmentDesc">Department</th>
+                            <th data-sortable="true" data-field="StatusDesc" data-formatter="tableApprovalStatus" class="text-center">Status</th>
+                            <th data-formatter="tableApprovalAction" data-events="tableApprovalEvent" class="not-print text-center">
+                                <i class="fa-solid fa-list-check"></i>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="modalApprovalReq" class="modal fade" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">OutPass / Add</span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body p-3" style="min-height:75vh;">
+                <form id="formApproval">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table id="tableApprovalReq" class="table table-bordered table-hover table-default" border="1" data-sort-name="OutPassNo" data-unique-id="Id" data-detail-view="true" data-detail-formatter="tableApprovalReqDetail">
+                                <thead></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label>Remarks<span class="text-mandatory">*</span></label>
+                            <input id="Approval_Id" name="Id" type="hidden" class="approval-required" />
+                            <input id="Approval_ApiId" name="ApiId" type="hidden" class="approval-required" />
+                            <input id="Approval_ApiName" name="ApiName" type="hidden" class="approval-required" />
+                            <input id="Approval_ReqId" name="ReqId" type="hidden" class="approval-required" />
+                            <textarea id="Remarks" name="Remarks" class="form-control form-control-sm approval-required" rows="4" cols="50"></textarea>
+                        </div>
+                    </div>
+                </form>                
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnSave" class="btn btn-sm btn-success rounded-5" data-action="Approve">
+                    <span class="fa fa-save"></span>&nbsp;&nbsp;Approve
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="~/script/Approval.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        $(function () {
+            Approval.init();
+        });
+    </script>
+}

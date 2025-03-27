@@ -1,0 +1,131 @@
+﻿@{
+    ViewData["Title"] = "Setting";
+}
+<div class="card shadow">
+    <div class="card-header">
+        <span class="card-title">Setting / View</span>
+        <button type="button" id="btnAdd" class="btn btn-sm btn-primary float-end rounded-5">
+            <span class="fa fa-plus"></span>&nbsp;&nbsp;Add
+        </button>
+    </div>
+    <div class="card-body">        
+        <div class="row">            
+            <div class="col-md-2">
+                <label>Status</label>
+                <select id="ListStatus" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label>Group</label>
+                <select id="ListGroup" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label>Name</label>
+                <select id="ListName" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <div class="btn-group">
+                    <button type="button" id="btnSearch" class="btn btn-sm btn-filter btn-outline-success" title="Search">
+                        <span class="fa fa-search"></span>
+                    </button>
+                    <button type="button" id="btnPrint" class="btn btn-sm btn-filter btn-outline-secondary" title="Print">
+                        <span class="fa fa-print"></span>
+                    </button>
+                    <button type="button" id="btnExport" class="btn btn-sm btn-filter btn-outline-primary" title="Export To Excel">
+                        <span class="fa fa-file-excel"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-md-12">
+                <table id="tableSetting" class="table table-bordered table-hover table-default" data-search="true" data-sort-name="Id" data-unique-id="Id">
+                    <thead>                       
+                        <tr>                            
+                            <th data-sortable="true" data-formatter="tableSettingSLNoFormatter" class="text-center">#</th>
+                            <th data-sortable="true" data-field="Group">Group</th>
+                            <th data-sortable="true" data-field="Name">Name</th>                            
+                            <th data-sortable="true" data-field="Description">Description</th>
+                            <th data-sortable="true" data-field="Value" class="text-center">Value</th>
+                            <th data-sortable="true" data-field="CssClass">Css Class</th>
+                            <th data-sortable="true" data-field="Icon">Icon</th>                            
+                            <th data-sortable="true" data-formatter="tableSettingCreatedByAndAtFormatter" class="text-nowrap">Created By & At</th>
+                            <th data-sortable="true" data-formatter="tableSettingUpdatedByAndAtFormatter" class="text-nowrap">Updated By & At</th>
+                            <th data-sortable="true" data-formatter="tableSettingStatusFormatter" class="text-center">Status</th>
+                            <th data-formatter="tableSettingActionFormatter" data-events="tableSettingActionEvent" class="not-print text-center">
+                                <i class="fa-solid fa-list-check"></i>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="modalSetting" class="modal fade" data-bs-backdrop="static" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Setting / Add</span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle" inert>
+                        <span class="fa fa-minus"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body" style="min-height:75vh;">
+                <form id="formSetting">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label>Group<span class="text-mandatory">*</span></label>
+                            <input type="hidden" id="Id" name="Id" />                            
+                            <input type="text" id="Group" name="Group" class="form-control form-control-sm es-input required" maxlength="50">
+                        </div>
+                        <div class="col-md-12">
+                            <label>Name<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Name" name="Name" class="form-control form-control-sm es-input required" maxlength="100">
+                        </div>
+                        <div class="col-md-12">
+                            <label>Description<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Description" name="Description" autocomplete="off" class="form-control form-control-sm required" maxlength="100" />                            
+                        </div>
+                        <div class="col-md-12">
+                            <label>Value<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Value" name="Value" autocomplete="off" class="form-control form-control-sm required" maxlength="50" />
+                        </div>
+                        <div class="col-md-12">
+                            <label>Icon</label>
+                            <select id="Icon" name="Icon" class="form-control form-control-sm select-pick" data-search="true" data-size="4">
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label>Css Class</label>
+                            <input type="text" id="CssClass" name="CssClass" autocomplete="off" class="form-control form-control-sm" maxlength="200" />
+                        </div>                        
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnSave" class="btn btn-sm btn-success rounded-5">
+                    <span class="fa fa-save"></span>&nbsp;&nbsp;Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+        <script src="~/script/Setting.js" asp-append-version="true"></script>
+        <script type="text/javascript">
+            $(function () {
+                Setting.init();
+            });
+        </script>
+}
+

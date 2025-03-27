@@ -1,0 +1,47 @@
+﻿
+<div id="modalUnit" class="modal fade modal-draggable" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Unit / Add</span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body" style="min-height:75vh;">
+                <form id="formUnit">
+                    <div class="row">                        
+                        <div class="col-md-12">
+                            <label>Name<span class="text-mandatory">*</span></label>
+                            <input type="hidden" id="Unit_Id" name="Id" />
+                            <input type="text" id="Unit_Name" name="Name" autocomplete="off" class="form-control form-control-sm unit-required" maxlength="8" />
+                        </div>
+                        <div class="col-md-12">
+                            <label>Description<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Unit_Description" name="Description" autocomplete="off" class="form-control form-control-sm unit-required" maxlength="100" />
+                        </div>
+                        <div class="col-md-12">
+                            <label>Unit Qty Code Of Gst<span class="text-mandatory">*</span></label>
+                            <select id="Unit_UQCG" name="UQCG" class="form-control form-control-sm select-pick unit-required" data-search="true" data-size="4">
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label>Decimal Place<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Unit_DecimalPlace" name="DecimalPlace" autocomplete="off" class="form-control form-control-sm unit-required" maxlength="2" oninput="this.value = _Number.validate({value:this.value, min:0, max:10, dp:0})" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="Unit_btnSave" class="btn btn-sm btn-success rounded-5">
+                    <span class="fa fa-save"></span>&nbsp;&nbsp;Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

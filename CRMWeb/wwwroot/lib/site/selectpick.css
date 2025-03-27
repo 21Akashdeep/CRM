@@ -1,0 +1,165 @@
+﻿:root {
+    --border: 1px solid #dee2e6 !important;
+    --fontSize: 0.85rem;
+}
+
+select.select-pick {
+    display: none;
+}
+
+.select-pick {
+    max-width: 100%;
+    border-radius: 5px;    
+    position: relative;
+    font-size: var(--fontSize);    
+}
+
+.select-pick-toggle-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 5px;
+    border: var(--border);
+    background-color:white;
+    height: 31px;
+    white-space: nowrap !important;
+    overflow: hidden;
+    margin-bottom: 0;
+}
+.select-pick-toggle-btn:disabled {
+    background-color: #e9ecef;
+    color:black;
+}
+.select-pick-toggle-btn .toggle-text {
+    overflow: hidden;
+    margin-bottom:2px;
+}
+
+.select-pick-toggle-btn .toggle-icon {
+    font-size: 8px;
+    transition: transform 0.1s ease-in-out;
+}
+.modal .select-pick-toggle-btn .toggle-text {
+    margin-top: 1px;
+}
+.modal .select-pick-toggle-btn .toggle-icon {
+    margin-top:1px;
+}
+
+.select-pick-toggle-btn .toggle-icon.up {
+    transform: rotate(180deg);
+}
+.select-pick-menu {
+    border: var(--border);
+    border-radius: 5px;
+    margin-top: 3px;
+    position: absolute;
+    z-index: 1000;
+    background-color: white;
+    display:none;
+    /*min-width: 100%; */
+}
+
+.select-pick-menu.menu-show {
+    min-height: 25px;
+    display: block;
+}
+@media screen and (min-width:1000px) {
+    .select-pick-menu {
+        max-width: 1000px;
+    }
+}
+.select-pick .menu-search-box {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.3rem;
+    display: flex;
+}
+.select-pick .menu-search-box .form-control {
+    margin-bottom: 0px;
+}
+
+.menu-action-box {
+    padding-left: 0.5rem;
+    padding-right: 0.1rem;
+    padding-bottom: 0.3rem;
+    display: flex;    
+    border-bottom: 1px solid rgba(222, 226, 230, 1);
+    width:auto;
+}
+.menu-action-box button {
+    flex:1;
+    min-width:0;
+    border-radius: 50px;
+    margin-right: 5px;
+    font-size: 90%;
+    padding: 0 15px 0 10px;    
+    height:20px!important;
+    border:0;
+    white-space:nowrap;
+}
+.select-pick-menu .menu-list {
+    color: black;    
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding:0;
+    overflow:auto;
+}
+.select-pick-menu .menu-item {
+    list-style: none;     
+    padding: 6px 7px 6px 7px;
+    display:flex;    
+    position:relative;
+    cursor:pointer;
+}
+.select-pick-menu .menu-item .table {
+    margin-bottom:0;
+}
+.select-pick-menu .menu-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+.select-pick-menu .menu-item:focus {
+    outline:0;
+    background-color: rgba(0, 0, 0, 0.05);    
+}
+.select-pick-menu .menu-item div {
+    line-height: 15px;
+}
+.select-pick-menu .menu-item .item-icon {
+    padding-right:10px;
+}
+.select-pick-menu .menu-item .item-text {
+    width:100%;
+    white-space:nowrap;
+}
+.select-pick-menu .menu-item .item-sub-text {
+    font-size:90%;
+}
+
+.select-pick-menu .menu-item .item-btn-group {
+    position:absolute;
+    width:100%;
+    top:3px;
+    right:0;
+    left:0;
+    text-align:right;
+    font-size:90%;    
+}
+.select-pick-menu .menu-item .item-btn-group .item-selected {
+    margin-right: 5px;
+    font-size: 16px;
+    display: none;
+}
+.select-pick-menu .menu-item.item-selected .item-btn-group .item-selected {
+    display: inline-block;
+}
+.select-pick-menu .menu-item .item-btn-group button {
+    margin-right: 5px;
+    padding: 0;
+    font-size: 12px;
+    height: 23px;
+    width: 23px;
+    border-radius: 50%;
+}

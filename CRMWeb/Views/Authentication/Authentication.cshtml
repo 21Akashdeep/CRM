@@ -1,0 +1,127 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+    <link rel="icon" href="@Url.Content("~/image/crm-logo-1.png")" />
+    <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.css" />
+    <link rel="stylesheet" href="~/lib/font-awesome/css/all.css" />
+    <link rel="stylesheet" href="~/lib/jquery-ui/jquery-ui.css" />
+    <link rel="stylesheet" href="~/lib/toast/css/jquery.toast.css" />
+
+    <style>
+        .fa {
+            width: 25px;
+        }
+
+        div.swal2-text-msg {
+            color: white;
+        }
+        .hide{
+            display: none;
+        }        
+    </style>
+</head>
+<body>
+    <div class="container-fluid hide" id="LoginInfo">
+        <div class="row" style="height:100vh;">            
+            <div class="col-md-4 my-auto"></div>
+            <div class="col-md-4 my-auto">
+                <div class="card card-block shadow-lg">
+                    <div class="card-body" style="min-height:70vh;">
+                        <div class="row">
+                            <div class="col-md-12 text-center text-nowrap text-uppercase">                                
+                                <img class="m-0" src="/image/crm-logo-2.png" style="height:150px;" />                                
+                                <h5 id="AppName" class="fw-bold" style="color:darkslategrey!important;"></h5>
+                                <h6 id="AppDesc" class="fw-bold" style="color:darkslategrey!important;"></h6>
+                            </div>
+                        </div>
+                        <div class="row mb-4 mt-4">
+                            <div class="col-md-12">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent">
+                                        <i class="fa fa-user"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0 required" name="UserId" Id="UserId" placeholder="User Id" autocomplete="User-Id" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent">
+                                        <i class="fa fa-key"></i>
+                                    </span>
+                                    <input type="password" class="form-control border-start-0 border-end-0 required" name="Password" Id="Password" placeholder="Password" autocomplete="Password" />
+                                    <span class="input-group-text view-password bg-transparent" style="cursor:pointer;">
+                                        <i class="fa fa-eye"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="" id="RememberMe">
+                                    <label class="form-check-label" for="RememberMe">Remember Me</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-outline-success btn-sm" id="btnLogin">
+                                        <span class="fa fa-sign-in"></span>&nbsp;&nbsp;Login
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="d-grid gap-2">
+                                    <a href="#" class="btn btn-outline-danger btn-sm mb-2">
+                                        <span class="fa fa-unlock"></span>&nbsp;&nbsp;
+                                        Forget Password??
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>     
+            <div class="col-md-4 my-auto"></div>
+        </div>
+    </div>
+    <div id="modalRequestProcess" class="modal" data-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 bg-transparent">
+                <div class="modal-body text-center">
+                    <div class="spinner-grow text-primary" role="status" style="opacity: 1; width: 1.5rem; height: 1.5rem;">
+                    </div>
+                    <div class="spinner-grow text-warning" role="status" style="opacity: 1; width: 1.5rem; height: 1.5rem;">
+                    </div>
+                    <div class="spinner-grow text-dark" role="status" style="opacity: 1; width: 1.5rem; height: 1.5rem;">
+                    </div>
+                    <div class="spinner-grow text-success" role="status" style="opacity: 1; width: 1.5rem; height: 1.5rem;">
+                    </div>
+                    <div class="spinner-grow text-danger" role="status" style="opacity: 1; width: 1.5rem; height: 1.5rem;">
+                    </div>
+                    <h4 style="opacity: 1; color: #000000; font-weight: 400;">Please Wait...</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="~/lib/jquery/jquery.js"></script>
+    <script type="text/javascript" src="~/lib/bootstrap/js/bootstrap.bundle.js"></script>
+    <script type="text/javascript" src="~/lib/jquery-ui/jquery-ui.js"></script>
+    <script type="text/javascript" src="~/lib/sweetalert2/js/sweetalert2.all.js"></script>
+    <script type="text/javascript" src="~/lib/toast/js/jquery.toast.js"></script>
+    <script type="text/javascript" asp-append-version="true" src="~/script/Util.js"></script>
+    <script type="text/javascript" asp-append-version="true" src="~/script/Authentication.js"></script>
+</body>
+</html>
