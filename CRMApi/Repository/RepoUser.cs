@@ -132,9 +132,9 @@ namespace CRMApi.Repository
                         IsAdded = ape != null
                     }
                 ).ToList();
-                
+
                 //Get Approval Role
-                var dbApprovalRole = RepoApprovalRole.List(null);                
+                var dbApprovalRole = db.ApprovalRole.Where(ar => App.ActiveStatus.Contains(ar.Status)).ToList();
                 var dbUserAprRole = dbUser.Where(x => x.Id == Id).SelectMany(x => x.ApprovalRole).ToList();
                 Options.AprRole = (
                     from arl in dbApprovalRole
@@ -614,18 +614,17 @@ namespace CRMApi.Repository
             Message objMsg = new Message();
             try
             {
-                obj.TokenExpiry = DateTime.Now.AddMinutes(Convert.ToDouble(App.Jwt.TokenExpireTimeInMinutes));
-                                
                 dynamic data = new ExpandoObject();                
                 data.User = new
                 {
                     obj.Name,
                     Type = obj.UserType,
-                    obj.Theme,
-                    AuthToken = Util.CreateJwtToken(obj),
+                    obj.Theme,                    
                     obj.Company,
-                    obj.Api                    
+                    obj.Api,
+                    AuthToken = Util.CreateJwtToken(obj)
                 };
+                data.Company = db.Company.FirstOrDefault(cp => App.ActiveStatus.Contains(cp.Status) && cp.Id == obj.CompanyId);
                 data.AppMenu = AppMenu(obj).data;
                 objMsg.status = Message.Type.success;
                 objMsg.statusText = "Login sucess";

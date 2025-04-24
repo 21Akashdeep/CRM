@@ -67,7 +67,7 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
-        [HttpGet]
+        [HttpPost]
         public IActionResult Print(Api obj)
         {
             Message objMsg = new Message();
@@ -83,7 +83,7 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
-        [HttpGet]
+        [HttpPost]
         public IActionResult Export(Api obj)
         {
             Message objMsg = new Message();

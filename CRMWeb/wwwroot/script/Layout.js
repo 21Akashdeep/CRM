@@ -38,7 +38,7 @@ class Layout {
                         let windowSize = $(window).width() <= 1000 ? '100%' : ($(window).width() - 50) + 'px';
                         let left = $(window).width() <= 1000 ? '0px' : '50px';
                         $('.content').css({ 'width': windowSize, left: left, top: '0', 'position': 'absolute' });
-                        $('.app-name').text(App.Setting.Info.Name);
+                        $('.app-name').text(App.Info.Name);
                     }
                     break;
                 case 'mouseleave':
@@ -47,7 +47,7 @@ class Layout {
                         $('.sidebar .menu .child').css({ 'display': 'none' });
                         $('.content').css({ 'width': '', 'position': '' });                        
                         $('a.menu-item').find('.fa.fa-angle-right').css({ "transform": "rotate(0deg)" });
-                        $('.app-name').text(App.Setting.Info.Code);
+                        $('.app-name').text(App.Info.Code);
                     }
                     break;
             }
@@ -180,7 +180,7 @@ class Layout {
             Cookie.set('SidebarView', 'On');
             $('.sidebar').animate({ 'width': '250px' }, speed);
         }
-        setTimeout(() => { $('.app-name').text(App.Setting.Info.Name); }, speed);
+        setTimeout(() => { $('.app-name').text(App.Info.Name); }, speed);
     }
     static sidebarOff(speed = 500) {
         if ($(window).width() <= 1000) {
@@ -190,7 +190,7 @@ class Layout {
             Cookie.set('SidebarView', 'Off');
             $('.sidebar').animate({ 'width': '50px' }, speed);
         }
-        $('.app-name').text(App.Setting.Info.Code);
+        $('.app-name').text(App.Info.Code);
     }
     static setPermission() {
         //By Pass Sys Admin
@@ -237,11 +237,11 @@ class Layout {
     }
     static setPage() {
         let title = $('title').text().split('-');
-        $('title').text(`${App.Setting.Info.Name} - ${title[title.length - 1]}`);
+        $('title').text(`${App.Info.Name} - ${title[title.length - 1]}`);
         //Set Theme Color
         $('.page-body').attr('data-theme', App.User.Theme);
         //Side Bar
-        $('.app-name').text(App.Setting.Info.Name);
+        $('.app-name').text(App.Info.Name);
         $('.user-name').text(App.User.Name);
         $('.user-deparment').text(App.User.Department);                        
         $('.user-name-first-char').text(App.User.Name.substring(0, 1));

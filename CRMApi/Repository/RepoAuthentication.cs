@@ -42,6 +42,7 @@ namespace CRMApi.Repository
                 }
                 objUser.ApiType = obj.ApiType;
                 objUser.CompanyId = objUser.Company.Where(c => c.IsDefault).Select(c => c.CompanyId).FirstOrDefault();
+                objUser.TokenExpiry = DateTime.Now.AddMinutes(Convert.ToDouble(App.Jwt.TokenExpireTimeInMinutes));
                 objMsg = RepoUser.UserInfo(objUser);
             }
             catch (Exception ex)

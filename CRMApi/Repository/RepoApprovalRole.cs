@@ -47,11 +47,11 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }        
-        public List<ApprovalRole> List(ApprovalRole? obj)
+        public List<ApprovalRole> List(ApprovalRole? obj, User User)
         {
             obj = obj == null ? new ApprovalRole() : obj;
             obj.ListStatus = obj.ListStatus.Count == 0 ? App.ActiveStatus : obj.ListStatus;
-            var dbApprovalRole = db.ApprovalRole.Where(ag => obj.ListStatus.Contains(ag.Status)).ToList();
+            var dbApprovalRole = db.ApprovalRole.Where(ag => obj.ListStatus.Contains(ag.Status) && ag.CompanyId == User.CompanyId).ToList();
             dbApprovalRole = obj.ListId.Count == 0 ? dbApprovalRole : dbApprovalRole.Where(ag => obj.ListId.Contains(ag.Id)).ToList();
             
             var dbSetting = db.Setting.Where(st => App.ActiveStatus.Contains(st.Status)).ToList();
@@ -86,12 +86,12 @@ namespace CRMApi.Repository
             ).ToList();
             return ListApprovalRole;
         }
-        public Message Print(ApprovalRole obj)
+        public Message Print(ApprovalRole obj, User User)
         {
             Message objMsg = new Message();
             try
             {
-                objMsg.data = List(obj);
+                objMsg.data = List(obj, User);
                 Message.Get(ref objMsg, "");
             }
             catch (Exception ex)
@@ -100,7 +100,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Export(ApprovalRole obj)
+        public Message Export(ApprovalRole obj, User User)
         {
             Message objMsg = new Message();
             try
@@ -113,7 +113,7 @@ namespace CRMApi.Repository
                     return objMsg;
                 }
                 //Get Approval Role
-                var ApprovalRole = List(obj);
+                var ApprovalRole = List(obj, User);
                 //Convert List To DataTable
                 DataTable objDataTable = Util.ListToDataTable(ApprovalRole);
                 //Remove Un-wanted column                
@@ -136,7 +136,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Add(ApprovalRole obj)
+        public Message Add(ApprovalRole obj, User User)
         {
             Message objMsg = new Message();
             try
@@ -156,17 +156,15 @@ namespace CRMApi.Repository
                     return objMsg;
                 }
                 //Add Approval Role                
-                obj.CreatedBy = obj.User.Id;
-                obj.UpdatedBy = obj.User.Id;
+                obj.CreatedBy = User.Id;
+                obj.UpdatedBy = User.Id;
                 db.Add(obj);
                 Message.Add(ref objMsg, db.SaveChanges(), "");
                 if (objMsg.status == Message.Type.success)
-                {                    
-                    db.Entry(obj).CurrentValues.SetValues(
-                        db.Database.SqlQueryRaw<ApprovalRole>("SELECT * FROM APPROVALROLE WHERE ID = {0} AND ROWNUM = 1", obj.Id).AsEnumerable().FirstOrDefault() ?? obj
-                    );
+                {
+                    db.Entry(obj).Reload();
                     obj.ListId.Add(obj.Id);
-                    objMsg.obj = List(obj).FirstOrDefault();
+                    objMsg.obj = List(obj, User).FirstOrDefault();
                     objMsg.data = GetViewOption().data;
                 }
             }
@@ -176,12 +174,12 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Edit(ApprovalRole obj)
+        public Message Edit(ApprovalRole obj, User User)
         {
             Message objMsg = new Message();
             try
             {
-                var ApprovalRole = List(obj).FirstOrDefault();
+                var ApprovalRole = List(obj, User).FirstOrDefault();
                 if (ApprovalRole == null)
                 {
                     Message.Error(ref objMsg, "Approval Role did not found for edit.");
@@ -196,7 +194,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Update(ApprovalRole obj)
+        public Message Update(ApprovalRole obj, User User)
         {
             Message objMsg = new Message();
             try
@@ -225,13 +223,13 @@ namespace CRMApi.Repository
                 UpdateApprovalRole.Name = obj.Name;
                 UpdateApprovalRole.Description = obj.Description;
                 UpdateApprovalRole.UpdatedAt = DateTime.Now;
-                UpdateApprovalRole.UpdatedBy = obj.User.Id;
+                UpdateApprovalRole.UpdatedBy = User.Id;
                 db.Update(UpdateApprovalRole);
                 Message.Update(ref objMsg, db.SaveChanges(), "");
                 if (objMsg.status == Message.Type.success)
                 {
                     obj.ListId.Add(UpdateApprovalRole.Id);
-                    objMsg.obj = List(obj).FirstOrDefault();
+                    objMsg.obj = List(obj, User).FirstOrDefault();
                     objMsg.data = GetViewOption().data;
                 }
             }
@@ -241,7 +239,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Delete(ApprovalRole obj)
+        public Message Delete(ApprovalRole obj, User User)
         {
             Message objMsg = new Message();
             try
@@ -253,7 +251,7 @@ namespace CRMApi.Repository
                     return objMsg;
                 }                
                 DeleteApprovalRole.Status = App.Status.Delete;
-                DeleteApprovalRole.UpdatedBy = obj.User.Id;
+                DeleteApprovalRole.UpdatedBy = User.Id;
                 DeleteApprovalRole.UpdatedAt = DateTime.Now;
                 db.Update(DeleteApprovalRole);
                 Message.Delete(ref objMsg, db.SaveChanges(), "");
@@ -261,7 +259,7 @@ namespace CRMApi.Repository
                 {
                     obj.ListId.Add(obj.Id);
                     obj.ListStatus.Add(App.Status.Delete);
-                    objMsg.obj = List(obj).FirstOrDefault();
+                    objMsg.obj = List(obj, User).FirstOrDefault();
                     objMsg.data = GetViewOption().data;
                 }
             }
@@ -271,7 +269,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Enable(ApprovalRole obj)
+        public Message Enable(ApprovalRole obj, User User)
         {
             Message objMsg = new Message();
             try
@@ -298,14 +296,14 @@ namespace CRMApi.Repository
                     return objMsg;
                 }
                 EnableApprovalRole.Status = App.Status.Enable;
-                EnableApprovalRole.UpdatedBy = obj.User.Id;
+                EnableApprovalRole.UpdatedBy = User.Id;
                 EnableApprovalRole.UpdatedAt = DateTime.Now;
                 db.Update(EnableApprovalRole);
                 Message.Enable(ref objMsg, db.SaveChanges(), "");
                 if (objMsg.status == Message.Type.success)
                 {
                     obj.ListId.Add(EnableApprovalRole.Id);
-                    objMsg.obj = List(obj).FirstOrDefault();
+                    objMsg.obj = List(obj, User).FirstOrDefault();
                     objMsg.data = GetViewOption().data;
                 }
             }

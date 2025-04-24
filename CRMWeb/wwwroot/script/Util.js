@@ -1,4 +1,11 @@
-﻿
+﻿const App = {
+    Setting: sessionStorage.getItem('Setting') ? JSON.parse(sessionStorage.getItem('Setting')) : null,
+    User: sessionStorage.getItem('User') ? JSON.parse(sessionStorage.getItem('User')) : null,
+    AppMenu: sessionStorage.getItem('AppMenu') ? sessionStorage.getItem('AppMenu') : '',
+    Company: sessionStorage.getItem('Company') ? JSON.parse(sessionStorage.getItem('Company')) : null,
+    Info: { Code: "CRM", Name: "CRM PORTAL", Desc: "Customer Relationship Managment", SubDesc: "Login" }
+}
+
 const Util = {
     init() {
         $('.view-password').on('click', function () {
@@ -113,35 +120,13 @@ const Cookie = {
         return match ? match[2] : null;
     },
     set({ name, value, expiryDays = 100 }) {
-        const expires = new Date(Date.now() + expiryDays * 86400000).toUTCString();
-        document.cookie = `${name}=${value};expires=${expires};path=/`;
+        const expires = new Date(Date.now() + expiryDays * 86400000).toUTCString();        
+        document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
     },
     remove(name) {
         document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`;
     }
 };
-
-const SessionStorage = {
-    set(key, Value) {
-        sessionStorage.setItem(key, Value);
-    },
-    get(key) {
-        return sessionStorage.getItem(key);
-    },
-    remove(key) {
-        sessionStorage.removeItem(key);
-    },
-    removeAll() {
-        sessionStorage.clear();
-    },
-}
-
-const App = {
-    Setting: SessionStorage.get('Setting') ? JSON.parse(SessionStorage.get('Setting')) : null,
-    User: SessionStorage.get('User') ? JSON.parse(SessionStorage.get('User')) : null,
-    AppMenu: SessionStorage.get('AppMenu') ? SessionStorage.get('AppMenu') : '',
-}
-//Object.freeze(App.Setting.Info, App.Setting.UserType, App.Setting.ApiType, App.Setting.ApiName, App.User, App.Permission);
 
 const Message = {
     Type: {
@@ -337,7 +322,7 @@ const PageLoader = {
 
 const Data = {
     get({ url = null, loader = true, async = false, isApi = true, onSuccess = () => { } }) {
-        const authToken = SessionStorage.get('User') ? `Bearer ${JSON.parse(SessionStorage.get('User')).AuthToken}` : '';
+        const authToken = sessionStorage.getItem('User') ? `Bearer ${JSON.parse(sessionStorage.getItem('User')).AuthToken}` : '';
         const apiUrl = isApi ? Url.Api + url : Url.App + url;
         $.ajax({
             url: apiUrl,
@@ -389,7 +374,7 @@ const Data = {
         });
     },
     post({ url = null, data = null, loader = true, loaderName = '', async = false, isApi = true, onSuccess = () => { } }) {
-        const authToken = SessionStorage.get('User') ? `Bearer ${JSON.parse(SessionStorage.get('User')).AuthToken}` : '';
+        const authToken = sessionStorage.getItem('User') ? `Bearer ${JSON.parse(sessionStorage.getItem('User')).AuthToken}` : '';
         const apiUrl = isApi ? Url.Api + url : Url.App + url;
         $.ajax({
             url: apiUrl,
@@ -451,7 +436,7 @@ const Data = {
         });
     },
     update({ url = null, data = null, loader = true, async = false, isApi = true, onSuccess = () => { } }) {
-        const authToken = SessionStorage.get('User') ? `Bearer ${JSON.parse(SessionStorage.get('User')).AuthToken}` : '';
+        const authToken = sessionStorage.getItem('User') ? `Bearer ${JSON.parse(sessionStorage.getItem('User')).AuthToken}` : '';
         const apiUrl = isApi ? Url.Api + url : Url.App + url;
         $.ajax({
             url: apiUrl,
@@ -488,7 +473,7 @@ const Data = {
         });
     },
     delete({ url = null, loader = true, async = false, isApi = true, onSuccess = () => { } }) {
-        const authToken = SessionStorage.get('User') ? `Bearer ${JSON.parse(SessionStorage.get('User')).AuthToken}` : '';
+        const authToken = sessionStorage.getItem('User') ? `Bearer ${JSON.parse(sessionStorage.getItem('User')).AuthToken}` : '';
         const apiUrl = isApi ? Url.Api + url : Url.App + url;
         $.ajax({
             url: apiUrl,
@@ -1045,19 +1030,17 @@ const Print = {
                 font-family: Calibri, sans-serif;
             }
             @media print{
-                @page {
-                    size:${orientation}; margin:3mm; counter-increment:page; counter-reset:page 1; 
-                    @bottom-right { content: "Page " counter(page) " of " counter(pages)};
-                }
+                @page { size:${orientation}; margin:7mm; counter-increment:page;  @bottom-right { content: "Page " counter(page) " of " counter(pages)}; }
                 table { page-break-after: auto; border-collapse: collapse; width:100%; }                
                 thead { display: table-header-group; }
                 tfoot { display: table-footer-group; }
                 tr { page-break-inside: avoid; page-break-after: auto; }
                 td { page-break-inside: avoid; page-break-after: auto; border: ${border ? `1px solid black;` : `none;`}}
-                th { page-break-inside: avoid; page-break-after: auto; border: ${border ? `1px solid black;` : `none;`}}                                
-                .btn-print { display: none; }
+                th { page-break-inside: avoid; page-break-after: auto; border: ${border ? `1px solid black;` : `none;`}}                                                
+                .not-print-item{display:none;}
             }
             td.td-num { vertical-align:middle; text-align: right; white-space: nowrap; }
+            .th-heading { font-size:14px;}
             .sub-table td th{ padding-left:0; }
             p{ margin:0; }
             .border{border:1px solid black;}
@@ -1086,8 +1069,8 @@ const Print = {
             .company-name {font-size:18px;}
             .company-add, .report-desc {font-size:14px;}
             .btn-print { color:#212529; border-color: #212529; border-radius:5px; background-color:#fff; padding:3px 10px 3px 10px; font-size:14px;}
-            .btn-print:hover { color:#fff; border-color: #212529; border-radius:5px; background-color:#212529}            
-            .th-heading { font-size:14px;}
+            .btn-print:hover { color:#fff; border-color: #212529; border-radius:5px; background-color:#212529;}
+            .not-print-item{ margin-top:20px;}
         `);
 
         var printWindow = window.open('', '_blank', `top = 0, left = 0, height = ${screen.height}, width = ${screen.width}`);
@@ -1102,11 +1085,12 @@ const Print = {
                     <script type="text/javascript" asp-append-version="true" src="${Url.App}/script/util.js"></script>                                        
                 </head>
                 <body>
-                    ${content.join('')}
-                    <br/>
-                    <button type="button" class="btn-print text-center" onClick="window.print(); window.close();">
-                        <span class="fa fa-print"></span>&nbsp;&nbsp;Print
-                    </button>
+                    ${content.join('')}                    
+                    <div class="text-center not-print-item">
+                        <button type="button" class="btn-print text-center" onClick="window.print(); window.close();">
+                            <span class="fa fa-print"></span>&nbsp;&nbsp;Print
+                        </button>
+                    </div>                    
                 </body>
             </html>
         `);
@@ -1116,7 +1100,7 @@ const Print = {
         }
         printWindow.document.close();
         printWindow.focus();
-        if (isPrint) {
+        if (!isPrint) {
             setTimeout(function () {
                 printWindow.print();
                 printWindow.close();
@@ -1378,17 +1362,17 @@ const OnlineApi = {
         });
     },
 }
-class DateTime {
-    static init() {
+const DateTime = {
+    init() {
         DateTime.monthPicker();
         DateTime.datePicker();
         DateTime.dateTimePicker();
         DateTime.timePicker();
         DateTime.dateRangePicker();
         DateTime.dateRangeTimePicker();
-    }
-    static pickerFunction() { }
-    static monthPicker() {
+    },
+    pickerFunction() { },
+    monthPicker() {
         var inputId = "";
         $('.month-picker').each((index, element) => {
             inputId = '#' + $(element).prev('input').attr('id');
@@ -1430,10 +1414,10 @@ class DateTime {
         $('.month-picker').on('apply.daterangepicker', (ev, picker) => {
             $(inputId).val(picker.startDate.format('MMM-YYYY'));
         });
-    };
-    static datePicker(pram = { minDate: '', maxDate: '' }) {
-        pram.minDate = pram.minDate === undefined ? moment().add(-10, 'y') : pram.minDate;
-        pram.maxDate = pram.maxDate === undefined ? moment().add(10, 'y') : pram.maxDate;
+    },
+    datePicker({ minDate, maxDate } = {}) {
+        minDate = minDate === undefined ? moment().add(-10, 'y') : minDate;
+        maxDate = maxDate === undefined ? moment().add(10, 'y') : maxDate;
         var inputId = "";
         $('.date-picker').each((index, element) => {
             inputId = '#' + $(element).prev('input').attr('id');
@@ -1450,8 +1434,8 @@ class DateTime {
         $('.date-picker').daterangepicker({
             showDropdowns: true,
             autoApply: true,
-            minDate: pram.minDate,
-            maxDate: pram.maxDate,
+            minDate: minDate,
+            maxDate: maxDate,
             singleDatePicker: true,
             autoUpdateInput: false,
             locale: {
@@ -1476,8 +1460,8 @@ class DateTime {
         $('.date-picker').on('apply.daterangepicker', (ev, picker) => {
             $(inputId).val(picker.startDate.format('DD-MMM-YYYY'));
         });
-    };
-    static timePicker() {
+    },
+    timePicker() {
         var inputId = "";
         $('.time-picker').each((index, element) => {
             inputId = '#' + $(element).prev('input').attr('id');
@@ -1502,10 +1486,10 @@ class DateTime {
             }).on('show.daterangepicker', (ev, picker) => {
                 picker.container.find(".calendar-table").hide();
             });
-    };
-    static dateTimePicker(pram = { minDate: '', maxDate: '' }) {
-        pram.minDate = typeof (pram.minDate) == 'undefined' || pram.minDate == '' ? moment().add(-10, 'y') : moment(pram.minDate);
-        pram.maxDate = typeof (pram.maxDate) == 'undefined' || pram.maxDate == '' ? moment().add(10, 'y') : moment(pram.maxDate);
+    },
+    dateTimePicker({ minDate = '', maxDate = '' } = {}) {
+        minDate = minDate == '' ? moment().add(-10, 'y') : moment(minDate);
+        maxDate = maxDate == '' ? moment().add(10, 'y') : moment(maxDate);
         var inputId = "";
         $('.date-time-picker').each((index, element) => {
             inputId = '#' + $(element).prev('input').attr('id');
@@ -1518,10 +1502,10 @@ class DateTime {
         $('.date-time-picker').daterangepicker(
             {
                 showDropdowns: true,
-                startDate: pram.minDate,
-                minDate: pram.minDate,
-                maxDate: pram.maxDate,
-                endDate: pram.maxDate,
+                startDate: minDate,
+                minDate: minDate,
+                maxDate: maxDate,
+                endDate: maxDate,
                 singleDatePicker: true,
                 timePicker: true,
                 autoUpdateInput: false,
@@ -1544,10 +1528,10 @@ class DateTime {
             $(inputId).val(picker.startDate.format('DD-MMM-YYYY HH:mm'));
             DateTime.pickerFunction();
         });
-    }
-    static dateTimePicker_current(pram = { minDate: '', maxDate: '' }) {
-        pram.minDate = typeof (pram.minDate) == 'undefined' || pram.minDate == '' ? moment().add(-10, 'y') : moment(pram.minDate);
-        pram.maxDate = typeof (pram.maxDate) == 'undefined' || pram.maxDate == '' ? moment().add(10, 'y') : moment(pram.maxDate);
+    },
+    dateTimePicker_current({ minDate = '', maxDate = '' }) {
+        minDate = minDate == '' ? moment().add(-10, 'y') : moment(minDate);
+        maxDate = maxDate == '' ? moment().add(10, 'y') : moment(maxDate);
         var inputId = "";
         $('.date-time-picker-current').each((index, element) => {
             inputId = '#' + $(element).prev('input').attr('id');
@@ -1560,9 +1544,8 @@ class DateTime {
         });
         $('.date-time-picker-current').daterangepicker({
             showDropdowns: true,
-            /*minDate: pram.minDate,*/
-            endDate: pram.maxDate,
-            maxDate: pram.maxDate,
+            endDate: maxDate,
+            maxDate: maxDate,
             autoApply: true,
             singleDatePicker: true,
             timePicker: true,
@@ -1590,8 +1573,8 @@ class DateTime {
             $($inputId).val(picker.startDate.format('DD-MMM-YYYY HH:mm'));
             DateTime.pickerFunction();
         });
-    }
-    static dateRangePicker() {
+    },
+    dateRangePicker() {
         var inputId = "";
         $('.date-range-picker').each((index, element) => {
             inputId = '#' + $(element).prev('input').attr('id');
@@ -1639,8 +1622,8 @@ class DateTime {
                 //    picker.drops = 'down';
                 //}
             });
-    }
-    static dateRangeTimePicker() {
+    },
+    dateRangeTimePicker() {
         var $inputId = "";
         $('.date-time-range-picker').each((index, element) => {
             $inputId = '#' + $(element).parent().prev('input').attr('id');
@@ -1689,8 +1672,8 @@ class DateTime {
                     picker.drops = 'down';
                 }
             });
-    }
-    static json(date) {
+    },
+    json(date) {
         if (date == null) {
             return null;
         }
@@ -1717,184 +1700,152 @@ class DateTime {
                 break;
         }
         return new Date(date.split('-')[2] + '-' + moment().month(date.split('-')[1]).format("MM") + '-' + date.split('-')[0]).toISOString();
-    }
-    static isDefault = (date) => { return date == '0001-01-01T00:00:00' ? true : false; }
-    static date = (date, isDefault = false) => {
-        return Field.isNullOrEmpty(date) && !isDefault ?
-            '' :
-            Field.isNullOrEmpty(date) && isDefault ?
-                moment('0001-01-01T00:00:00').format('DD-MMM-YYYY') :
-                moment(date).format('DD-MMM-YYYY');
-    }
-    static dateTime = (date, isDefault = false) => {
+    },
+    isDefault: (date) => { return date == '0001-01-01T00:00:00' ? true : false; },
+    date: (date, isDefault = false) => {
+        return Field.isNullOrEmpty(date) && !isDefault ? '' : Field.isNullOrEmpty(date) && isDefault ? moment('0001-01-01T00:00:00').format('DD-MMM-YYYY') : moment(date).format('DD-MMM-YYYY');
+    },
+    dateTime: (date, isDefault = false) => {
         return Field.isNullOrEmpty(date) && !isDefault ?
             '' :
             Field.isNullOrEmpty(date) && isDefault ?
                 moment('0001-01-01T00:00:00').format('DD-MMM-YYYY HH:mm:ss') :
                 moment(date).format('DD-MMM-YYYY HH:mm:ss');
-    }
-    static time = (date, isDefault = false) => {
+    },
+    time: (date, isDefault = false) => {
         return Field.isNullOrEmpty(date) && !isDefault ?
             '' :
             Field.isNullOrEmpty(date) && isDefault ?
                 moment('0001-01-01T00:00:00').format('HH:mm:ss') :
                 moment(date).format('HH:mm:ss');
-    }
-    static isValid = (value) => {
+    },
+    isValid: (value) => {
         return value != null && value != "" && isNaN(value) && !isNaN(Date.parse(value));
-    }
+    },
 }
-class Table {
-    static add(pram = {
-        id: '',
-        data: [],
-        action: 'destroy',
-        overflow: 'auto',
-        height: '68vh',
-        isHeightPercent: false,
-        fontSize: 11,
-        filterControl: false,
-        showExport: true,
-        showfooter: false,
-        search: true,
-        showPrint: false,
-        printTitle: '',
-        mobileResponsive: true,
-        toggle: true,
-        detailFormatter: null,
-        thead: [],
-        tbody: [],
-        autoThead: false,
-        actionEvents: false,
-        removeExtraColumns: [],
-        hideColumns: '',
-        reportDesc: '',
-        isPrint: false,
-        selectPick: false
+const Table = {
+    add({
+        id = '',
+        data = [],
+        search = true,
+        isPrint = false,
+        toggle = true,
+        selectPick = false,
+        action = 'destroy',
+        mobileResponsive = true,
+        detailFormatter = null,
+        overflow = 'auto',
+        height = '68vh',
+        fontSize = 11,
+        filterControl = false,
+        showfooter = false,
+        thead = [],
+        tbody = [],
+        autoThead = false,
+        removeExtraColumns = [],
+        actionEvents = false,
+        printTitle = '',
+        reportDesc = '',
+        viewMode = 'view'
+
     }) {
-        pram = {
-            id: pram.id === undefined ? '' : pram.id,
-            data: pram.data == undefined || typeof pram.data != 'object' ? [] : pram.data,
-            action: pram.action === undefined ? "destroy" : pram.action,
-            overflow: pram.overflow === undefined ? 'auto' : pram.overflow,
-            height: pram.height === undefined ? "68vh" : pram.height,
-            fontSize: pram.fontSize === undefined ? '11px' : pram.fontSize + 'px',
-            filterControl: pram.filterControl === undefined ? false : pram.filterControl,
-            search: pram.search === undefined ? true : pram.search,
-            showfooter: pram.showfooter === undefined ? true : pram.showfooter,
-            printTitle: pram.printTitle == undefined ? 'Print Table' : pram.printTitle,
-            mobileResponsive: pram.mobileResponsive === undefined ? true : pram.mobileResponsive,
-            detailFormatter: pram.detailFormatter === undefined ? null : pram.detailFormatter,
-            thead: pram.thead === undefined ? [] : pram.thead,
-            tbody: pram.tbody === undefined ? [] : pram.tbody,
-            autoThead: pram.autoThead === undefined ? false : pram.autoThead,
-            actionEvent: pram.actionEvent === undefined ? false : pram.actionEvent,
-            toggle: pram.toggle === undefined ? false : pram.toggle,
-            removeCol: pram.removeCol === undefined ? [] : pram.removeCol,
-            reportDesc: pram.reportDesc === undefined ? '' : pram.reportDesc,
-            isPrint: pram.isPrint === undefined ? false : pram.isPrint,
-            selectPick: pram.selectPick === undefined ? false : pram.selectPick,
-            viewMode: pram.viewMode === undefined ? 'Edit' : pram.viewMode
-        };
-        if (pram.id == '') {
+
+        if (id == '') {
             console.warn('Table id did not find...');
             return;
         }
-        if ($(pram.id).attr('data-detail-formatter')) {
-            pram.detailFormatter = $(pram.id).attr('data-detail-formatter');
+        if ($(id).attr('data-detail-formatter')) {
+            detailFormatter = $(id).attr('data-detail-formatter');
         }
 
-        if (pram.action == 'destroy') {
-            $(pram.id).bootstrapTable(pram.action);
-            if (pram.thead.length > 0) {
-                $(pram.id + ' thead').html(pram.thead.join(''));
+        if (action == 'destroy') {
+            $(id).bootstrapTable(action);
+            if (thead.length > 0) {
+                $(`${id} thead`).html(thead.join(''));
             }
-            if (pram.autoThead) {
-                Table.autoThead(pram);
+            if (autoThead) {
+                Table.autoThead({ id: id, data: data, removeCol: removeExtraColumns, actionEvent: actionEvents });
             }
-            if (pram.tbody.length > 0) {
-                $(pram.id + ' tbody').html(pram.tbody.join(''));
-                $(pram.id).bootstrapTable({ search: pram.search, trimOnSearch: false });
+            if (tbody.length > 0) {
+                $(`${id} tbody`).html(pram.tbody.join(''));
+                $(id).bootstrapTable({ search: pram.search, trimOnSearch: false });
             }
             else {
-                $(pram.id).bootstrapTable({
-                    data: pram.data,
-                    filterControl: pram.filterControl,
-                    search: pram.search,
-                    showfooter: pram.showfooter,
+                $(id).bootstrapTable({
+                    data: data,
+                    filterControl: filterControl,
+                    search: search,
+                    showfooter: showfooter,
                     trimOnSearch: false,
-                    detailView: pram.detailFormatter != null ? true : false,
-                    detailFormatter: pram.detailFormatter,
-                    printPageBuilder: (pram) => {
-                        return '<html><head><style type="text/css" media="print"> @page { size: auto; margin: 25px 0 25px 0; } </style> <style type="text/css" media="all"> table { border-collapse: collapse; font-size: 12px; } table, th, td { border: 1px solid grey; } th, td { text-align: center; vertical-align: middle; } p { font-weight: bold; margin-left:20px; } table { width:94%; margin-left:3%; margin-right:3%; } div.bs-table-print { text-align:center; } </style> </head><title>' + pram.printTitle + '</title> <body> <p>'.concat(pram.printTitle).concat('<p> <div class="bs-table-print">').concat(pram).concat('</div> </body> </html>')
-                    }
+                    detailView: detailFormatter != null ? true : false,
+                    detailFormatter: detailFormatter,
                 });
             }
         }
         else {
-            $(pram.id).bootstrapTable(pram.action, pram.data);
+            $(id).bootstrapTable(action, data);
         }
         //Close Drop down menu if scrolled the table body
         //$('div.fixed-table-body').on('scroll', (event) => {
         //    $(event.currentTarget).find('.dropdown-menu.show').removeClass('show');
         //});
         //Table height        
-        $(pram.id).parent().css({
-            "overflow-y": pram.overflow,
-            "overflow-x": pram.overflow,
-            "max-height": pram.height,
+        $(id).parent().css({
+            "overflow-y": overflow,
+            "overflow-x": overflow,
+            "max-height": height,
         });
         //Font size
-        $(pram.id).css({ 'font-size': pram.fontSize });
+        $(id).css({ 'font-size': fontSize });
         //Set Responsive
-        if (pram.mobileResponsive) {
-            $(pram.id).addClass('table-mobile-responsive');
-            $(pram.id + ' thead tr:not(.hide) th:not([colspan])').each((index, element) => {
+        if (mobileResponsive) {
+            $(id).addClass('table-mobile-responsive');
+            $(`${id} thead tr:not(.hide) th:not([colspan])`).each((index, element) => {
                 if ($(element).attr('colspan') === undefined) {
                     var thText = $(element).text().trim();
-                    $(pram.id + ' tbody tr td:nth-child(' + (index + 1) + ')').attr('data-title', thText);
+                    $(`${id} tbody tr td:nth-child(${(index + 1)})`).attr('data-title', thText);
                 }
             });
         }
 
         //Set Check As Toggle Botton
-        if (pram.toggle) {
-            $(`${pram.id} input[type="checkbox"]`).parent('label').parent('div.th-inner').addClass('p-0');
-            $(`${pram.id} input[type="checkbox"]`).parent('label').addClass('form-switch ps-0 pt-1');
-            $(`${pram.id} input[type="checkbox"]`).addClass('form-check-input');
+        if (toggle) {
+            $(`${id} input[type="checkbox"]`).parent('label').parent('div.th-inner').addClass('p-0');
+            $(`${id} input[type="checkbox"]`).parent('label').addClass('form-switch ps-0 pt-1');
+            $(`${id} input[type="checkbox"]`).addClass('form-check-input');
         }
-        if (pram.viewMode == "View" || pram.viewMode == "view") {
-            $(`${pram.id} input`).attr('disabled', true);
-            $(`${pram.id} textarea`).attr('disabled', true);
-            $(`${pram.id} select`).attr('disabled', true);
+        if (viewMode == "View" || viewMode == "view") {
+            $(`${id} input`).attr('disabled', true);
+            $(`${id} textarea`).attr('disabled', true);
+            $(`${id} select`).attr('disabled', true);
         }
         //Set Select As Select Pick
-        if (pram.selectPick) {
+        if (selectPick) {
             $(`${pram.id} tbody select.select-pick[data-isMatched="false"]`).val(null);
             Dropdown.refresh({ selector: `${pram.id} tbody select.select-pick` });
         }
         //Print
-        if (pram.isPrint) {
-            let company = App.User.Company.find(x => x.IsDefault);
-            if (company == undefined) {
-                console.error('Company Info did not find');
-                return;
+        if (isPrint) {
+            let obj = App.Company;
+            let table = document.querySelector(id).cloneNode(true);
+            if (obj != undefined) {
+                let noOfCol = 0;
+                table.tHead.querySelector('tr').querySelectorAll('th').forEach(th => {
+                    noOfCol += parseInt(th.attributes['colspan'] != undefined ? th.attributes['colspan'].value : 1);
+                });
+                let address = [obj.Address1, obj.PostOffice, obj.District, obj.StateName, obj.PinCode];
+                let title = `
+                <tr>
+                    <th colspan="${noOfCol}">
+                        <div class="company-name">${obj.Description}</div>
+                        <div class="company-add">
+                            ${address.filter(x => x != null).join(', ')}
+                        </div>
+                        <div class="report-desc">${reportDesc}</div>
+                    </th>
+                </tr>`;
+                $(table.tHead).prepend(title);
             }
-            let table = document.querySelector(pram.id).cloneNode(true);
-            let noOfCol = 0;
-            table.tHead.querySelector('tr').querySelectorAll('th').forEach(th => {
-                noOfCol += parseInt(th.attributes['colspan'] != undefined ? th.attributes['colspan'].value : 1);
-            });
-            let title = `<tr>
-                            <th colspan="${noOfCol}">
-                                <div class="company-name">${company.Description}</div>
-                                <div class="company-add">
-                                    ${company.Address1 || ``}, ${company.PostOffice || ``}, ${company.District || ``}, ${company.StateName || ``} - ${company.PinCode || ``}
-                                </div>
-                                <div class="report-desc">${pram.reportDesc}</div>
-                            </th>
-                        </tr>`;
-            $(table.tHead).prepend(title);
             var htmlString = [];
             htmlString.push('<table class="table">');
             htmlString.push($(table).html());
@@ -1910,117 +1861,94 @@ class Table {
             style.push(".table-child th{border: none;}");
             style.push(".not-print{display:none;}");
             style.push("td.td-num{text-align:right;}");
-            Print.table({ title: pram.printTitle, style: style, content: htmlString, orientation: 'A4 landscape', print: false, tableId: '#tableSubGroup' });
+            Print.table({ title: printTitle, style: style, content: htmlString, orientation: 'A4 landscape', print: false, tableId: '#tableSubGroup' });
         }
         //Note work on search input. for content
-    }
-    static empty(pram = { selector: '' }) {
-        pram = {
-            id: pram.selector === undefined || pram.selector == '' ? '.table-default' : pram.selector
-        }
-        $(pram.id).attr('data-trim-on-search', false);
-        $(pram.id).bootstrapTable('destroy');
-        $(pram.id).bootstrapTable();
+    },
+    empty({ selector = '.table-default' }) {
+        $(selector).attr('data-trim-on-search', false);
+        $(selector).bootstrapTable('destroy');
+        $(selector).bootstrapTable();
         //Table height        
-        $(pram.id).parent().css({
+        $(selector).parent().css({
             "overflow-y": 'auto',
             "overflow-x": 'auto',
             "max-height": '68vh'
         });
-    }
-    static remove(pram = { id: '', value: [-1], field: '$index', toggle: false }) {
-        pram.id = typeof (pram.id) == 'undefined' ? '' : pram.id;
-        pram.value = typeof (pram.value) == 'undefined' ? [-1] : pram.value;
-        pram.field = typeof (pram.field) == 'undefined' ? '$index' : pram.field;
-        pram.toggle = pram.toggle === undefined ? false : pram.toggle;
-        if (pram.id == '') {
+    },
+    remove({ id = '', value = [-1], field = '$index', toggle = false }) {
+
+        if (id == '') {
             console.warn('Table Id or trDataIndex is empty.');
             return;
         }
-        $(pram.id).bootstrapTable('remove', { values: pram.value, field: pram.field });
+        $(id).bootstrapTable('remove', { values: value, field: field });
         //Set Select As Select Pick
-        $(`${pram.id} tbody select.select-pick[data-isMatched="false"]`).val(null);
-        Dropdown.refresh({ selector: `${pram.id} tbody select.select-pick` });
+        $(`${id} tbody select.select-pick[data-isMatched="false"]`).val(null);
+        Dropdown.refresh({ selector: `${id} tbody select.select-pick` });
         //Set Check As Toggle Botton
-        if (pram.toggle) {
-            $(`${pram.id} input[type="checkbox"]`).parent('label').parent('div.th-inner').addClass('p-0');
-            $(`${pram.id} input[type="checkbox"]`).parent('label').addClass('form-switch ps-0 pt-1');
-            $(`${pram.id} input[type="checkbox"]`).addClass('form-check-input');
+        if (toggle) {
+            $(`${id} input[type="checkbox"]`).parent('label').parent('div.th-inner').addClass('p-0');
+            $(`${id} input[type="checkbox"]`).parent('label').addClass('form-switch ps-0 pt-1');
+            $(`${id} input[type="checkbox"]`).addClass('form-check-input');
         }
-    }
-    static updateById(pram = { id: '', objId: -1, obj: {} }) {
-        pram.id = typeof (pram.id) == 'undefined' ? '' : pram.id;
-        pram.objId = typeof (pram.objId) == 'undefined' ? -1 : pram.objId;
-        pram.obj = typeof (pram.obj) == 'undefined' ? {} : pram.obj;
-        if (Field.isNullOrEmpty(pram.id)) {
+    },
+    updateById({ id = '', objId = -1, obj = {} }) {
+        if (Field.isNullOrEmpty(id)) {
             console.warn('Table id did not find.');
             return;
         }
-        if (pram.objId == -1) {
+        if (objId == -1) {
             console.warn('data id did not find.');
             return;
         }
-        if (pram.obj == null) {
-            console.warn('value is null.');
-            return;
-        }
-        if ($.isEmptyObject(pram.obj)) {
+        if ($.isEmptyObject(obj)) {
             console.warn('value is empty.');
             return;
         }
-        $(pram.id).bootstrapTable('updateByUniqueId', { id: pram.objId, row: pram.obj });
-    }
-    static updateByIndex(pram = { id: '', index: -1, obj: {}, value: null, event: null, toggle: false }) {
-        pram.id = pram.id === undefined ? '' : pram.id;
-        pram.index = pram.index === undefined ? -1 : pram.index;
-        pram.obj = pram.obj === undefined ? {} : pram.obj;
-        pram.value = pram.value === undefined ? null : pram.value;
-        pram.event = pram.event === undefined ? null : pram.event;
-        pram.toggle = pram.toggle === undefined ? false : pram.toggle;
-        if (Field.isNullOrEmpty(pram.id)) {
+        $(id).bootstrapTable('updateByUniqueId', { id: objId, row: obj });
+    },
+    updateByIndex({ id = '', index = -1, obj = {}, value = null, event = null, toggle = false }) {
+        if (Field.isNullOrEmpty(id)) {
             console.warn('Table id did not find.');
             return;
         }
-        if (pram.index == -1) {
+        if (index == -1) {
             console.warn('index no. did not find.');
             return;
         }
-        if (pram.obj == null) {
-            console.warn('value is null.');
-            return;
-        }
-        if ($.isEmptyObject(pram.obj)) {
+        if ($.isEmptyObject(obj)) {
             console.warn('value is empty.');
             return;
         }
         //Get Text Cursor Poition
-        let curStart = pram.event == null ? -1 : document.getElementById(pram.event.target.id).selectionStart;
+        let curStart = event == null ? -1 : document.getElementById(pram.event.target.id).selectionStart;
         //Update Table By Index
-        $(pram.id).bootstrapTable('updateRow', { index: pram.index, row: pram.obj });
+        $(id).bootstrapTable('updateRow', { index: index, row: obj });
         //Set Select As Select Pick
-        $(`${pram.id} tbody select.select-pick[data-isMatched="false"]`).val(null);
-        Dropdown.refresh({ selector: `${pram.id} tbody select.select-pick` });
+        $(`${id} tbody select.select-pick[data-isMatched="false"]`).val(null);
+        Dropdown.refresh({ selector: `${id} tbody select.select-pick` });
         //Set Check As Toggle Botton
-        if (pram.toggle) {
-            $(`${pram.id} input[type="checkbox"]`).parent('label').parent('div.th-inner').addClass('p-0');
-            $(`${pram.id} input[type="checkbox"]`).parent('label').addClass('form-switch ps-0 pt-1');
-            $(`${pram.id} input[type="checkbox"]`).addClass('form-check-input');
+        if (toggle) {
+            $(`${id} input[type="checkbox"]`).parent('label').parent('div.th-inner').addClass('p-0');
+            $(`${id} input[type="checkbox"]`).parent('label').addClass('form-switch ps-0 pt-1');
+            $(`${id} input[type="checkbox"]`).addClass('form-check-input');
         }
         //Set Cursor Position and focus
-        if (pram.event != null) {
-            var field = document.getElementById($(pram.event.target).prop('id'));
-            if (pram.event.currentTarget.tagName.toLowerCase() == "select") {
-                if (Array.from(pram.event.currentTarget.classList).filter(value => value == 'select-pick').length > 0) {
+        if (event != null) {
+            var field = document.getElementById($(event.target).prop('id'));
+            if (event.currentTarget.tagName.toLowerCase() == "select") {
+                if (Array.from(event.currentTarget.classList).filter(value => value == 'select-pick').length > 0) {
                     $(`button[data-target="#${field.id}-SelectPick-Menu"]`).trigger('focus');
                 }
                 else {
                     $(`#${field.id}`).trigger('focus');
                 }
             }
-            else if (pram.value != null && curStart > -1) {
-                var curPos = curStart > 0 && curStart < pram.value.length ? curStart : pram.value.length;
+            else if (value != null && curStart > -1) {
+                var curPos = curStart > 0 && curStart < value.length ? curStart : value.length;
                 if (field.type == "date") {
-                    $(`#${field.id}`).trigger('focus').val('').val(pram.value);
+                    $(`#${field.id}`).trigger('focus').val('').val(value);
                 }
                 else {
                     field.setSelectionRange(curPos, curPos);
@@ -2028,191 +1956,171 @@ class Table {
                 }
             }
         }
-    }
-    static addtree(pram = {
-        id: '',
-        data: [],
-        filterControl: false,
-        showFullscreen: false,
-        showExport: false,
-        search: false,
-        mobileResponsive: false,
-        showPrint: false,
-        idField: '',
-        treeShowField: '',
-        parentIdField: '',
-        treeColumn: 1,
-        oprationType: '',
-        heightStatus: '',
-        height: ''
-    }) {
-        pram = {
-            id: typeof (pram.id) == 'undefined' ? '' : pram.id,
-            data: typeof (pram.data) == 'undefined' ? [] : pram.data,
-            filterControl: typeof (pram.filterControl) == 'undefined' ? false : pram.filterControl,
-            showFullscreen: typeof (pram.showFullscreen) == 'undefined' ? false : pram.showFullscreen,
-            showExport: typeof (pram.showExport) == 'undefined' ? false : pram.showExport,
-            search: typeof (pram.search) == 'undefined' ? false : pram.search,
-            mobileResponsive: typeof (pram.mobileResponsive) == 'undefined' ? false : pram.mobileResponsive,
-            showPrint: typeof (pram.showPrint) == 'undefined' ? false : pram.showPrint,
-            idField: typeof (pram.idField) == 'undefined' ? '' : pram.idField,
-            treeShowField: typeof (pram.treeShowField) == 'undefined' ? '' : pram.treeShowField,
-            parentIdField: typeof (pram.parentIdField) == 'undefined' ? '' : pram.parentIdField,
-            treeColumn: typeof (pram.treeColumn) == 'undefined' ? 0 : pram.treeColumn,
-            oprationType: typeof (pram.oprationType) == 'undefined' ? "destroy" : pram.oprationType,
-            heightStatus: typeof (pram.heightStatus) == 'undefined' ? '' : pram.heightStatus,
-            height: typeof (pram.height) == 'undefined' ? '400px' : pram.height + 'px',
-        }
-        if (pram.id == '') {
-            console.warn('Table id did not find. So data has not bind in table.');
-            return;
-        }
-        if (pram.data.length == 0 || pram.data == null) {
-            $(pram.tableId).bootstrapTable(pram.oprationType);
-            $(pram.tableId).bootstrapTable();
-            BsTable.tableDesign(pram);
-            console.warn('Bs Table Data not found');
-            return;
-        }
-        $(pram.id).bootstrapTable(pram.oprationType);
-        $(pram.id).bootstrapTable({
-            filterControl: pram.filterControl,
-            data: pram.data,
-            showFullscreen: pram.showFullscreen,
-            showExport: pram.showExport,
-            search: pram.search,
-            mobileResponsive: pram.mobileResponsive,
-            showPrint: pram.showPrint,
-            idField: pram.idField,
-            treeShowField: pram.treeShowField,
-            parentIdField: pram.parentIdField,
-            onPostBody: function () {
-                $(pram.id).treegrid({
-                    treeColumn: pram.treeColumn,
-                    expanderExpandedClass: 'fa fa-minus-circle text-primary',
-                    expanderCollapsedClass: 'fa fa-plus-circle text-primary',
-                    initialState: 'collapsed',
-                    onChange: function () {
-                        $(pram.id).bootstrapTable('resetView')
-                    }
-                })
-            },
-            printPageBuilder: function (pram) {
-                return '<html><head><style type="text/css" media="print"> @page { size: auto; margin: 25px 0 25px 0; } </style> <style type="text/css" media="all"> table { border-collapse: collapse; font-size: 12px; } table, th, td { border: 1px solid grey; } th, td { text-align: center; vertical-align: middle; } p { font-weight: bold; margin-left:20px; } table { width:94%; margin-left:3%; margin-right:3%; } div.bs-table-print { text-align:center; } </style> </head><title>' + pram.printTitle + '</title> <body> <p>'.concat(pram.printTitle).concat('<p> <div class="bs-table-print">').concat(pram).concat('</div> </body> </html>')
-            }
-        });
-        $(pram.id).parent().css({
-            "overflow-y": "auto",
-            "overflow-x": "auto",
-            "max-height": pram.isHeightPercent == false ? pram.height : pram.height.replaceAll('px', '%')
-        });
-        $(pram.id).css({ 'font-size': pram.fontSize });
-        if (pram.mobileResponsive) {
-            $(pram.id).addClass('table-mobile-responsive');
-            $(pram.id + ' thead tr:not(.hide) th').each(function (index) {
-                var thText = $(this).text().trim();
-                $(pram.id + ' tbody tr td:nth-child(' + (index + 1) + ')').attr('data-title', thText);
-            });
-        }
-    }
-    static autoThead(pram = { id: '', data: [], removeCol: [], actionEvent: false }) {
+    },
+    autoThead({ id = '', data = [], removeCol = [], actionEvent = false }) {
         var thead = [];
         thead.push('<tr>');
-        $.map(pram.data[0], (value, fieldName) => {
+        $.map(data[0], (value, fieldName) => {
             var dataField = fieldName;
             var theadText = fieldName.replaceAll('_', ' ').replace(/([A-Z])/g, ' $1').replace(/\s\s+/g, ' ').toCamelCase();
-            if (pram.removeCol.indexOf(dataField) == -1) {
+            if (removeCol.indexOf(dataField) == -1) {
                 if (DateTime.isValid(value)) {
-                    thead.push(`<th data-field="${dataField}" data-formatter="${pram.id.replace("#", "")}Date" class="text-nowrap">${theadText}</th>`);
+                    thead.push(`<th data-field="${dataField}" data-formatter="${id.replace("#", "")}Date" class="text-nowrap">${theadText}</th>`);
                 }
                 else if (fieldName == "Status") {
-                    thead.push(`<th data-field="${dataField}" data-formatter="${pram.id.replace("#", "")}Status">${theadText}</th>`);
+                    thead.push(`<th data-field="${dataField}" data-formatter="${id.replace("#", "")}Status">${theadText}</th>`);
                 }
                 else {
                     thead.push(`<th data-field="${dataField}">${theadText}</th>`);
                 }
             }
         });
-        if (pram.actionEvent == true) {
+        if (actionEvent == true) {
             thead.push(`
-                <th data-formatter="${pram.id.replace('#', '')}Action" data-events="${pram.id.replace('#', '')}Event" class="not-print text-center">
+                <th data-formatter="${id.replace('#', '')}Action" data-events="${id.replace('#', '')}Event" class="not-print text-center">
                     <i class="fa-solid fa-list-check"></i>
                 </th>
             `);
         }
         thead.push('</tr>');
-        $(`${pram.id} thead`).html(thead.join(''));
-    }
-    static setCursor(pram = { event: {}, value: null, cursorStart: 0, callBack: () => { } }) {
-        pram.event = typeof (pram.event) == "undefined" ? null : pram.event;
-        pram.value = typeof (pram.value) == "undefined" ? null : pram.value;
-        pram.cursorStart = typeof (pram.cursorStart) == "undefined" ? 0 : pram.cursorStart;
-        pram.callBack = typeof (pram.callBack) == "undefined" ? () => { } : pram.callBack;
-
-        pram.callBack();
-        if (pram.event != null && pram.value != null) {
-            var field = document.getElementById($(pram.event.target).prop('id'));
-            var cursorPosition = pram.cursorStart > 0 && pram.cursorStart < pram.value.length ? pram.cursorStart : pram.value.length;
+        $(`${id} thead`).html(thead.join(''));
+    },
+    setCursor({ event = null, value = null, cursorStart = 0, callBack = () => { } }) {
+        callBack();
+        if (event != null && value != null) {
+            var field = document.getElementById($(event.target).prop('id'));
+            var cursorPosition = cursorStart > 0 && cursorStart < value.length ? cursorStart : value.length;
             if (field.type == "date") {
-                $('#' + field.id).trigger('focus').val('').val(pram.value);
+                $('#' + field.id).trigger('focus').val('').val(value);
             }
             else {
                 field.setSelectionRange(cursorPosition, cursorPosition);
                 field.focus();
             }
         }
-    }
-}
-class Dropdown {
-    static bind(pram = { id: '', data: [], value: '', text: '', size: 4, icon: '', subText: '', html: '', initialValue: [], json: false, addFn: '', editFn: '', isSelectPick: true, isEditable: false, disabled }) {
-        pram.data = typeof (pram.data) == 'undefined' ? [] : pram.data;
-        pram.value = typeof (pram.value) == 'undefined' ? 'Id' : pram.value;
-        pram.text = typeof (pram.text) == 'undefined' ? 'Text' : pram.text;
-        pram.size = typeof (pram.size) == 'undefined' ? 4 : pram.size;
-        pram.icon = typeof (pram.icon) == 'undefined' ? '' : pram.icon;
-        pram.subText = typeof (pram.subText) == 'undefined' ? '' : pram.subText;
-        pram.html = typeof (pram.html) == 'undefined' ? '' : pram.html;
-        pram.initialValue = typeof (pram.initialValue) == 'undefined' ? [] : pram.initialValue;
-        pram.json = typeof (pram.json) == 'undefined' ? false : pram.json;
-        pram.isSelectPick = typeof (pram.isSelectPick) == 'undefined' ? true : pram.isSelectPick;
-        pram.isEditable = typeof (pram.isEditable) == 'undefined' ? false : pram.isEditable;
-
-        if (pram.isEditable) {
-            $(pram.id).editableSelect('destroy');
-        }
-        let select = document.querySelector(pram.id);
-        if (select == null) {
-            console.warn(`Select Id (${pram.id}) is undefined`);
+    },
+    addtree({
+        id = '',
+        data = [],
+        filterControl = false,
+        showFullscreen = false,
+        showExport = false,
+        search = false,
+        mobileResponsive = false,
+        showPrint = false,
+        idField = '',
+        treeShowField = '',
+        parentIdField = '',
+        treeColumn = 1,
+        oprationType = '',
+        heightStatus = '',
+        height = ''
+    }) {
+        if (id == '') {
+            console.warn('Table id did not find. So data has not bind in table.');
             return;
         }
-        if (pram.addFn !== undefined) {
-            select.setAttribute('data-action', true);
-            select.setAttribute('data-addFn', pram.addFn);
+        if (data.length == 0 || data == null) {
+            $(tableId).bootstrapTable(oprationType);
+            $(tableId).bootstrapTable();
+            console.warn('Bs Table Data not found');
+            return;
         }
-        if (pram.editFn !== undefined) {
-            select.setAttribute('data-editFn', pram.editFn);
+        $(id).bootstrapTable(oprationType);
+        $(id).bootstrapTable({
+            filterControl: filterControl,
+            data: data,
+            showFullscreen: showFullscreen,
+            showExport: showExport,
+            search: search,
+            mobileResponsive: mobileResponsive,
+            showPrint: showPrint,
+            idField: idField,
+            treeShowField: treeShowField,
+            parentIdField: parentIdField,
+            onPostBody: function () {
+                $(id).treegrid({
+                    treeColumn: treeColumn,
+                    expanderExpandedClass: 'fa fa-minus-circle text-primary',
+                    expanderCollapsedClass: 'fa fa-plus-circle text-primary',
+                    initialState: 'collapsed',
+                    onChange: function () {
+                        $(id).bootstrapTable('resetView')
+                    }
+                })
+            },
+            printPageBuilder: function (pram) {
+                return '<html><head><style type="text/css" media="print"> @page { size: auto; margin: 25px 0 25px 0; } </style> <style type="text/css" media="all"> table { border-collapse: collapse; font-size: 12px; } table, th, td { border: 1px solid grey; } th, td { text-align: center; vertical-align: middle; } p { font-weight: bold; margin-left:20px; } table { width:94%; margin-left:3%; margin-right:3%; } div.bs-table-print { text-align:center; } </style> </head><title>' + printTitle + '</title> <body> <p>'.concat(printTitle).concat('<p> <div class="bs-table-print">').concat(pram).concat('</div> </body> </html>')
+            }
+        });
+        $(id).parent().css({
+            "overflow-y": "auto",
+            "overflow-x": "auto",
+            "max-height": height
+        });
+        $(id).css({ 'font-size': fontSize });
+        if (mobileResponsive) {
+            $(id).addClass('table-mobile-responsive');
+            $(id + ' thead tr:not(.hide) th').each(function (index) {
+                var thText = $(this).text().trim();
+                $(id + ' tbody tr td:nth-child(' + (index + 1) + ')').attr('data-title', thText);
+            });
+        }
+    },
+}
+const Dropdown = {
+    bind({
+        id = '',
+        data = [],
+        value = 'Id',
+        text = 'Text',        
+        icon = '',
+        subText = '',
+        html = '',
+        initialValue = [],
+        json = false,
+        addFn = '',
+        editFn = '',
+        isSelectPick = true,
+        isEditable = false,
+        disabled
+    }) {
+        if (isEditable) {
+            $(id).editableSelect('destroy');
+        }
+        let select = document.querySelector(id);
+        if (select == null) {
+            console.warn(`Select Id (${id}) is undefined`);
+            return;
+        }
+        if (addFn !== undefined) {
+            select.setAttribute('data-action', true);
+            select.setAttribute('data-addFn', addFn);
+        }
+        if (editFn !== undefined) {
+            select.setAttribute('data-editFn', editFn);
         }
 
-        select.disabled = pram.disabled === undefined ? select.disabled : pram.disabled;
+        select.disabled = disabled === undefined ? select.disabled : disabled;
         select.innerHTML = "";
         const fragment = document.createDocumentFragment();
         let isOptionMatched = false;
-        pram.data.forEach((obj, index) => {
+        data.forEach((obj, index) => {
             let option = new Option();
-            option.value = obj[pram.value];
-            option.selected = pram.initialValue.map(value => value == null ? null : value.toString()).includes(option.value);
-            isOptionMatched = isOptionMatched ? true : pram.initialValue.map(value => value == null ? null : value.toString()).includes(option.value);
-            option.text = obj[pram.text];
-            if (obj[pram.icon]) {
-                option.setAttribute(SELECTPICK_ITEM_DATA_ICON, obj[pram.icon]);
+            option.value = obj[value];
+            option.selected = initialValue.map(value => value == null ? null : value.toString()).includes(option.value);
+            isOptionMatched = isOptionMatched ? true : initialValue.map(value => value == null ? null : value.toString()).includes(option.value);
+            option.text = obj[text];
+            if (obj[icon]) {
+                option.setAttribute(SELECTPICK_ITEM_DATA_ICON, obj[icon]);
             }
-            if (obj[pram.subText]) {
-                option.setAttribute(SELECTPICK_ITEM_DATA_SUBTEXT, obj[pram.subText]);
+            if (obj[subText]) {
+                option.setAttribute(SELECTPICK_ITEM_DATA_SUBTEXT, obj[subText]);
             }
-            if (obj[pram.html]) {
-                option.setAttribute(SELECTPICK_ITEM_DATA_HTML, obj[pram.html]);
+            if (obj[html]) {
+                option.setAttribute(SELECTPICK_ITEM_DATA_HTML, obj[html]);
             }
-            if (pram.json) {
+            if (json) {
                 option.setAttribute('data-json', JSON.stringify(obj));
             }
             fragment.appendChild(option);
@@ -2221,17 +2129,15 @@ class Dropdown {
         if (!isOptionMatched) {
             select.value = null;
         }
-        if (pram.isEditable) {
-            $(pram.id).editableSelect({ effects: 'slide' });
+        if (isEditable) {
+            $(id).editableSelect({ effects: 'slide' });
         }
-        else if (pram.isSelectPick) {
+        else if (isSelectPick) {
             SelectPick.render(select);
         }
-    }
-    static bindIcon(pram = { id: '', value: [] }) {
-        pram.id = typeof (pram.id) == 'undefined' ? '' : pram.id;
-        pram.value = pram.value == undefined ? [] : pram.value
-        if (Field.isNullOrEmpty(pram.id)) {
+    },
+    bindIcon({ id = '', value = [] }) {
+        if (Field.isNullOrEmpty(id)) {
             console.warn('id did not find for bind icon.')
             return;
         }
@@ -2240,89 +2146,88 @@ class Dropdown {
                 url: "/lib/site/fontawesome.json",
                 isApi: false,
                 onSuccess: (response) => {
-                    Dropdown.bind({ id: pram.id, data: response.data, value: 'Value', text: 'Value', icon: 'Value', initialValue: pram.value });
+                    Dropdown.bind({ id: pram.id, data: response.data, value: 'Value', text: 'Value', icon: 'Value', initialValue: value });
                 }
             }
         );
-    }
-    static set(pram = { id: '', value: [], text: [] }) {
-        if (!pram.id) {
+    },
+    set({ id = '', value = null, text = null }) {
+        if (!id) {
             Message.show({ statusText: 'Id is unidefined' });
             return;
         }
-        pram.value = pram.value == undefined ? null : pram.value;
-        pram.text = pram.text == undefined ? null : pram.text;
         SelectPick.set({ id: pram.id, value: pram.value, text: pram.text });
-    }
-    static itemJson(pram = { id: '' }) {
-        if ($(`${pram.id} option:selected`).attr('data-json') == undefined) {
+    },
+    itemJson({ id = '' }) {
+        if ($(`${id} option:selected`).attr('data-json') == undefined) {
             return null;
         }
         else {
-            return JSON.parse($(`${pram.id} option:selected`).attr('data-json'));
+            return JSON.parse($(`${id} option:selected`).attr('data-json'));
         }
-    }
-    static refresh(pram = { selector: '', isDisabled: '' }) {
-        if (pram.selector == undefined || Field.isNullOrEmpty(pram.selector)) {
+    },
+    refresh({ selector = '', isDisabled }) {
+        if (Field.isNullOrEmpty(selector)) {
             console.warn('Selector is undefined or empty in the function Dropdown refresh.');
             return;
         }
-        if (pram.isDisabled != undefined) {
-            $(pram.selector).attr('disabled', pram.isDisabled);
+        if (isDisabled != undefined) {
+            $(pram.selector).attr('disabled', isDisabled);
         }
-        SelectPick.refresh({ selector: pram.selector });
-    }
-    static html(pram = { id: '', class: '', data: [], value: '', text: '', size: 4, icon: '', subText: '', html: '', initialValue: [], json: false, title: '', selectionType: '', parent: '', isSelectPick: true, isEditable: false, addFn: '', editFn: '' }) {
-        pram.id = typeof (pram.id) == 'undefined' ? '' : pram.id;
-        pram.class = typeof (pram.class) == 'undefined' ? '' : pram.class;
-        pram.data = typeof (pram.data) == 'undefined' ? [] : pram.data;
-        pram.value = typeof (pram.value) == 'undefined' ? 'Id' : pram.value;
-        pram.text = typeof (pram.text) == 'undefined' ? 'Text' : pram.text;
-        pram.size = typeof (pram.size) == 'undefined' ? 4 : pram.size;
-        pram.icon = typeof (pram.icon) == 'undefined' ? '' : pram.icon;
-        pram.subText = typeof (pram.subText) == 'undefined' ? '' : pram.subText;
-        pram.html = typeof (pram.html) == 'undefined' ? '' : pram.html;
-        pram.initialValue = typeof (pram.initialValue) == 'undefined' ? [] : pram.initialValue;
-        pram.json = typeof (pram.json) == 'undefined' ? false : pram.json;
-        pram.title = typeof (pram.title) == 'undefined' ? 'Nothing Selected' : pram.title;
-        pram.selectionType = typeof (pram.selectionType) == 'undefined' ? '' : pram.selectionType;
-        pram.parent = typeof (pram.parent) == 'undefined' ? 'body' : pram.parent;
-        pram.isSelectPick = typeof (pram.isSelectPick) == 'undefined' ? true : pram.isSelectPick;
-        pram.isEditable = typeof (pram.isEditable) == 'undefined' ? false : pram.isEditable;
-
+        SelectPick.refresh({ selector: selector });
+    },
+    html({
+        id = '',
+        className = '',
+        data = [],
+        value = '',
+        text = '',
+        size = 4,
+        icon = '',
+        subText = '',
+        html = '',
+        initialValue = [],
+        json = false,
+        title = 'Nothing Selected',
+        selectionType = '',
+        parent = '',
+        addFn = '',
+        editFn = ''
+    }) {
         let selectHtml = [];
-        if (Field.isNullOrEmpty(pram.id)) {
+        if (Field.isNullOrEmpty(id)) {
             return selectHtml.join('');
         }
-        let isMatched = pram.data.filter(obj => pram.initialValue.toString().includes(obj[pram.value] == null ? "" : obj[pram.value].toString())).length > 0 ? true : false;
-        selectHtml.push(`<select id="${pram.id}" class="form-control form-control-sm select-pick ${pram.class}" title="${pram.title}" ${pram.selectionType} data-search="true" data-size="${pram.size}" data-parent="${pram.parent}" data-ismatched="${isMatched}"`);
-        if (pram.addFn !== undefined) {
+        let isMatched = data.filter(obj => initialValue.toString().includes(obj[value] == null ? "" : obj[value].toString())).length > 0 ? true : false;
+        selectHtml.push(`<select id="${id}" class="select-pick ${className}" title="${title}" ${selectionType} data-search="true" data-size="${size}" data-parent="${parent}" data-ismatched="${isMatched}"`);
+        if (addFn !== undefined) {
             selectHtml.push(` data-action="true" `);
-            selectHtml.push(` data-addFn="${pram.addFn}" `);
+            selectHtml.push(` data-addFn="${addFn}" `);
         }
-        if (pram.editFn !== undefined) {
-            selectHtml.push(` data-editFn="${pram.editFn}" `);
+        if (editFn !== undefined) {
+            selectHtml.push(` data-editFn="${editFn}" `);
         }
         selectHtml.push(`>`);
-        pram.data.forEach((obj, index) => {
+
+        data.forEach((obj, index) => {
             let option = '';
             option += `<option `;
-            option += `value ='${obj[pram.value].toString().replaceAll("'", "&#39;")}' `;
-            option += `${pram.initialValue.map(value => value == null ? null : value.toString()).includes(obj[pram.value].toString()) ? `selected` : ``} `;
-            if (obj[pram.icon]) {
-                option += `${SELECTPICK_ITEM_DATA_ICON} = '${obj[pram.icon].replaceAll("'", "&#39;")}' `;
+            option += `value ='${obj[value].toString().replaceAll("'", "&#39;")}' `;
+            option += `${initialValue.map(value => value == null ? null : value.toString()).includes(obj[value].toString()) ? `selected` : ``} `;
+            if (obj[icon]) {
+                option += `${SELECTPICK_ITEM_DATA_ICON} = '${obj[icon].replaceAll("'", "&#39;")}' `;
             }
-            if (obj[pram.subText]) {
-                option += `${SELECTPICK_ITEM_DATA_SUBTEXT} = '${obj[pram.subText].replaceAll("'", "&#39;")}' `;
+            if (obj[subText]) {
+                option += `${SELECTPICK_ITEM_DATA_SUBTEXT} = '${obj[subText].replaceAll("'", "&#39;")}' `;
             }
-            if (obj[pram.html]) {
-                option += `${SELECTPICK_ITEM_DATA_HTML} = '${obj[pram.html].replaceAll("'", "&#39;")}' `;
+            if (obj[html]) {
+                option += `${SELECTPICK_ITEM_DATA_HTML} = '${obj[html].replaceAll("'", "&#39;")}' `;
             }
-            if (pram.json) {
+            if (json) {
                 option += `data-json = '${JSON.stringify(obj).replaceAll("'", "&#39;")}' `;
             }
             option += `>`;
-            option += `${obj[pram.text]}`;
+            option += `${obj[text]}`;
             option += `</option>`;
             selectHtml.push(option);
         });

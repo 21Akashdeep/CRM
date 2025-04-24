@@ -247,7 +247,7 @@ namespace CRMApi.Services
         public static string CreateJwtToken(User obj)
         {
             string JwtToken = "";
-            string userJsonString = JsonConvert.SerializeObject(new { obj.Id, obj.TokenExpiry });
+            string userJsonString = JsonConvert.SerializeObject(new { obj.Id, obj.TokenExpiry, obj.CompanyId });
             var signingCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AppSetting.Jwt.Key)),
                 SecurityAlgorithms.HmacSha512Signature
@@ -306,6 +306,7 @@ namespace CRMApi.Services
                 return null;
             }
             User.TokenExpiry = AuthUser.TokenExpiry;
+            User.CompanyId = AuthUser.CompanyId;
             //Set Api Name
             User.ApiName = Request.HttpRequest.RouteValues["controller"]?.ToString() ?? "";            
             //Is User Type Sys Admin Or Request Action Type UnAuthorised            

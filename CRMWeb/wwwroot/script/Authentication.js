@@ -1,5 +1,9 @@
-﻿document.addEventListener("DOMContentLoaded", () => {  
-    SessionStorage.removeAll();
+﻿document.addEventListener("DOMContentLoaded", () => {
+    sessionStorage.clear();    
+    $('title').text(`${App.Info.Name} - Login`);
+    $('#AppName').text(App.Info.Desc);
+    $('#AppDesc').text(App.Info.SubDesc);
+    $('#LoginInfo').removeClass('hide');
     Authentication.appInfo();
     Authentication.init();    
 });
@@ -23,11 +27,7 @@ class Authentication {
         Data.get({
             url: 'Authentication/AppInfo', loader: false, onSuccess: (response) => {                
                 App.Setting = response.data;                
-                SessionStorage.set('Setting', JSON.stringify(response.data));                
-                $('title').text(`${App.Setting.Info.Name} - Login`);
-                $('#AppName').text(App.Setting.Info.Desc);
-                $('#AppDesc').text(App.Setting.Info.SubDesc);
-                $('#LoginInfo').removeClass('hide');
+                sessionStorage.setItem('Setting', JSON.stringify(response.data));
             }
         });
     }
@@ -39,8 +39,9 @@ class Authentication {
                 onSuccess: (response) => {
                     if (response.status == Message.Type.success) {
                         let obj = response.data;
-                        SessionStorage.set('User', JSON.stringify(obj.User));
-                        SessionStorage.set('AppMenu', Data.menuHtmlString(obj.AppMenu));
+                        sessionStorage.setItem('User', JSON.stringify(obj.User));                        
+                        sessionStorage.setItem('Company', JSON.stringify(obj.Company));
+                        sessionStorage.setItem('AppMenu', Data.menuHtmlString(obj.AppMenu));                        
                         if (obj.AppMenu.length == 0 && obj.User.Type != App.Setting.UserType.SysAdmin) {
                             Message.show({ status: Message.Type.error, statusText: "You are not authorised to access this Application." });
                             return;

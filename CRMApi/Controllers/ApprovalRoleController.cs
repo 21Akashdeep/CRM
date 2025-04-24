@@ -42,7 +42,7 @@ namespace CRMApi.Controllers
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg.data = RepoApprovalRole.List(obj);
+                objMsg.data = RepoApprovalRole.List(obj, User);
                 Message.Get(ref objMsg, "");
             }
             catch (Exception ex)
@@ -59,7 +59,7 @@ namespace CRMApi.Controllers
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Print }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = RepoApprovalRole.Print(obj);
+                objMsg = RepoApprovalRole.Print(obj, User);
             }
             catch (Exception ex)
             {
@@ -74,9 +74,8 @@ namespace CRMApi.Controllers
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
-                if (User == null) return Ok(objMsg);
-                obj.User = User;
-                objMsg = RepoApprovalRole.Export(obj);
+                if (User == null) return Ok(objMsg);                
+                objMsg = RepoApprovalRole.Export(obj, User);
             }
             catch (Exception ex)
             {
@@ -91,9 +90,8 @@ namespace CRMApi.Controllers
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
-                if (User == null) return Ok(objMsg);
-                obj.User = User;
-                objMsg = RepoApprovalRole.Add(obj);
+                if (User == null) return Ok(objMsg);                
+                objMsg = RepoApprovalRole.Add(obj, User);
             }
             catch (Exception ex)
             {
@@ -110,9 +108,8 @@ namespace CRMApi.Controllers
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
                 ApprovalRole obj = new ApprovalRole();
-                obj.ListId.Add(Id);
-                obj.User = User;
-                objMsg = RepoApprovalRole.Edit(obj);
+                obj.ListId.Add(Id);                
+                objMsg = RepoApprovalRole.Edit(obj, User);
             }
             catch (Exception ex)
             {
@@ -127,9 +124,8 @@ namespace CRMApi.Controllers
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
-                if (User == null) return Ok(objMsg);
-                obj.User = User;
-                objMsg = RepoApprovalRole.Update(obj);
+                if (User == null) return Ok(objMsg);                
+                objMsg = RepoApprovalRole.Update(obj, User);
             }
             catch (Exception ex)
             {
@@ -146,9 +142,8 @@ namespace CRMApi.Controllers
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
                 ApprovalRole obj = new ApprovalRole();
-                obj.Id = Id;
-                obj.User = User;
-                objMsg = RepoApprovalRole.Delete(obj);
+                obj.Id = Id;                
+                objMsg = RepoApprovalRole.Delete(obj, User);
             }
             catch (Exception ex)
             {
@@ -165,9 +160,8 @@ namespace CRMApi.Controllers
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
                 ApprovalRole obj = new ApprovalRole();
-                obj.Id = Id;
-                obj.User = User;
-                objMsg = RepoApprovalRole.Enable(obj);
+                obj.Id = Id;                
+                objMsg = RepoApprovalRole.Enable(obj, User);
             }
             catch (Exception ex)
             {
