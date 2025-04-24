@@ -15,9 +15,7 @@ namespace CRMApi.Models
         [NotMapped] public string ApiGroupDesc { get; set; } = string.Empty;
         public bool IsApprovalRequired { get; set; } = false;
         public int SeqNo { get; set; }
-        [MaxLength(100)] public string? Icon { get; set; }
-        public int CompanyId { get; set; }
-        [NotMapped] public string CompanyDesc { get; set; } = string.Empty;
+        [MaxLength(100)] public string? Icon { get; set; }        
         public int Status { get; set; } = 1;
         [NotMapped] public string StatusName { get; set; } = string.Empty;
         [NotMapped] public string StatusCss { get; set; } = string.Empty;
@@ -34,7 +32,6 @@ namespace CRMApi.Models
         [NotMapped] public bool IsDuplicate { get; set; } = false;
         [NotMapped] public List<int> ListId { get; set; } = new List<int>();
         [NotMapped] public List<int> ListApiGroupId { get; set; } = new List<int>();
-        [NotMapped] public List<int> ListStatus { get; set; } = new List<int>();
-        [NotMapped] public User User { get; set; } = new User();
+        [NotMapped] public List<int> ListStatus { get; set; } = new List<int>();        
     }
 }

@@ -13,9 +13,7 @@ namespace CRMApi.Models
         public int ParentId { get; set; } = 1;
         [NotMapped] public string? ParentDesc { get; set; } = string.Empty;
         public int SeqNo { get; set; } = 0;
-        [MaxLength(100)] public string? Icon { get; set; } = null!;
-        public int CompanyId { get; set; }
-        [NotMapped] public string CompanyDesc { get; set; } = String.Empty;
+        [MaxLength(100)] public string? Icon { get; set; } = null!;        
         public int Status { get; set; } = 1;
         [NotMapped] public string? StatusName { get; set; } = string.Empty;
         [NotMapped] public string? StatusIcon { get; set; } = string.Empty;

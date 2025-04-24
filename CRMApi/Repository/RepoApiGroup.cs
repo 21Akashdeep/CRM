@@ -220,8 +220,7 @@ namespace CRMApi.Repository
                     Message.Duplicate(ref objMsg, $"Description : {obj.Description}");
                     return objMsg;
                 }
-                //Add Api Group
-                obj.CompanyId = User.CompanyId;
+                //Add Api Group                
                 obj.CreatedBy = User.Id;
                 obj.UpdatedBy = User.Id;
                 db.Add(obj);

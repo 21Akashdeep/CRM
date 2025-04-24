@@ -35,9 +35,10 @@
                 return;
             }
             var obj = Data.serializeToObject({ formId: "#formUser" });
-            obj.DateOfBirth = DateTime.json(obj.DateOfBirth);            
-            obj.ApiPermission = $('#tableApi').bootstrapTable('getData').filter(ap => ap.View || ap.Add || ap.Update || ap.Delete || ap.Enable || ap.Print || ap.Import || ap.Export);
-            obj.ApRoPermission = $('#tableApprovalRole').bootstrapTable('getData').filter(cp => cp.IsAdded == true);
+            obj.DateOfBirth = DateTime.json(obj.DateOfBirth);
+            obj.Company = $('#tableCompany').bootstrapTable('getData').filter(c => c.IsAdded);
+            obj.Api = $('#tableApi').bootstrapTable('getData').filter(ap => ap.View || ap.Add || ap.Update || ap.Delete || ap.Enable || ap.Print || ap.Import || ap.Export);
+            obj.ApprovalRole = $('#tableApprovalRole').bootstrapTable('getData').filter(cp => cp.IsAdded == true);
             if (Field.isNullOrEmpty(obj.Id)) {            
                 User.add(obj);
             }
@@ -127,8 +128,6 @@
                 onSuccess: (response) => {
                     if (response.status == Message.Type.success) {                        
                         Dropdown.bind({ id: '#UserType', data: response.data.UserType, value: 'Value', text: ['Description'], isSelectPicker: true });
-                        Dropdown.bind({ id: '#DepartmentId', data: response.data.Department, value: 'Id', text: ['Description'], isSelectPicker: true });
-                        Dropdown.bind({ id: '#DesignationId', data: response.data.Designation, value: 'Id', text: ['Description'], isSelectPicker: true });
                         let obj = response.obj;
                         obj.Id = action == 'Edit' ? obj.Id : null;
                         let title = action == 'Edit' ? `User / Edit (Code: ${obj.Code})` : `User / Add`;

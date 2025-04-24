@@ -16,15 +16,10 @@ namespace CRMApi.Models
         public string? PinCode { get; set; }
         public string? PostOffice { get; set; }
         public string? District { get; set; }
-        public string? StateCode { get; set; }
-        public string? StateName { get; set; }        
+        public int AdminDivId { get; set; }
         public int CountryId { get; set; }
         public string? ContactNo { get; set; }
-        public string? Email { get; set; }
-        public string? AccountNo { get; set; }
-        public string? IfscCode { get; set; }
-        public string? BankName { get; set; }
-        public string? BankAddress { get; set; }
+        public string? Email { get; set; }        
         public int Status { get; set; } = 1;
         public int CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;

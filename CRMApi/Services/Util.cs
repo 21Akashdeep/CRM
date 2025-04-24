@@ -15,6 +15,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using QRCoder;
 using System.Drawing;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 
 namespace CRMApi.Services
@@ -22,47 +23,9 @@ namespace CRMApi.Services
     public class Util
     {
         public static readonly AppSetting AppSetting = AppSetting.Init();
-        private readonly static string Key = "SecurityKey@123456789~!@#$%^&*()_";
-        public static string Encrypt(string Value)
-        {
-            byte[] keyArray;
-            byte[] toEncryptArray = UTF8Encoding.UTF8.GetBytes(Value);
-
-            MD5 hashmd5 = new MD5CryptoServiceProvider();
-            keyArray = hashmd5.ComputeHash(UTF8Encoding.UTF8.GetBytes(Key));
-            hashmd5.Clear();
-
-            TripleDES tdes = new TripleDESCryptoServiceProvider();            
-            tdes.Key = keyArray;
-            tdes.Mode = CipherMode.ECB;
-            tdes.Padding = PaddingMode.PKCS7;
-            ICryptoTransform cTransform = tdes.CreateEncryptor();
-            byte[] resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
-            tdes.Clear();
-            return Convert.ToBase64String(resultArray, 0, resultArray.Length);
-        }
-        public static string Decrypt(string EncryptedValue)
-        {
-            byte[] keyArray;
-            byte[] toEncryptArray = Convert.FromBase64String(EncryptedValue);
-
-            MD5 hashmd5 = new MD5CryptoServiceProvider();
-            keyArray = hashmd5.ComputeHash(UTF8Encoding.UTF8.GetBytes(Key));
-            hashmd5.Clear();
-
-            TripleDES tdes = new TripleDESCryptoServiceProvider();
-            tdes.Key = keyArray;
-            tdes.Mode = CipherMode.ECB;
-            tdes.Padding = PaddingMode.PKCS7;
-            ICryptoTransform cTransform = tdes.CreateDecryptor();
-            byte[] resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
-            tdes.Clear();
-            return UTF8Encoding.UTF8.GetString(resultArray);
-        }
-
-        //Implementation is due
-        private static readonly string EncryptionKey = "your-32-character-encryption-key"; // Key should be 32 bytes for AES-256        
-        public static string Encrypt_New(string plainText)
+        
+        private static readonly string EncryptionKey = "SecurityKey@123456789~!@#$%^&*()"; // Key should be 32 bytes for AES-256        
+        public static string Encrypt(string plainText)
         {
             using (Aes aesAlg = Aes.Create())
             {
@@ -86,7 +49,7 @@ namespace CRMApi.Services
                 }
             }
         }        
-        public static string Decrypt_New(string cipherText)
+        public static string Decrypt(string cipherText)
         {
             using (Aes aesAlg = Aes.Create())
             {
@@ -106,42 +69,6 @@ namespace CRMApi.Services
                     }
                 }
             }
-        }
-        private static string GenerateAESKey()
-        {
-            byte[] key = new byte[32]; // AES requires 32 bytes for a 256-bit key
-            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(key); // Fill the byte array with random values
-            }
-            return Convert.ToBase64String(key);
-        }        
-
-        public static string CreateJwtToken(User obj)
-        {
-            string JwtToken = "";
-            string userJsonString = JsonConvert.SerializeObject(obj);
-            var signingCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AppSetting.Jwt.Key)),
-                SecurityAlgorithms.HmacSha512Signature
-            );
-            var subject = new ClaimsIdentity(new[]
-            {
-                    new Claim(JwtRegisteredClaimNames.Sub, userJsonString),
-            });
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = subject,
-                Expires = DateTime.UtcNow.AddMinutes(int.Parse(AppSetting.Jwt.TokenExpireTimeInMinutes)),
-                Issuer = AppSetting.Jwt.Issuer,
-                Audience = AppSetting.Jwt.Audience,
-                SigningCredentials = signingCredentials
-            };
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            JwtToken = tokenHandler.WriteToken(token);
-            return JwtToken;
         }
         public static string RandomAlphaNum()
         {
@@ -316,7 +243,33 @@ namespace CRMApi.Services
                 value += letters[index % letters.Length - 1];
             }
             return value;
-        }        
+        }
+        public static string CreateJwtToken(User obj)
+        {
+            string JwtToken = "";
+            string userJsonString = JsonConvert.SerializeObject(new { obj.Id, obj.TokenExpiry });
+            var signingCredentials = new SigningCredentials(
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AppSetting.Jwt.Key)),
+                SecurityAlgorithms.HmacSha512Signature
+            );
+            var subject = new ClaimsIdentity(new[]
+            {
+                    new Claim(JwtRegisteredClaimNames.Sub, userJsonString),
+            });
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = subject,
+                Expires = DateTime.UtcNow.AddMinutes(int.Parse(AppSetting.Jwt.TokenExpireTimeInMinutes)),
+                Issuer = AppSetting.Jwt.Issuer,
+                Audience = AppSetting.Jwt.Audience,
+                SigningCredentials = signingCredentials
+            };
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            JwtToken = tokenHandler.WriteToken(token);
+            return JwtToken;
+        }
         public static User? RequestVerify(Request Request, DbCRM db, ref Message objMsg)
         {
             User? User = new User();
@@ -329,26 +282,32 @@ namespace CRMApi.Services
             }
             
             var JwtHandler = new JwtSecurityTokenHandler();
-            var UserJsonString = JwtHandler.ReadJwtToken(AuthorizationToken).Subject;
+            var AuthTokenSub = JwtHandler.ReadJwtToken(AuthorizationToken).Subject;
             
-            //Deserialize User Info from JWT Token
-            User = JsonConvert.DeserializeObject<User>(UserJsonString);
-            if (User == null)
+            //Deserialize User from JWT Token
+            var AuthUser = JsonConvert.DeserializeObject<User>(AuthTokenSub);
+            if (AuthUser == null)
             {
-                Message.UnAuthorized(ref objMsg, "User did not find.");
+                Message.UnAuthorized(ref objMsg, "Invalid auth token.");
                 return null;
-            }
-            
+            }            
             //Check Is Token Expiry
-            if (User.TokenExpiry < DateTime.Now)
+            if (AuthUser.TokenExpiry < DateTime.Now)
             {
                 Message.UnAuthorized(ref objMsg, "Your session has been expired.<br>Please re-login.");
                 return null;
             }
-            //Set Api Name
-            User.ApiName = Request.HttpRequest.RouteValues["controller"]?.ToString() ?? "";
             //Get App setting
             var App = Util.AppSetting;
+            User = db.User.FirstOrDefault(x => App.ActiveStatus.Contains(x.Status) && x.Id == AuthUser.Id);
+            if (User == null) 
+            {
+                Message.UnAuthorized(ref objMsg, "User did not find.");
+                return null;
+            }
+            User.TokenExpiry = AuthUser.TokenExpiry;
+            //Set Api Name
+            User.ApiName = Request.HttpRequest.RouteValues["controller"]?.ToString() ?? "";            
             //Is User Type Sys Admin Or Request Action Type UnAuthorised            
             if (User.UserType == App.UserType.SysAdmin || Request.ActionType == ActionType.UnAuthorised)
             {

@@ -15,12 +15,11 @@ namespace CRMApi.Repository
     {
         private readonly DbCRM db;
         private AppSetting App = Util.AppSetting;
-        private RepoApi RepoApi;
+        //private RepoApi RepoApi;
         private RepoApprovalRole RepoApprovalRole;
         public RepoUser(DbCRM _db) 
         {
-            db = _db;
-            RepoApi = new RepoApi(db);
+            db = _db;            
             RepoApprovalRole = new RepoApprovalRole(db);
         }        
         
@@ -95,16 +94,17 @@ namespace CRMApi.Repository
                     join uco in dbUserCompany on com.Id equals uco.CompanyId into UserCompany
                     from uco in UserCompany.DefaultIfEmpty()
                     select new 
-                    {
+                    {                        
                         CompanyId = com.Id,
                         CompanyName = com.Name,
                         CompanyDesc = com.Description,
-                        IsAdded = uco == null ? false : true
+                        IsDefault = uco?.IsDefault ?? false,
+                        IsAdded = uco != null,
                     }
                 ).ToList();
 
                 //Get Api Permission                
-                var dbApi = RepoApi.List(null);
+                var dbApi = db.Api.Where(ap => App.ActiveStatus.Contains(ap.Status)).ToList();
                 var dbUserApi = dbUser.Where(x => x.Id == Id).SelectMany(x => x.Api).ToList();
                 Options.Api = (
                     from api in dbApi
@@ -129,7 +129,7 @@ namespace CRMApi.Repository
                         Print = ape?.Print ?? false,
                         Import = ape?.Import ?? false,
                         Export = ape?.Export ?? false,
-                        IsAdded = ape == null ? false : true
+                        IsAdded = ape != null
                     }
                 ).ToList();
                 
@@ -144,7 +144,7 @@ namespace CRMApi.Repository
                     {
                         ApprovalRoleId = arl.Id,
                         ApprovalRoleDesc = arl.Description,
-                        IsAdded = arp == null ? false : true
+                        IsAdded = arp != null
                     }
                 ).ToList();
 

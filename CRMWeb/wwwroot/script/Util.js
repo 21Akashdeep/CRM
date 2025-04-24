@@ -391,7 +391,6 @@ const Data = {
     post({ url = null, data = null, loader = true, loaderName = '', async = false, isApi = true, onSuccess = () => { } }) {
         const authToken = SessionStorage.get('User') ? `Bearer ${JSON.parse(SessionStorage.get('User')).AuthToken}` : '';
         const apiUrl = isApi ? Url.Api + url : Url.App + url;
-
         $.ajax({
             url: apiUrl,
             type: 'POST',
@@ -423,6 +422,7 @@ const Data = {
                     onSuccess(response);
                 } catch (ex) {
                     console.error(ex);
+                    PageLoader.off();
                 }
             },
             error: (response) => {

@@ -58,7 +58,7 @@ namespace CRMApi.Controllers
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg.data = RepoApi.List(obj);
+                objMsg.data = RepoApi.List(obj, User);
                 Message.Get(ref objMsg, "");
             }
             catch (Exception ex)
@@ -75,7 +75,7 @@ namespace CRMApi.Controllers
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Print }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = RepoApi.Print(obj);
+                objMsg = RepoApi.Print(obj, User);
             }
             catch (Exception ex)
             {
@@ -90,9 +90,8 @@ namespace CRMApi.Controllers
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
-                if (User == null) return Ok(objMsg);
-                obj.User = User;
-                objMsg = RepoApi.Export(obj);
+                if (User == null) return Ok(objMsg);                
+                objMsg = RepoApi.Export(obj, User);
             }
             catch (Exception ex)
             {
@@ -107,9 +106,8 @@ namespace CRMApi.Controllers
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
-                if (User == null) return Ok(objMsg);
-                obj.User = User;
-                objMsg = RepoApi.Add(obj);
+                if (User == null) return Ok(objMsg);                
+                objMsg = RepoApi.Add(obj, User);
             }
             catch (Exception ex)
             {
@@ -126,9 +124,8 @@ namespace CRMApi.Controllers
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
                 Api obj = new Api();
-                obj.ListId.Add(Id);
-                obj.User = User;
-                objMsg = RepoApi.Edit(obj);
+                obj.ListId.Add(Id);                
+                objMsg = RepoApi.Edit(obj, User);
             }
             catch (Exception ex)
             {
@@ -143,9 +140,8 @@ namespace CRMApi.Controllers
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
-                if (User == null) return Ok(objMsg);
-                obj.User = User;
-                objMsg = RepoApi.Update(obj);
+                if (User == null) return Ok(objMsg);                
+                objMsg = RepoApi.Update(obj, User);
             }
             catch (Exception ex)
             {
@@ -162,9 +158,8 @@ namespace CRMApi.Controllers
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
                 Api obj = new Api();
-                obj.Id = Id;
-                obj.User = User;
-                objMsg = RepoApi.Delete(obj);
+                obj.Id = Id;                
+                objMsg = RepoApi.Delete(obj, User);
             }
             catch (Exception ex)
             {
@@ -182,8 +177,8 @@ namespace CRMApi.Controllers
                 if (User == null) return Ok(objMsg);
                 Api obj = new Api();
                 obj.Id = Id;
-                obj.User = User;
-                objMsg = RepoApi.Enable(obj);
+                
+                objMsg = RepoApi.Enable(obj, User);
             }
             catch (Exception ex)
             {

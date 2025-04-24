@@ -47,6 +47,17 @@ namespace CRMApi.Controllers
                 Message.Exception(ref objMsg, ex);
             }
             return Ok(objMsg);
-        }        
+        }
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Test() 
+        {
+            Message objMsg = new Message();            
+            objMsg.obj = new {
+                EncryptedCode = Util.Encrypt("SysAdmin@New"),
+                DecryptedCode = Util.Decrypt(Util.Encrypt("SysAdmin@New")),
+            };
+            return Ok(objMsg);
+        }
     }
 }

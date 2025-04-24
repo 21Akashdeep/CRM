@@ -88,7 +88,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public List<Api> List(Api? obj) 
+        public List<Api> List(Api? obj, User User) 
         {
             Message objMsg = new Message();
             List<Api> Api = new List<Api>();
@@ -149,12 +149,12 @@ namespace CRMApi.Repository
             }
             return Api;
         }
-        public Message Print(Api obj) 
+        public Message Print(Api obj, User User) 
         {
             Message objMsg = new Message();
             try 
             {
-                objMsg.data = List(obj);
+                objMsg.data = List(obj, User);
                 Message.Get(ref objMsg, "");
             }
             catch (Exception ex) 
@@ -163,7 +163,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Export(Api obj)
+        public Message Export(Api obj, User User)
         {
             Message objMsg = new Message();
             try 
@@ -176,7 +176,7 @@ namespace CRMApi.Repository
                     return objMsg;
                 }
                 //Get Api Group
-                var Api = List(obj);
+                var Api = List(obj, User);
                 //Convert List To DataTable
                 DataTable objDataTable = Util.ListToDataTable(Api);
                 //Remove Un-wanted column                
@@ -199,7 +199,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Add(Api obj) 
+        public Message Add(Api obj, User User) 
         {
             Message objMsg = new Message();
             try 
@@ -212,15 +212,15 @@ namespace CRMApi.Repository
                     Message.Duplicate(ref objMsg, $"Api Name : {obj.Name} already mapped with given group.");
                     return objMsg;
                 }                
-                obj.CreatedBy = obj.User.Id;
-                obj.UpdatedBy = obj.User.Id;
+                obj.CreatedBy = User.Id;
+                obj.UpdatedBy = User.Id;
                 db.Add(obj);
                 Message.Add(ref objMsg, db.SaveChanges(), "");                
                 if (objMsg.status == Message.Type.success) 
                 {
                     db.Entry(obj).Reload();                    
                     obj.ListId.Add(obj.Id);
-                    objMsg.obj = List(obj).FirstOrDefault();
+                    objMsg.obj = List(obj, User).FirstOrDefault();
                     objMsg.data = GetViewOption().data;
                 }                    
             } 
@@ -230,12 +230,12 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Edit(Api obj) 
+        public Message Edit(Api obj, User User) 
         {
             Message objMsg = new Message();
             try 
             {                                
-                var Api = List(obj).FirstOrDefault();
+                var Api = List(obj, User).FirstOrDefault();
                 if (Api == null) 
                 {
                     Message.Error(ref objMsg, "Api did not find for edit.");
@@ -251,7 +251,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Update(Api obj) 
+        public Message Update(Api obj, User User) 
         {
             Message objMsg = new Message();
             try 
@@ -276,14 +276,14 @@ namespace CRMApi.Repository
                 UpdateApi.IsApprovalRequired = obj.IsApprovalRequired;
                 UpdateApi.SeqNo = obj.SeqNo;
                 UpdateApi.Icon = obj.Icon;
-                UpdateApi.UpdatedBy = obj.User.Id;
+                UpdateApi.UpdatedBy = User.Id;
                 UpdateApi.UpdatedAt = DateTime.Now;
                 db.Update(UpdateApi);
                 Message.Update(ref objMsg, db.SaveChanges(), "");
                 if (objMsg.status == Message.Type.success) 
                 {
                     obj.ListId.Add(UpdateApi.Id);
-                    objMsg.obj = List(obj).FirstOrDefault();
+                    objMsg.obj = List(obj, User).FirstOrDefault();
                     objMsg.data = GetViewOption().data;
                 }                   
             }
@@ -293,7 +293,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Delete(Api obj) 
+        public Message Delete(Api obj, User User) 
         {
             Message objMsg = new Message();
             try 
@@ -305,7 +305,7 @@ namespace CRMApi.Repository
                     return objMsg;
                 }
                 DeleteApi.Status = App.Status.Delete;
-                DeleteApi.UpdatedBy = obj.User.Id;
+                DeleteApi.UpdatedBy = User.Id;
                 DeleteApi.UpdatedAt = DateTime.Now;
                 db.Update(DeleteApi);
                 Message.Delete(ref objMsg, db.SaveChanges(), "");
@@ -313,7 +313,7 @@ namespace CRMApi.Repository
                 {
                     obj.ListId.Add(obj.Id);
                     obj.ListStatus.Add(App.Status.Delete);
-                    objMsg.obj = List(obj).FirstOrDefault();
+                    objMsg.obj = List(obj, User).FirstOrDefault();
                     objMsg.data = GetViewOption().data;
                 }
             }
@@ -323,7 +323,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Enable(Api obj)
+        public Message Enable(Api obj, User User)
         {
             Message objMsg = new Message();
             try
@@ -335,14 +335,14 @@ namespace CRMApi.Repository
                     return objMsg;
                 }
                 EnableApi.Status = App.Status.Enable;
-                EnableApi.UpdatedBy = obj.User.Id;
+                EnableApi.UpdatedBy = User.Id;
                 EnableApi.UpdatedAt = DateTime.Now;
                 db.Update(EnableApi);
                 Message.Delete(ref objMsg, db.SaveChanges(), "");
                 if (objMsg.status == Message.Type.success)
                 {
                     obj.ListId.Add(obj.Id);                    
-                    objMsg.obj = List(obj).FirstOrDefault();
+                    objMsg.obj = List(obj, User).FirstOrDefault();
                     objMsg.data = GetViewOption().data;
                 }
             }
