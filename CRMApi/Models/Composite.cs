@@ -36,13 +36,7 @@ namespace CRMApi.Models
         {
             public int ApprovalRoleId { get; set; }
             public int SeqNo { get; set; }
-        }
-        public class ExportInfo 
-        {
-            [NotMapped] public string CompanyDesc { get; set; } = string.Empty;
-            [NotMapped] public string SheetName { get; set; } = string.Empty;
-            [NotMapped] public string ReportDesc { get; set; } = string.Empty;
-        }
+        }        
     }
 }
 
