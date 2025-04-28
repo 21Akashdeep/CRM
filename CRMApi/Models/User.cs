@@ -41,7 +41,7 @@ namespace CRMApi.Models
         [NotMapped] public int ApiId { get; set; }
         [NotMapped] public string ApiName { get; set; } = string.Empty;
         [NotMapped] public string ApiType { get; set; } = string.Empty;
-        [NotMapped] public int CompanyId { get; set; }
+        [NotMapped] public int CompanyId { get; set; }        
         [NotMapped] public bool IsReSentPassword { get; set; } = false;
         [NotMapped] public bool IsEdit { get; set; } = false;
         [NotMapped] public bool IsDuplicate { get; set; } = false;

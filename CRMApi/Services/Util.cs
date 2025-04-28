@@ -192,7 +192,7 @@ namespace CRMApi.Services
                 var ws = wb.Worksheets.Add(obj.SheetName);
 
                 ws.Cell("A1")
-                    .SetValue(obj.Name)
+                    .SetValue(obj.Description)
                     .Style.Font.SetFontSize(18)
                     .Font.SetBold(true)
                     .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
@@ -306,7 +306,7 @@ namespace CRMApi.Services
                 return null;
             }
             User.TokenExpiry = AuthUser.TokenExpiry;
-            User.CompanyId = AuthUser.CompanyId;
+            User.CompanyId = AuthUser.CompanyId;            
             //Set Api Name
             User.ApiName = Request.HttpRequest.RouteValues["controller"]?.ToString() ?? "";            
             //Is User Type Sys Admin Or Request Action Type UnAuthorised            
@@ -464,10 +464,7 @@ namespace CRMApi.Services
             }
             return MailBody;
         }
-        public static string SanitizeInput(string text, string regExp)
-        {
-            return Regex.Replace(text, regExp, string.Empty);
-        }
+        
         public static string QRCodeBase64(string text) 
         {
             string base64 = "";
@@ -478,5 +475,17 @@ namespace CRMApi.Services
             base64 = string.Format("data:image/png;base64,{0}", Convert.ToBase64String(qrCodeImage));            
             return base64;
         }
+        public static string? SanitizeInput(string? str, string? regExp)
+        {
+            if (!String.IsNullOrEmpty(str))
+            {
+                str = Regex.Replace(str.Trim(), @"\s+", " ");
+                return !String.IsNullOrEmpty(regExp) ? Regex.Replace(str, regExp, string.Empty) : str;
+            }
+            else 
+            {
+                return str;
+            }
+        }        
     }
 }

@@ -47,12 +47,17 @@ namespace CRMApi.Services
         public DbSet<User> User { get; set; }
         public DbSet<Setting> Setting { get; set; }
         public DbSet<MailService> MailService { get; set; }
+        public DbSet<Department> Department { get; set; }
+        public DbSet<Country> Country { get; set; }
+        public DbSet<Zone> Zone { get; set; }
+        public DbSet<AdminDiv> AdminDiv { get; set; }
         public DbSet<Company> Company { get; set; }
         public DbSet<Log> Log { get; set; }
         public DbSet<ApiGroup> ApiGroup { get; set; }
         public DbSet<Api> Api { get; set; }
         public DbSet<ApprovalRole> ApprovalRole { get; set; }
         public DbSet<ApprovalConfig> ApprovalConfig { get; set; }
+        public DbSet<Customer> Customer { get; set; }
         public DbSet<Approval> Approval { get; set; }
         public DbSet<AccountGroup> AccountGroup { get; set; }
         public DbSet<Godown> Godown { get; set; }

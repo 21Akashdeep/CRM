@@ -9,6 +9,10 @@ class Layout {
     static init() {    
         //View Password
         Util.init();
+        //Default Table init
+        Table.empty({ selector: '.table-default' });
+        //Date Time init
+        DateTime.init();
         //Side Bar On or Off Button
         $('.sidebar-toggle').on('click', () => {
             $('.sidebar .menu .child').css({ 'display': 'none' });
@@ -84,11 +88,9 @@ class Layout {
         //Modal Dragable
         $('.modal-draggable').draggable({
             handle: ".modal-header, .modal-body, .modal-footer"
-        });    
-        //Default Table init
-        Table.empty({ selector: '.table-default' });
-        //Date Time init
-        DateTime.init();
+        });
+        //Due to modal focus problem when close the modal
+        Modal.hideEvent();
         //input Text Upper Case
         $("input.text-upper").on('input', (e) => {
             $(e.currentTarget).val($(e.currentTarget).val().toUpperCase());

@@ -189,7 +189,7 @@ namespace CRMApi.Repository
             try
             {
                 //Get Party
-                var objCompany = db.Company.Where(pt => App.ActiveStatus.Contains(pt.Status)).AsEnumerable().FirstOrDefault();
+                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status) && pt.Id == User.CompanyId);
                 if (objCompany == null)
                 {
                     Message.Error(ref objMsg, "Company Info did found");
@@ -284,7 +284,7 @@ namespace CRMApi.Repository
             Message objMsg = new Message();
             try
             {
-                obj.Code = Util.SanitizeInput(obj.Code ?? "", App.Regexp.AlphaLgNum);
+                obj.Code = Util.SanitizeInput(obj.Code ?? "", App.Regexp.AlphaLgNum) ?? "";
                 var dbItem = db.Item.ToList();
                 if (!String.IsNullOrEmpty(obj.Code) && dbItem.Where(x => x.Code == obj.Code && x.Id != obj.Id).Any())
                 {

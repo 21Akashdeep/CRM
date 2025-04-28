@@ -1,5 +1,7 @@
-﻿class User {
-    static init() {        
+﻿
+
+class User {
+    static init() {            
         User.getViewOption((response) => {
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: ['Description'], isSelectPicker: true });
             Dropdown.bind({ id: '#ListUserType', data: response.data.UserType, value: 'Value', text: ['Description'], isSelectPicker: true });
@@ -7,8 +9,8 @@
         });
         $('#btnSearch').on('click', () => {
             User.get('Get', (response) => {
-                Table.add({ id: '#tableUser', data: response.data });
-            });
+                Table.add({ id: '#tableUser', data: response.data });                
+            });            
         });
         $('#btnPrint').on('click', () => {
             User.get('Print', (response) => {
@@ -20,8 +22,8 @@
                 Export.Base64ToExcel({ base64: response.base64, fielName: "User List" });
             });
         });
-        $('#btnAdd').on('click', () => {
-            User.fill();             
+        $('#btnAdd').on('click', () => {            
+            User.fill();                
         });
         $('#ContactNo').on('focusout', function () {
             if (parseFloat($('#ContactNo').val()) < 1000000000 || parseFloat($('#ContactNo').val()) > 9999999999) {
@@ -38,7 +40,7 @@
             obj.DateOfBirth = DateTime.json(obj.DateOfBirth);
             obj.Company = $('#tableCompany').bootstrapTable('getData').filter(c => c.IsAdded);
             obj.Api = $('#tableApi').bootstrapTable('getData').filter(ap => ap.View || ap.Add || ap.Update || ap.Delete || ap.Enable || ap.Print || ap.Import || ap.Export);
-            obj.ApprovalRole = $('#tableApprovalRole').bootstrapTable('getData').filter(cp => cp.IsAdded == true);
+            obj.ApprovalRole = $('#tableApprovalRole').bootstrapTable('getData').filter(cp => cp.IsAdded);
             if (Field.isNullOrEmpty(obj.Id)) {            
                 User.add(obj);
             }
@@ -67,9 +69,10 @@
             onSuccess: (response) => {
                 Modal.open({ id: '#modalUser', title: 'User / Add', action: 'Add' });
                 $('#DateOfBirth').val('');
-                Dropdown.bind({ id: '#UserType', data: response.data.UserType, value: 'Value', text: ['Description'], isSelectPicker: true });
+                Dropdown.bind({ id: '#UserType', data: response.data.UserType, value: 'Value', text: ['Description'] });
+                Table.add({ id: '#tableCompany', data: response.data.Company });
                 Table.add({ id: '#tableApi', data: response.data.Api });
-                Table.add({ id: '#tableApprovalRole', data: response.data.AprRole });
+                Table.add({ id: '#tableApprovalRole', data: response.data.AprRole });                                
             }
         });
     }
@@ -127,10 +130,10 @@
                 url: `User/Edit?Id=${id}`,
                 onSuccess: (response) => {
                     if (response.status == Message.Type.success) {                        
-                        Dropdown.bind({ id: '#UserType', data: response.data.UserType, value: 'Value', text: ['Description'], isSelectPicker: true });
+                        Dropdown.bind({ id: '#UserType', data: response.data.UserType, value: 'Value', text: ['Description'] });
                         let obj = response.obj;
                         obj.Id = action == 'Edit' ? obj.Id : null;
-                        let title = action == 'Edit' ? `User / Edit (Code: ${obj.Code})` : `User / Add`;
+                        let title = action == 'Edit' ? `User / Edit (Code: ${obj.UserId})` : `User / Add`;
                         Modal.open({ id: '#modalUser', title: title, action: action, obj: obj });
                         Table.add({ id: '#tableCompany', data: response.data.Company });
                         Table.add({ id: '#tableApi', data: response.data.Api });
@@ -143,7 +146,7 @@
             }
         );
     }
-    static update(obj) {
+    static update(obj) {        
         Data.update({ url: 'User/Update', data: obj, onSuccess: User.updateOnSuccess });        
     }  
     static updateOnSuccess = (response) => {
@@ -287,6 +290,13 @@ window.tableCompanyCheckedEvent = {
     'change .company-checked': (e, value, obj, index) => {
         obj.IsAdded = $(e.target).is(':Checked') ? true : false;
         $('#tableCompany').bootstrapTable('updateRow', { index: index, row: obj });
+        var Company = $('#tableCompany').bootstrapTable('getData').map((com) => {
+            if (obj.CompanyId != com.CompanyId) {
+                com.IsAdded = false;
+            }
+            return com;
+        });
+        Table.add({ id: '#tableCompany', data: Company });
     }
 }
 tableCompanyIsDefaultFormatter = (value, obj, index) => {
@@ -297,7 +307,7 @@ tableCompanyIsDefaultFormatter = (value, obj, index) => {
     `;    
     return checkBox;
 }
-window.tableCompanyIsDefaultEvent = {
+window.tableCompanyIsDefaultEvent = {    
     'change .default-checked': (e, value, obj, index) => {
         obj.IsDefault = $(e.target).is(':Checked') ? true : false;
         $('#tableCompany').bootstrapTable('updateRow', { index: index, row: obj });

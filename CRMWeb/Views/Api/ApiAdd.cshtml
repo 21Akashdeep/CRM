@@ -1,10 +1,10 @@
-﻿<div id="modalApi" class="modal fade modal-draggable" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+﻿<div id="modalApi" class="modal fade modal-draggable" data-bs-backdrop="static" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <span class="modal-title">API / Add</span>
                 <div class="btn-group">
-                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle" inert>
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
                         <span class="fa fa-minus"></span>
                     </button>
                     <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal">
@@ -18,7 +18,7 @@
                         <div class="col-md-12">
                             <label>Group<span class="text-mandatory">*</span></label>
                             <input type="hidden" id="Api_Id" name="Id" />
-                            <select id="Api_ApiGroupId" name="ApiGroupId" class="form-control select-pick api-required" data-search="true" data-action="true" data-addFn="ApiGroup.fill" data-editFn="ApiGroup.edit" data-deleteFn="ApiGroup.delete">
+                            <select id="Api_ApiGroupId" name="ApiGroupId" class="select-pick api-required" data-search="true" data-size="4" data-addFn="ApiGroup.fill" data-editFn="ApiGroup.edit" data-deleteFn="ApiGroup.delete">
                             </select>
                         </div>
                         <div class="col-md-12">
@@ -31,7 +31,7 @@
                         </div>
                         <div class="col-md-12">
                             <label>API Type<span class="text-mandatory">*</span></label>
-                            <select id="Api_ApiType" name="ApiType" class="form-control form-control-sm select-pick api-required" data-search="true" data-size="4">
+                            <select id="Api_ApiType" name="ApiType" class="select-pick api-required" data-search="true" data-size="4">
                             </select>
                         </div>
                         <div class="col-md-12">

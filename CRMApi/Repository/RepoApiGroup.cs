@@ -168,7 +168,7 @@ namespace CRMApi.Repository
             try
             {
                 //Get Party
-                var objCompany = db.Company.Where(pt => App.ActiveStatus.Contains(pt.Status)).AsEnumerable().FirstOrDefault();
+                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status) && pt.Id == User.CompanyId);
                 if (objCompany == null)
                 {
                     Message.Error(ref objMsg, "Company Info did found");
@@ -187,7 +187,7 @@ namespace CRMApi.Repository
                 objDataTable.Columns.Remove("ListParentId");
                 objDataTable.Columns.Remove("ListStatus");
                 objDataTable.Columns.Remove("User");
-                //Convert Datatable to base64               
+                //Convert Datatable to base64
                 objCompany.SheetName = "Api Group List";
                 objCompany.ReportDesc = $"Api Group - {DateTime.Now.ToString("dd-MMM-yyyy")}";
                 objMsg.base64 = Util.DataTableToBase64(objDataTable, objCompany);

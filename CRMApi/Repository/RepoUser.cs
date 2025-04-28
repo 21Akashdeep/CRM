@@ -115,7 +115,7 @@ namespace CRMApi.Repository
                     orderby agp.SeqNo, api.SeqNo
                     select new
                     {
-                        ApiId = api.Id,                        
+                        ApiId = api.Id,
                         ApiName = api.Name,
                         ApiDesc = api.Description,
                         ApiGroupDesc = agp.Description,
@@ -125,7 +125,7 @@ namespace CRMApi.Repository
                         Add = ape?.Add ?? false,
                         Update = ape?.Update ?? false,
                         Delete = ape?.Delete ?? false,
-                        Enable = ape?.Enable ?? false,                        
+                        Enable = ape?.Enable ?? false,
                         Print = ape?.Print ?? false,
                         Import = ape?.Import ?? false,
                         Export = ape?.Export ?? false,

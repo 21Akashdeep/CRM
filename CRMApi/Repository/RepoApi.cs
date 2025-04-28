@@ -168,8 +168,8 @@ namespace CRMApi.Repository
             Message objMsg = new Message();
             try 
             {
-                //Get Party
-                var objCompany = db.Company.Where(pt => App.ActiveStatus.Contains(pt.Status)).AsEnumerable().FirstOrDefault();
+                //Get Company
+                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status) && pt.Id == User.CompanyId);
                 if (objCompany == null)
                 {
                     Message.Error(ref objMsg, "Company Info did found");
@@ -187,7 +187,7 @@ namespace CRMApi.Repository
                 objDataTable.Columns.Remove("ListId");
                 objDataTable.Columns.Remove("ListApiGroupId");                
                 objDataTable.Columns.Remove("ListStatus");
-                //Convert Datatable to base64               
+                //Convert Datatable to base64                                               
                 objCompany.SheetName = "Api List";
                 objCompany.ReportDesc = $"Api - {DateTime.Now.ToString("dd-MMM-yyyy")}";
                 objMsg.base64 = Util.DataTableToBase64(objDataTable, objCompany);
@@ -205,7 +205,7 @@ namespace CRMApi.Repository
             try 
             {
                 //Sanitize Input
-                obj.Name = Util.SanitizeInput(obj.Name, App.Regexp.AlphaNum);
+                obj.Name = Util.SanitizeInput(obj.Name, App.Regexp.AlphaNum) ?? "";
                 var dbApi = db.Api.Where(fm => App.ActiveStatus.Contains(fm.Status)).ToList();
                 if (dbApi.Where(ap => ap.ApiGroupId == obj.ApiGroupId && ap.Name == obj.Name).Count() > 0)
                 {
@@ -256,7 +256,7 @@ namespace CRMApi.Repository
             Message objMsg = new Message();
             try 
             {
-                obj.Name = Util.SanitizeInput(obj.Name, App.Regexp.AlphaNum);
+                obj.Name = Util.SanitizeInput(obj.Name, App.Regexp.AlphaNum) ?? "";
                 var dbApi = db.Api.Where(ap => App.ActiveStatus.Contains(ap.Status)).ToList();
                 if (dbApi.Where(ap => ap.ApiGroupId == obj.ApiGroupId && ap.Name == obj.Name && ap.Id != obj.Id).Count() > 0)
                 {

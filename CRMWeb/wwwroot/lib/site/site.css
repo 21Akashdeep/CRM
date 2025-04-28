@@ -138,9 +138,10 @@ nav {
     overflow:hidden;
 }
 
-.menu .menu-item .fa {
+.menu .menu-item .fa, 
+.menu .menu-item .fa-brands {
     min-width: 20px;
-    font-size: 16px;    
+    font-size: 16px;
 }
 
 .menu .menu-item .fa.fa-angle-right {
@@ -552,6 +553,13 @@ nav {
     right: 1px;
     z-index: 9999;
 }
+
+/*.modal-backdrop {
+    background-color:none!important;
+}
+.modal-backdrop.show {
+    opacity:0;
+}*/
 
 .mandatory {
     --bs-text-opacity: 1;
@@ -1066,12 +1074,7 @@ hr {
     font-size:0.85rem;    
 }
 
-.modal-backdrop {
-    background-color:none!important;
-}
-.modal-backdrop.show {
-    opacity:0;
-}
+
 
 .btn-info-1 {
     background-color: rgba(127, 50, 168,0.8);

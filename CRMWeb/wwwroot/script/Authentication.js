@@ -25,7 +25,7 @@ class Authentication {
     }
     static appInfo() {
         Data.get({
-            url: 'Authentication/AppInfo', loader: false, onSuccess: (response) => {                
+            url: 'Authentication/AppInfo', loader: true, onSuccess: (response) => {                
                 App.Setting = response.data;                
                 sessionStorage.setItem('Setting', JSON.stringify(response.data));
             }
@@ -56,8 +56,7 @@ class Authentication {
                         Message.show(response);
                     }
                 }
-            },
-            
+            },            
         );
     }
 }

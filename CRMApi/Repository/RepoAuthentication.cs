@@ -40,8 +40,8 @@ namespace CRMApi.Repository
                     Message.Error(ref objMsg, "Opps, Invalid login credentials.");
                     return objMsg;
                 }
-                objUser.ApiType = obj.ApiType;
-                objUser.CompanyId = objUser.Company.Where(c => c.IsDefault).Select(c => c.CompanyId).FirstOrDefault();
+                objUser.ApiType = obj.ApiType;                
+                objUser.CompanyId = objUser.Company.FirstOrDefault(c => c.IsDefault)?.CompanyId ?? 0;                
                 objUser.TokenExpiry = DateTime.Now.AddMinutes(Convert.ToDouble(App.Jwt.TokenExpireTimeInMinutes));
                 objMsg = RepoUser.UserInfo(objUser);
             }

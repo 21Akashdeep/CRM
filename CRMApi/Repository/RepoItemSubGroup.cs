@@ -150,8 +150,8 @@ namespace CRMApi.Repository
             Message objMsg = new Message();
             try
             {
-                //Get Party
-                var objCompany = db.Company.Where(pt => App.ActiveStatus.Contains(pt.Status)).AsEnumerable().FirstOrDefault();
+                //Get Company
+                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status) && pt.Id == User.CompanyId);
                 if (objCompany == null)
                 {
                     Message.Error(ref objMsg, "Company Info did found");

@@ -9,14 +9,14 @@ namespace CRMApi.Controllers
     [Route("api/[controller]/[action]")]
     [ApiController]
     [Authorize]
-    public class CompanyController : ControllerBase
+    public class DepartmentController : ControllerBase
     {
         private readonly DbCRM db;
-        private readonly RepoCompany RepoCompany;
-        public CompanyController(DbCRM _db)
+        private readonly RepoDepartment RepoDept;
+        public DepartmentController(DbCRM _db) 
         {
             db = _db;
-            RepoCompany = new RepoCompany(db);
+            RepoDept = new RepoDepartment(db);
         }
         [HttpGet]
         public IActionResult GetViewOption()
@@ -26,39 +26,23 @@ namespace CRMApi.Controllers
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = RepoCompany.GetViewOption();
+                objMsg = RepoDept.GetViewOption();
             }
             catch (Exception ex)
             {
                 Message.Exception(ref objMsg, ex);
             }
             return Ok(objMsg);
-        }
-        [HttpGet]
-        public IActionResult GetAddOption()
-        {
-            Message objMsg = new Message();
-            try
-            {
-                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
-                if (User == null) return Ok(objMsg);
-                objMsg = RepoCompany.GetAddOption();
-            }
-            catch (Exception ex)
-            {
-                Message.Exception(ref objMsg, ex);
-            }
-            return Ok(objMsg);
-        }
+        }        
         [HttpPost]
-        public IActionResult Get(Company obj)
+        public IActionResult Get(Department obj)
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg.data = RepoCompany.List(obj, User);
+                objMsg.data = RepoDept.List(obj, User);
                 Message.Get(ref objMsg, "");
             }
             catch (Exception ex)
@@ -68,14 +52,14 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPost]
-        public IActionResult Print(Company obj)
+        public IActionResult Print(Department obj)
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Print }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = RepoCompany.Print(obj, User);
+                objMsg = RepoDept.Print(obj, User);
             }
             catch (Exception ex)
             {
@@ -84,14 +68,14 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPost]
-        public IActionResult Export(Company obj)
+        public IActionResult Export(Department obj)
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
-                if (User == null) return Ok(objMsg);
-                objMsg = RepoCompany.Export(obj, User);
+                if (User == null) return Ok(objMsg);                
+                objMsg = RepoDept.Export(obj, User);
             }
             catch (Exception ex)
             {
@@ -100,14 +84,14 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPost]
-        public IActionResult Add(Company obj)
+        public IActionResult Add(Department obj)
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
-                if (User == null) return Ok(objMsg);
-                objMsg = RepoCompany.Add(obj, User);
+                if (User == null) return Ok(objMsg);                
+                objMsg = RepoDept.Add(obj, User);
             }
             catch (Exception ex)
             {
@@ -123,9 +107,9 @@ namespace CRMApi.Controllers
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                Company obj = new Company();
-                obj.ListId.Add(Id);
-                objMsg = RepoCompany.Edit(obj, User);
+                Department obj = new Department();
+                obj.ListId.Add(Id);                
+                objMsg = RepoDept.Edit(obj, User);
             }
             catch (Exception ex)
             {
@@ -134,14 +118,14 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPatch]
-        public IActionResult Update(Company obj)
+        public IActionResult Update(Department obj)
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
-                if (User == null) return Ok(objMsg);
-                objMsg = RepoCompany.Update(obj, User);
+                if (User == null) return Ok(objMsg);                
+                objMsg = RepoDept.Update(obj, User);
             }
             catch (Exception ex)
             {
@@ -157,9 +141,9 @@ namespace CRMApi.Controllers
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                Company obj = new Company();
-                obj.Id = Id;
-                objMsg = RepoCompany.Delete(obj, User);
+                Department obj = new Department();
+                obj.Id = Id;                
+                objMsg = RepoDept.Delete(obj, User);
             }
             catch (Exception ex)
             {
@@ -175,9 +159,9 @@ namespace CRMApi.Controllers
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                Company obj = new Company();
-                obj.Id = Id;
-                objMsg = RepoCompany.Enable(obj, User);
+                Department obj = new Department();
+                obj.Id = Id;                
+                objMsg = RepoDept.Enable(obj, User);
             }
             catch (Exception ex)
             {

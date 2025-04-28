@@ -86,7 +86,6 @@ select.select-pick {
     padding-right: 0.1rem;
     padding-bottom: 0.3rem;
     display: flex;    
-    border-bottom: 1px solid rgba(222, 226, 230, 1);
     width:auto;
 }
 .menu-action-box button {
@@ -100,12 +99,33 @@ select.select-pick {
     border:0;
     white-space:nowrap;
 }
+
+.menu-item-add {
+    padding-left: 0.5rem;
+    padding-right: 0.1rem;
+    padding-bottom: 0.3rem;
+    display: flex;    
+    width: auto;
+}
+
+.menu-item-add button {
+    flex: 1;
+    min-width: 0;
+    border-radius: 50px;
+    margin-right: 5px;
+    font-size: 90%;
+    padding: 0 15px 0 10px;
+    height: 20px !important;
+    border: 0;
+    white-space: nowrap;
+}
 .select-pick-menu .menu-list {
-    color: black;    
-    margin-top: 5px;
+    color: black;
+    margin-top: 0px;
     margin-bottom: 5px;
-    padding:0;
-    overflow:auto;
+    padding: 0;
+    overflow: auto;
+    border-top: 1px solid rgba(222, 226, 230, 1);
 }
 .select-pick-menu .menu-item {
     list-style: none;     

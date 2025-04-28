@@ -21,7 +21,7 @@ namespace CRMApi.Repository
                 var dbSetting = db.Setting.Where(x => App.ActiveStatus.Contains(x.Status)).ToList();
                 dynamic Option = new ExpandoObject();
                 Option.Status = dbSetting.Where(x => x.Name == App.SettingName.Status).ToList();
-                Option.SettingGroup = dbSetting.GroupBy(x => new { x.Category }).Select(x => new { x.Key.Category }).ToList();
+                Option.SettingCategory = dbSetting.GroupBy(x => new { x.Category }).Select(x => new { x.Key.Category }).ToList();
                 Option.SettingName = dbSetting.GroupBy(x => new { x.Name }).Select(x => new { x.Key.Name }).ToList();
                 objMsg.data = Option;
                 Message.Success(ref objMsg, "Record found");
@@ -39,7 +39,7 @@ namespace CRMApi.Repository
             {
                 var dbSetting = db.Setting.Where(x => App.ActiveStatus.Contains(x.Status)).ToList();
                 dynamic Option = new ExpandoObject();                
-                Option.SettingGroup = dbSetting.GroupBy(x => new { x.Category }).Select(x => new { x.Key.Category }).ToList();
+                Option.SettingCategory = dbSetting.GroupBy(x => new { x.Category }).Select(x => new { x.Key.Category }).ToList();
                 Option.SettingName = dbSetting.GroupBy(x => new { x.Name }).Select(x => new { x.Key.Name }).ToList();
                 objMsg.data = Option;
                 Message.Success(ref objMsg, "Record found");
@@ -56,7 +56,7 @@ namespace CRMApi.Repository
             obj.ListStatus = obj.ListStatus.Count == 0 ? App.ActiveStatus : obj.ListStatus;
             var dbSetting = db.Setting.Where(st => obj.ListStatus.Contains(st.Status)).ToList();
             dbSetting = obj.ListStatus.Count > 0 ? dbSetting.Where(x => obj.ListStatus.Contains(x.Status)).ToList() : dbSetting;
-            dbSetting = obj.ListGroup.Count > 0 ? dbSetting.Where(x => obj.ListGroup.Contains(x.Category)).ToList() : dbSetting;
+            dbSetting = obj.ListCategory.Count > 0 ? dbSetting.Where(x => obj.ListCategory.Contains(x.Category)).ToList() : dbSetting;
             dbSetting = obj.ListName.Count > 0 ? dbSetting.Where(x => obj.ListName.Contains(x.Name)).ToList() : dbSetting;
             dbSetting = obj.ListId.Count > 0 ? dbSetting.Where(x => obj.ListId.Contains(x.Id)).ToList() : dbSetting;
             var Setting = (
@@ -98,12 +98,13 @@ namespace CRMApi.Repository
                 //Sanitize Input
                 obj.Category = Util.SanitizeInput(obj.Category, App.Regexp.AlphaNum);
                 obj.Name = Util.SanitizeInput(obj.Name, App.Regexp.AlphaNum);
+                obj.Description = Util.SanitizeInput(obj.Description, null);
                 obj.Value = Util.SanitizeInput(obj.Value, App.Regexp.AlphaNum);
                 //Check Duplicate
-                var dbSetting = db.Setting.Where(x => x.Status == 1 && x.Name == obj.Name && x.Value == obj.Value).ToList();
-                if (dbSetting.Count > 0)
+                var dbSetting = db.Setting.FirstOrDefault(x => x.Status == 1 && x.Name == obj.Name && x.Value == obj.Value);
+                if (dbSetting != null)
                 {
-                    Message.Error(ref objMsg, "Duplicate Entry :<br>Setting Name & Value : " + obj.Name + " & " + obj.Value);
+                    Message.Duplicate(ref objMsg, "Setting Name & Value : " + obj.Name + " & " + obj.Value);
                     return objMsg;
                 }
                 //Add                 
@@ -111,7 +112,8 @@ namespace CRMApi.Repository
                 obj.UpdatedBy = obj.User.Id;
                 db.Add(obj);
                 Message.Add(ref objMsg, db.SaveChanges(), "");
-                if (objMsg.status == Message.Type.success) {
+                if (objMsg.status == Message.Type.success) 
+                {
                     obj.ListId.Add(obj.Id);
                     objMsg.obj = List(obj).FirstOrDefault();
                     objMsg.data = GetAddOption().data;
@@ -143,16 +145,17 @@ namespace CRMApi.Repository
                 //Senitise Input
                 obj.Category = Util.SanitizeInput(obj.Category, App.Regexp.AlphaNum);
                 obj.Name = Util.SanitizeInput(obj.Name, App.Regexp.AlphaNum);
+                obj.Description = Util.SanitizeInput(obj.Description, null);
                 obj.Value = Util.SanitizeInput(obj.Value, App.Regexp.AlphaNum);
                 //Prevent Duplicate
-                var dbSetting = db.Setting.Where(x => x.Status == 1 && x.Name == obj.Name && x.Value == obj.Value && x.Id != obj.Id).ToList();
-                if (dbSetting.Count > 0)
+                var dbSetting = db.Setting.FirstOrDefault(x => x.Status == 1 && x.Name == obj.Name && x.Value == obj.Value && x.Id != obj.Id);
+                if (dbSetting != null)
                 {
-                    Message.Error(ref objMsg, "Duplicate entry.<br>Name & Value : " + obj.Name + " & " + obj.Value);
+                    Message.Duplicate(ref objMsg, "Name & Value : " + obj.Name + " & " + obj.Value);
                     return objMsg;
                 }
                 //Get Setting For Update
-                var UpdateSetting = db.Setting.Where(x => x.Status == 1 && x.Id == obj.Id).AsEnumerable().FirstOrDefault();
+                var UpdateSetting = db.Setting.FirstOrDefault(x => x.Status == 1 && x.Id == obj.Id);
                 if (UpdateSetting == null)
                 {
                     Message.Error(ref objMsg, "Setting did not find.");

@@ -122,12 +122,12 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c => { c.ConfigObject.AdditionalItems["persistAuthorization"] = true; });
 }
 else 
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c => { c.ConfigObject.AdditionalItems["persistAuthorization"] = true; });
 }
 app.UseCors("CorsPolicy");
 app.UseAuthentication();

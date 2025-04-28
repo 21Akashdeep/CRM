@@ -40,7 +40,7 @@
                 url: 'Setting/GetViewOption',
                 onSuccess: (response) => {                    
                     Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
-                    Dropdown.bind({ id: '#ListGroup', data: response.data.SettingGroup, value: 'Group', text: 'Group' });
+                    Dropdown.bind({ id: '#ListCategory', data: response.data.SettingCategory, value: 'Category', text: 'Category' });
                     Dropdown.bind({ id: '#ListName', data: response.data.SettingName, value: 'Name', text: 'Name' });
                 }
             }
@@ -49,7 +49,7 @@
     static get(method, onSuccess = () => { }) {
         let obj = {
             ListStatus: $('#ListStatus').val(),
-            ListGroup: $('#ListGroup').val(),
+            ListCategory: $('#ListCategory').val(),
             ListName: $('#ListName').val(),
         };
         Data.post({ url: `Setting/${method}`, data: obj, onSuccess: onSuccess });
@@ -60,7 +60,7 @@
     static fill() {
         Setting.getAddOption((response) => {
             Modal.open({ id: '#modalSetting', title: 'Setting / Add', action: 'Add' });
-            Dropdown.bind({ id: '#Group', data: response.data.SettingGroup, value: 'Group', text: 'Group', isEditable: true });
+            Dropdown.bind({ id: '#Category', data: response.data.SettingCategory, value: 'Category', text: 'Category', isEditable: true });
             Dropdown.bind({ id: '#Name', data: response.data.SettingName, value: 'Name', text: ['Name'], isEditable: true });
             Dropdown.bindIcon({ id: '#Icon' });
         });
@@ -73,28 +73,25 @@
         if (response.status == Message.Type.success) {
             Modal.reset({ id: "#modalSetting" });
             Table.add({ id: '#tableSetting', data: response.obj, action: 'prepend' });            
-            Dropdown.bind({ id: '#ListGroup', data: response.data.SettingGroup, value: 'Group', text: 'Group' });
+            Dropdown.bind({ id: '#ListCategory', data: response.data.SettingCategory, value: 'Category', text: 'Category' });
             Dropdown.bind({ id: '#ListName', data: response.data.SettingName, value: 'Name', text: 'Name' });
-            Dropdown.bind({ id: '#Group', data: response.data.SettingGroup, value: 'Group', text: 'Group', isEditable: true });
+            Dropdown.bind({ id: '#Category', data: response.data.SettingCategory, value: 'Category', text: 'Category', isEditable: true });
             Dropdown.bind({ id: '#Name', data: response.data.SettingName, value: 'Name', text: ['Name'], isEditable: true });
         }
     }
-    static edit(id, viewMode = "Edit") {
+    static edit({id, action = "Edit"}) {
         Data.get(
             {
                 url: `Setting/Edit?Id=${id}`,
                 onSuccess: (response) => {
                     if (response.status == Message.Type.success) {
                         let obj = response.obj;                        
-                        let title = `Setting / ${viewMode} (Name: ${response.obj.Name})`;
-                        if (viewMode == "Add") {
-                            obj.Id = null;
-                            title = `Setting / ${viewMode}`
-                        }
-                        Modal.open({ id: '#modalSetting', title, action: viewMode, obj: obj });
-                        Dropdown.bind({ id: '#Group', data: response.data.SettingGroup, value: 'Group', text: 'Group', isEditable: true });
+                        let title = action == "Edit" ? `Setting / ${action} (Name: ${response.obj.Name})` : `Setting / ${action}`;
+                        obj.Id = action == "Edit" ? obj.Id : null;                        
+                        Modal.open({ id: '#modalSetting', title, action: action, obj: obj });
+                        Dropdown.bind({ id: '#Category', data: response.data.SettingCategory, value: 'Category', text: 'Category', isEditable: true });
                         Dropdown.bind({ id: '#Name', data: response.data.SettingName, value: 'Name', text: ['Name'], isEditable: true });                        
-                        $('#Group').val(obj.Group);
+                        $('#Category').val(obj.Category);
                         $('#Name').val(obj.Name);
                         Dropdown.bindIcon({ id: '#Icon', value: [obj.Icon] });
                     }
@@ -115,18 +112,18 @@
             Modal.close({ id: "#modalSetting" });
             Table.updateById({ id: '#tableSetting', objId: response.obj.Id, obj: response.obj });
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
-            Dropdown.bind({ id: '#ListGroup', data: response.data.SettingGroup, value: 'Group', text: 'Group' });
+            Dropdown.bind({ id: '#ListCategory', data: response.data.SettingCategory, value: 'Category', text: 'Category' });
             Dropdown.bind({ id: '#ListName', data: response.data.SettingName, value: 'Name', text: 'Name' });
         }
     }
-    static delete(id) {
+    static delete({ id }) {
         Message.confirm(
             {
                 msg: "Do you want to delete???",
                 confirmButtonText: "Delete",
                 denyButtonText: "Don't Delete",
                 data: id,
-                onConfirm: (id) => {                    
+                onConfirm: (id) => {
                     Data.delete(
                         {
                             url: `Setting/Delete?Id=${id}`,
@@ -142,7 +139,7 @@
         if (response.status == Message.Type.success) {            
             Table.updateById({ id: '#tableSetting', objId: response.obj.Id, obj: response.obj });
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
-            Dropdown.bind({ id: '#ListGroup', data: response.data.SettingGroup, value: 'Group', text: 'Group' });
+            Dropdown.bind({ id: '#ListCategory', data: response.data.SettingCategory, value: 'Category', text: 'Category' });
             Dropdown.bind({ id: '#ListName', data: response.data.SettingName, value: 'Name', text: 'Name' });
         }
     }
@@ -169,7 +166,7 @@
         if (response.status == Message.Type.success) {
             Table.updateById({ id: '#tableSetting', objId: response.obj.Id, obj: response.obj });
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
-            Dropdown.bind({ id: '#ListGroup', data: response.data.SettingGroup, value: 'Group', text: 'Group' });
+            Dropdown.bind({ id: '#ListCategory', data: response.data.SettingCategory, value: 'Category', text: 'Category' });
             Dropdown.bind({ id: '#ListName', data: response.data.SettingName, value: 'Name', text: 'Name' });
         }
     }
@@ -227,13 +224,13 @@ tableSettingActionFormatter = (value, obj, index) => {
 }
 window.tableSettingActionEvent = {
     'click .btn-edit': (e, value, obj, index) => {
-        Setting.edit(obj.Id);
+        Setting.edit({ id: obj.Id });
     },
     'click .btn-duplicate': (e, value, obj, index) => {
-        Setting.edit(obj.Id,"Add");
+        Setting.edit({ id: obj.Id, action: "Add" });
     },
     'click .btn-delete': (e, value, obj, index) => {
-        Setting.delete(obj.Id);
+        Setting.delete({id: obj.Id });
     },
     'click .btn-enable': (e, value, obj, index) => {
         Setting.enable(obj.Id);

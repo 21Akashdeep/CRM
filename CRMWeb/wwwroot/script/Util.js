@@ -271,14 +271,15 @@ const Message = {
                 swalHtml += `<h3>Error</h3>`;
                 break;
         }
-
-        swalHtml += `<div class='swal2-text-msg'><span>${statusText}</span></div></div>`;
-
+        swalHtml += `<div class='swal2-text-msg'><span>${statusText}</span></div></div>`;        
         Swal.fire({
             html: swalHtml,
             background: 'rgba(0,0,0,0.5)',
-            timer: Message.timer
-        });
+            timer: 100000,
+            didOpen: () => {
+                document.querySelector('button.swal2-confirm').focus();                
+            }
+        });        
     },
     confirm({ msg = '', confirmButtonText = 'Confirm', denyButtonText = "Don't Confirm", data = null, onConfirm = () => { }, onDenied = () => { } }) {
         Swal.fire({
@@ -321,18 +322,18 @@ const PageLoader = {
 };
 
 const Data = {
-    get({ url = null, loader = true, async = false, isApi = true, onSuccess = () => { } }) {
-        const authToken = sessionStorage.getItem('User') ? `Bearer ${JSON.parse(sessionStorage.getItem('User')).AuthToken}` : '';
-        const apiUrl = isApi ? Url.Api + url : Url.App + url;
+    get({ url = null, loader = true, async = true, isApi = true, onSuccess = () => { } }) {           
+        let ApiUrl = isApi ? Url.Api + url : Url.App + url;
+        let AuthToken = App.User ? `Bearer ${App.User.AuthToken}` : '';
         $.ajax({
-            url: apiUrl,
+            url: ApiUrl,
             type: 'Get',
             async: async,
             dataType: 'json',
             contentType: "application/json; charset=utf-8",
             cache: false,
             headers: {
-                Authorization: authToken,
+                Authorization: AuthToken,
             },
             beforeSend: () => {
                 if (loader) {
@@ -373,87 +374,94 @@ const Data = {
             }
         });
     },
-    post({ url = null, data = null, loader = true, loaderName = '', async = false, isApi = true, onSuccess = () => { } }) {
-        const authToken = sessionStorage.getItem('User') ? `Bearer ${JSON.parse(sessionStorage.getItem('User')).AuthToken}` : '';
-        const apiUrl = isApi ? Url.Api + url : Url.App + url;
+    post({ url = null, data = null, loader = true, loaderName = '', async = true, isApi = true, onSuccess = () => { } }) {
+        let ApiUrl = isApi ? Url.Api + url : Url.App + url;
+        let AuthToken = App.User ? `Bearer ${App.User.AuthToken}` : '';        
         $.ajax({
-            url: apiUrl,
+            url: ApiUrl,
             type: 'POST',
             async: async,
             dataType: 'json',
             contentType: "application/json; charset=utf-8",
-            headers: { Authorization: authToken },
+            headers: {
+                Authorization: AuthToken,
+            },
             data: JSON.stringify(data),
             beforeSend: () => {
                 if (loader) {
-                    if (loaderName) {
-                        $(loaderName).show(); // Show loader if loaderName is provided
-                    } else {
-                        PageLoader.on(); // Otherwise, use the default PageLoader
+                    if (loaderName != '') {
+                        $(loaderName).show();
+                    }
+                    else {
+                        PageLoader.on();
                     }
                 }
             },
             success: (response) => {
-                // Handle redirect or unauthorized response
-                if ([Message.Type.redirect, Message.Type.unauthorized].includes(response.status)) {
+                if (response.status == Message.Type.redirect || response.status == Message.Type.unauthorized) {
                     Message.alert(response);
                     setTimeout(() => {
                         location.replace(Url.App + response.redirectPage);
                     }, 3000);
                     return;
                 }
-                // Call the onSuccess callback
                 try {
                     onSuccess(response);
                 } catch (ex) {
                     console.error(ex);
-                    PageLoader.off();
                 }
             },
             error: (response) => {
-                // Handle unauthorized error
-                if (response.status === Message.Type.unauthorized) {
+                if (response.status == Message.Type.unauthorized) {
                     Message.alert(response);
                     setTimeout(() => {
-                        location.replace(Url.App); // Redirect to login if unauthorized
+                        location.replace(Url.App);
                     }, 3000);
                     return;
                 }
-
-                // Log the error and show the message
-                console.error(JSON.stringify(response));
-                Message.show(response);
+                else {
+                    console.error(JSON.stringify(response));
+                    Message.show(response);
+                }
             },
             complete: () => {
                 if (loader) {
-                    if (loaderName) {
-                        $(loaderName).hide(); // Hide loader if loaderName was used
-                    } else {
-                        PageLoader.off(); // Otherwise, hide the default PageLoader
+                    if (loaderName != '') {
+                        $(loaderName).hide();
+                    }
+                    else {
+                        PageLoader.off();
                     }
                 }
             }
         });
     },
-    update({ url = null, data = null, loader = true, async = false, isApi = true, onSuccess = () => { } }) {
-        const authToken = sessionStorage.getItem('User') ? `Bearer ${JSON.parse(sessionStorage.getItem('User')).AuthToken}` : '';
-        const apiUrl = isApi ? Url.Api + url : Url.App + url;
+    update({ url= null, data= null, loader= true, async= true, isApi= true, onSuccess= () => { } }) {
+        let ApiUrl = isApi ? Url.Api + url : Url.App + url;
+        let AuthToken = App.User ? `Bearer ${App.User.AuthToken}` : '';  
         $.ajax({
-            url: apiUrl,
-            type: 'PATCH',
-            async,
+            url: ApiUrl,
+            type: 'Patch',
+            async: async,
             dataType: 'json',
             contentType: "application/json; charset=utf-8",
-            headers: { Authorization: authToken },
+            headers: {
+                Authorization: AuthToken,
+            },
             data: JSON.stringify(data),
-            beforeSend: loader ? PageLoader.on : null,
+            beforeSend: () => {
+                if (loader) {
+                    PageLoader.on();
+                }
+            },
             success: (response) => {
-                if ([Message.Type.redirect, Message.Type.unauthorized].includes(response.status)) {
+                if (response.status == Message.Type.redirect || response.status == Message.Type.unauthorized) {
                     Message.alert(response);
-                    setTimeout(() => location.replace(Url.App + response.redirectPage), 3000);
+                    setTimeout(() => {
+                        location.replace(Url.App + response.redirectPage);
+                    }, 3000);
                     return;
                 }
-
                 try {
                     onSuccess(response);
                 } catch (ex) {
@@ -461,53 +469,75 @@ const Data = {
                 }
             },
             error: (response) => {
-                if (response.status === Message.Type.unauthorized) {
+                if (response.status == Message.Type.unauthorized) {
                     Message.alert(response);
-                    setTimeout(() => location.replace(Url.App), 3000);
+                    setTimeout(() => {
+                        location.replace(Url.App);
+                    }, 3000);
                     return;
                 }
-                console.error(response);
-                Message.show(response);
+                else {
+                    console.error(JSON.stringify(response));
+                    Message.show(response);
+                }
             },
-            complete: () => loader && PageLoader.off(),
+            complete: () => {
+                if (loader) {
+                    PageLoader.off();
+                }
+            }
         });
     },
-    delete({ url = null, loader = true, async = false, isApi = true, onSuccess = () => { } }) {
-        const authToken = sessionStorage.getItem('User') ? `Bearer ${JSON.parse(sessionStorage.getItem('User')).AuthToken}` : '';
-        const apiUrl = isApi ? Url.Api + url : Url.App + url;
+    delete({ url= null, loader= true, async= true, isApi= true, onSuccess= () => { } }) {        
+        let ApiUrl = isApi ? Url.Api + url : Url.App + url;
+        let AuthToken = App.User ? `Bearer ${App.User.AuthToken}` : '';
         $.ajax({
-            url: apiUrl,
-            type: 'DELETE',
-            async,
+            url: ApiUrl,
+            type: 'Delete',
+            async: async,
             dataType: 'json',
             contentType: "application/json; charset=utf-8",
             cache: false,
-            headers: { Authorization: authToken },
-            beforeSend: loader ? PageLoader.on : null, // Show loader if requested
-            success: (response) => {
-                if ([Message.Type.redirect, Message.Type.unauthorized].includes(response.status)) {
-                    Message.alert(response);
-                    setTimeout(() => location.replace(Url.App + response.redirectPage), 3000);
-                    return;
+            headers: {
+                Authorization: AuthToken,
+            },
+            beforeSend: () => {
+                if (loader) {
+                    PageLoader.on();
                 }
-
+            },
+            success: (response) => {                
                 try {
-                    onSuccess(response); // Call the success callback
+                    if (response.status == Message.Type.redirect || response.status == Message.Type.unauthorized) {
+                        Message.alert(response);
+                        setTimeout(() => {
+                            location.replace(Url.App + response.redirectPage);
+                        }, 3000);
+                        return;
+                    }
+                    onSuccess(response);
                 } catch (ex) {
                     console.error(ex);
                 }
             },
             error: (response) => {
-                if (response.status === Message.Type.unauthorized) {
+                if (response.status == Message.Type.unauthorized) {
                     Message.alert(response);
-                    setTimeout(() => location.replace(Url.App), 3000); // Redirect to login page if unauthorized
+                    setTimeout(() => {
+                        location.replace(Url.App);
+                    }, 3000);
                     return;
                 }
-
-                console.error(response); // Log other errors
-                Message.show(response); // Show error message
+                else {
+                    console.error(JSON.stringify(response));
+                    Message.show(response);
+                }
             },
-            complete: () => loader && PageLoader.off(), // Hide loader after request completes
+            complete: () => {
+                if (loader) {
+                    PageLoader.off();
+                }
+            }
         });
     },
     serializeToObject({ formId = '' } = {}) {
@@ -585,67 +615,6 @@ const Data = {
             return [];
         }
     },
-    isEmptyObj({ obj = {} }) {
-        return Object.keys(obj).length === 0;
-    },
-    isJson({ value = null }) {
-        try {
-            const json = JSON.parse(value);
-            return typeof json === 'object' && json !== null && Object.keys(json).length > 0;
-        } catch {
-            return false;
-        }
-    },
-    base64ToBytes(base64) {
-        const binaryString = atob(base64);
-        const len = binaryString.length;
-        const bytes = new Uint8Array(len);
-        Array.from(binaryString).forEach((char, i) => {
-            bytes[i] = char.charCodeAt(0);
-        });
-        return bytes.buffer;
-    },
-    attachFile({ objFile = [], AllowedExtension = ['png', 'jpg', 'jpeg', 'pdf'], afterReaderOnLoad = () => { } }) {
-        const file = objFile?.files[0]; // Corrected: Changed `pram` to `objFile`
-        if (!file) {
-            Message.error({ statusText: 'File did not attach.' });
-            return;
-        }
-
-        const fileExt = file.name.split('.').pop();
-        const elementId = `#${$(objFile).parent().next('.file-preview').find('iframe').attr('id')}`; // Corrected: Changed `pram` to `objFile`
-
-        // Check for allowed file extensions
-        if (!AllowedExtension.includes(fileExt)) {  // Corrected: Changed `pram` to `AllowedExtension`
-            Data.setImageInIframe({ IframeId: elementId, src: "/images/uploadlogo.png" });
-            Message.Error({ statusText: 'Only attach png, jpg, jpeg or pdf.' });
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            Data.setIframe({ IframeId: elementId, src: e.target.result });
-            $(elementId).hide().fadeIn(650);
-            const [mimeType, base64] = e.target.result.split(',');
-            afterReaderOnLoad({ MimeType: mimeType, Base64: base64 });  // Corrected: Changed `pram` to `afterReaderOnLoad`
-        };
-        reader.readAsDataURL(file);
-    },
-    setIframe({ IframeId = '', src = '' }) {
-        if (!IframeId || !src) {
-            console.warn("IFrame id or source is empty...");
-            return;
-        }
-        const iframe = $(IframeId);
-        if (src.startsWith('data:application/pdf')) {
-            iframe.removeAttr('srcdoc').attr('src', src);
-        } else {
-            const height = iframe.height() - 23;
-            const width = iframe.width() - 23;
-            const htmlString = `<html><body style="text-align: center;"><img class="border" src="${src}" height="${height}" width="${width}"/></body></html>`;
-            iframe.attr('src', src).attr('srcdoc', htmlString);
-        }
-    },
     menuHtmlString(AppMenu) {
         var Menu = [];
         if (AppMenu.length > 0) {
@@ -700,6 +669,169 @@ const Data = {
         }
         return Menu.join('');
     },
+    isEmptyObj({ obj = {} }) {
+        return Object.keys(obj).length === 0;
+    },
+    isJson({ value = null }) {
+        try {
+            const json = JSON.parse(value);
+            return typeof json === 'object' && json !== null && Object.keys(json).length > 0;
+        } catch {
+            return false;
+        }
+    },
+}
+
+const _File = {
+    attach({ fileId = "", allowedExtension = ['png', 'jpg', 'jpeg', 'pdf'], iframeId = "", readerOnLoad = () => { } }) {
+        var objFile = $(fileId)[0];
+        if (objFile.files.length > 0) {
+            let FileName = objFile.files[0].name;
+            let FileExtention = FileName.split('.')[FileName.split('.').length - 1];
+
+            if (!allowedExtension.includes(FileExtention)) {
+                _File.setIframe({ IframeId: iframeId, src: "/image/upload.png" });
+                $(fileId).val(null);
+                Message.error({ statusText: `Only attach ${allowedExtension.join(', ')}.` });
+                return;
+            }
+
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                const base64 = e.target.result.split(',')[1];
+                const mimeType = e.target.result.split(',')[0].match(/:(.*?);/)[1];
+
+                // Convert base64 to binary
+                const byteCharacters = atob(base64);
+                const byteNumbers = Array.from(byteCharacters, char => char.charCodeAt(0));
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: mimeType });
+                const blobUrl = URL.createObjectURL(blob);
+
+                _File.setIframe({ iframeId: iframeId, mimeType: mimeType, src: blobUrl });
+                $(iframeId).hide().fadeIn(650);
+                let doc = {
+                    Base64: base64,
+                    MimeType: mimeType,
+                    BlobUrl: blobUrl,
+                    Blob: blob
+                };
+                readerOnLoad(doc);
+            }
+            reader.readAsDataURL(objFile.files[0]);
+        }
+        else {
+            Message.error({ statusText: 'File did not attached.' });
+        }
+    },
+    setIframe({ iframeId = "", mimeType = "", src = "" }) {
+        if (Field.isNullOrEmpty(iframeId)) {
+            console.warn("IFrame id is empty...");
+            return;
+        }
+        if (Field.isNullOrEmpty(src)) {
+            console.warn("Source is empty...");
+            return;
+        }
+        if (mimeType == "application/pdf") {
+            $(iframeId).removeAttr('srcdoc');
+            $(iframeId).attr('src', src);
+        }
+        else {
+            let htmlString = `
+                <html>
+                    <body style="text-align: center;">                        
+                        <img class="border" src="${src}" style="max-width: 100%; height: auto;"/>
+                    </body>
+                </html>`;
+            $(iframeId).attr('src', src);
+            $(iframeId).attr('srcdoc', htmlString);
+        }
+    },
+    async info(inputFile) {
+        const file = inputFile.files[0];
+        if (!file) return null;
+
+        const base64 = await _File.read(file);
+        return {
+            Base64: base64.split(',')[1],
+            MimeType: file.type
+        };
+    },
+    read(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    },
+    base64ToBytes(base64) {
+        var binary_string = window.atob(base64);
+        var len = binary_string.length;
+        var bytes = new Uint8Array(len);
+        for (var i = 0; i < len; i++) {
+            bytes[i] = binary_string.charCodeAt(i);
+        }
+        return bytes.buffer;
+    },
+    open({ base64, mimeType, fileName }) {
+        //Convert Byte Array to BLOB.
+        var binary_string = window.atob(base64);
+        var len = binary_string.length;
+        var bytes = new Uint8Array(len);
+        for (var i = 0; i < len; i++) {
+            bytes[i] = binary_string.charCodeAt(i);
+        }
+        bytes = bytes.buffer;
+        var blob = new Blob([bytes], { type: mimeType });
+
+        //Create object URL and open in new tab
+        const fileURL = URL.createObjectURL(blob);
+        if (mimeType === 'application/pdf' || mimeType.startsWith('image/')) {
+            const newTab = window.open('', '_blank');
+            newTab.document.write(`
+            <html>
+                <head>
+                    <title>${fileName}</title>                                    
+                </head>
+                <body style="margin:0">
+                    <iframe src="${fileURL}" width="100%" height="100%" style="border:none;"></iframe>
+                </body>
+            </html>
+        `);
+        }
+        else {
+            const a = document.createElement('a');
+            a.href = fileURL;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    },
+    blobUrl({ base64 = "", mimeType = "" }) {
+        // Convert base64 to binary
+        const byteCharacters = atob(base64);
+        const byteNumbers = Array.from(byteCharacters, char => char.charCodeAt(0));
+        const byteArray = new Uint8Array(byteNumbers);
+        //Convert Binary to blob
+        const blob = new Blob([byteArray], { type: mimeType });
+        //Convert blob to Url
+        const blobUrl = URL.createObjectURL(blob);
+        return blobUrl;
+    },
+    parseUri(uri) {
+        const regex = /^data:(.*?);base64,(.+)$/;
+        const match = uri.match(regex);
+        if (!match) {
+            return null;
+        }
+        return {
+            MimeType: match[1],
+            Base64: match[2]
+        };
+    }
 }
 
 const Field = {
@@ -828,7 +960,7 @@ const Modal = {
             $('#' + obj.id).val(moment().format('HH:mm'));
         });
 
-        Data.setIframe({ IframeId: '#' + $(pram.id + ' iframe').attr('id'), src: "/images/uploadlogo.png" });
+        _File.setIframe({ iframeId: `#${$(`${pram.id} iframe`).attr('id')}`, src: "/image/upload.png" });
 
         //=======Callback function===========//
         if (typeof (pram.callBack) != 'undefined') {
@@ -858,8 +990,7 @@ const Modal = {
             $(pram.id).modal('show');
         }
         else if (pram.action == 'Edit' || pram.action == 'edit') {
-            $(pram.id + ' .modal-footer button').attr('title', 'Update');
-            /*$(pram.id + ' .modal-footer button').html('<span class="fa fa-edit"></span>');*/
+            $(pram.id + ' .modal-footer button').attr('title', 'Update');            
             $(pram.id).modal('show');
         }
         else if (pram.action == 'View' || pram.action == 'view') {
@@ -892,7 +1023,7 @@ const Modal = {
         $('#' + $(pram.id + ' .date-picker').prev('input').attr('id')).val(moment().format('DD-MMM-YYYY'));
         $('#' + $(pram.id + ' .date-range-picker').prev('input').attr('id')).val(moment().format('DD-MMM-YYYY') + ' | ' + moment().format('DD-MMM-YYYY'));
         $('#' + $(pram.id + ' .month-picker').prev('input').attr('id')).val(moment().format('MMM-YYYY'));
-        Data.setIframe({ IframeId: $(pram.id + ' .file-upload iframe').attr('id'), src: "/images/uploadlogo.png" });
+        _File.setIframe({ IframeId: $(pram.id + ' .file-upload iframe').attr('id'), src: "/images/uploadlogo.png" });
     },
     close(pram = { id: '' }) {
         pram.id = typeof (pram.id) == 'undefined' ? '' : pram.id;
@@ -912,9 +1043,20 @@ const Modal = {
         $('#' + $(pram.id + ' .date-picker').prev('input').attr('id')).val(moment().format('DD-MMM-YYYY'));
         $('#' + $(pram.id + ' .date-range-picker').prev('input').attr('id')).val(moment().format('DD-MMM-YYYY') + ' | ' + moment().format('DD-MMM-YYYY'));
         $('#' + $(pram.id + ' .month-picker').prev('input').attr('id')).val(moment().format('MMM-YYYY'));
-        Data.setIframe({ IframeId: $(pram.id + ' .file-upload iframe').attr('id'), src: "/images/uploadlogo.png" });
+        _File.setIframe({ IframeId: $(pram.id + ' .file-upload iframe').attr('id'), src: "/images/uploadlogo.png" });
         $(pram.id).modal('hide');
     },
+    hideEvent() {
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.removeEventListener('hide.bs.modal', Modal.handleModalHide); // remove if already attached
+            modal.addEventListener('hide.bs.modal', Modal.handleModalHide);
+        });
+    },
+    handleModalHide() {
+        if (document.activeElement) {
+            document.activeElement.blur();
+        }
+    }
 };
 
 const Print = {
@@ -1746,7 +1888,7 @@ const Table = {
         actionEvents = false,
         printTitle = '',
         reportDesc = '',
-        viewMode = 'view'
+        viewMode = ''
 
     }) {
 
@@ -2078,9 +2220,7 @@ const Dropdown = {
         subText = '',
         html = '',
         initialValue = [],
-        json = false,
-        addFn = '',
-        editFn = '',
+        json = false,        
         isSelectPick = true,
         isEditable = false,
         disabled
@@ -2092,13 +2232,6 @@ const Dropdown = {
         if (select == null) {
             console.warn(`Select Id (${id}) is undefined`);
             return;
-        }
-        if (addFn !== undefined) {
-            select.setAttribute('data-action', true);
-            select.setAttribute('data-addFn', addFn);
-        }
-        if (editFn !== undefined) {
-            select.setAttribute('data-editFn', editFn);
         }
 
         select.disabled = disabled === undefined ? select.disabled : disabled;
@@ -2146,7 +2279,7 @@ const Dropdown = {
                 url: "/lib/site/fontawesome.json",
                 isApi: false,
                 onSuccess: (response) => {
-                    Dropdown.bind({ id: pram.id, data: response.data, value: 'Value', text: 'Value', icon: 'Value', initialValue: value });
+                    Dropdown.bind({ id: id, data: response.data, value: 'Value', text: 'Value', icon: 'Value', initialValue: value });
                 }
             }
         );

@@ -1,4 +1,5 @@
-﻿const
+﻿//Global Data
+const
     SELECTPICK = "select-pick",
     SELECTPICK_DATA_ID = "data-Id",
     SELECTPICK_DATA_SIZE = "data-size",
@@ -17,6 +18,7 @@
     SELECTPICK_MENU_SHOW = "menu-show",
     SELECTPICK_MENU_SEACRH_BOX = "menu-search-box",
     SELECTPICK_MENU_ACTION_BOX = "menu-action-box",
+    SELECTPICK_MENU_ITEM_ADD = "menu-item-add",
     SELECTPICK_MENU_ACTION_ADDNEW = "btn-add-new",
     SELECTPICK_MENU_ACTION_SELECTALL = "btn-select-all",
     SELECTPICK_MENU_ACTION_DESELECTALL = "btn-deselect-all",
@@ -41,14 +43,14 @@ class SelectPick {
         let obj = {};
         obj.id = select.id;
         obj.title = select.title == '' ? 'Nothing Selected' : select.title;
-        obj.menuId = `${select.id}-SelectPick-Menu`;
+        obj.menuId = `${select.id}-SelectPick-Menu`;        
         obj.searchBox = SelectPick.#getAttrVal({ el: select, attr: SELECTPICK_DATA_SEARCH_BOX, intialVal: 'false' });
-        obj.actionBox = SelectPick.#getAttrVal({ el: select, attr: SELECTPICK_DATA_ACTION_BOX, intialVal: 'false' });
-        obj.parent = SelectPick.#getAttrVal({ el: select, attr: SELECTPICK_DATA_PARENT, intialVal: 'body' });
-        obj.isMultiple = select.attributes[SELECTPICK_OPTION_MULTIPLE] == undefined ? false : true;
-        obj.size = parseInt(SelectPick.#getAttrVal({ el: select, attr: SELECTPICK_DATA_SIZE, intialVal: '0' }));
         obj.isSearched = false;
+        obj.actionBox = SelectPick.#getAttrVal({ el: select, attr: SELECTPICK_DATA_ACTION_BOX, intialVal: 'false' });
+        obj.isMultiple = select.attributes[SELECTPICK_OPTION_MULTIPLE] == undefined ? false : true;
         obj.addFn = SelectPick.#getAttrVal({ el: select, attr: SELECTPICK_DATA_ADDFN, isfn: true });
+        obj.parent = SelectPick.#getAttrVal({ el: select, attr: SELECTPICK_DATA_PARENT, intialVal: 'body' });        
+        obj.size = parseInt(SelectPick.#getAttrVal({ el: select, attr: SELECTPICK_DATA_SIZE, intialVal: '0' }));                
         obj.isDisabled = select.disabled;
         obj.data = [];
         let options = select.options;
@@ -73,29 +75,23 @@ class SelectPick {
         //Push Unique Data
         SelectPick.#data.push(obj);
     }
-    static #getAttrVal(obj = { el: {}, attr: '', initVal: '', isfn: false, fnParm: null }) {
-        obj.el = typeof obj.el == 'undefined' ? {} : obj.el;
-        obj.attr = typeof obj.attr == 'undefined' ? '' : obj.attr;
-        obj.initVal = typeof obj.initVal == 'undefined' ? null : obj.initVal;
-        obj.isfn = typeof obj.isfn == 'undefined' ? false : obj.isfn;
-        obj.fnParm = typeof obj.fnParm == 'undefined' ? null : obj.fnParm;
-
-        if (obj.el.attributes[obj.attr] == undefined) {
-            return obj.initVal;
+    static #getAttrVal({ el = {}, attr = '', initVal = null, isfn= false, fnParm= null }) {
+        if (el.attributes[attr] == undefined) {
+            return initVal;
         }
-        else if (obj.el.attributes[obj.attr].value == "") {
-            return obj.initVal;
+        else if (el.attributes[attr].value == "") {
+            return initVal;
         }
-        else if (obj.isfn) {
-            if (obj.fnParm != null) {
-                return obj.el.attributes[obj.attr].value == '' ? '' : obj.el.attributes[obj.attr].value + `({id:${obj.fnParm}})`;
+        else if (isfn) {
+            if (fnParm != null) {
+                return el.attributes[attr].value == '' ? '' : `${el.attributes[attr].value}({id:${fnParm}})`;
             }
             else {
-                return obj.el.attributes[obj.attr].value == '' ? '' : obj.el.attributes[obj.attr].value + '()';
+                return el.attributes[attr].value == '' ? '' : `${el.attributes[attr].value}()`;
             }
         }
         else {
-            return obj.el.attributes[obj.attr].value
+            return el.attributes[attr].value
         }
     }
     static render(select) {  
@@ -174,16 +170,7 @@ class SelectPick {
         if (obj.actionBox == "true") {
             let actionBox = document.createElement('div');
             actionBox.className = SELECTPICK_MENU_ACTION_BOX;
-            menu.appendChild(actionBox);
-            if (obj.addFn) {
-                let btnAdd = document.createElement('button');                
-                btnAdd.type = "button";
-                btnAdd.className = `${SELECTPICK_MENU_ACTION_ADDNEW} btn btn-sm btn-success`;
-                btnAdd.innerHTML = '<i class="fa fa-plus"></i>&nbsp;&nbsp;Add New';
-                btnAdd.title = "Add New";
-                btnAdd.setAttribute("onclick", `${obj.addFn}`);
-                actionBox.appendChild(btnAdd);
-            }
+            menu.appendChild(actionBox);            
             if (obj.isMultiple) {
                 //Select All
                 let btnSelectAll = document.createElement('button');
@@ -201,7 +188,18 @@ class SelectPick {
                 actionBox.appendChild(btnDeselectAll);
             }
         }
-
+        if (obj.addFn) {
+            let itemAdd = document.createElement('div');
+            itemAdd.className = SELECTPICK_MENU_ITEM_ADD;
+            menu.appendChild(itemAdd);
+            let btnAdd = document.createElement('button');
+            btnAdd.type = "button";
+            btnAdd.className = `${SELECTPICK_MENU_ACTION_ADDNEW} btn btn-sm btn-success`;
+            btnAdd.innerHTML = '<i class="fa fa-plus"></i>&nbsp;&nbsp;Add New';
+            btnAdd.title = "Add New";
+            btnAdd.setAttribute("onclick", `${obj.addFn}`);
+            itemAdd.appendChild(btnAdd);
+        }
         //Add Item LIst
         let menuList = document.createElement('ul');
         menuList.className = SELECTPICK_MENU_LIST;
@@ -277,39 +275,38 @@ class SelectPick {
                 deleteBtn.setAttribute('onclick', item.deleteFn);
                 itemBtnGroup.appendChild(deleteBtn);
             }
-        });
-        //select option
-        document.querySelectorAll(`.${SELECTPICK} .${SELECTPICK_MENU_ITEM}`).forEach((li) => {
-            li.removeEventListener('click', SelectPick.#selectItem);
-            li.addEventListener('click', SelectPick.#selectItem);            
-        });
-    }    
+            //select option click event register
+            listItem.removeEventListener('click', SelectPick.#selectItem);
+            listItem.addEventListener('click', SelectPick.#selectItem);
+        });        
+    }
     static #events() {
+        //Toggle button click event for show & hide selectpick list item
         document.querySelectorAll(`.${SELECTPICK_TOGGLE_BTN}`).forEach(btn => {
             btn.removeEventListener('click', SelectPick.#show);
             btn.addEventListener('click', SelectPick.#show);
         });
-        //Special Key input Search input text
+        //Special Key input on item press escape to close the item, press down arrow to select next item
         document.querySelectorAll(`.${SELECTPICK} .${SELECTPICK_MENU_SEACRH_BOX} input`).forEach((el) => {
             el.removeEventListener('keydown', SelectPick.#specialKey);
             el.addEventListener('keydown', SelectPick.#specialKey);
         });
-        //input text Search input text
+        //Search Item on the behalf of input text
         document.querySelectorAll(`.${SELECTPICK} .${SELECTPICK_MENU_SEACRH_BOX} input`).forEach((el) => {
             el.removeEventListener('input', SelectPick.#search);
             el.addEventListener('input', SelectPick.#search);
         });
-        //Select All text Search input text
+        //Select All Item
         document.querySelectorAll(`.${SELECTPICK} .${SELECTPICK_MENU_ACTION_BOX} button.btn-select-all`).forEach((el) => {
             el.removeEventListener('click', SelectPick.#selectAllItem);
             el.addEventListener('click', SelectPick.#selectAllItem);
         });
-        //Deselect All text Search input text
+        //Deselect All Item
         document.querySelectorAll(`.${SELECTPICK} .${SELECTPICK_MENU_ACTION_BOX} button.btn-deselect-all`).forEach((el) => {
             el.removeEventListener('click', SelectPick.#deSelectAllItem);
             el.addEventListener('click', SelectPick.#deSelectAllItem);
         });        
-    }    
+    }
     static #show(event) {
         let selectPick = event.currentTarget.closest(`.${SELECTPICK}`);
         if (!selectPick) {
@@ -393,7 +390,7 @@ class SelectPick {
         let dataSize = parseInt(SelectPick.#getAttrVal({ el: select, attr: SELECTPICK_DATA_SIZE, initVal: '0' }));
         let selectPickItemHeight = selectPickMenu.lastChild.firstElementChild == null ? 0 : selectPickMenu.lastChild.firstElementChild.offsetHeight;
         selectPickList.style.maxHeight = (dataSize <= 1 ? window.innerHeight / 2 : (dataSize * selectPickItemHeight) + 5) + 'px';
-    }    
+    }
     static #specialKey(event) {
         if (event.code == "Escape") {
             let selectPickMenu = document.querySelector(`#${event.currentTarget.id}`).closest(`.${SELECTPICK_MENU}`);
@@ -425,7 +422,7 @@ class SelectPick {
         obj.data.forEach(op => {
             let text = `${op.text} ${op.subText}`;            
             if (text.toLowerCase().includes(input.toLowerCase())) {
-                filterObj.data.push(op);
+                filterObj.data.push(op);                
             }
         });
         SelectPick.#item(filterObj);
@@ -514,53 +511,40 @@ class SelectPick {
             event.currentTarget.parentElement.previousElementSibling.firstChild.focus();
         }
     }
-    static refresh(pram = { selector: '' }) {
-        if (!pram.selector) {
+    static refresh({ selector= '' }) {
+        if (!selector) {
             console.error('Selector is undefind.');
             return;
         }
-        let selectList = document.querySelectorAll(pram.selector);
-        selectList.forEach(select => {            
-            /*Array.from(select.options).forEach(x => x.selected = false);*/
+        let selectList = document.querySelectorAll(selector);
+        selectList.forEach(select => {
             SelectPick.render(select);
         });        
     }
-    static set(pram = { id: '', value: [], text:[] }) {
-        pram.id = pram.id == undefined ? '' : pram.id;
-        pram.value = pram.value == undefined ? [] : pram.value.map(vl => vl == null ? '' : vl.toString());
-        pram.text = pram.text == undefined ? [] : pram.text;
-        if (!pram.id) {
+    static set({ id= '', value= [], text=[] }) {        
+        value.map(vl => vl == null ? '' : vl.toString());        
+        if (!id) {
             console.error("Select id is undefined.");
             return;
         }
-        let select = document.querySelector(`${pram.id}`);
+        let select = document.querySelector(`${id}`);
         if (select != null) {
             select.value = null;
-            if (pram.value.length > 0) {
-                Array.from(select.options).forEach(op => op.selected = pram.value.includes(op.value));
+            if (value.length > 0) {
+                Array.from(select.options).forEach(op => op.selected = value.includes(op.value));
             }
-            else if (pram.text.length > 0) {
-                Array.from(select.options).forEach(op => op.selected = pram.text.includes(op.text));
+            else if (text.length > 0) {
+                Array.from(select.options).forEach(op => op.selected = text.includes(op.text));
             }
-            SelectPick.refresh({ selector: pram.id });
+            SelectPick.refresh({ selector: id });
         }        
     }
-    static get(pram = { id: '', value: '' }) {
-        pram.id = pram.id == undefined ? '' : pram.id.replace('#','');
-        pram.value = pram.value == undefined ? null : pram.value;
-        if (!pram.id || !pram.value) {
-            console.error("Select id or value is undefined.");
-            return;
-        }
-        let data = SelectPick.#data.find(x => x.id).data.find(x => x.value == pram.value);
-    }    
     static triggerChange(select) {
         const event = new Event('change', { bubbles: true });
         // Dispatch the event
         select.dispatchEvent(event);
     }
 }
-
 //Apply Selectpick on DOM Content loaad.
 document.addEventListener('DOMContentLoaded', () => {
     var selectList = document.querySelectorAll(`select.${SELECTPICK}`);
@@ -584,8 +568,3 @@ document.addEventListener('click', (e) => {
     }
 });
 
-//document.querySelectorAll('select.select-pick').forEach(select => {
-//    select.addEventListener('change', function (event) {
-//        console.log(event);
-//    });
-//});

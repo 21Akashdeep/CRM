@@ -138,7 +138,7 @@ namespace CRMApi.Controllers
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-
+                //for (long i = 0; i <= 999999999999999999; i++) { }
                 User obj = new User();
                 obj.ListId.Add(Id);
                 var dbUser = RepoUser.List(obj, User).FirstOrDefault();
