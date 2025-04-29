@@ -19,7 +19,7 @@ namespace CRMApi.Repository
             Message objMsg = new Message();
             try
             {
-                objMsg.data = new { Info = App.AppInfo, App.UserType, App.ApiType, App.ApiName };
+                objMsg.data = new {App.UserType, App.ApiType, App.ApiName };
                 Message.Success(ref objMsg, "App Info found.");
             }
             catch (Exception ex)

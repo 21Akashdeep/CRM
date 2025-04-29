@@ -48,7 +48,30 @@ namespace CRMApi.Repository
                 Message.Exception(ref objMsg, ex);
             }
             return objMsg;
-        }        
+        }
+        public Message GetAddOption() 
+        {
+            Message objMsg = new Message();
+            try 
+            {
+                var dbSetting = db.Setting.Where(x => App.ActiveStatus.Contains(x.Status) && (x.Name == App.SettingName.AdminDivType || x.Name == App.SettingName.PostalType)).Select(x => new
+                {
+                    x.Name,
+                    x.Value,
+                    x.Description
+                }).ToList();
+                dynamic Option = new ExpandoObject();
+                Option.AdminDivType = dbSetting.Where(x => x.Name == App.SettingName.AdminDivType).ToList();
+                Option.PostalType = dbSetting.Where(x => x.Name == App.SettingName.PostalType).ToList();
+                objMsg.data = Option;
+                Message.Success(ref objMsg, "");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
         public List<Country> List(Country? obj, User User) 
         {
             Message objMsg = new Message();

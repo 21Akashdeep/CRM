@@ -33,7 +33,23 @@ namespace CRMApi.Controllers
                 Message.Exception(ref objMsg, ex);
             }
             return Ok(objMsg);
-        }        
+        }
+        [HttpGet]
+        public IActionResult GetAddOption()
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
+                if (User == null) return Ok(objMsg);
+                objMsg = RepoCountry.GetAddOption();
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
         [HttpPost]
         public IActionResult Get(Country obj)
         {

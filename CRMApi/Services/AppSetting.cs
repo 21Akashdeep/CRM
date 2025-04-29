@@ -8,8 +8,7 @@
         }
         public ConnectionStrings ConnectionStrings { get; set; } = new ConnectionStrings();
         public string DbName { get; set; } = string.Empty;
-        public string CrosOrigin { get; set; } = string.Empty;
-        public AppInfo AppInfo { get; set; } = new AppInfo();
+        public string CrosOrigin { get; set; } = string.Empty;        
         public AppJwt Jwt { get; set; } = new AppJwt();
         public List<int> AllStatus { get; set; } = new List<int>();
         public List<int> AllActiveStatus { get; set; } = new List<int>();
@@ -31,14 +30,7 @@
         public string? MySql { get; set; }
         public string? Oracle { get; set; }
         public string? SqlServer { get; set; }
-    }
-    public class AppInfo 
-    {
-        public string Code { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public string Desc { get; set; } = string.Empty;
-        public string SubDesc { get; set; } = string.Empty;
-    }
+    }    
     public class AppJwt
     {
         public string Issuer { get; set; } = string.Empty;
@@ -125,6 +117,8 @@
     {
         public string Status { get; set; } = string.Empty;
         public string UserType { get; set; } = string.Empty;
+        public string AdminDivType { get; set; } = string.Empty;
+        public string PostalType { get; set; } = string.Empty;
         public string ApiType { get; set; } = string.Empty;
         public string UQCG { get; set; } = string.Empty;
         public string SupplyType { get; set; } = string.Empty;

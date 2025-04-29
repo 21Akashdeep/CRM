@@ -94,12 +94,12 @@ namespace CRMApi.Repository
         {
             Message objMsg = new Message();
             try
-            {                
+            {
                 //Sanitize Input
-                obj.Category = Util.SanitizeInput(obj.Category, App.Regexp.AlphaNum);
-                obj.Name = Util.SanitizeInput(obj.Name, App.Regexp.AlphaNum);
-                obj.Description = Util.SanitizeInput(obj.Description, null);
-                obj.Value = Util.SanitizeInput(obj.Value, App.Regexp.AlphaNum);
+                obj.Category = Util.SanitizeInput(obj.Category, App.Regexp.AlphaNum) ?? "";
+                obj.Name = Util.SanitizeInput(obj.Name, App.Regexp.AlphaNum) ?? "";
+                obj.Description = Util.SanitizeInput(obj.Description, null) ?? "";
+                obj.Value = Util.SanitizeInput(obj.Value, App.Regexp.AlphaNum) ?? "";
                 //Check Duplicate
                 var dbSetting = db.Setting.FirstOrDefault(x => x.Status == 1 && x.Name == obj.Name && x.Value == obj.Value);
                 if (dbSetting != null)
@@ -143,10 +143,10 @@ namespace CRMApi.Repository
             try
             {
                 //Senitise Input
-                obj.Category = Util.SanitizeInput(obj.Category, App.Regexp.AlphaNum);
-                obj.Name = Util.SanitizeInput(obj.Name, App.Regexp.AlphaNum);
-                obj.Description = Util.SanitizeInput(obj.Description, null);
-                obj.Value = Util.SanitizeInput(obj.Value, App.Regexp.AlphaNum);
+                obj.Category = Util.SanitizeInput(obj.Category, App.Regexp.AlphaNum) ?? "";
+                obj.Name = Util.SanitizeInput(obj.Name, App.Regexp.AlphaNum) ?? "";
+                obj.Description = Util.SanitizeInput(obj.Description, null) ?? "";
+                obj.Value = Util.SanitizeInput(obj.Value, App.Regexp.AlphaNum) ?? "";
                 //Prevent Duplicate
                 var dbSetting = db.Setting.FirstOrDefault(x => x.Status == 1 && x.Name == obj.Name && x.Value == obj.Value && x.Id != obj.Id);
                 if (dbSetting != null)

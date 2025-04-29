@@ -283,7 +283,7 @@ namespace CRMApi.Repository
             Message objMsg = new Message();
             try 
             {
-                obj.UserId = Util.SanitizeInput(obj.UserId, $"{App.Regexp.AlphaNum}_");
+                obj.UserId = Util.SanitizeInput(obj.UserId, $"{App.Regexp.AlphaNum}_")?? "";
                 var dbUser = db.User.Where(ur => App.ActiveStatus.Contains(ur.Status)).ToList();
                 if (dbUser.Where(ur => ur.UserId == obj.UserId).Count() > 0)
                 {
@@ -356,14 +356,14 @@ namespace CRMApi.Repository
             ";
             MailMessage objMail = new MailMessage();
             objMail.To.Add(obj.Email);
-            Util.SentMail(db, objMail, $"{App.AppInfo.Name} User Login Credential", matter, "info", ref objMsg);
+            Util.SentMail(db, objMail, $"User Login Credential", matter, "info", ref objMsg);
         }
         public Message Update(User obj, User objLogger) 
         {
             Message objMsg = new Message();
             try 
             {
-                obj.UserId = Util.SanitizeInput(obj.UserId, $"{App.Regexp.AlphaNum}_");                
+                obj.UserId = Util.SanitizeInput(obj.UserId, $"{App.Regexp.AlphaNum}_") ?? "";
                 var dbUser = db.User.Where(x => App.ActiveStatus.Contains(x.Status)).ToList();
                 if (dbUser.Where(ur => ur.UserId == obj.UserId && ur.Id != obj.Id).Count() > 0)
                 {
