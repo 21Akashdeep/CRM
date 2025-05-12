@@ -108,7 +108,7 @@ namespace CRMApi.Controllers
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
                 Department obj = new Department();
-                obj.ListId.Add(Id);                
+                obj.ListId.Add(Id);                                       
                 objMsg = RepoDept.Edit(obj, User);
             }
             catch (Exception ex)

@@ -1721,7 +1721,8 @@ const DateTime = {
         var inputId = "";
         $('.date-range-picker').each((index, element) => {
             inputId = '#' + $(element).prev('input').attr('id');
-            $(inputId).val(moment().startOf('month').format("DD-MMM-YYYY") + " | " + moment().endOf('month').format("DD-MMM-YYYY"));
+            $(inputId).val(`${moment().startOf('month').format("DD-MMM-YYYY")} | ${moment().endOf('month').format("DD-MMM-YYYY")}`);
+            $(inputId).attr('title', `${moment().startOf('month').format("DD-MMM-YYYY")} | ${moment().endOf('month').format("DD-MMM-YYYY")}`);
         });
 
         $('.date-range-picker').on('click', (e) => {
@@ -1755,7 +1756,8 @@ const DateTime = {
             linkedCalendars: true
         },
             (fromDate, toDate) => {
-                $(inputId).val(moment(fromDate).format("DD-MMM-YYYY") + " | " + moment(toDate).format("DD-MMM-YYYY"));
+                $(inputId).val(`${moment(fromDate).format("DD-MMM-YYYY")} | ${moment(toDate).format("DD-MMM-YYYY")}`);
+                $(inputId).attr('title', `${moment(fromDate).format("DD-MMM-YYYY")} | ${moment(toDate).format("DD-MMM-YYYY")}`);
                 DateTime.pickerFunction();
             }).on('showCalendar.daterangepicker', (ev, picker) => {
                 //if (picker.element.offset().top + picker.container.outerHeight() > $(window).height()) {
@@ -1765,6 +1767,11 @@ const DateTime = {
                 //    picker.drops = 'down';
                 //}
             });
+        $('.date-range-picker').on('apply.daterangepicker', (ev, picker) => {
+            $(inputId).val(`${picker.startDate.format('DD-MMM-YYYY')} | ${picker.startDate.format('DD-MMM-YYYY')}`);
+            $(inputId).attr('title', `${picker.startDate.format('DD-MMM-YYYY')} | ${picker.startDate.format('DD-MMM-YYYY')}`);
+            DateTime.pickerFunction();
+        });
     },
     dateRangeTimePicker() {
         var $inputId = "";

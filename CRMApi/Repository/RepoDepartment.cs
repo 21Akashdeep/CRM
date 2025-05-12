@@ -48,7 +48,7 @@ namespace CRMApi.Repository
                 obj ??= new Department();
                 obj.ListStatus = obj.ListStatus.Count == 0 ? App.ActiveStatus : obj.ListStatus;
                 var dbDepartment = db.Department.Where(x => obj.ListStatus.Contains(x.Status)).AsQueryable();
-                obj.ListId = obj.ListId.Count == 0 ? dbDepartment.Select(x => x.Id).ToList() : obj.ListId;
+                dbDepartment = obj.ListId.Any() ? dbDepartment.Where(x => obj.ListId.Contains(x.Id)).AsQueryable() : dbDepartment;
 
                 Department = (
                     from dpt in dbDepartment
@@ -69,7 +69,11 @@ namespace CRMApi.Repository
                         CreatedAt = dpt.CreatedAt,
                         UpdatedBy = dpt.UpdatedBy,
                         UpdatedByName = uby.Name,
-                        UpdatedAt = dpt.UpdatedAt
+                        UpdatedAt = dpt.UpdatedAt,
+                        IsEdit = dpt.Status == App.Status.Enable ? true : false,
+                        IsDuplicate = true,
+                        IsDelete = dpt.Status == App.Status.Enable ? true : false,
+                        IsEnable = dpt.Status == App.Status.Delete ? true : false,
                     }
                 ).ToList();
             }
