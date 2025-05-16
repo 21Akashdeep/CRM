@@ -3,7 +3,7 @@
     User: sessionStorage.getItem('User') ? JSON.parse(sessionStorage.getItem('User')) : null,
     AppMenu: sessionStorage.getItem('AppMenu') ? sessionStorage.getItem('AppMenu') : '',
     Company: sessionStorage.getItem('Company') ? JSON.parse(sessionStorage.getItem('Company')) : null,
-    Info: { Code: "CRM", Name: "CRM PORTAL", Desc: "Customer Relationship Managment", SubDesc: "Login" }
+    Info: { Code: "CRM", Name: "CRM PORTAL", Desc: "CRM Portal", SubDesc: "Sign In" }
 }
 
 const Util = {
@@ -1399,35 +1399,26 @@ const Export = {
 }
 
 const OnlineApi = {
-    pinCode(pram = { pinCode: '', postOfficeId: '', postOffice: '', districtId: '', stateId: '', loader: false, callBack: () => { } }) {
-        pram = {
-            pinCode: pram.pinCode == undefined ? '' : pram.pinCode,
-            postOfficeId: pram.postOfficeId == undefined ? '#PostOffice' : pram.postOfficeId,
-            postOffice: pram.postOffice == undefined ? null : pram.postOffice,
-            districtId: pram.districtId == undefined ? '#DistrictId' : pram.districtId,
-            stateId: pram.stateId == undefined ? '#SateId' : pram.stateId,
-            loader: pram.loader == undefined ? true : pram.loader,
-            callBack: pram.callBack == undefined ? () => { } : pram.callBack
-        };
+    pinCode({ pinCode = '', postOffice = '', postOfficeId = '#PostOffice', districtId= '#DistrictId', stateId= '#SateId', loader= false, callBack= () => { } }) {        
         let data = {
             status: Message.Type.warning,
             statusText: 'No records found',
             obj: {}
         };
-        $(pram.postOfficeId).editableSelect('destroy');
-        $(pram.districtId).val(null);
-        Dropdown.set({ id: pram.stateId });
-        if (pram.pinCode.length != 6) {
-            pram.callBack(data);
+        $(postOfficeId).editableSelect('destroy');
+        $(districtId).val(null);
+        Dropdown.set({ id: stateId });
+        if (pinCode.length != 6) {
+            callBack(data);
             return;
         }
         $.ajax({
-            url: 'https://api.postalpincode.in/pincode/' + pram.pinCode,
+            url: `https://api.postalpincode.in/pincode/${pinCode}`,
             type: 'Get',
             dataType: 'json',
             contenttype: 'application/json; charset=utf-8',
             beforeSend: () => {
-                if (pram.loader)
+                if (loader)
                     PageLoader.on();
             },
             success: (response) => {
@@ -1437,48 +1428,41 @@ const OnlineApi = {
                 data.obj.PostOffice = response.PostOffice == null ? [] : response.PostOffice;
                 data.obj.District = response.PostOffice == null ? null : response.PostOffice[0].District;
                 data.obj.State = response.PostOffice == null ? null : response.PostOffice[0].State;
-                Dropdown.bind({ id: pram.postOfficeId, data: data.obj.PostOffice, value: 'Name', text: 'Name', isEditable: true });
-                $(pram.postOfficeId).val(pram.postOffice);
-                $(pram.districtId).val(data.obj.District);
-                Dropdown.set({ id: pram.stateId, text: [data.obj.State] });
-                pram.callBack(data);
+                Dropdown.bind({ id: postOfficeId, data: data.obj.PostOffice, value: 'Name', text: 'Name', isEditable: true });
+                $(postOfficeId).val(postOffice);
+                $(districtId).val(data.obj.District);
+                Dropdown.set({ id: stateId, text: [data.obj.State] });
+                callBack(data);
             },
             error: (response) => {
                 Message.error({ statusText: `Pin Code server is not responding.<br>${response.statusText}` });
-                pram.callBack(obj);
+                callBack(obj);
             },
             complete: () => {
-                if (pram.loader)
+                if (loader)
                     PageLoader.off();
             }
         });
     },
-    ifscCode(pram = { ifscCode: '', bankNameId: '', bankAddressId: '', loader: true, callback: () => { } }) {
-        pram = {
-            ifscCode: pram.ifscCode == undefined ? '' : pram.ifscCode,
-            bankNameId: pram.bankNameId == undefined ? '#BankName' : pram.bankNameId,
-            bankAddressId: pram.bankNameId == undefined ? '#BankAddressId' : pram.bankAddressId,
-            loader: pram.loader == undefined ? true : pram.loader,
-            callback: pram.callback == undefined ? () => { } : pram.callback
-        };
-        $(`${pram.bankNameId}, ${pram.bankAddressId}`).val(null);
+    ifscCode({ ifscCode = '', bankNameId = '#BankName', bankAddressId = '#BankAddressId', loader = true, callback = () => { } }) {        
+        $(`${bankNameId}, ${bankAddressId}`).val(null);
         let data = {
             status: Message.Type.warning,
             statusText: "IFSC Code did not find",
             obj: null
         };
-        if (pram.ifscCode.length != 11) {
-            pram.callback(data);
+        if (ifscCode.length != 11) {
+            callback(data);
             return;
         }
 
         $.ajax({
-            url: 'https://ifsc.razorpay.com/' + pram.ifscCode,
+            url: `https://ifsc.razorpay.com/${ifscCode}`,
             type: 'Get',
             dataType: 'json',
             contenttype: 'application/json; charset=utf-8',
             beforSend: () => {
-                if (pram.loader) {
+                if (loader) {
                     PageLoader.on();
                 }
             },
@@ -1488,17 +1472,17 @@ const OnlineApi = {
                 data.obj = response;
                 //Set Value
                 let Address = (`${response.BRANCH}, ${response.ADDRESS}, ${response.CITY}, ${response.DISTRICT}, ${response.STATE}`).replaceAll(",,", ",");
-                $(pram.bankNameId).val(data.obj.BANK);
-                $(pram.bankAddressId).val(Address.toCamelCase());
-                //Call Call function
-                pram.callback(data);
+                $(bankNameId).val(data.obj.BANK);
+                $(bankAddressId).val(Address.toCamelCase());
+                //Call Callback function
+                callback(data);
             },
             error: (response) => {
                 data.statusText = `IFSC Code ${pram.ifscCode} ${response.statusText}`;
-                pram.callback(data);
+                callback(data);
             },
             complete: () => {
-                if (pram.loader) {
+                if (loader) {
                     PageLoader.off();
                 }
             }
@@ -2292,12 +2276,12 @@ const Dropdown = {
             }
         );
     },
-    set({ id = '', value = null, text = null }) {
+    set({ id = '', value = [], text = [] }) {
         if (!id) {
             Message.show({ statusText: 'Id is unidefined' });
             return;
         }
-        SelectPick.set({ id: pram.id, value: pram.value, text: pram.text });
+        SelectPick.set({ id: id, value: value, text: text });
     },
     itemJson({ id = '' }) {
         if ($(`${id} option:selected`).attr('data-json') == undefined) {
