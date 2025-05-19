@@ -48,6 +48,7 @@ namespace CRMApi.Services
         public DbSet<Setting> Setting { get; set; }
         public DbSet<MailService> MailService { get; set; }
         public DbSet<Department> Department { get; set; }
+        public DbSet<Designation> Designation { get; set; }
         public DbSet<Country> Country { get; set; }
         public DbSet<Zone> Zone { get; set; }
         public DbSet<AdminDiv> AdminDiv { get; set; }
@@ -64,6 +65,8 @@ namespace CRMApi.Services
         public DbSet<Unit> Unit { get; set; }
         public DbSet<ItemGroup> ItemGroup { get; set; }
         public DbSet<ItemSubGroup> ItemSubGroup { get; set; }
-        public DbSet<Item> Item { get; set; }                
+        public DbSet<Item> Item { get; set; }
+        public DbSet<Complaint> Complaint { get; set; }
+        public DbSet<ComplaintItem> ComplaintItem { get; set; }
     }
 }

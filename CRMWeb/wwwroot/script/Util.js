@@ -3,7 +3,7 @@
     User: sessionStorage.getItem('User') ? JSON.parse(sessionStorage.getItem('User')) : null,
     AppMenu: sessionStorage.getItem('AppMenu') ? sessionStorage.getItem('AppMenu') : '',
     Company: sessionStorage.getItem('Company') ? JSON.parse(sessionStorage.getItem('Company')) : null,
-    Info: { Code: "CRM", Name: "CRM PORTAL", Desc: "CRM Portal", SubDesc: "Sign In" }
+    Info: { Code: "CRM", Name: "CRM PORTAL", Desc: "CRM Portal", SubDesc: "Sign In", CountryId: 112 }
 }
 
 const Util = {

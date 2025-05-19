@@ -92,9 +92,9 @@
     }
     public class AprvRole 
     {
-        public string Hod { get; set; } = null!;
-        public string GM { get; set; } = null!;
-        public string Security { get; set; } = null!;
+        public string SupportTeam { get; set; } = null!;
+        public string Manager { get; set; } = null!;
+        public string Supervisor { get; set; } = null!;
     }
     public class Regexp
     {
@@ -122,6 +122,8 @@
         public string ApiType { get; set; } = string.Empty;
         public string UQCG { get; set; } = string.Empty;
         public string SupplyType { get; set; } = string.Empty;
+        public string SupportMode { get; set; } = string.Empty;
+        public string Priority { get; set; } = string.Empty;
         public string Returnable { get; set; } = string.Empty;
     }
     public class Status
@@ -132,12 +134,12 @@
         public int ItemDelete { get; set; }
         public int Delete { get; set; }
         public int Enable { get; set; }
+        public int SaveAsDraft { get; set; }
         public int Approved { get; set; }
         public int AutoApproved { get; set; }        
-        public int Pending { get; set; }
-        public int WaitingForApproval { get; set; }
+        public int Pending { get; set; }        
         public int Processing { get; set; }
-        public int WaitingForReturn { get; set; }
+        public int WaitingForApproval { get; set; }
         public int Resign { get; set; }
     }
 }
