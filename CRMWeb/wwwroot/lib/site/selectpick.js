@@ -388,7 +388,6 @@ class SelectPick {
         let overflowX = ((Math.ceil(coordinates.x) + selectPickMenu.offsetWidth) - parent.offsetWidth) + padding;
         let translateX = overflowX < 0 ? 0 : overflowX;
         selectPickMenu.style.transform = `translate(-${translateX}px, 0px)`;
-        
     }
     static #specialKey(event) {
         if (event.code == "Escape") {
@@ -521,7 +520,7 @@ class SelectPick {
         });        
     }
     static set({ id= '', value= [], text=[] }) {        
-        value.map(vl => vl == null ? '' : vl.toString());        
+        value = value.map(vl => vl == null ? '' : vl.toString());        
         if (!id) {
             console.error("Select id is undefined.");
             return;

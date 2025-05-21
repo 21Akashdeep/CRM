@@ -312,7 +312,6 @@ const Message = {
         });
     }
 };
-
 const PageLoader = {
     on() {
         $('#modalRequestProcess').modal('show');
@@ -321,7 +320,6 @@ const PageLoader = {
         $('#modalRequestProcess').modal('hide');
     }
 };
-
 const Data = {
     get({ url = null, loader = true, async = true, isApi = true, onSuccess = () => { } }) {           
         let ApiUrl = isApi ? Url.Api + url : Url.App + url;
@@ -566,14 +564,15 @@ const Data = {
             return;
         }
 
+        $(`${formId} input.es-input`).editableSelect('destroy');
+        $(`${formId} select.es-input`).editableSelect({ effects: 'slide' });
+
         Object.keys(obj).forEach(key => {
             const val = obj[key] == null ? null : String(obj[key]);
             $(`${formId} [name=${key}]`).val(val);
         });
         //This usefull when call this method from modal function
         SelectPick.refresh({ selector: `${formId} select.select-pick` });
-        $(`${formId} input.es-input`).editableSelect('destroy');
-        $(`${formId} select.es-input`).editableSelect({ effects: 'slide' });
     },
     groupAndSum({ data, groupBy, sumBy = [] }) {
         const result = data.reduce((acc, current) => {
@@ -682,7 +681,6 @@ const Data = {
         }
     },
 }
-
 const _File = {
     attach({ fileId = "", allowedExtension = ['png', 'jpg', 'jpeg', 'pdf'], iframeId = "", readerOnLoad = () => { } }) {
         var objFile = $(fileId)[0];
@@ -834,7 +832,6 @@ const _File = {
         };
     }
 }
-
 const Field = {
     isMandatory(data = { class: '', reset: false, id: '' }) {
         var status = true;
@@ -918,134 +915,116 @@ const Field = {
         element.forEach(el => { el.dispatchEvent(event) });
     },
 };
-
 const Modal = {
-    open(pram = { id: '', title: '', action: '', obj: {}, callBack: () => { } }) {
-        pram.id = typeof (pram.id) == 'undefined' ? '' : pram.id;
-        pram.title = typeof (pram.title) == 'undefined' ? '' : pram.title;
-        pram.action = typeof (pram.action) == 'undefined' ? '' : pram.action;
-        pram.obj = typeof (pram.obj) == 'undefined' ? {} : pram.obj;
+    open({ id= '', title= '', action= '', obj= {}, callBack= () => { } }) {        
         //=======Check Modal Id====================//
-        if (pram.id == '') {
+        if (id == '') {
             console.warn('Modal id did not find.');
         }
-        if ($(pram.id).hasClass("show")) {
-            $(pram.id).trigger('focus');
+        if ($(id).hasClass("show")) {
+            $(id).trigger('focus');
             return;
         }
         //=======Reset Modal Elements====================//
-        $(pram.id + ' .modal-title').text(pram.title);
-        $(pram.id + ' input, ' + pram.id + ' textarea,' + pram.id + ' select,' + pram.id + ' button').prop('disabled', false);
-        $(pram.id + ' input[type=checkbox]').prop('checked', false);
-        $(pram.id + ' input.es-input').editableSelect('destroy');
-        $(pram.id + ' input.es-input').editableSelect({ effects: 'slide' });
-        $(pram.id + ' input,' + pram.id + ' textarea,' + pram.id + ' select').val('');
-        SelectPick.refresh({ selector: `${pram.id} select.select-pick` });
-        $(pram.id + ' .modal-footer button').show();
-        Table.empty({ selector: pram.id + ' .table-default' });
+        $(`${id} .modal-title`).text(title);
+        $(`${id} input, ${id} textarea, ${id} select, ${id} button`).prop('disabled', false);        
+        $(`${id} input[type=checkbox]`).prop('checked', false);
+        $(`${id} input.es-input`).editableSelect('destroy');
+        $(`${id} input.es-input`).editableSelect({ effects: 'slide' });
+        $(`${id} input, ${id} textarea, ${id} select`).val('');
+        SelectPick.refresh({ selector: `${id} select.select-pick` });
+        $(`${id} .modal-footer button`).show();
+        Table.empty({ selector: `${id} .table-default` });
 
-        Field.isMandatory({ reset: true, id: pram.id });
-        $(pram.id + ' .date-picker').prevAll('input[type="text"]').each((index, obj) => {
-            $('#' + obj.id).val(moment().format('DD-MMM-YYYY'));
+        Field.isMandatory({ reset: true, id: id });
+        $(`${id} .date-picker`).prevAll('input[type="text"]').each((index, el) => {
+            $(`#${el.id}`).val(moment().format('DD-MMM-YYYY'));
         });
-        $(pram.id + ' .date-time-picker').prevAll('input[type="text"]').each((index, obj) => {
-            $('#' + obj.id).val(moment().format('DD-MMM-YYYY HH:mm'));
+        $(`${id} .date-time-picker`).prevAll('input[type="text"]').each((index, el) => {
+            $(`#${el.id}`).val(moment().format('DD-MMM-YYYY HH:mm'));
         });
-        $(pram.id + ' .date-range-picker').prevAll('input[type="text"]').each((index, obj) => {
-            $('#' + obj.id).val(moment().format('DD-MMM-YYYY') + ' | ' + moment().format('DD-MMM-YYYY'));
+        $(`${id} .date-range-picker`).prevAll('input[type="text"]').each((index, el) => {
+            $(`#${el.id}`).val(moment().format('DD-MMM-YYYY') + ' | ' + moment().format('DD-MMM-YYYY'));
         });
-        $(pram.id + ' .month-picker').prevAll('input[type="text"]').each((index, obj) => {
-            $('#' + obj.id).val(moment().format('MMM-YYYY'));
+        $(`${id} .month-picker`).prevAll('input[type="text"]').each((index, el) => {
+            $(`#${el.id}`).val(moment().format('MMM-YYYY'));
         });
-        $(pram.id + ' .time-picker').prevAll('input[type="text"]').each((index, obj) => {
-            $('#' + obj.id).val(moment().format('HH:mm'));
+        $(`${id} .time-picker`).prevAll('input[type="text"]').each((index, el) => {
+            $(`#${el.id}`).val(moment().format('HH:mm'));
         });
 
-        _File.setIframe({ iframeId: `#${$(`${pram.id} iframe`).attr('id')}`, src: "/image/upload.png" });
+        _File.setIframe({ iframeId: `#${$(`${id} iframe`).attr('id')}`, src: "/image/upload.png" });
 
         //=======Callback function===========//
-        if (typeof (pram.callBack) != 'undefined') {
-            pram.callBack();
-            $(pram.id + ' input.es-input').editableSelect('destroy');
-            $(pram.id + ' input.es-input').editableSelect({ effects: 'slide' });
-            SelectPick.refresh({ selector: `${pram.id} select.select-pick` });
+        if (typeof (callBack) != 'undefined') {
+            callBack();            
         }
 
         //=======Assign Values from Obj===========//
-        if (Object.keys(pram.obj).length > 0) {
-            let formId = '#' + $(pram.id + ' form').attr('id');
-            Data.objectToForm({ obj: pram.obj, formId: formId });
-            //======Refresh Select Pick==================//
-            Dropdown.refresh({ selector: `${pram.id} select.select-pick` });
-
-            //======Refresh Editable Select Picker==================//
-            $(pram.id + ' input.es-input').editableSelect('destroy');
-            $(pram.id + ' input.es-input').editableSelect({ effects: 'slide' });
+        if (Object.keys(obj).length > 0) {
+            let formId = '#' + $(`${id} form`).attr('id');
+            Data.objectToForm({ obj: obj, formId: formId });
         }
-        //for Select 2 open properly in modal
-        $.fn.modal.Constructor.prototype.enforceFocus = () => { };
+        
         //======Modal Footer Button===================//
-        if (pram.action == 'Add' || pram.action == 'add') {
-            $(pram.id + ' .modal-footer button').attr('title', 'Save');
-            /*$(pram.id + ' .modal-footer button').html('<span class="fa fa-save"></span>');*/
-            $(pram.id).modal('show');
+        if (action == 'Add' || action == 'add') {
+            $(`${id} .modal-footer button`).attr('title', 'Save');            
+            $(id).modal('show');
         }
-        else if (pram.action == 'Edit' || pram.action == 'edit') {
-            $(pram.id + ' .modal-footer button').attr('title', 'Update');            
-            $(pram.id).modal('show');
+        else if (action == 'Edit' || action == 'edit') {
+            $(`${id} .modal-footer button`).attr('title', 'Update');
+            $(id).modal('show');
         }
-        else if (pram.action == 'View' || pram.action == 'view') {
-            $(pram.id + ' .modal-body input').prop('disabled', true);
-            $(pram.id + ' .modal-body textarea').prop('disabled', true);
-            $(pram.id + ' .modal-body select').prop('disabled', true);
-            SelectPick.refresh({ selector: `${pram.id} select.select-pick` });
-            $(pram.id + ' .modal-footer button').hide();
-            $(pram.id).modal('show');
+        else if (action == 'View' || action == 'view') {
+            $(`${id} .modal-body input`).prop('disabled', true);
+            $(`${id} .modal-body textarea`).prop('disabled', true);
+            $(`${id} .modal-body select`).prop('disabled', true);
+            SelectPick.refresh({ selector: `${id} select.select-pick` });
+            $(`${id} .modal-footer button`).hide();
+            $(id).modal('show');
         }
         else {
-            $(pram.id).modal('show');
+            $(id).modal('show');
         }
     },
-    reset(pram = { id: '' }) {
-        pram.id = typeof (pram.id) == 'undefined' ? '' : pram.id;
+    reset({ id= '' }) {        
+        //=======Check Modal Id====================//
+        if (id == '') {
+            console.warn('Modal id did not find.');
+        }
+        //=======Reset Modal Element====================//        
+        $(`${id} input, ${id} textarea, ${id} select, ${id} button`).prop('disabled', false);
+        $(`${id} input[type=checkbox]`).prop('checked', false);
+        $(`${id} input.es-input`).editableSelect('destroy');
+        $(`${id} input.es-input`).editableSelect({ effects: 'slide' });
+        $(`${id} input, ${id} textarea, ${id} select`).val('');
+        SelectPick.refresh({ selector: `${id} select.select-pick` });
+        Table.empty({ selector: `${id} .table-default` });
+        Field.isMandatory({ reset: true, id: id });
+        $(`#${$(`${id} .date-picker`).prev('input').attr('id')}`).val(moment().format('DD-MMM-YYYY'));
+        $(`#${$(`${id}  .date-range-picker`).prev('input').attr('id')}`).val(moment().format('DD-MMM-YYYY') + ' | ' + moment().format('DD-MMM-YYYY'));
+        $(`#${$(`${id}  .month-picker`).prev('input').attr('id')}`).val(moment().format('MMM-YYYY'));
+        _File.setIframe({ IframeId: $(`${id} .file-upload iframe`).attr('id'), src: "/images/uploadlogo.png" });
+    },
+    close({ id= '' }) {        
         //=======Check Modal Id====================//
         if (pram.id == '') {
             console.warn('Modal id did not find.');
         }
         //=======Reset Modal Element====================//                
-        $(pram.id + ' input, ' + pram.id + ' textarea,' + pram.id + ' select,' + pram.id + ' button').prop('disabled', false);
-        $(pram.id + ' input[type=checkbox]').prop('checked', false);
-        $(pram.id + ' input.es-input').editableSelect('destroy');
-        $(pram.id + ' input.es-input').editableSelect({ "effects": 'slide' });
-        $(pram.id + ' input,' + pram.id + ' textarea,' + pram.id + ' select').val('');
-        SelectPick.refresh({ selector: `${pram.id} select.select-pick` });
-        Table.empty({ selector: pram.id + ' .table-default' });
-        Field.isMandatory({ reset: true, id: pram.id });
-        $('#' + $(pram.id + ' .date-picker').prev('input').attr('id')).val(moment().format('DD-MMM-YYYY'));
-        $('#' + $(pram.id + ' .date-range-picker').prev('input').attr('id')).val(moment().format('DD-MMM-YYYY') + ' | ' + moment().format('DD-MMM-YYYY'));
-        $('#' + $(pram.id + ' .month-picker').prev('input').attr('id')).val(moment().format('MMM-YYYY'));
-        _File.setIframe({ IframeId: $(pram.id + ' .file-upload iframe').attr('id'), src: "/images/uploadlogo.png" });
-    },
-    close(pram = { id: '' }) {
-        pram.id = typeof (pram.id) == 'undefined' ? '' : pram.id;
-        //=======Check Modal Id====================//
-        if (pram.id == '') {
-            console.warn('Modal id did not find.');
-        }
-        //=======Reset Modal Element====================//                
-        $(pram.id + ' input, ' + pram.id + ' textarea,' + pram.id + ' select,' + pram.id + ' button').prop('disabled', false);
-        $(pram.id + ' input[type=checkbox]').prop('checked', false);
-        $(pram.id + ' input.es-input').editableSelect('destroy');
-        $(pram.id + ' input.es-input').editableSelect({ "effects": 'slide' });
-        $(pram.id + ' input,' + pram.id + ' textarea,' + pram.id + ' select').val('');
-        SelectPick.refresh({ selector: `${pram.id} select.select-pick` });
-        Table.empty({ selector: pram.id + ' .table-default' });
-        Field.isMandatory({ reset: true, id: pram.id });
-        $('#' + $(pram.id + ' .date-picker').prev('input').attr('id')).val(moment().format('DD-MMM-YYYY'));
-        $('#' + $(pram.id + ' .date-range-picker').prev('input').attr('id')).val(moment().format('DD-MMM-YYYY') + ' | ' + moment().format('DD-MMM-YYYY'));
-        $('#' + $(pram.id + ' .month-picker').prev('input').attr('id')).val(moment().format('MMM-YYYY'));
-        _File.setIframe({ IframeId: $(pram.id + ' .file-upload iframe').attr('id'), src: "/images/uploadlogo.png" });
-        $(pram.id).modal('hide');
+        $(`${id} input, ${id} textarea, ${id} select, ${id} button`).prop('disabled', false);
+        $(`${id} input[type=checkbox]`).prop('checked', false);
+        $(`${id} input.es-input`).editableSelect('destroy');
+        $(`${id} input.es-input`).editableSelect({ effects: 'slide' });
+        $(`${id} input, ${id} textarea, ${id} select`).val('');
+        SelectPick.refresh({ selector: `${id} select.select-pick` });
+        Table.empty({ selector: `${id} .table-default` });
+        Field.isMandatory({ reset: true, id: id });
+        $(`#${$(`${id} .date-picker`).prev('input').attr('id')}`).val(moment().format('DD-MMM-YYYY'));
+        $(`#${$(`${id}  .date-range-picker`).prev('input').attr('id')}`).val(moment().format('DD-MMM-YYYY') + ' | ' + moment().format('DD-MMM-YYYY'));
+        $(`#${$(`${id}  .month-picker`).prev('input').attr('id')}`).val(moment().format('MMM-YYYY'));
+        _File.setIframe({ IframeId: $(`${id} .file-upload iframe`).attr('id'), src: "/images/uploadlogo.png" });
+        $(id).modal('hide');
     },
     hideEvent() {
         document.querySelectorAll('.modal').forEach(modal => {
@@ -1059,7 +1038,6 @@ const Modal = {
         }
     }
 };
-
 const Print = {
     page({ title = 'Print Report', link = [], style = [], content = [], border = false, isPrint = true, orientation = 'A4 portrait' }) {
         if (content.length == 0) {
@@ -1397,21 +1375,48 @@ const Export = {
         }
     }
 }
-
 const OnlineApi = {
-    pinCode({ pinCode = '', postOffice = '', postOfficeId = '#PostOffice', districtId= '#DistrictId', stateId= '#SateId', loader= false, callBack= () => { } }) {        
+    pinCode({
+        pinCode = '',
+        postOffice = null,
+        district = null,
+        state = null,
+        country = null,
+        pinCodeId = '',
+        postOfficeId = '',
+        districtId = '',
+        stateId = '',
+        countryId = '',
+        loader = false,
+        callback = () => { }
+    }) {
         let data = {
             status: Message.Type.warning,
             statusText: 'No records found',
-            obj: {}
+            obj: {
+                PinCode: pinCode,
+                PostOffice: postOffice,
+                PostOfficeList: [],
+                District: district,
+                State: state,
+                Country: country == null ? App.Info.CountryId : country
+            }
         };
-        $(postOfficeId).editableSelect('destroy');
-        $(districtId).val(null);
-        Dropdown.set({ id: stateId });
-        if (pinCode.length != 6) {
-            callBack(data);
+
+        let updateFields = ({ obj, isValue = true }) => {
+            $(pinCodeId).val(obj.PinCode);
+            Dropdown.bind({ id: postOfficeId, data: obj.PostOfficeList, value: 'Name', text: 'Name', isEditable: true });
+            $(postOfficeId).val(obj.PostOffice);
+            $(districtId).val(obj.District);
+            Dropdown.set({ id: stateId, value: isValue ? [obj.State] : [], text: !isValue ? [obj.State] : [] });
+            Dropdown.set({ id: countryId, value: isValue ? [obj.State] : [], text: !isValue ? [obj.Country] : [] });
+        };
+
+        if (!pinCode || pinCode.length !== 6 || isNaN(pinCode)) {            
+            updateFields({ obj: data.obj, isValue: true });
             return;
-        }
+        };
+
         $.ajax({
             url: `https://api.postalpincode.in/pincode/${pinCode}`,
             type: 'Get',
@@ -1422,21 +1427,29 @@ const OnlineApi = {
                     PageLoader.on();
             },
             success: (response) => {
-                response = response[0]
-                data.status = response.Status == 'Success' ? Message.Type.success : Message.Type.error;
-                data.statusText = response.Message;
-                data.obj.PostOffice = response.PostOffice == null ? [] : response.PostOffice;
-                data.obj.District = response.PostOffice == null ? null : response.PostOffice[0].District;
-                data.obj.State = response.PostOffice == null ? null : response.PostOffice[0].State;
-                Dropdown.bind({ id: postOfficeId, data: data.obj.PostOffice, value: 'Name', text: 'Name', isEditable: true });
-                $(postOfficeId).val(postOffice);
-                $(districtId).val(data.obj.District);
-                Dropdown.set({ id: stateId, text: [data.obj.State] });
-                callBack(data);
+                let obj = response[0];                
+                if (obj.Status == 'Success') {                    
+                    data.status = Message.Type.success;
+                    data.statusText = obj.Message;
+                    let objPost = obj.PostOffice == null ? null : obj.PostOffice[0];                                      
+                    data.obj.PostOfficeList = objPost == null ? [] : obj.PostOffice;
+                    data.obj.District = objPost == null ? null : objPost.District;
+                    data.obj.State = objPost == null ? null : objPost.State;
+                    data.obj.Country = objPost == null ? null : objPost.Country;                    
+                    updateFields({ obj: data.obj, isValue: false });
+                }
+                else {                                        
+                    updateFields({ obj: data.obj });
+                    Message.error({ statusText: response[0].Message });
+                }
+                callback(data);
             },
             error: (response) => {
-                Message.error({ statusText: `Pin Code server is not responding.<br>${response.statusText}` });
-                callBack(obj);
+                updateFields({ obj: data.obj });
+                data.status = Message.Type.error;
+                data.statusText = `Pin Code server is not responding.<br>${response.statusText}`;
+                Message.show(data);
+                callback(data);
             },
             complete: () => {
                 if (loader)
@@ -1955,8 +1968,8 @@ const Table = {
         }
         //Set Select As Select Pick
         if (selectPick) {
-            $(`${pram.id} tbody select.select-pick[data-isMatched="false"]`).val(null);
-            Dropdown.refresh({ selector: `${pram.id} tbody select.select-pick` });
+            $(`${id} tbody select.select-pick[data-isMatched="false"]`).val(null);
+            Dropdown.refresh({ selector: `${id} tbody select.select-pick` });
         }
         //Print
         if (isPrint) {
@@ -2056,7 +2069,7 @@ const Table = {
             return;
         }
         //Get Text Cursor Poition
-        let curStart = event == null ? -1 : document.getElementById(pram.event.target.id).selectionStart;
+        let curStart = event == null ? -1 : document.getElementById(event.target.id).selectionStart;
         //Update Table By Index
         $(id).bootstrapTable('updateRow', { index: index, row: obj });
         //Set Select As Select Pick
@@ -2278,7 +2291,7 @@ const Dropdown = {
     },
     set({ id = '', value = [], text = [] }) {
         if (!id) {
-            Message.show({ statusText: 'Id is unidefined' });
+            console.warn('Id is unidefined');            
             return;
         }
         SelectPick.set({ id: id, value: value, text: text });
