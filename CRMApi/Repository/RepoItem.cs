@@ -225,6 +225,8 @@ namespace CRMApi.Repository
             Message objMsg = new Message();
             try
             {
+                obj.Name = Util.SanitizeInput(obj.Name, "")!;
+                obj.Description = Util.SanitizeInput(obj.Description, "")!;
                 var dbItem = List(obj, User);
                 if (!String.IsNullOrEmpty(obj.Code) && dbItem.Where(it => it.Code == obj.Code).Any())
                 {
@@ -241,15 +243,14 @@ namespace CRMApi.Repository
                     Message.Duplicate(ref objMsg, $"Item Description ({obj.Description}).");
                     return objMsg;
                 }
+                obj.CompanyId = User.CompanyId;
                 obj.CreatedBy = User.Id;
                 obj.UpdatedBy = User.Id;
                 db.Add(obj);
                 Message.Add(ref objMsg, db.SaveChanges(), "");
                 if (objMsg.status == Message.Type.success)
-                {                    
-                    db.Entry(obj).CurrentValues.SetValues(
-                        db.Database.SqlQueryRaw<Item>("SELECT * FROM ITEM WHERE ID = {0} AND ROWNUM = 1", obj.Id).AsEnumerable().FirstOrDefault() ?? obj
-                    );
+                {
+                    db.Entry(obj).Reload();                    
                     obj.ListId.Add(obj.Id);
                     objMsg.obj = List(obj, User).FirstOrDefault();
                     objMsg.data = GetViewOption(User).data;

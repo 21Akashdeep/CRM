@@ -33,7 +33,7 @@
                 <select id="ListId" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
                 </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-1">
                 <div class="btn-group">
                     <button type="button" id="btnSearch" class="btn btn-sm btn-filter btn-outline-success" title="Search">
                         <span class="fa fa-search"></span>
@@ -45,7 +45,7 @@
                         <span class="fa fa-file-excel"></span>
                     </button>
                 </div>
-            </div>
+            </div>            
         </div>
         <hr />
         <div class="row">
@@ -53,18 +53,21 @@
                 <table id="tableComplaint" class="table table-bordered table-hover table-default" border="1" data-sort-name="Id" data-unique-id="Id">
                     <thead>
                         <tr>
-                            <th data-sortable="true" data-field="Code">Complaint No.</th>
-                            <th data-sortable="true" data-field="TypeDesc">Type</th>
-                            <th data-sortable="true" data-field="Name">Name</th>
-                            <th data-sortable="true" data-field="CustomerDes">Customer</th>
-                            <th data-sortable="true" data-field="DateOfBirth">Address</th>                            
+                            <th data-sortable="false" data-formatter="tableComplaintSlNo" class="text-center">#</th>
+                            <th data-sortable="true" data-field="Code" class="left-fix">Complaint No.</th>
+                            <th data-sortable="true" data-field="SupportModeDesc">Support Mode</th>                            
+                            <th data-sortable="true" data-field="CustomerDesc" data-formatter="tableComplaintCustomerDesc" class="text-nowrap">Customer</th>
+                            <th data-sortable="false" data-formatter="tableComplaintAddress" class="text-nowrap">Address</th>
                             <th data-sortable="true" data-field="ContactNo" class="text-nowrap">Contact No.</th>
                             <th data-sortable="true" data-field="Email">Email</th>
-                            <th data-sortable="true" data-field="DepartmentDesc">Department</th>                            
-                            <th data-sortable="true" data-formatter="tableUserCreatedByAndAt" class="text-nowrap">Created By & At</th>
-                            <th data-sortable="true" data-formatter="tableUserUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
-                            <th data-formatter="tableComplaintStatus" class="Status text-center">Status</th>
-                            <th data-formatter="tableComplaintAction" class="not-print text-center"><i class="fa-solid fa-list-check"></i></th>
+                            <th data-sortable="true" data-field="DepartmentDesc">Department</th>
+                            <th data-sortable="true" data-field="AssignToName">Assign To</th>
+                            <th data-sortable="true" data-field="CreatedAt" data-formatter="tableComplaintCreatedByAndAt" class="text-nowrap">Created By & At</th>
+                            <th data-sortable="true" data-field="UpdatedAt" data-formatter="tableComplaintUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
+                            <th data-formatter="tableComplaintStatus" class="text-nowrap text-center right-fix-2">Status</th>
+                            <th data-formatter="tableComplaintAction" data-events="tableComplaintActionEvent" class="not-print text-center right-fix">
+                                <i class="fa-solid fa-list-check"></i>
+                            </th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -73,141 +76,10 @@
         </div>
     </div>
 </div>
+<!-- Complaint Add Modal -->
+<partial name="ComplaintAdd.cshtml" />
 
 
-<div id="modalUser" class="modal fade" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="modal-title">User / Add</span>
-                <div class="btn-group">
-                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
-                        <span class="fa fa-minus"></span>
-                    </button>
-                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal">
-                        <span class="fa fa-remove"></span>
-                    </button>
-                </div>
-            </div>
-            <div class="modal-body" style="min-height:75vh;">
-                <form id="formUser">
-                    <input type="hidden" id="Id" name="Id" />
-                    <div class="row">
-                        <div class="col-md-2">
-                            <label>User Id<span class="text-mandatory">*</span></label>
-                            <input type="text" id="UserId" name="UserId" autocomplete="off" class="form-control form-control-sm required" maxlength="50" />
-                        </div>
-                        <div class="col-md-2">
-                            <label>User Type<span class="text-mandatory">*</span></label>
-                            <select id="UserType" name="UserType" class="form-control form-control-sm select-pick required" data-search='true'>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label>Name<span class="text-mandatory">*</span></label>
-                            <input type="text" id="Name" name="Name" autocomplete="off" class="form-control form-control-sm required" maxlength="100" />
-                        </div>
-                        <div class="col-md-2">
-                            <label>Code</label>
-                            <input type="text" id="Code" name="Code" autocomplete="off" class="form-control form-control-sm" maxlength="100" />
-                        </div>
-                        <div class="col-md-2">
-                            <label>Date of Birth</label>
-                            <input type="text" id="DateOfBirth" name="DateOfBirth" autocomplete="off" class="form-control form-control-sm" maxlength="100" />
-                        </div>
-                        <div class="col-md-2">
-                            <label>Gender</label>
-                            <select id="Gender" name="Gender" class="select-pick">
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Transgender">Transgender</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label>Father's Name</label>
-                            <input type="text" id="FatherName" name="FatherName" autocomplete="off" class="form-control form-control-sm" maxlength="100" />
-                        </div>
-                        <div class="col-md-2">
-                            <label>Contact No.<span class="text-mandatory">*</span></label>
-                            <input type="text" id="ContactNo" name="ContactNo" autocomplete="off" class="form-control form-control-sm required" data-num="true" data-decimal-place="0" data-min="0" data-max="9999999999" maxlength="10" />
-                        </div>
-                        <div class="col-md-2">
-                            <label>Email<span class="text-mandatory">*</span></label>
-                            <input type="text" id="Email" name="Email" autocomplete="off" class="form-control form-control-sm required" maxlength="100" />
-                        </div>
-                    </div>
-                    <hr />
-                    <div class="row">
-                        <div class="col-md-12">
-                            @* <table id="tableCompany" class="table table-bordered table-hover table-default" border="1" data-checkbox-header="false">
-                                <thead>
-                                    <tr>
-                                        <th colspan="3">Company</th>
-                                    </tr>
-                                    <tr>
-                                        <th data-formatter="tableCompanyCheckedFormatter" data-events="tableCompanyCheckedEvent" class="text-center"></th>
-                                        <th data-field="CompanyDesc">Company Name</th>
-                                        <th data-formatter="tableCompanyIsDefaultFormatter" data-events="tableCompanyIsDefaultEvent" class="text-center">Is Default</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table> *@
-                        </div>
-                    </div>
-                    <hr />
-                    <div class="row">
-                        <div class="col-md-12">
-                            @* <table id="tableApi" class="table table-bordered table-hover table-default" border="1" data-checkbox-header="false" data-unique-id="ApiId">
-                                <thead>
-                                    <tr>
-                                        <th colspan="12">API</th>
-                                    </tr>
-                                    <tr>
-                                        <th data-formatter="tableApiIsAllColChecked" data-events="tableApiIsAllColCheckedEvent" class="text-center"></th>
-                                        <th data-field="ApiGroupDesc">API Group</th>
-                                        <th data-field="ApiDesc">API Name</th>
-                                        <th data-field="ApiTypeDesc">API Type</th>
-                                        <th data-formatter="tableApiView" data-events="tableApiViewEvent" class="text-center">View</th>
-                                        <th data-formatter="tableApiAdd" data-events="tableApiAddEvent" class="text-center">Add</th>
-                                        <th data-formatter="tableApiUpdate" data-events="tableApiUpdateEvent" class="text-center">Update</th>
-                                        <th data-formatter="tableApiDelete" data-events="tableApiDeleteEvent" class="text-center">Delete</th>
-                                        <th data-formatter="tableApiEnable" data-events="tableApiEnableEvent" class="text-center">Enable</th>
-                                        <th data-formatter="tableApiPrint" data-events="tableApiPrintEvent" class="text-center">Print</th>
-                                        <th data-formatter="tableApiImport" data-events="tableApiImportEvent" class="text-center">Import</th>
-                                        <th data-formatter="tableApiExport" data-events="tableApiExportEvent" class="text-center">Export</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table> *@
-                        </div>
-                    </div>
-                    <hr />
-                    <div class="row">
-                        <div class="col-md-12">
-                            @* <table id="tableApprovalRole" class="table table-bordered table-hover table-default" border="1" data-checkbox-header="false" data-unique-id="ApprovalRoleId">
-                                <thead>
-                                    <tr>
-                                        <th colspan="2">Approval Role</th>
-                                    </tr>
-                                    <tr>
-                                        <th data-formatter="tableApprovalRoleChecked" data-events="tableApprovalRoleCheckedEvent" class="text-center"></th>
-                                        <th data-field="ApprovalRoleDesc">Approval Role</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table> *@
-                        </div>
-                    </div>
-
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" id="btnSave" class="btn btn-sm btn-success rounded-5">
-                    <span class="fa fa-save"></span>&nbsp;&nbsp;Save
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
 @section Scripts {
     <script src="~/script/Complaint.js" asp-append-version="true"></script>
     <script type="text/javascript">

@@ -509,8 +509,8 @@ namespace CRMApi.Services
         {
             if (!String.IsNullOrEmpty(str))
             {
-                str = Regex.Replace(str.Trim(), @"\s+", " ");
-                return !String.IsNullOrEmpty(regExp) ? Regex.Replace(str, regExp, string.Empty) : str;
+                str = Regex.Replace(str.Trim(), @"\s+", " ");//Remove Extra Space
+                return !String.IsNullOrEmpty(regExp) ? Regex.Replace(str, regExp, string.Empty) : str; //Set Value According to Regexp
             }
             else 
             {
