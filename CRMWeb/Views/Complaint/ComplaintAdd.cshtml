@@ -19,7 +19,7 @@
                         <div class="col-md-2">
                             <label>Date<span class="text-mandatory">*</span></label>
                             <div class="input-group input-group-sm">
-                                <input type="text" id="Complaint_Date" name="Date" autocomplete="off" class="form-control complaint-required" maxlength="50" />
+                                <input type="text" id="Complaint_Date" name="Date" autocomplete="off" class="form-control complaint-required" maxlength="50" data-date-format="DD-MMM-YYYY" />
                                 <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
                             </div>                            
                         </div>
@@ -81,33 +81,11 @@
                             <label>Priority<span class="text-mandatory">*</span></label>
                             <select id="Complaint_Priority" name="Priority" class="select-pick complaint-required" data-search="true" data-size="4"></select>
                         </div>
-                    </div>
-                    <hr />
-                    <div class="row">
                         <div class="col-md-12">
-                            <table id="tableComplaintItem" class="table table-bordered table-default line-item" data-search="false">
-                                <thead>
-                                    <tr>
-                                        <th colspan="4">
-                                            <span style="font-size:14px;">Complaint Item</span>
-                                            <button type="button" id="Complaint_BtnAddItem" class="btn btn-sm btn-primary rounded-5 float-end" title="Add Item"
-                                                    style="padding-left:5px; padding-right:5px;" onclick="Complaint.addItem();">
-                                                <span class="fa fa-plus"></span>
-                                            </button>
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th data-formatter="tableComplaintItemSlNo" class="text-center">#</th>
-                                        <th data-formatter="tableComplaintItemDesc" data-events="tableComplaintItemDescEvent" class="description">Item Description</th>
-                                        <th data-formatter="tableComplaintItemProblem" data-events="tableComplaintItemProblemEvent" class="description">Problem</th>
-                                        <th data-formatter="tableComplaintItemAction" data-events="tableComplaintItemActionEvent" class="action text-center">
-                                            <i class="fa-solid fa-list-check"></i>
-                                        </th>
-                                    </tr>
-                                </thead>
-                            </table>
+                            <label>Problem<span class="text-mandatory">*</span></label>
+                            <textarea type="text" id="Complaint_Problem" name="Problem" class="form-control form-control-sm complaint-required" rows="4" cols="20"></textarea>
                         </div>
-                    </div>
+                    </div>                    
                 </form>
             </div>
             <div class="modal-footer">

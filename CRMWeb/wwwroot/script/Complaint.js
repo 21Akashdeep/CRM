@@ -45,7 +45,7 @@
             ListId: $('#ListId').val(),
             ListCustomerId: $('#ListCustomerId').val(),
             ListStatus: $('#ListStatus').val(),
-            FormDate: DateTime.json($('#DateRange').val().split('|')[0]),
+            FromDate: DateTime.json($('#DateRange').val().split('|')[0]),
             ToDate: DateTime.json($('#DateRange').val().split('|')[1]),
         };
         Data.post({
@@ -82,7 +82,7 @@
                 postOfficeId: "#Complaint_PostOffice",
                 districtId: "#Complaint_District",
                 stateId: "#Complaint_AdminDivId",
-                country: "#Complaint_CountryId",
+                countryId: "#Complaint_CountryId",
             });            
         });
         $('#Complaint_ContactNo').on('focusout', () => {
@@ -110,9 +110,7 @@
             if (!Field.isMandatory({ class: '.complaint-required' })) {
                 return;
             }
-            let obj = Data.serializeToObject({ formId: '#formComplaint' });
-            obj.Date = DateTime.json(obj.Date);
-            obj.ComplaintItem = $('#tableComplaintItem').bootstrapTable('getData');
+            let obj = Data.serializeToObject({ formId: '#formComplaint' });                      
             if (obj.AssignTo) {
                 Message.confirm({
                     msg: 'Do you want save & Assign to supervisor.',
@@ -197,25 +195,24 @@
                 Complaint.Item = Option.Item;
                 //Assing Value in Form
                 let obj = response.obj;                
-                obj.Id = action == "Edit" ? obj.Id : null;
-                obj.Date = moment(obj.Date).format("DD-MMM-YYYY");
+                obj.Id = action == "Edit" ? obj.Id : null;                
                 let title = action == "Edit" ? `Complaint / Edit (Complaint No. : ${obj.Code})` : `Complaint / Add`;
-                Modal.open({ id: '#modalComplaint', title: title, action: action, obj: obj });
+                Modal.open({ id: '#modalComplaint', title: title, action: action, obj: obj });                
                 Table.add({ id: '#tableComplaintItem', data: obj.ComplaintItem, search: false, selectPick: true, overflow: 'visible', height: 'auto', mobileResponsive: false });
-                //setTimeout(() => {
-                //    OnlineApi.pinCode({
-                //        pinCode: obj.PinCode,
-                //        postOffice: obj.PostOffice,
-                //        district: obj.District,
-                //        state: obj.AdminDivId,
-                //        country: obj.Country,
-                //        postOfficeId: "#Complaint_PostOffice",
-                //        districtId: "#Complaint_District",
-                //        stateId: "#Complaint_AdminDivId",
-                //        countryId: "#Complaint_CountryId",
-                //        loader: true
-                //    });
-                //}, 100);
+                setTimeout(() => {
+                    OnlineApi.pinCode({
+                        pinCode: obj.PinCode,
+                        postOffice: obj.PostOffice,
+                        district: obj.District,
+                        state: obj.AdminDivId,
+                        country: obj.Country,
+                        postOfficeId: "#Complaint_PostOffice",
+                        districtId: "#Complaint_District",
+                        stateId: "#Complaint_AdminDivId",
+                        countryId: "#Complaint_CountryId",
+                        loader: true
+                    });
+                }, 100);
                 
             }
         });
@@ -279,17 +276,17 @@
 window.tableComplaintSlNo = (value, obj, index) => {
     return index + 1;
 }
-window.tableComplaintCustomerDesc = (value, obj, index) => {
-    return obj.CustomerDesc.match(/.{1,20}/g).join('<br>');
+window.tableComplaintDate = (value, obj, index) => {
+    return moment(obj.Date).format('DD-MMM-YYYY');
 }
-window.tableComplaintAddress = (value, obj, index) => {
+window.tableComplaintCustomerDesc = (value, obj, index) => {
     let Address = [];
     if (obj.Address1) {
         Address.push(obj.Address1)
     }
     if (obj.Address2) {
         Address.push(obj.Address2)
-    }    
+    }
     if (obj.PostOffice) {
         Address.push(obj.PostOffice)
     }
@@ -305,7 +302,15 @@ window.tableComplaintAddress = (value, obj, index) => {
     if (obj.CountryDesc) {
         Address.push(obj.CountryDesc)
     }
-    return Address.join(', ').match(/.{1,50}/g).join('<br>').replaceAll(', ,','');
+    return `
+        <div class="fw-bold">${obj.CustomerDesc.match(/.{1,30}/g).join('<br>')}</div>
+        <div>${Address.join(', ').match(/.{1,50}/g).join('<br>').replaceAll(', ,', '')}</div>
+        <div>${obj.ContactNo}, ${obj.Email??""}</div>        
+    `;
+}
+
+window.tableComplaintCustomerProblem = (value, obj, index) => {
+    return `<div>${Field.isNullOrEmpty(obj.Problem) ? '-' : obj.Problem.match(/.{1,50}/g).join('<br>')}</div >`;
 }
 window.tableComplaintStatus = (value, obj, index) => {
     return `<div class="${obj.StatusCss}">${obj.StatusDesc}</div>`;
@@ -352,14 +357,7 @@ window.tableComplaintAction = (value, obj, index) => {
                             <span class="fa fa-toggle-on"></span>&nbsp;&nbsp;Enable
                         </a>
                     </li>` : ``
-                }
-                ${obj.IsAssignTo ? `
-                    <li>
-                        <a href="#" class="dropdown-item text-success btn-assign-to" title="Enable">
-                            <span class="fa fa-toggle-on"></span>&nbsp;&nbsp;Assign To
-                        </a>
-                    </li>` : ``
-                }
+                }                
             </ul>
         </div>
     `;

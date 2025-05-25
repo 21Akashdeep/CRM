@@ -49,6 +49,11 @@ namespace CRMApi.Models
             public string? Country { get; set; }
             public string? OtherText { get; set; }
         }
+        public class ComplaintAssignTo
+        {
+            public int Id { get; set; }
+            public string Name { get; set; } = String.Empty;
+        }
     }
 }
 

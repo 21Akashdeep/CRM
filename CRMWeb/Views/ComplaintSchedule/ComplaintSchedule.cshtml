@@ -1,0 +1,168 @@
+﻿@{
+    ViewData["Title"] = "Complaint Schedule Schedule";
+}
+
+<div class="card shadow">
+    <div class="card-header">
+        <span class="card-title">Complaint Schedule / View</span>
+        <button type="button" class="btn btn-sm btn-primary float-end rounded-5" id="btnNewEntry">
+            <span class="fa fa-plus"></span>&nbsp;&nbsp;Add
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-2">
+                <label>Date Range</label>
+                <div class="input-group input-group-sm">
+                    <input id="DateRange" type="text" class="form-control ps-1 pe-0" readonly="" style="font-size:13px; height:31px;">
+                    <span class="input-group-text date-range-picker ps-1 pe-1"><i class="fa fa-calendar"></i></span>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label>Status</label>
+                <select id="ListStatus" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label>Complaint No.</label>
+                <select id="ListComplaintId" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <div class="btn-group">
+                    <button type="button" id="btnSearch" class="btn btn-sm btn-filter btn-outline-success" title="Search">
+                        <span class="fa fa-search"></span>
+                    </button>
+                    <button type="button" id="btnPrint" class="btn btn-sm btn-filter btn-outline-secondary" title="Print">
+                        <span class="fa fa-print"></span>
+                    </button>
+                    <button type="button" id="btnExport" class="btn btn-sm btn-filter btn-outline-primary" title="Export To Excel">
+                        <span class="fa fa-file-excel"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-md-12">
+                <table id="tableComplaintSchedule" class="table table-bordered table-hover table-default" border="1" data-sort-name="Id" data-unique-id="Id">
+                    <thead>
+                        <tr>
+                            <th data-sortable="false" data-formatter="tableComplaintScheduleSlNo" class="text-center">#</th>
+                            <th data-sortable="true" data-field="ComplaintNo" class="left-fix">Complaint No.</th>
+                            <th data-sortable="true" data-field="ItemDesc" data-formatter="tableComplaintScheduleCustomerDesc" class="text-nowrap">Customer</th>
+                            <th data-sortable="true" data-field="Problem" data-formatter="tableComplaintScheduleProblem" class="text-nowrap">Problem</th>
+                            <th data-sortable="true" data-formatter="tableComplaintScheduleAssignTo" class="text-nowrap">Assigned User</th>
+                            <th data-sortable="true" data-field="StartDateTime" data-formatter="tableComplaintScheduleStartDateTime" class="text-nowrap">Start Date Time</th>
+                            <th data-sortable="true" data-field="EndDateTime" data-formatter="tableComplaintScheduleEndDateTime" class="text-nowrap">End Date Time</th>
+                            <th data-sortable="true" data-field="CompletedDateTime" data-formatter="tableComplaintScheduleCompletedDateTime" class="text-nowrap">Completed Date Time</th>
+                            <th data-sortable="false"  data-formatter="tableComplaintScheduleRemarks" class="text-nowrap">Remarks</th>
+                            <th data-sortable="true" data-field="CreatedAt" data-formatter="tableComplaintScheduleCreatedByAndAt" class="text-nowrap">Created By & At</th>
+                            <th data-sortable="true" data-field="UpdatedAt" data-formatter="tableComplaintScheduleUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
+                            <th data-formatter="tableComplaintScheduleStatus" class="text-nowrap text-center right-fix-2">Status</th>
+                            <th data-formatter="tableComplaintScheduleAction" data-events="tableComplaintScheduleActionEvent" class="not-print text-center right-fix">
+                                <i class="fa-solid fa-list-check"></i>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="modalComplaintSchedule" class="modal fade modal-draggable" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title"></span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body" style="min-height:75vh;">
+                <form id="formComplaintSchedule">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label>Complaint No.</label>
+                            <input type="hidden" name="Id" />
+                            <select id="ComplaintId" name="ComplaintId" class="select-pick required" data-search="true" data-size="4"></select>
+                        </div>                        
+                        <div class="col-md-9">
+                            <label>Customer</label>
+                            <input type="text" id="CustomerDesc" name="CustomerDesc" class="form-control form-control-sm" readonly/>
+                        </div>
+                        <div class="col-md-12">
+                            <label>Address</label>
+                            <input type="text" id="CustomerAddress" name="CustomerAddress" class="form-control form-control-sm" readonly />
+                        </div>
+                        <div class="col-md-12">
+                            <label>Problem</label>
+                            <textarea type="text" id="Problem" name="Problem" rows="2" cols="20" class="form-control form-control-sm" readonly></textarea>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label>Start Date & Time<span class="text-mandatory">*</span></label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" id="StartDateTime" name="StartDateTime" class="form-control required" />
+                                <span class="input-group-text date-time-picker"><i class="fa fa-calendar"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label>End Date & Time<span class="text-mandatory">*</span></label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" id="EndDateTime" name="EndDateTime" class="form-control required" />
+                                <span class="input-group-text date-time-picker"><i class="fa fa-calendar"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Remarks</label>
+                            <input type="text" id="Remarks" name="Remarks" class="form-control form-control-sm" maxlength="100"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table id="tableAssignTo" class="table table-border table-default">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2">Service Eng. List<span class="text-mandatory">*</span></th>
+                                    </tr>
+                                    <tr>
+                                        <th data-checkbox="true" data-formatter="tableAssignToIsSelected"></th>
+                                        <th data-field="Name">Service Eng. Name</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                        
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnSave" class="btn btn-sm btn-success rounded-5">
+                    <span class="fa fa-save"></span>&nbsp;&nbsp;Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {    
+    <script src="~/script/ComplaintSchedule.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        $(function () {
+            ComplaintSchedule.init();
+        });
+    </script>
+}
+
+

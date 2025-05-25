@@ -29,6 +29,7 @@ namespace CRMApi.Models
         [NotMapped] public string? AssignToName { get; set; }
         public int Priority { get; set; }
         [NotMapped] public string? PriorityDesc { get; set; }
+        public string Problem { get; set; } = string.Empty;
         public int CompanyId { get; set; }
         [NotMapped] public string? CompanyDesc { get; set; }
         public int Status { get; set; } = 1;
@@ -39,8 +40,7 @@ namespace CRMApi.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public int UpdatedBy { get; set; }
         [NotMapped] public string UpdatedByName { get; set; } = string.Empty;
-        public DateTime UpdatedAt { get; set; } = DateTime.Now;
-        public List<ComplaintItem> ComplaintItem { get; set; } = new List<ComplaintItem>();
+        public DateTime UpdatedAt { get; set; } = DateTime.Now;        
         [NotMapped] public bool IsEdit { get; set; } = false;
         [NotMapped] public bool IsDelete { get; set; } = false;
         [NotMapped] public bool IsEnable { get; set; } = false;
@@ -52,6 +52,7 @@ namespace CRMApi.Models
         [NotMapped] public List<int> ListCustomerId { get; set; } = new List<int>();
         [NotMapped] public List<int> ListDeparmentId { get; set; } = new List<int>();
         [NotMapped] public List<int> ListPriority { get; set; } = new List<int>();
+        [NotMapped] public List<int> ListAssignTo { get; set; } = new List<int>();
         [NotMapped] public List<int> ListStatus { get; set; } = new List<int>();        
     }
 }

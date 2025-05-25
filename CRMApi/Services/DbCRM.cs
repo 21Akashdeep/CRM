@@ -43,6 +43,13 @@ namespace CRMApi.Services
                 v => JsonConvert.DeserializeObject<List<Composite.ApprovalSeq>>(v)! //Deserialize JSON string back to List<CustomObject>
             );            
             modelBuilder.Entity<ApprovalConfig>().Property(e => e.ApprovalSeq).HasConversion(jsonApprovalSeq).HasColumnType("json");
+
+            //Json Convert Approval Seq for Approval Config
+            var jsonComplaintAssignTo = new ValueConverter<List<Composite.ComplaintAssignTo>, string>(
+                v => JsonConvert.SerializeObject(v),//Serialize List<CustomObject> to JSON string
+                v => JsonConvert.DeserializeObject<List<Composite.ComplaintAssignTo>>(v)! //Deserialize JSON string back to List<CustomObject>
+            );
+            modelBuilder.Entity<ComplaintSchedule>().Property(e => e.AssignTo).HasConversion(jsonComplaintAssignTo).HasColumnType("json");
         }
         public DbSet<User> User { get; set; }
         public DbSet<Setting> Setting { get; set; }
@@ -67,6 +74,6 @@ namespace CRMApi.Services
         public DbSet<ItemSubGroup> ItemSubGroup { get; set; }
         public DbSet<Item> Item { get; set; }
         public DbSet<Complaint> Complaint { get; set; }
-        public DbSet<ComplaintItem> ComplaintItem { get; set; }
+        public DbSet<ComplaintSchedule> ComplaintSchedule { get; set; }
     }
 }
