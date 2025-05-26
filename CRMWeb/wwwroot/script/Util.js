@@ -554,7 +554,7 @@ const Data = {
                 else if (DateTime.isValid(value)) {
                     value = DateTime.json(value);
                 }
-                object[name] = value || null; // Set value or null if empty
+                object[name] = value == null ? null : value; // Set value or null if empty
             }
         });
         return object;
@@ -1876,6 +1876,9 @@ const DateTime = {
             !isNaN(new Date(value).getTime());
     },
     json: (input) => {
+        if (!input) {
+            return null;
+        }
         input = input.trim();
         if (!DateTime.isValid(input)) {
             return null;
