@@ -1729,8 +1729,8 @@ const DateTime = {
                 //}
             });
         $(selector).on('apply.daterangepicker', (ev, picker) => {
-            $(inputId).val(`${picker.startDate.format('DD-MMM-YYYY')} | ${picker.startDate.format('DD-MMM-YYYY')}`);
-            $(inputId).attr('title', `${picker.startDate.format('DD-MMM-YYYY')} | ${picker.startDate.format('DD-MMM-YYYY')}`);
+            $(inputId).val(`${picker.startDate.format('DD-MMM-YYYY')} | ${picker.endDate.format('DD-MMM-YYYY')}`);
+            $(inputId).attr('title', `${picker.startDate.format('DD-MMM-YYYY')} | ${picker.endDate.format('DD-MMM-YYYY')}`);
             DateTime.pickerFunction();
         });
     },

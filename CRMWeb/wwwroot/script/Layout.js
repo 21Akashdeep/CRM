@@ -198,7 +198,7 @@ class Layout {
         //By Pass Sys Admin
         if (App.User.Type == App.Setting.UserType.SysAdmin) return;
         //Get Form Name FromUrl
-        let ApiName = window.location.pathname.replace('/');
+        let ApiName = window.location.pathname.replace('/','');
         //Get Form Permission from session storage
         let Api = App.User.Api.find(x => x.ApiName == ApiName);
         if (Api == undefined) {
