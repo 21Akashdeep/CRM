@@ -25,31 +25,19 @@ namespace CRMApi.Repository
             try
             {
                 dynamic Option = new ExpandoObject();
-                var dbComplaintSchedule = await (
-                    from cs in db.ComplaintSchedule
-                    join st in db.Setting on new { Name = App.SettingName.Status, Value = cs.Status.ToString() } equals new { st.Name, st.Value }
-                    join co in db.Complaint on cs.ComplaintId equals co.Id
-                    select new 
-                    {
-                        cs.Id,
-                        cs.ComplaintId,
-                        ComplaintNo = co.Code,
-                        ComplaintDate = co.Date,
-                        cs.Status,
-                        StatusName = st.Name,
-                        StatusDesc = st.Description
-                    }
-                ).ToListAsync();
-                Option.Status = dbComplaintSchedule.GroupBy(x => new { x.Status, x.StatusName, x.StatusDesc }).Select(x => new
+                var ListStatus = new List<int>() { App.Status.Pending, App.Status.Scheduled, App.Status.Processing, App.Status.Completed };
+                Option.Status = await db.Setting.Where(x => x.Name == App.SettingName.Status && ListStatus.Contains(int.Parse(x.Value))).Select(x => new
                 {
-                    Value = x.Key.Status,
-                    Description = x.Key.StatusDesc
-                }).ToList();
-                Option.Complaint = dbComplaintSchedule.GroupBy(x => new { x.ComplaintId, x.ComplaintNo }).Select(x => new
+                    x.Value,
+                    x.Description
+                }).ToListAsync();
+
+                Option.Complaint = await db.Complaint.Where(x => ListStatus.Contains(x.Status)).Select(x => new
                 {
-                    x.Key.ComplaintId,
-                    x.Key.ComplaintNo
-                }).ToList();
+                    ComplaintId = x.Id,
+                    ComplaintNo = x.Code
+                }).ToListAsync();
+                
                 objMsg.data = Option;
                 Message.Success(ref objMsg, "Record found");
             }
@@ -128,19 +116,21 @@ namespace CRMApi.Repository
             var dbComplaintScheduleQuery = db.ComplaintSchedule.Where(cs => obj.ListStatus.Contains(cs.Status) && cs.CompanyId == User.CompanyId).AsQueryable();            
             dbComplaintScheduleQuery = obj.ListId.Any() ? dbComplaintScheduleQuery.Where(cs => obj.ListId.Contains(cs.Id)) : dbComplaintScheduleQuery;
             dbComplaintScheduleQuery = obj.ListComplaintId.Any() ? dbComplaintScheduleQuery.Where(cs => obj.ListComplaintId.Contains(cs.ComplaintId)) : dbComplaintScheduleQuery;
-            dbComplaintScheduleQuery = obj.FromDate != default ? dbComplaintScheduleQuery.Where(cs => cs.StartDateTime.Date >= obj.FromDate.Date) : dbComplaintScheduleQuery;
-            dbComplaintScheduleQuery = obj.ToDate != default ? dbComplaintScheduleQuery.Where(cs => cs.StartDateTime.Date <= obj.ToDate.Date) : dbComplaintScheduleQuery;
+                        
+            var dbComplaintQuery = db.Complaint.Where(co => obj.ListStatus.Contains(co.Status) && co.CompanyId == User.CompanyId).AsQueryable();
+            dbComplaintQuery = dbComplaintQuery.Where(co => obj.FromDate == DateTime.MinValue || co.Date.Date >= obj.FromDate.Date);
+            dbComplaintQuery = dbComplaintQuery.Where(co => obj.ToDate == DateTime.MinValue || co.Date.Date <= obj.ToDate.Date);
+                            
 
-            var dbComplaintSchedule = await dbComplaintScheduleQuery.ToListAsync();
-            var dbComplaintScheduleList = (
-                from cs in dbComplaintSchedule
+            var dbComplaintSchedule = await (
+                from cs in dbComplaintScheduleQuery
                 join st in db.Setting on new { Name = App.SettingName.Status, Value = cs.Status.ToString() } equals new { st.Name, st.Value }
-                join co in db.Complaint on cs.ComplaintId equals co.Id
+                join co in dbComplaintQuery on cs.ComplaintId equals co.Id
                 join cu in db.Customer on co.CustomerId equals cu.Id
                 join ad in db.AdminDiv on co.AdminDivId equals ad.Id
                 join ct in db.Country on ad.CountryId equals ct.Id                                
                 join cb in db.User on cs.CreatedBy equals cb.Id
-                join ub in db.User on cs.UpdatedBy equals ub.Id
+                join ub in db.User on cs.UpdatedBy equals ub.Id                
                 select new ComplaintSchedule
                 {
                     Id = cs.Id,
@@ -177,9 +167,11 @@ namespace CRMApi.Repository
                     UpdatedAt = co.UpdatedAt,
                     IsEdit = cs.Status == App.Status.Scheduled ? true : false,
                     IsDelete = cs.Status == App.Status.Scheduled ? true : false,
+                    IsAddStatus = co.Status == App.Status.Scheduled || co.Status == App.Status.Processing ? true : false,
                 }
-            ).ToList();
-            return dbComplaintScheduleList;
+            ).ToListAsync();
+            dbComplaintSchedule = dbComplaintSchedule.Where(x => x.AssignTo.Any(x1 => !obj.ListAssignToId.Any() || obj.ListAssignToId.Contains(x1.Id))).ToList();
+            return dbComplaintSchedule;
         }
         public async Task<Message> GetAsync(ComplaintSchedule obj, User User) 
         {

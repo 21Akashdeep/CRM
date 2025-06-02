@@ -102,10 +102,10 @@
         Data.get({
             url: `ComplaintSchedule/Edit?Id=${id}`,
             onSuccess: (response) => {
-                let obj = response.obj;                 
-                response.data.Complaint.map(x => { x.SubText = `<div class="fw-bold">${x.CustomerDesc}</div><div>${x.Address}</div>` });
+                let obj = response.obj;
+                response.data.Complaint.map(x => { x.SubText = `<div class="fw-bold">${x.CustomerDesc}</div><div>${x.CustomerAddress}</div>` });
                 Dropdown.bind({ id: '#ComplaintId', data: response.data.Complaint, value: 'Id', text: 'Code', subText: 'SubText', json: true });
-                let Complaint = response.data.Complaint.find(x => x.ComplaintId == obj.ListId);
+                let Complaint = response.data.Complaint.find(x => x.Id == obj.ComplaintId);
                 Modal.open({ id: '#modalComplaintSchedule', title: 'Complaint Schedule / Edit', action: 'Edit', obj: obj });
                 Complaint.UserList.map(x => { x.IsSelected = obj.AssignTo.find(x2 => x2.Id == x.Id) ? true : false; });
                 Table.add({ id: '#tableAssignTo', data: Complaint.UserList, search: false });   

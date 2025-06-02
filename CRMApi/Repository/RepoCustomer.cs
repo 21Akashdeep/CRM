@@ -268,7 +268,8 @@ namespace CRMApi.Repository
                     return objMsg;
                 }
                 objMsg.obj = Customer;                
-                Message.Success(ref objMsg, "Record found.");
+                objMsg.data = GetAddOption().data;
+                Message.Success(ref objMsg, "Record found.");                
             }
             catch (Exception ex) 
             {

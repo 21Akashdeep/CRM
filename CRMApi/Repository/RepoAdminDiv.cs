@@ -214,7 +214,8 @@ namespace CRMApi.Repository
                     Message.Error(ref objMsg, "AdminDiv did not find for edit.");
                     return objMsg;
                 }
-                objMsg.obj = AdminDiv;                
+                objMsg.obj = AdminDiv;    
+                objMsg.data = GetAddOption().data;
                 Message.Success(ref objMsg, "Record found.");
             }
             catch (Exception ex) 
