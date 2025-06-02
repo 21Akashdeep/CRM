@@ -1,0 +1,91 @@
+﻿<div id="modalCustomer" class="modal fade modal-draggable" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Customer / Add</span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body" style="min-height:75vh;">
+                <form id="formCustomer">
+                    <input type="hidden" id="Id" name="Id" />
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label>Name<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Customer_Name" name="Name" autocomplete="off" class="form-control form-control-sm Customer-required" maxlength="50" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>Description<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Customer_Description" name="Description" autocomplete="off" class="form-control form-control-sm Customer-required" maxlength="100" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>CinNo</label>
+                            <input type="text" id="Customer_CinNo" name="CinNo" autocomplete="off" class="form-control form-control-sm" maxlength="21" data-alpha-lg-num="true" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>GstNo<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Customer_GstNo" name="GstNo" autocomplete="off" class="form-control form-control-sm Customer-required" maxlength="15" data-alpha-lg-num="true" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>PanNo</label>
+                            <input type="text" id="Customer_PanNo" name="PanNo" autocomplete="off" class="form-control form-control-sm" maxlength="10" data-alpha-lg-num="true" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>Address1</label>
+                            <input type="text" id="Customer_Address1" name="Address1" autocomplete="off" class="form-control form-control-sm" maxlength="100" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>Address2</label>
+                            <input type="text" id="Customer_Address2" name="Address2" autocomplete="off" class="form-control form-control-sm" maxlength="100" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>PinCode<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Customer_PinCode" name="PinCode" autocomplete="off" class="form-control form-control-sm Customer-required" data-num="true" maxlength="6" )" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>Post Office</label>
+                            <input type="text" id="Customer_PostOffice" name="PostOffice" autocomplete="off" class="form-control form-control-sm es-input" maxlength="100" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>District</label>
+                            <input type="text" id="Customer_District" name="District" autocomplete="off" class="form-control form-control-sm" maxlength="100" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>Country<span class="text-mandatory">*</span></label>
+                            <select id="Customer_CountryId" name="CountryId" class="form-control form-control-sm select-pick" title="Nothing Selected" data-search="true" data-size="4">
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label>State<span class="text-mandatory">*</span></label>
+                            <select id="Customer_AdminDivId" name="AdminDivId" class="form-control form-control-sm select-pick" title="Nothing Selected" data-search="true" data-size="4">
+                            </select>
+                        </div>
+                       
+                        <div class="col-md-4">
+                            <label>ContactNo</label>
+                            <input type="text" id="Customer_ContactNo" name="ContactNo" autocomplete="off" class="form-control form-control-sm" maxlength="10" data-num="true" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>Email</label>
+                            <input type="text" id="Customer_Email" name="Email" autocomplete="off" class="form-control form-control-sm" maxlength="100" />
+                        </div>
+                        
+
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="Customer_btnSave" class="btn btn-sm btn-success rounded-5">
+                    <span class="fa fa-save"></span>&nbsp;&nbsp;Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+

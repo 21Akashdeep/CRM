@@ -2,7 +2,7 @@
     static init() {
         Department.getViewOption((response) => {
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
-            Dropdown.bind({ id: '#ListId', data: response.data.Department, value: 'Id', text: 'Name', subText: 'Description' });
+            Dropdown.bind({ id: '#ListId', data: response.data.ListId, value: 'Id', text: 'Description'});
         });
         $('#btnSearch').on('click', () => {
             Department.get({
@@ -45,134 +45,139 @@
             ListUQCG: $('#ListUQCG').val(),
         };
         Data.post({ url: `Department/${action}`, data: obj, onSuccess: onSuccess });
-    }
+}
     //Department Add, Edit, Update & Delete
     static initAdd() {
-        $('#Department_btnSave').on('click', () => {
-            if (!Field.isMandatory({ class: ".item-group-required" })) {
-                return;
-            }
-            let obj = Data.serializeToObject({ formId: "#formDepartment" });
-            if (Field.isNullOrEmpty(obj.Id)) {
-                Department.add(obj);
-            }
-            else {
-                Department.update(obj);
-            }
-        });
+    $('#Department_btnSave').on('click', () => {
+        if (!Field.isMandatory({ class: ".item-group-required" })) {
+            return;
+        }
+        let obj = Data.serializeToObject({ formId: "#formDepartment" });
+        if (Field.isNullOrEmpty(obj.Id)) {
+            Department.add(obj);
+        }
+        else {
+            Department.update(obj);
+        }
+    });
+    }
+    static getAddOption(onSuccess) {
+        Data.get({ url: 'Country/GetAddOption', onSuccess: onSuccess });
     }
     static fill() {
-        Modal.open({ id: '#modalDepartment', title: 'Department / Add', action: 'add' });
-    }
+    Modal.open({ id: '#modalDepartment', title: 'Department / Add', action: 'add' });
+}
     static add(obj) {
-        Data.post({ url: 'Department/Add', data: obj, onSuccess: Department.addOnSuccess });
-    }
+    Data.post({ url: 'Department/Add', data: obj, onSuccess: Department.addOnSuccess });
+}
     static addOnSuccess = (response) => {
-        Message.show(response);
-        if (response.status == Message.Type.success) {
-            Department.setUiState({ action: 'Add', response: response });
-        }
+    Message.show(response);
+    if (response.status == Message.Type.success) {
+        Department.setUiState({ action: 'Add', response: response });
     }
+}
     static edit(id, action = "Edit") {
-        Data.get(
-            {
+    Data.get(
+        {
                 url: `Department/Edit?Id=${id}`,
-                onSuccess: (response) => {
-                    if (response.status == Message.Type.success) {
+        onSuccess: (response) => {
+            if (response.status == Message.Type.success) {
                         let title = action == "Edit" ? `Department / Edit (Code : ${response.obj.Code})` : `Department / Add`;
-                        response.obj.Id = action == "Edit" ? response.obj.Id : null;
-                        Modal.open({ id: '#modalDepartment', title: title, action: action, obj: response.obj });
-                    }
-                    else {
-                        Message.alert(response);
-                    }
-                }
+                response.obj.Id = action == "Edit" ? response.obj.Id : null;
+                Modal.open({ id: '#modalDepartment', title: title, action: action, obj: response.obj });
+            }
+            else {
+                Message.alert(response);
+            }
+        }
             }
         );
     }
     static update(obj) {
-        Data.update({ url: 'Department/Update', data: obj, onSuccess: Department.updateOnSuccess });
-    }
+    Data.update({ url: 'Department/Update', data: obj, onSuccess: Department.updateOnSuccess });
+}
     static updateOnSuccess = (response) => {
-        Message.show(response);
-        if (response.status == Message.Type.success) {
-            Department.setUiState({ response: response });
-        }
+    Message.show(response);
+    if (response.status == Message.Type.success) {
+        Department.setUiState({ response: response });
     }
+}
     static delete(id) {
-        Message.confirm(
-            {
-                msg: "Do you want to delete???",
-                confirmButtonText: "Delete",
-                denyButtonText: "Don't Delete",
-                data: id,
-                onConfirm: (id) => {
-                    Data.delete(
-                        {
+    Message.confirm(
+        {
+            msg: "Do you want to delete???",
+            confirmButtonText: "Delete",
+            denyButtonText: "Don't Delete",
+            data: id,
+            onConfirm: (id) => {
+                Data.delete(
+                    {
                             url: `Department/Delete?Id=${id}`,
-                            onSuccess: Department.deleteOnSuccess
+                    onSuccess: Department.deleteOnSuccess
                         }
                     );
-                }
+}
             },
         );
     }
     static deleteOnSuccess = (response) => {
-        Message.show(response);
-        if (response.status == Message.Type.success) {
-            Department.setUiState({ response: response });
-        }
+    Message.show(response);
+    if (response.status == Message.Type.success) {
+        Table.updateById({ id: "#tableDepartment", objId: response.obj.Id, obj: response.obj });
+        Dropdown.bind({ id: '#ListId', data: response.data.Department, value: 'Id', text: 'Description', subText: "Code" });
     }
+}
     static enable(id) {
-        Message.confirm(
-            {
-                msg: "Do you want to enable???",
-                confirmButtonText: "Enable",
-                denyButtonText: "Don't Enable",
-                data: id,
-                onConfirm: (id) => {
-                    Data.update(
-                        {
+    Message.confirm(
+        {
+            msg: "Do you want to enable???",
+            confirmButtonText: "Enable",
+            denyButtonText: "Don't Enable",
+            data: id,
+            onConfirm: (id) => {
+                Data.update(
+                    {
                             url: `Department/Enable?Id=${id}`,
-                            onSuccess: Department.enableOnSuccess
+                    onSuccess: Department.enableOnSuccess
                         }
                     );
-                }
+}
             },
         );
     }
     static enableOnSuccess = (response) => {
-        Message.show(response);
-        if (response.status == Message.Type.success) {
-            Department.setUiState({ response: response });
-        }
+    Message.show(response);
+    if (response.status == Message.Type.success) {
+        Table.updateById({ id: "#tableDepartment", objId: response.obj.Id, obj: response.obj });
+        Dropdown.bind({ id: '#ListId', data: response.data.Department, value: 'Id', text: 'Description', subText: "Code" });
     }
+}
     static setUiState({ action = null, response }) {
-        switch (action) {
-            case "Add":
-                Modal.reset({ id: '#modalDepartment' });
-                Table.add({ id: "#tableDepartment", data: response.obj, action: 'prepend' });
-                break;
-            default:
-                Modal.close({ id: '#modalDepartment' });
-                Table.updateById({ id: "#tableDepartment", objId: response.obj.Id, obj: response.obj });
-                break;
-        }
-        Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
-        Dropdown.bind({ id: '#ListId', data: response.data.Unit, value: 'Id', text: 'Description', subText: 'Name' });
+    switch (action) {
+        case "Add":
+            Modal.reset({ id: '#modalDepartment' });
+            Table.add({ id: "#tableDepartment", data: response.obj, action: 'prepend' });
+            break;
+        default:
+            Modal.close({ id: '#modalDepartment' });
+            Table.updateById({ id: "#tableDepartment", objId: response.obj.Id, obj: response.obj });
+            break;
     }
+    Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
+    Dropdown.bind({ id: '#ListId', data: response.data.Department, value: 'Id', text: 'Description', subText: 'Name' });
+}
 }
 window.tableDepartmentSLNo = (value, obj, index) => {
     return index + 1;
 }
 window.tableDepartmentStatus = (value, obj, index) => {
-    return `<div class="${obj.StatusCss}">${obj.StatusDesc}</div>`;
+    return `<div class="${obj.StatusCss}">${obj.StatusName}</div>`;
 }
-window.tableDepartmentCreatedBy = (value, obj, index) => {
+window.tableDepartmentCreatedByAndAt = (value, obj, index) => {
     return `<div>${obj.CreatedByName}</div>
             <div>${moment(obj.CreatedAt).format('DD-MMM-YYYY HH:mm:ss')}</div>`;
 }
-window.tableDepartmentUpdatedBy = (value, obj, index) => {
+window.tableDepartmentUpdatedByAndAt = (value, obj, index) => {
     return `<div>${obj.UpdatedByName}</div>
             <div>${moment(obj.UpdatedAt).format('DD-MMM-YYYY HH:mm:ss')}</div>`;
 }
@@ -219,7 +224,7 @@ window.tableDepartmentActionEvent = {
         Department.edit(obj.Id);
     },
     'click .btn-duplicate': (e, value, obj, index) => {
-        Department.edit(obj.Id, "Add");
+        Department.edit(obj.Id, "Add" );
     },
     'click .btn-delete': (e, value, obj, index) => {
         Department.delete(obj.Id);
