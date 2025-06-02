@@ -12,10 +12,14 @@ namespace CRMApi.Models
         [MaxLength(10)] public string UserType { get; set; } = string.Empty;
         [NotMapped] public string UserTypeDesc { get; set; } = string.Empty;        
         [MaxLength(10)] public string? Code { get; set; }
-        [MaxLength(100)] public string Name { get; set; } = string.Empty;
+        [MaxLength(100)] public string Name { get; set; } = string.Empty;        
         public DateTime? DateOfBirth { get; set; }
         [MaxLength(1)] public string? Gender { get; set; }
         [MaxLength(100)] public string? FatherName { get; set; }
+        public int DepartmentId { get; set; }
+        [NotMapped] public string DepartmentDesc { get; set; } = string.Empty;
+        public int DesignationId { get; set; }
+        [NotMapped] public string DesignationDesc { get; set; } = string.Empty;
         [MaxLength(10)] public string ContactNo { get; set; } = string.Empty;
         [MaxLength(100)] public string Email { get; set; } = string.Empty;
         public DateTime? PasswordExpiredAt { get; set; }

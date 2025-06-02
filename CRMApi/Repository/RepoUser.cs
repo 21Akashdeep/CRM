@@ -147,7 +147,18 @@ namespace CRMApi.Repository
                         IsAdded = arp != null
                     }
                 ).ToList();
-
+                Options.Department = db.Department.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
+                {
+                    x.Id,
+                    x.Name,
+                    x.Description
+                }).ToList();
+                Options.Designation = db.Designation.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
+                {
+                    x.Id,
+                    x.Name,
+                    x.Description
+                }).ToList();
                 objMsg.data = Options;
                 Message.Success(ref objMsg, "");
             } 
@@ -173,6 +184,8 @@ namespace CRMApi.Repository
             var User = (
                 from ur in dbUser                
                 join ut in dbSetting on new { Value = ur.UserType, Name = App.SettingName.UserType } equals new { ut.Value, ut.Name }
+                join dt in db.Department on ur.DepartmentId equals dt.Id
+                join ds in db.Designation on ur.DesignationId equals ds.Id
                 join st in dbSetting on new { Value = ur.Status.ToString(), Name = App.SettingName.Status } equals new { st.Value, st.Name }
                 join cb in dbUsers on ur.CreatedBy equals cb.Id
                 join ub in dbUsers on ur.UpdatedBy equals ub.Id
@@ -182,10 +195,14 @@ namespace CRMApi.Repository
                     UserId = ur.UserId,
                     Password = ur.Password,                    
                     Code = ur.Code,
-                    Name = ur.Name,
+                    Name = ur.Name,                    
                     DateOfBirth = ur.DateOfBirth,
                     Gender = ur.Gender,
                     FatherName = ur.FatherName,
+                    DepartmentId = ur.DepartmentId,
+                    DepartmentDesc = dt.Description,
+                    DesignationId = ur.DesignationId,
+                    DesignationDesc = ds.Description,
                     ContactNo = ur.ContactNo,
                     Email = ur.Email,
                     UserType = ur.UserType,
@@ -194,7 +211,7 @@ namespace CRMApi.Repository
                     Company = ur.Company,
                     Api = ur.Api,
                     ApprovalRole = ur.ApprovalRole,
-                    Theme = ur.Theme,
+                    Theme = ur.Theme,                    
                     Status = ur.Status,
                     StatusDesc = st.Description,
                     StatusCss = st.CssClass,
@@ -387,6 +404,8 @@ namespace CRMApi.Repository
                 UpdateUser.PasswordExpiredAt = obj.PasswordExpiredAt == null || obj.PasswordExpiredAt == default(DateTime) ? UpdateUser.CreatedAt.AddMonths(24) : obj.PasswordExpiredAt;
                 UpdateUser.Company = obj.Company;
                 UpdateUser.Api = obj.Api;
+                UpdateUser.DepartmentId = obj.DepartmentId;
+                UpdateUser.DesignationId = obj.DesignationId;                
                 UpdateUser.ApprovalRole = obj.ApprovalRole;
                 UpdateUser.UpdatedBy = objLogger.Id;
                 UpdateUser.UpdatedAt = DateTime.Now;
@@ -619,10 +638,10 @@ namespace CRMApi.Repository
                 {
                     obj.Name,
                     Type = obj.UserType,
-                    obj.Theme,                    
+                    obj.Theme,
+                    AuthToken = Util.CreateJwtToken(obj),
                     obj.Company,
-                    obj.Api,
-                    AuthToken = Util.CreateJwtToken(obj)
+                    obj.Api
                 };
                 data.Company = db.Company.FirstOrDefault(cp => App.ActiveStatus.Contains(cp.Status) && cp.Id == obj.CompanyId);
                 data.AppMenu = AppMenu(obj).data;

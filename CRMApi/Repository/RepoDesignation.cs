@@ -5,11 +5,11 @@ using System.Dynamic;
 
 namespace CRMApi.Repository
 {
-    public class RepoDepartment
+    public class RepoDesignation
     {
         private readonly DbCRM db;
         private readonly AppSetting App = Util.AppSetting;
-        public RepoDepartment(DbCRM db)
+        public RepoDesignation(DbCRM db)
         {
             this.db = db;
         }
@@ -19,8 +19,8 @@ namespace CRMApi.Repository
             try
             {
                 dynamic option = new ExpandoObject();
-                var dbDepartment = db.Department.Where(x => App.ActiveStatus.Contains(x.Status)).ToList();
-                var ListStatus = dbDepartment.Select(x => x.Status.ToString()).ToList();
+                var dbDesignation = db.Designation.Where(x => App.ActiveStatus.Contains(x.Status)).ToList();
+                var ListStatus = dbDesignation.Select(x => x.Status.ToString()).ToList();
                 option.Status = (
                     from st in db.Setting                    
                     where App.ActiveStatus.Contains(st.Status) && st.Name == App.SettingName.Status && ListStatus.Contains(st.Value)
@@ -30,7 +30,7 @@ namespace CRMApi.Repository
                         st.Description,
                     }
                 ).ToList();
-                option.ListId = db.Department.Select(x => new { x.Id,  x.Description }).ToList();
+                option.ListId = db.Designation.Select(x => new { x.Id,  x.Description }).ToList();
                 objMsg.data = option;
                 Message.Success(ref objMsg, "Record found");
             }
@@ -40,22 +40,22 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public List<Department> List(Department? obj, User User)
+        public List<Designation> List(Designation? obj, User User)
         {
-            List<Department> Department = new List<Department>();
+            List<Designation> Designation = new List<Designation>();
             try 
             {
-                obj ??= new Department();
+                obj ??= new Designation();
                 obj.ListStatus = obj.ListStatus.Count == 0 ? App.ActiveStatus : obj.ListStatus;
-                var dbDepartment = db.Department.Where(x => obj.ListStatus.Contains(x.Status)).AsQueryable();
-                dbDepartment = obj.ListId.Any() ? dbDepartment.Where(x => obj.ListId.Contains(x.Id)).AsQueryable() : dbDepartment;
+                var dbDesignation = db.Designation.Where(x => obj.ListStatus.Contains(x.Status)).AsQueryable();
+                dbDesignation = obj.ListId.Any() ? dbDesignation.Where(x => obj.ListId.Contains(x.Id)).AsQueryable() : dbDesignation;
 
-                Department = (
-                    from dpt in dbDepartment
+                Designation = (
+                    from dpt in dbDesignation
                     join sts in db.Setting on new { Value = dpt.Status.ToString(), Name = App.SettingName.Status } equals new { sts.Value, sts.Name }
                     join cby in db.User on dpt.CreatedBy equals cby.Id
                     join uby in db.User on dpt.UpdatedBy equals uby.Id
-                    select new Department
+                    select new Designation
                     {
                         Id = dpt.Id,
                         Code = dpt.Code,
@@ -80,9 +80,9 @@ namespace CRMApi.Repository
             catch (Exception) 
             {
             }                       
-            return Department;
+            return Designation;
         }
-        public Message Print(Department obj, User User) 
+        public Message Print(Designation obj, User User) 
         {
             Message objMsg = new Message();
             try 
@@ -96,7 +96,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Export(Department obj, User User)
+        public Message Export(Designation obj, User User)
         {
             Message objMsg = new Message();
             try
@@ -108,7 +108,7 @@ namespace CRMApi.Repository
                     Message.Error(ref objMsg, "Company not found.");
                     return objMsg;
                 }
-                //Get Department Group
+                //Get Designation Group
                 var Deparment = List(obj, User).Select(x => new
                 {
                     x.Id,
@@ -127,8 +127,8 @@ namespace CRMApi.Repository
                 //Convert List To DataTable
                 DataTable objDataTable = Util.ListToDataTable(Deparment);
                 //Convert Datatable to base64                
-                objCompany.SheetName = "Department List";
-                objCompany.ReportDesc = $"Department - {DateTime.Now.ToString("dd-MMM-yyyy")}";
+                objCompany.SheetName = "Designation List";
+                objCompany.ReportDesc = $"Designation - {DateTime.Now.ToString("dd-MMM-yyyy")}";
                 objMsg.base64 = Util.DataTableToBase64(objDataTable, objCompany);
                 Message.Get(ref objMsg, "");
             }
@@ -138,7 +138,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Add(Department obj, User User)
+        public Message Add(Designation obj, User User)
         {
             Message objMsg = new Message();
             try
@@ -146,13 +146,13 @@ namespace CRMApi.Repository
                 obj.Name = Util.SanitizeInput(obj.Name, null) ?? "";
                 obj.Description = Util.SanitizeInput(obj.Description, null) ?? "";
                 //Checking Duplicate
-                var duplicate = db.Department.Where(ap => ap.Name == obj.Name || ap.Description == obj.Description).Select(ap => new { ap.Name, ap.Description }).FirstOrDefault();
+                var duplicate = db.Designation.Where(ap => ap.Name == obj.Name || ap.Description == obj.Description).Select(ap => new { ap.Name, ap.Description }).FirstOrDefault();
                 if (duplicate != null)
                 {
                     if (duplicate.Name == obj.Name)
-                        Message.Duplicate(ref objMsg, $"Department Name : {obj.Name} already exists.");
+                        Message.Duplicate(ref objMsg, $"Designation Name : {obj.Name} already exists.");
                     else if (duplicate.Description == obj.Description)
-                        Message.Duplicate(ref objMsg, $"Department Description : {obj.Description} already exists.");
+                        Message.Duplicate(ref objMsg, $"Designation Description : {obj.Description} already exists.");
                     return objMsg;
                 }
                 obj.CreatedBy = User.Id;
@@ -173,18 +173,18 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Edit(Department obj, User User) 
+        public Message Edit(Designation obj, User User) 
         {
             Message objMsg = new Message();
             try 
             {
-                var Department = List(obj, User).FirstOrDefault();
-                if (Department == null)
+                var Designation = List(obj, User).FirstOrDefault();
+                if (Designation == null)
                 {
-                    Message.Error(ref objMsg, "Department did not find for edit.");
+                    Message.Error(ref objMsg, "Designation did not find for edit.");
                     return objMsg;
                 }
-                objMsg.obj = Department;                
+                objMsg.obj = Designation;                
                 Message.Success(ref objMsg, "Record found.");
             }
             catch (Exception ex) 
@@ -193,29 +193,29 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Update(Department obj, User User)
+        public Message Update(Designation obj, User User)
         {
             Message objMsg = new Message();
             try
             {
                 obj.Name = Util.SanitizeInput(obj.Name, null) ?? "";
                 obj.Description = Util.SanitizeInput(obj.Description, null) ?? "";
-                // Get Active Department
-                var dbDepartment = db.Department.Where(dp => App.ActiveStatus.Contains(dp.Status)).ToList();
+                // Get Active Designation
+                var dbDesignation = db.Designation.Where(dp => App.ActiveStatus.Contains(dp.Status)).ToList();
                 // Check for duplicate Name or Description
-                var duplicate = dbDepartment.FirstOrDefault(dp => (dp.Name == obj.Name || dp.Description == obj.Description) && dp.Id != obj.Id);
+                var duplicate = dbDesignation.FirstOrDefault(dp => (dp.Name == obj.Name || dp.Description == obj.Description) && dp.Id != obj.Id);
                 if (duplicate != null)
                 {
                     if (duplicate.Name == obj.Name)
-                        Message.Duplicate(ref objMsg, $"Department Name: {obj.Name} already exists.");
+                        Message.Duplicate(ref objMsg, $"Designation Name: {obj.Name} already exists.");
                     else
-                        Message.Duplicate(ref objMsg, $"Department Description: {obj.Description} already exists.");
+                        Message.Duplicate(ref objMsg, $"Designation Description: {obj.Description} already exists.");
                     return objMsg;
                 }
-                var UpdateDept = dbDepartment.FirstOrDefault(dp => dp.Id == obj.Id);
+                var UpdateDept = dbDesignation.FirstOrDefault(dp => dp.Id == obj.Id);
                 if (UpdateDept == null)
                 {
-                    Message.Error(ref objMsg, "Department did not find for update.");
+                    Message.Error(ref objMsg, "Designation did not find for update.");
                     return objMsg;
                 }                
                 UpdateDept.Name = obj.Name;
@@ -237,15 +237,15 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Delete(Department obj, User User)
+        public Message Delete(Designation obj, User User)
         {
             Message objMsg = new Message();
             try
             {
-                var DeleteDept = db.Department.FirstOrDefault(ap => App.ActiveStatus.Contains(ap.Status) && ap.Id == obj.Id);
+                var DeleteDept = db.Designation.FirstOrDefault(ap => App.ActiveStatus.Contains(ap.Status) && ap.Id == obj.Id);
                 if (DeleteDept == null)
                 {
-                    Message.Error(ref objMsg, "Department did not find for delete.");
+                    Message.Error(ref objMsg, "Designation did not find for delete.");
                     return objMsg;
                 }
                 DeleteDept.Status = App.Status.Delete;
@@ -267,15 +267,15 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Enable(Department obj, User User)
+        public Message Enable(Designation obj, User User)
         {
             Message objMsg = new Message();
             try
             {
-                var DeleteDept = db.Department.FirstOrDefault(ap => ap.Status == App.Status.Delete && ap.Id == obj.Id);
+                var DeleteDept = db.Designation.FirstOrDefault(ap => ap.Status == App.Status.Delete && ap.Id == obj.Id);
                 if (DeleteDept == null)
                 {
-                    Message.Error(ref objMsg, "Department did not find for delete.");
+                    Message.Error(ref objMsg, "Designation did not find for delete.");
                     return objMsg;
                 }
                 DeleteDept.Status = App.Status.Enable;

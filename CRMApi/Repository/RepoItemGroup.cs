@@ -161,7 +161,8 @@ namespace CRMApi.Repository
         public Message Add(ItemGroup obj, User User)
         {
             Message objMsg = new Message();
-            obj.Code = Util.SanitizeInput(obj.Code ?? "", App.Regexp.AlphaLgNum);            
+            obj.Code = Util.SanitizeInput(obj.Code ?? "", App.Regexp.AlphaLgNum)!;
+            obj.CompanyId = User.CompanyId;
             obj.CreatedBy = User.Id;
             obj.UpdatedBy = User.Id;
             //Validate Duplicate
@@ -186,9 +187,7 @@ namespace CRMApi.Repository
             Message.Add(ref objMsg, db.SaveChanges(), "");            
             if (objMsg.status == Message.Type.success)
             {
-                db.Entry(obj).CurrentValues.SetValues(
-                    db.Database.SqlQueryRaw<ItemGroup>("SELECT * FROM ITEMGROUP WHERE ID = {0} AND ROWNUM = 1", obj.Id).AsEnumerable().FirstOrDefault() ?? obj
-                );
+                db.Entry(obj).Reload();
                 obj.ListId.Add(obj.Id);
                 objMsg.obj = List(obj, User).FirstOrDefault();
                 objMsg.data = GetViewOption().data;

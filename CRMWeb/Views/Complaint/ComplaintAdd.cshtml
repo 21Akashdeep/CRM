@@ -1,0 +1,98 @@
+﻿<div id="modalComplaint" class="modal fade" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Complaint / Add</span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body" style="min-height:75vh;">
+                <form id="formComplaint">
+                    <input type="hidden" id="Complaint_Id" name="Id" />
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label>Date<span class="text-mandatory">*</span></label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" id="Complaint_Date" name="Date" autocomplete="off" class="form-control complaint-required" maxlength="50" data-date-format="DD-MMM-YYYY" />
+                                <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
+                            </div>                            
+                        </div>
+                        <div class="col-md-2">
+                            <label>Support Mode<span class="text-mandatory">*</span></label>
+                            <select id="Complaint_SupportMode" name="SupportMode" class="select-pick complaint-required" data-search='true' data-size="4">
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Customer<span class="text-mandatory">*</span></label>
+                            <select id="Complaint_CustomerId" name="CustomerId" class="select-pick complaint-required" data-search='true' data-size="4">
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Address1<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Complaint_Address1" name="Address1" autocomplete="off" class="form-control form-control-sm complaint-required" maxlength="100" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>Address2</label>
+                            <input type="text" id="Complaint_Address2" name="Address2" autocomplete="off" class="form-control form-control-sm" maxlength="100" />
+                        </div>
+                        <div class="col-md-2">
+                            <label>Pin Code<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Complaint_PinCode" name="PinCode" autocomplete="off" class="form-control form-control-sm complaint-required"  maxlength="6" />
+                        </div>
+                        <div class="col-md-2">
+                            <label>Post Office</label>
+                            <input type="text" id="Complaint_PostOffice" name="PostOffice" autocomplete="off" class="form-control form-control-sm es-input" maxlength="100" />
+                        </div>
+                        <div class="col-md-2">
+                            <label>District</label>
+                            <input type="text" id="Complaint_District" name="District" autocomplete="off" class="form-control form-control-sm" maxlength="100" />
+                        </div>
+                        <div class="col-md-2">
+                            <label>State<span class="text-mandatory">*</span></label>
+                            <select id="Complaint_AdminDivId" name="AdminDivId" class="select-pick complaint-required" data-search="true" data-size="4" data-parent="#modalComplaint"></select>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Country<span class="text-mandatory">*</span></label>
+                            <select id="Complaint_CountryId" name="CountryId" class="select-pick complaint-required" data-search="true" data-size="4"></select>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Contact No.<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Complaint_ContactNo" name="ContactNo" autocomplete="off" class="form-control form-control-sm complaint-required" data-num="true" maxlength="10" />
+                        </div>
+                        <div class="col-md-2">
+                            <label>Email</label>
+                            <input type="text" id="Complaint_Email" name="Email" autocomplete="off" class="form-control form-control-sm" maxlength="100" />
+                        </div>
+                        <div class="col-md-2">
+                            <label>Department<span class="text-mandatory">*</span></label>
+                            <select id="Complaint_DepartmentId" name="DepartmentId" class="select-pick complaint-required" data-search="true" data-size="4"></select>
+                        </div>     
+                        <div class="col-md-2">
+                            <label>Assign To</label>
+                            <select id="Complaint_AssignTo" name="AssignTo" class="select-pick" data-search="true" data-size="4"></select>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Priority<span class="text-mandatory">*</span></label>
+                            <select id="Complaint_Priority" name="Priority" class="select-pick complaint-required" data-search="true" data-size="4"></select>
+                        </div>
+                        <div class="col-md-12">
+                            <label>Problem<span class="text-mandatory">*</span></label>
+                            <textarea type="text" id="Complaint_Problem" name="Problem" class="form-control form-control-sm complaint-required" rows="4" cols="20"></textarea>
+                        </div>
+                    </div>                    
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnSave" class="btn btn-sm btn-success rounded-5">
+                    <span class="fa fa-save"></span>&nbsp;&nbsp;Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

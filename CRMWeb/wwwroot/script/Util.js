@@ -3,7 +3,7 @@
     User: sessionStorage.getItem('User') ? JSON.parse(sessionStorage.getItem('User')) : null,
     AppMenu: sessionStorage.getItem('AppMenu') ? sessionStorage.getItem('AppMenu') : '',
     Company: sessionStorage.getItem('Company') ? JSON.parse(sessionStorage.getItem('Company')) : null,
-    Info: { Code: "CRM", Name: "CRM PORTAL", Desc: "Customer Relationship Managment", SubDesc: "Login" }
+    Info: { Code: "CRM", Name: "CRM PORTAL", Desc: "CRM Portal", SubDesc: "Sign In", CountryId: 112 }
 }
 
 const Util = {
@@ -121,7 +121,7 @@ const Cookie = {
         return match ? match[2] : null;
     },
     set({ name, value, expiryDays = 100 }) {
-        const expires = new Date(Date.now() + expiryDays * 86400000).toUTCString();        
+        const expires = new Date(Date.now() + expiryDays * 86400000).toUTCString();
         document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
     },
     remove(name) {
@@ -272,15 +272,15 @@ const Message = {
                 swalHtml += `<h3>Error</h3>`;
                 break;
         }
-        swalHtml += `<div class='swal2-text-msg'><span>${statusText}</span></div></div>`;        
+        swalHtml += `<div class='swal2-text-msg'><span>${statusText}</span></div></div>`;
         Swal.fire({
             html: swalHtml,
             background: 'rgba(0,0,0,0.5)',
             timer: 100000,
             didOpen: () => {
-                document.querySelector('button.swal2-confirm').focus();                
+                document.querySelector('button.swal2-confirm').focus();
             }
-        });        
+        });
     },
     confirm({ msg = '', confirmButtonText = 'Confirm', denyButtonText = "Don't Confirm", data = null, onConfirm = () => { }, onDenied = () => { } }) {
         Swal.fire({
@@ -312,7 +312,6 @@ const Message = {
         });
     }
 };
-
 const PageLoader = {
     on() {
         $('#modalRequestProcess').modal('show');
@@ -321,9 +320,8 @@ const PageLoader = {
         $('#modalRequestProcess').modal('hide');
     }
 };
-
 const Data = {
-    get({ url = null, loader = true, async = true, isApi = true, onSuccess = () => { } }) {           
+    get({ url = null, loader = true, async = true, isApi = true, onSuccess = () => { } }) {
         let ApiUrl = isApi ? Url.Api + url : Url.App + url;
         let AuthToken = App.User ? `Bearer ${App.User.AuthToken}` : '';
         $.ajax({
@@ -377,7 +375,7 @@ const Data = {
     },
     post({ url = null, data = null, loader = true, loaderName = '', async = true, isApi = true, onSuccess = () => { } }) {
         let ApiUrl = isApi ? Url.Api + url : Url.App + url;
-        let AuthToken = App.User ? `Bearer ${App.User.AuthToken}` : '';        
+        let AuthToken = App.User ? `Bearer ${App.User.AuthToken}` : '';
         $.ajax({
             url: ApiUrl,
             type: 'POST',
@@ -437,9 +435,9 @@ const Data = {
             }
         });
     },
-    update({ url= null, data= null, loader= true, async= true, isApi= true, onSuccess= () => { } }) {
+    update({ url = null, data = null, loader = true, async = true, isApi = true, onSuccess = () => { } }) {
         let ApiUrl = isApi ? Url.Api + url : Url.App + url;
-        let AuthToken = App.User ? `Bearer ${App.User.AuthToken}` : '';  
+        let AuthToken = App.User ? `Bearer ${App.User.AuthToken}` : '';
         $.ajax({
             url: ApiUrl,
             type: 'Patch',
@@ -489,7 +487,7 @@ const Data = {
             }
         });
     },
-    delete({ url= null, loader= true, async= true, isApi= true, onSuccess= () => { } }) {        
+    delete({ url = null, loader = true, async = true, isApi = true, onSuccess = () => { } }) {
         let ApiUrl = isApi ? Url.Api + url : Url.App + url;
         let AuthToken = App.User ? `Bearer ${App.User.AuthToken}` : '';
         $.ajax({
@@ -507,7 +505,7 @@ const Data = {
                     PageLoader.on();
                 }
             },
-            success: (response) => {                
+            success: (response) => {
                 try {
                     if (response.status == Message.Type.redirect || response.status == Message.Type.unauthorized) {
                         Message.alert(response);
@@ -547,7 +545,16 @@ const Data = {
         const array = $(formId).serializeArray();
         array.forEach(({ name, value }) => {
             if (value && value !== 'selectPick-Search-Clear') {
-                object[name] = value || null; // Set value or null if empty
+                if (value == 'true') {
+                    value = true;
+                }
+                else if (value == 'false') {
+                    value = false;
+                }
+                else if (DateTime.isValid(value)) {
+                    value = DateTime.json(value);
+                }
+                object[name] = value == null ? null : value; // Set value or null if empty
             }
         });
         return object;
@@ -566,14 +573,19 @@ const Data = {
             return;
         }
 
+        $(`${formId} input.es-input`).editableSelect('destroy');
+        $(`${formId} select.es-input`).editableSelect({ effects: 'slide' });
+
         Object.keys(obj).forEach(key => {
-            const val = obj[key] == null ? null : String(obj[key]);
+            let val = obj[key] == null ? null : String(obj[key]);
+            if (DateTime.isValid(val)) {
+                let format = !$(`${formId} [name=${key}]`).attr('data-date-format') ? 'DD-MMM-YYYY HH:mm' : $(`${formId} [name=${key}]`).attr('data-date-format');
+                val = moment(val).format(format);
+            }
             $(`${formId} [name=${key}]`).val(val);
         });
         //This usefull when call this method from modal function
         SelectPick.refresh({ selector: `${formId} select.select-pick` });
-        $(`${formId} input.es-input`).editableSelect('destroy');
-        $(`${formId} select.es-input`).editableSelect({ effects: 'slide' });
     },
     groupAndSum({ data, groupBy, sumBy = [] }) {
         const result = data.reduce((acc, current) => {
@@ -682,7 +694,6 @@ const Data = {
         }
     },
 }
-
 const _File = {
     attach({ fileId = "", allowedExtension = ['png', 'jpg', 'jpeg', 'pdf'], iframeId = "", readerOnLoad = () => { } }) {
         var objFile = $(fileId)[0];
@@ -834,7 +845,6 @@ const _File = {
         };
     }
 }
-
 const Field = {
     isMandatory(data = { class: '', reset: false, id: '' }) {
         var status = true;
@@ -918,134 +928,116 @@ const Field = {
         element.forEach(el => { el.dispatchEvent(event) });
     },
 };
-
 const Modal = {
-    open(pram = { id: '', title: '', action: '', obj: {}, callBack: () => { } }) {
-        pram.id = typeof (pram.id) == 'undefined' ? '' : pram.id;
-        pram.title = typeof (pram.title) == 'undefined' ? '' : pram.title;
-        pram.action = typeof (pram.action) == 'undefined' ? '' : pram.action;
-        pram.obj = typeof (pram.obj) == 'undefined' ? {} : pram.obj;
+    open({ id = '', title = '', action = '', obj = {}, callBack = () => { } }) {
         //=======Check Modal Id====================//
-        if (pram.id == '') {
+        if (id == '') {
             console.warn('Modal id did not find.');
         }
-        if ($(pram.id).hasClass("show")) {
-            $(pram.id).trigger('focus');
+        if ($(id).hasClass("show")) {
+            $(id).trigger('focus');
             return;
         }
         //=======Reset Modal Elements====================//
-        $(pram.id + ' .modal-title').text(pram.title);
-        $(pram.id + ' input, ' + pram.id + ' textarea,' + pram.id + ' select,' + pram.id + ' button').prop('disabled', false);
-        $(pram.id + ' input[type=checkbox]').prop('checked', false);
-        $(pram.id + ' input.es-input').editableSelect('destroy');
-        $(pram.id + ' input.es-input').editableSelect({ effects: 'slide' });
-        $(pram.id + ' input,' + pram.id + ' textarea,' + pram.id + ' select').val('');
-        SelectPick.refresh({ selector: `${pram.id} select.select-pick` });
-        $(pram.id + ' .modal-footer button').show();
-        Table.empty({ selector: pram.id + ' .table-default' });
+        $(`${id} .modal-title`).text(title);
+        $(`${id} input, ${id} textarea, ${id} select, ${id} button`).prop('disabled', false);
+        $(`${id} input[type=checkbox]`).prop('checked', false);
+        $(`${id} input.es-input`).editableSelect('destroy');
+        $(`${id} input.es-input`).editableSelect({ effects: 'slide' });
+        $(`${id} input, ${id} textarea, ${id} select`).val('');
+        SelectPick.refresh({ selector: `${id} select.select-pick` });
+        $(`${id} .modal-footer button`).show();
+        Table.empty({ selector: `${id} .table-default` });
 
-        Field.isMandatory({ reset: true, id: pram.id });
-        $(pram.id + ' .date-picker').prevAll('input[type="text"]').each((index, obj) => {
-            $('#' + obj.id).val(moment().format('DD-MMM-YYYY'));
+        Field.isMandatory({ reset: true, id: id });
+        $(`${id} .date-picker`).prevAll('input[type="text"]').each((index, el) => {
+            $(`#${el.id}`).val(moment().format('DD-MMM-YYYY'));
         });
-        $(pram.id + ' .date-time-picker').prevAll('input[type="text"]').each((index, obj) => {
-            $('#' + obj.id).val(moment().format('DD-MMM-YYYY HH:mm'));
+        $(`${id} .date-time-picker`).prevAll('input[type="text"]').each((index, el) => {
+            $(`#${el.id}`).val(moment().format('DD-MMM-YYYY HH:mm'));
         });
-        $(pram.id + ' .date-range-picker').prevAll('input[type="text"]').each((index, obj) => {
-            $('#' + obj.id).val(moment().format('DD-MMM-YYYY') + ' | ' + moment().format('DD-MMM-YYYY'));
+        $(`${id} .date-range-picker`).prevAll('input[type="text"]').each((index, el) => {
+            $(`#${el.id}`).val(moment().format('DD-MMM-YYYY') + ' | ' + moment().format('DD-MMM-YYYY'));
         });
-        $(pram.id + ' .month-picker').prevAll('input[type="text"]').each((index, obj) => {
-            $('#' + obj.id).val(moment().format('MMM-YYYY'));
+        $(`${id} .month-picker`).prevAll('input[type="text"]').each((index, el) => {
+            $(`#${el.id}`).val(moment().format('MMM-YYYY'));
         });
-        $(pram.id + ' .time-picker').prevAll('input[type="text"]').each((index, obj) => {
-            $('#' + obj.id).val(moment().format('HH:mm'));
+        $(`${id} .time-picker`).prevAll('input[type="text"]').each((index, el) => {
+            $(`#${el.id}`).val(moment().format('HH:mm'));
         });
 
-        _File.setIframe({ iframeId: `#${$(`${pram.id} iframe`).attr('id')}`, src: "/image/upload.png" });
+        _File.setIframe({ iframeId: `#${$(`${id} iframe`).attr('id')}`, src: "/image/upload.png" });
 
         //=======Callback function===========//
-        if (typeof (pram.callBack) != 'undefined') {
-            pram.callBack();
-            $(pram.id + ' input.es-input').editableSelect('destroy');
-            $(pram.id + ' input.es-input').editableSelect({ effects: 'slide' });
-            SelectPick.refresh({ selector: `${pram.id} select.select-pick` });
+        if (typeof (callBack) != 'undefined') {
+            callBack();
         }
 
         //=======Assign Values from Obj===========//
-        if (Object.keys(pram.obj).length > 0) {
-            let formId = '#' + $(pram.id + ' form').attr('id');
-            Data.objectToForm({ obj: pram.obj, formId: formId });
-            //======Refresh Select Pick==================//
-            Dropdown.refresh({ selector: `${pram.id} select.select-pick` });
+        if (Object.keys(obj).length > 0) {
+            let formId = '#' + $(`${id} form`).attr('id');
+            Data.objectToForm({ obj: obj, formId: formId });
+        }
 
-            //======Refresh Editable Select Picker==================//
-            $(pram.id + ' input.es-input').editableSelect('destroy');
-            $(pram.id + ' input.es-input').editableSelect({ effects: 'slide' });
-        }
-        //for Select 2 open properly in modal
-        $.fn.modal.Constructor.prototype.enforceFocus = () => { };
         //======Modal Footer Button===================//
-        if (pram.action == 'Add' || pram.action == 'add') {
-            $(pram.id + ' .modal-footer button').attr('title', 'Save');
-            /*$(pram.id + ' .modal-footer button').html('<span class="fa fa-save"></span>');*/
-            $(pram.id).modal('show');
+        if (action == 'Add' || action == 'add') {
+            $(`${id} .modal-footer button`).attr('title', 'Save');
+            $(id).modal('show');
         }
-        else if (pram.action == 'Edit' || pram.action == 'edit') {
-            $(pram.id + ' .modal-footer button').attr('title', 'Update');            
-            $(pram.id).modal('show');
+        else if (action == 'Edit' || action == 'edit') {
+            $(`${id} .modal-footer button`).attr('title', 'Update');
+            $(id).modal('show');
         }
-        else if (pram.action == 'View' || pram.action == 'view') {
-            $(pram.id + ' .modal-body input').prop('disabled', true);
-            $(pram.id + ' .modal-body textarea').prop('disabled', true);
-            $(pram.id + ' .modal-body select').prop('disabled', true);
-            SelectPick.refresh({ selector: `${pram.id} select.select-pick` });
-            $(pram.id + ' .modal-footer button').hide();
-            $(pram.id).modal('show');
+        else if (action == 'View' || action == 'view') {
+            $(`${id} .modal-body input`).prop('disabled', true);
+            $(`${id} .modal-body textarea`).prop('disabled', true);
+            $(`${id} .modal-body select`).prop('disabled', true);
+            SelectPick.refresh({ selector: `${id} select.select-pick` });
+            $(`${id} .modal-footer button`).hide();
+            $(id).modal('show');
         }
         else {
-            $(pram.id).modal('show');
+            $(id).modal('show');
         }
     },
-    reset(pram = { id: '' }) {
-        pram.id = typeof (pram.id) == 'undefined' ? '' : pram.id;
+    reset({ id = '' }) {
         //=======Check Modal Id====================//
-        if (pram.id == '') {
+        if (id == '') {
+            console.warn('Modal id did not find.');
+        }
+        //=======Reset Modal Element====================//        
+        $(`${id} input, ${id} textarea, ${id} select, ${id} button`).prop('disabled', false);
+        $(`${id} input[type=checkbox]`).prop('checked', false);
+        $(`${id} input.es-input`).editableSelect('destroy');
+        $(`${id} input.es-input`).editableSelect({ effects: 'slide' });
+        $(`${id} input, ${id} textarea, ${id} select`).val('');
+        SelectPick.refresh({ selector: `${id} select.select-pick` });
+        Table.empty({ selector: `${id} .table-default` });
+        Field.isMandatory({ reset: true, id: id });
+        $(`#${$(`${id} .date-picker`).prev('input').attr('id')}`).val(moment().format('DD-MMM-YYYY'));
+        $(`#${$(`${id}  .date-range-picker`).prev('input').attr('id')}`).val(moment().format('DD-MMM-YYYY') + ' | ' + moment().format('DD-MMM-YYYY'));
+        $(`#${$(`${id}  .month-picker`).prev('input').attr('id')}`).val(moment().format('MMM-YYYY'));
+        _File.setIframe({ IframeId: $(`${id} .file-upload iframe`).attr('id'), src: "/images/uploadlogo.png" });
+    },
+    close({ id = '' }) {
+        //=======Check Modal Id====================//
+        if (id == '') {
             console.warn('Modal id did not find.');
         }
         //=======Reset Modal Element====================//                
-        $(pram.id + ' input, ' + pram.id + ' textarea,' + pram.id + ' select,' + pram.id + ' button').prop('disabled', false);
-        $(pram.id + ' input[type=checkbox]').prop('checked', false);
-        $(pram.id + ' input.es-input').editableSelect('destroy');
-        $(pram.id + ' input.es-input').editableSelect({ "effects": 'slide' });
-        $(pram.id + ' input,' + pram.id + ' textarea,' + pram.id + ' select').val('');
-        SelectPick.refresh({ selector: `${pram.id} select.select-pick` });
-        Table.empty({ selector: pram.id + ' .table-default' });
-        Field.isMandatory({ reset: true, id: pram.id });
-        $('#' + $(pram.id + ' .date-picker').prev('input').attr('id')).val(moment().format('DD-MMM-YYYY'));
-        $('#' + $(pram.id + ' .date-range-picker').prev('input').attr('id')).val(moment().format('DD-MMM-YYYY') + ' | ' + moment().format('DD-MMM-YYYY'));
-        $('#' + $(pram.id + ' .month-picker').prev('input').attr('id')).val(moment().format('MMM-YYYY'));
-        _File.setIframe({ IframeId: $(pram.id + ' .file-upload iframe').attr('id'), src: "/images/uploadlogo.png" });
-    },
-    close(pram = { id: '' }) {
-        pram.id = typeof (pram.id) == 'undefined' ? '' : pram.id;
-        //=======Check Modal Id====================//
-        if (pram.id == '') {
-            console.warn('Modal id did not find.');
-        }
-        //=======Reset Modal Element====================//                
-        $(pram.id + ' input, ' + pram.id + ' textarea,' + pram.id + ' select,' + pram.id + ' button').prop('disabled', false);
-        $(pram.id + ' input[type=checkbox]').prop('checked', false);
-        $(pram.id + ' input.es-input').editableSelect('destroy');
-        $(pram.id + ' input.es-input').editableSelect({ "effects": 'slide' });
-        $(pram.id + ' input,' + pram.id + ' textarea,' + pram.id + ' select').val('');
-        SelectPick.refresh({ selector: `${pram.id} select.select-pick` });
-        Table.empty({ selector: pram.id + ' .table-default' });
-        Field.isMandatory({ reset: true, id: pram.id });
-        $('#' + $(pram.id + ' .date-picker').prev('input').attr('id')).val(moment().format('DD-MMM-YYYY'));
-        $('#' + $(pram.id + ' .date-range-picker').prev('input').attr('id')).val(moment().format('DD-MMM-YYYY') + ' | ' + moment().format('DD-MMM-YYYY'));
-        $('#' + $(pram.id + ' .month-picker').prev('input').attr('id')).val(moment().format('MMM-YYYY'));
-        _File.setIframe({ IframeId: $(pram.id + ' .file-upload iframe').attr('id'), src: "/images/uploadlogo.png" });
-        $(pram.id).modal('hide');
+        $(`${id} input, ${id} textarea, ${id} select, ${id} button`).prop('disabled', false);
+        $(`${id} input[type=checkbox]`).prop('checked', false);
+        $(`${id} input.es-input`).editableSelect('destroy');
+        $(`${id} input.es-input`).editableSelect({ effects: 'slide' });
+        $(`${id} input, ${id} textarea, ${id} select`).val('');
+        SelectPick.refresh({ selector: `${id} select.select-pick` });
+        Table.empty({ selector: `${id} .table-default` });
+        Field.isMandatory({ reset: true, id: id });
+        $(`#${$(`${id} .date-picker`).prev('input').attr('id')}`).val(moment().format('DD-MMM-YYYY'));
+        $(`#${$(`${id}  .date-range-picker`).prev('input').attr('id')}`).val(moment().format('DD-MMM-YYYY') + ' | ' + moment().format('DD-MMM-YYYY'));
+        $(`#${$(`${id}  .month-picker`).prev('input').attr('id')}`).val(moment().format('MMM-YYYY'));
+        _File.setIframe({ IframeId: $(`${id} .file-upload iframe`).attr('id'), src: "/images/uploadlogo.png" });
+        $(id).modal('hide');
     },
     hideEvent() {
         document.querySelectorAll('.modal').forEach(modal => {
@@ -1059,7 +1051,6 @@ const Modal = {
         }
     }
 };
-
 const Print = {
     page({ title = 'Print Report', link = [], style = [], content = [], border = false, isPrint = true, orientation = 'A4 portrait' }) {
         if (content.length == 0) {
@@ -1397,88 +1388,107 @@ const Export = {
         }
     }
 }
-
 const OnlineApi = {
-    pinCode(pram = { pinCode: '', postOfficeId: '', postOffice: '', districtId: '', stateId: '', loader: false, callBack: () => { } }) {
-        pram = {
-            pinCode: pram.pinCode == undefined ? '' : pram.pinCode,
-            postOfficeId: pram.postOfficeId == undefined ? '#PostOffice' : pram.postOfficeId,
-            postOffice: pram.postOffice == undefined ? null : pram.postOffice,
-            districtId: pram.districtId == undefined ? '#DistrictId' : pram.districtId,
-            stateId: pram.stateId == undefined ? '#SateId' : pram.stateId,
-            loader: pram.loader == undefined ? true : pram.loader,
-            callBack: pram.callBack == undefined ? () => { } : pram.callBack
-        };
+    pinCode({
+        pinCode = '',
+        postOffice = null,
+        district = null,
+        state = null,
+        country = null,
+        pinCodeId = '',
+        postOfficeId = '',
+        districtId = '',
+        stateId = '',
+        countryId = '',
+        loader = false,
+        callback = () => { }
+    }) {
         let data = {
             status: Message.Type.warning,
             statusText: 'No records found',
-            obj: {}
+            obj: {
+                PinCode: pinCode,
+                PostOffice: postOffice,
+                PostOfficeList: [],
+                District: district,
+                State: state,
+                Country: country == null ? App.Info.CountryId : country
+            }
         };
-        $(pram.postOfficeId).editableSelect('destroy');
-        $(pram.districtId).val(null);
-        Dropdown.set({ id: pram.stateId });
-        if (pram.pinCode.length != 6) {
-            pram.callBack(data);
+
+        let updateFields = ({ obj, isValue = true }) => {
+            $(pinCodeId).val(obj.PinCode);
+            Dropdown.bind({ id: postOfficeId, data: obj.PostOfficeList, value: 'Name', text: 'Name', isEditable: true });
+            $(postOfficeId).val(obj.PostOffice);
+            $(districtId).val(obj.District);
+            Dropdown.set({ id: stateId, value: isValue ? [obj.State] : [], text: !isValue ? [obj.State] : [] });
+            Dropdown.set({ id: countryId, value: isValue ? [obj.Country] : [], text: !isValue ? [obj.Country] : [] });
+        };
+
+        if (!pinCode || pinCode.length !== 6 || isNaN(pinCode)) {
+            updateFields({ obj: data.obj, isValue: true });
             return;
-        }
+        };
+
         $.ajax({
-            url: 'https://api.postalpincode.in/pincode/' + pram.pinCode,
+            url: `https://api.postalpincode.in/pincode/${pinCode}`,
             type: 'Get',
             dataType: 'json',
             contenttype: 'application/json; charset=utf-8',
             beforeSend: () => {
-                if (pram.loader)
+                if (loader)
                     PageLoader.on();
             },
             success: (response) => {
-                response = response[0]
-                data.status = response.Status == 'Success' ? Message.Type.success : Message.Type.error;
-                data.statusText = response.Message;
-                data.obj.PostOffice = response.PostOffice == null ? [] : response.PostOffice;
-                data.obj.District = response.PostOffice == null ? null : response.PostOffice[0].District;
-                data.obj.State = response.PostOffice == null ? null : response.PostOffice[0].State;
-                Dropdown.bind({ id: pram.postOfficeId, data: data.obj.PostOffice, value: 'Name', text: 'Name', isEditable: true });
-                $(pram.postOfficeId).val(pram.postOffice);
-                $(pram.districtId).val(data.obj.District);
-                Dropdown.set({ id: pram.stateId, text: [data.obj.State] });
-                pram.callBack(data);
+                let obj = response[0];
+                if (obj.Status == 'Success') {
+                    data.status = Message.Type.success;
+                    data.statusText = obj.Message;
+                    let objPost = obj.PostOffice == null ? null : obj.PostOffice[0];
+                    data.obj.PostOfficeList = objPost == null ? [] : obj.PostOffice;
+                    data.obj.District = objPost == null ? null : objPost.District;
+                    data.obj.State = objPost == null ? null : objPost.State;
+                    data.obj.Country = objPost == null ? null : objPost.Country;
+                    updateFields({ obj: data.obj, isValue: false });
+                }
+                else {
+                    updateFields({ obj: data.obj });
+                    Message.error({ statusText: response[0].Message });
+                }
+                callback(data);
             },
             error: (response) => {
-                Message.error({ statusText: `Pin Code server is not responding.<br>${response.statusText}` });
-                pram.callBack(obj);
+                updateFields({ obj: data.obj });
+                data.status = Message.Type.error;
+                data.statusText = `Pin Code server is not responding.<br>${response.statusText}`;
+                Message.show(data);
+                callback(data);
             },
             complete: () => {
-                if (pram.loader)
+                if (loader)
                     PageLoader.off();
             }
         });
     },
-    ifscCode(pram = { ifscCode: '', bankNameId: '', bankAddressId: '', loader: true, callback: () => { } }) {
-        pram = {
-            ifscCode: pram.ifscCode == undefined ? '' : pram.ifscCode,
-            bankNameId: pram.bankNameId == undefined ? '#BankName' : pram.bankNameId,
-            bankAddressId: pram.bankNameId == undefined ? '#BankAddressId' : pram.bankAddressId,
-            loader: pram.loader == undefined ? true : pram.loader,
-            callback: pram.callback == undefined ? () => { } : pram.callback
-        };
-        $(`${pram.bankNameId}, ${pram.bankAddressId}`).val(null);
+    ifscCode({ ifscCode = '', bankNameId = '#BankName', bankAddressId = '#BankAddressId', loader = true, callback = () => { } }) {
+        $(`${bankNameId}, ${bankAddressId}`).val(null);
         let data = {
             status: Message.Type.warning,
             statusText: "IFSC Code did not find",
             obj: null
         };
-        if (pram.ifscCode.length != 11) {
-            pram.callback(data);
+        if (ifscCode.length != 11) {
+            callback(data);
             return;
         }
 
         $.ajax({
-            url: 'https://ifsc.razorpay.com/' + pram.ifscCode,
+            url: `https://ifsc.razorpay.com/${ifscCode}`,
             type: 'Get',
             dataType: 'json',
             contenttype: 'application/json; charset=utf-8',
             beforSend: () => {
-                if (pram.loader) {
+                if (loader) {
                     PageLoader.on();
                 }
             },
@@ -1488,17 +1498,17 @@ const OnlineApi = {
                 data.obj = response;
                 //Set Value
                 let Address = (`${response.BRANCH}, ${response.ADDRESS}, ${response.CITY}, ${response.DISTRICT}, ${response.STATE}`).replaceAll(",,", ",");
-                $(pram.bankNameId).val(data.obj.BANK);
-                $(pram.bankAddressId).val(Address.toCamelCase());
-                //Call Call function
-                pram.callback(data);
+                $(bankNameId).val(data.obj.BANK);
+                $(bankAddressId).val(Address.toCamelCase());
+                //Call Callback function
+                callback(data);
             },
             error: (response) => {
                 data.statusText = `IFSC Code ${pram.ifscCode} ${response.statusText}`;
-                pram.callback(data);
+                callback(data);
             },
             complete: () => {
-                if (pram.loader) {
+                if (loader) {
                     PageLoader.off();
                 }
             }
@@ -1515,20 +1525,20 @@ const DateTime = {
         DateTime.dateRangeTimePicker();
     },
     pickerFunction() { },
-    monthPicker() {
+    monthPicker({ selector = '.month-picker' } = {}) {
         var inputId = "";
-        $('.month-picker').each((index, element) => {
-            inputId = '#' + $(element).prev('input').attr('id');
+        $(selector).each((index, element) => {
+            inputId = `#${$(element).prev('input').attr('id')}`;
             if ($(inputId).val() == '') {
                 $(inputId).val(moment().format("MMM-YYYY"));
             }
         });
 
-        $('.month-picker').on('click', (e) => {
-            inputId = '#' + $(e.currentTarget).prev('input').attr('id');
+        $(selector).on('click', (e) => {
+            inputId = `#${$(e.currentTarget).prev('input').attr('id')}`;            
         });
 
-        $('.month-picker').daterangepicker({
+        $(selector).daterangepicker({
             showDropdowns: true,
             autoApply: true,
             minDate: moment().add(-2, 'y'),
@@ -1554,27 +1564,25 @@ const DateTime = {
                     picker.drops = 'down';
                 }
             });
-        $('.month-picker').on('apply.daterangepicker', (ev, picker) => {
+        $(selector).on('apply.daterangepicker', (ev, picker) => {
             $(inputId).val(picker.startDate.format('MMM-YYYY'));
         });
     },
-    datePicker({ minDate, maxDate } = {}) {
-        minDate = minDate === undefined ? moment().add(-10, 'y') : minDate;
-        maxDate = maxDate === undefined ? moment().add(10, 'y') : maxDate;
+    datePicker({ selector = '.date-picker', minDate = moment().add(-50, 'y'), maxDate = moment().add(10, 'y') } = {}) {        
         var inputId = "";
-        $('.date-picker').each((index, element) => {
+        $(selector).each((index, element) => {
             inputId = '#' + $(element).prev('input').attr('id');
             if ($(inputId).val() == '') {
                 $(inputId).val(moment().format("DD-MMM-YYYY"));
             }
         });
 
-        $('.date-picker').on('click', (e) => {
+        $(selector).on('click', (e) => {
             inputId = '#' + $(e.currentTarget).prev('input').attr('id');
             DateTime.pickerFunction = () => { }
         });
 
-        $('.date-picker').daterangepicker({
+        $(selector).daterangepicker({
             showDropdowns: true,
             autoApply: true,
             minDate: minDate,
@@ -1600,22 +1608,22 @@ const DateTime = {
                     picker.drops = 'down';
                 }
             });
-        $('.date-picker').on('apply.daterangepicker', (ev, picker) => {
+        $(selector).on('apply.daterangepicker', (ev, picker) => {
             $(inputId).val(picker.startDate.format('DD-MMM-YYYY'));
         });
     },
-    timePicker() {
-        var inputId = "";
-        $('.time-picker').each((index, element) => {
-            inputId = '#' + $(element).prev('input').attr('id');
+    timePicker({ selector = '.time-picker' } = {}) {
+        let inputId = "";
+        $(selector).each((index, element) => {
+            inputId = `#${$(element).prev('input').attr('id')}`;
             if ($(inputId).val() == '') {
                 $(inputId).val(moment().format("HH:mm")).trigger('change');
             }
         });
-        $('.time-picker').on('click', (e) => {
-            $inputId = '#' + $(e.currentTarget).prev('input').attr('id');
+        $(selector).on('click', (e) => {
+            inputId = '#' + $(e.currentTarget).prev('input').attr('id');
         });
-        $('.time-picker').daterangepicker({
+        $(selector).daterangepicker({
             timePicker: true,
             singleDatePicker: true,
             timePicker24Hour: true,
@@ -1625,24 +1633,22 @@ const DateTime = {
             }
         },
             (fromDate) => {
-                $($inputId).val(moment(fromDate).format("HH:mm")).trigger('change');
+                $(inputId).val(moment(fromDate).format("HH:mm")).trigger('change');
             }).on('show.daterangepicker', (ev, picker) => {
                 picker.container.find(".calendar-table").hide();
             });
     },
-    dateTimePicker({ minDate = '', maxDate = '' } = {}) {
-        minDate = minDate == '' ? moment().add(-10, 'y') : moment(minDate);
-        maxDate = maxDate == '' ? moment().add(10, 'y') : moment(maxDate);
+    dateTimePicker({ selector = '.date-time-picker', minDate = moment(), maxDate = moment().add(10, 'y') } = {}) {        
         var inputId = "";
-        $('.date-time-picker').each((index, element) => {
-            inputId = '#' + $(element).prev('input').attr('id');
+        $(selector).each((index, element) => {            
+            inputId = `#${$(element).prev('input').attr('id')}`;
             $(inputId).val(moment().format("DD-MMM-YYYY HH:mm")).trigger('change');
         });
-        $('.date-time-picker').on('click', (e) => {
-            inputId = '#' + $(e.currentTarget).prev('input').attr('id');
+        $(selector).on('click', (e) => {            
+            inputId = `#${$(e.currentTarget).prev('input').attr('id')}`;
             DateTime.pickerFunction = () => { }
         });
-        $('.date-time-picker').daterangepicker(
+        $(selector).daterangepicker(
             {
                 showDropdowns: true,
                 startDate: minDate,
@@ -1667,71 +1673,27 @@ const DateTime = {
             }
         }
         );
-        $('.date-time-picker').on('apply.daterangepicker', (ev, picker) => {
+        $(selector).on('apply.daterangepicker', (ev, picker) => {
             $(inputId).val(picker.startDate.format('DD-MMM-YYYY HH:mm'));
             DateTime.pickerFunction();
         });
-    },
-    dateTimePicker_current({ minDate = '', maxDate = '' }) {
-        minDate = minDate == '' ? moment().add(-10, 'y') : moment(minDate);
-        maxDate = maxDate == '' ? moment().add(10, 'y') : moment(maxDate);
+    },    
+    dateRangePicker({ selector = '.date-range-picker', minDate = moment().add(-60, 'y') } = {}) {
         var inputId = "";
-        $('.date-time-picker-current').each((index, element) => {
-            inputId = '#' + $(element).prev('input').attr('id');
-            $(inputId).val(moment().format("DD-MMM-YYYY HH:mm")).trigger('change');
+        $(selector).each((index, element) => {
+            inputId = `#${$(element).prev('input').attr('id')}`;
+            $(inputId).val(`${moment().startOf('month').format("DD-MMM-YYYY")} | ${moment().endOf('month').format("DD-MMM-YYYY")}`);
+            $(inputId).attr('title', `${moment().startOf('month').format("DD-MMM-YYYY")} | ${moment().endOf('month').format("DD-MMM-YYYY")}`);
         });
 
-        $('.date-time-picker-current').on('click', (e) => {
-            inputId = '#' + $(e.currentTarget).prev('input').attr('id');
-            DateTime.pickerFunction = () => { }
-        });
-        $('.date-time-picker-current').daterangepicker({
-            showDropdowns: true,
-            endDate: maxDate,
-            maxDate: maxDate,
-            autoApply: true,
-            singleDatePicker: true,
-            timePicker: true,
-            autoUpdateInput: false,
-            timePicker24Hour: true,
-            locale: {
-                format: 'DD-MMM-YYYY HH:mm',
-                separator: "|",
-                firstDay: 1
-            },
-            linkedCalendars: true
-        },
-            (fromDate) => {
-                $(inputId).val(moment(fromDate).format("DD-MMM-YYYY HH:mm")).trigger('change');
-                DateTime.pickerFunction();
-            }).on('showCalendar.daterangepicker', (ev, picker) => {
-                if (picker.element.offset().top + picker.container.outerHeight() > $(window).height()) {
-                    picker.drops = 'up';
-                }
-                else {
-                    picker.drops = 'down';
-                }
-            });
-        $('.date-time-picker-current').on('apply.daterangepicker', (ev, picker) => {
-            $($inputId).val(picker.startDate.format('DD-MMM-YYYY HH:mm'));
-            DateTime.pickerFunction();
-        });
-    },
-    dateRangePicker() {
-        var inputId = "";
-        $('.date-range-picker').each((index, element) => {
-            inputId = '#' + $(element).prev('input').attr('id');
-            $(inputId).val(moment().startOf('month').format("DD-MMM-YYYY") + " | " + moment().endOf('month').format("DD-MMM-YYYY"));
+        $(selector).on('click', (e) => {            
+            inputId = `#${$(e.currentTarget).prev('input').attr('id')}`;
         });
 
-        $('.date-range-picker').on('click', (e) => {
-            inputId = '#' + $(e.currentTarget).prev('input').attr('id');
-        });
-
-        $('.date-range-picker').daterangepicker({
+        $(selector).daterangepicker({
             showDropdowns: true,
             autoApply: true,
-            minDate: moment().add(-60, 'y'),
+            minDate: minDate,
             autoUpdateInput: false,
             ranges: {
                 "This Month": [moment().startOf('month'), moment().endOf('month')],
@@ -1755,7 +1717,8 @@ const DateTime = {
             linkedCalendars: true
         },
             (fromDate, toDate) => {
-                $(inputId).val(moment(fromDate).format("DD-MMM-YYYY") + " | " + moment(toDate).format("DD-MMM-YYYY"));
+                $(inputId).val(`${moment(fromDate).format("DD-MMM-YYYY")} | ${moment(toDate).format("DD-MMM-YYYY")}`);
+                $(inputId).attr('title', `${moment(fromDate).format("DD-MMM-YYYY")} | ${moment(toDate).format("DD-MMM-YYYY")}`);
                 DateTime.pickerFunction();
             }).on('showCalendar.daterangepicker', (ev, picker) => {
                 //if (picker.element.offset().top + picker.container.outerHeight() > $(window).height()) {
@@ -1765,23 +1728,28 @@ const DateTime = {
                 //    picker.drops = 'down';
                 //}
             });
+        $(selector).on('apply.daterangepicker', (ev, picker) => {
+            $(inputId).val(`${picker.startDate.format('DD-MMM-YYYY')} | ${picker.endDate.format('DD-MMM-YYYY')}`);
+            $(inputId).attr('title', `${picker.startDate.format('DD-MMM-YYYY')} | ${picker.endDate.format('DD-MMM-YYYY')}`);
+            DateTime.pickerFunction();
+        });
     },
-    dateRangeTimePicker() {
+    dateRangeTimePicker({ selector = '.date-time-range-picker', minDate = moment().add(-60, 'y') } = {}) {
         var $inputId = "";
-        $('.date-time-range-picker').each((index, element) => {
+        $(selector).each((index, element) => {
             $inputId = '#' + $(element).parent().prev('input').attr('id');
             $($inputId).val(moment().startOf('month').format("DD-MMM-YYYY HH:mm") + " | " + moment().endOf('month').format("DD-MMM-YYYY HH:mm"));
         });
 
-        $('.date-time-range-picker').on('click', (e) => {
+        $(selector).on('click', (e) => {
             $inputId = '#' + $(e.currentTarget).parent().prev('input').attr('id');
         });
 
-        $('.date-time-range-picker').daterangepicker({
+        $(selector).daterangepicker({
             showDropdowns: true,
             autoApply: true,
             timePicker: true,
-            minDate: moment().add(-60, 'y'),
+            minDate: minDate,
             autoUpdateInput: false,
             ranges: {
                 "This Month": [moment().startOf('month'), moment().endOf('month')],
@@ -1815,35 +1783,12 @@ const DateTime = {
                     picker.drops = 'down';
                 }
             });
-    },
-    json(date) {
-        if (date == null) {
-            return null;
-        }
-        date = date.trim();
-        if (Field.isNullOrEmpty(date)) {
-            return null;
-        }
-        switch (date.split('-')[1]) {
-            case "Jan":
-            case "Feb":
-            case "Mar":
-            case "Apr":
-            case "May":
-            case "Jun":
-            case "Jul":
-            case "Aug":
-            case "Sep":
-            case "Oct":
-            case "Nov":
-            case "Dec":
-                break;
-            default:
-                return null;
-                break;
-        }
-        return new Date(date.split('-')[2] + '-' + moment().month(date.split('-')[1]).format("MM") + '-' + date.split('-')[0]).toISOString();
-    },
+        $(selector).on('apply.daterangepicker', (ev, picker) => {
+            $(inputId).val(`${picker.startDate.format('DD-MMM-YYYY HH:mm')} | ${picker.startDate.format('DD-MMM-YYYY HH:mm')}`);
+            $(inputId).attr('title', `${picker.startDate.format('DD-MMM-YYYY HH:mm')} | ${picker.startDate.format('DD-MMM-YYYY HH:mm')}`);
+            DateTime.pickerFunction();
+        });
+    },    
     isDefault: (date) => { return date == '0001-01-01T00:00:00' ? true : false; },
     date: (date, isDefault = false) => {
         return Field.isNullOrEmpty(date) && !isDefault ? '' : Field.isNullOrEmpty(date) && isDefault ? moment('0001-01-01T00:00:00').format('DD-MMM-YYYY') : moment(date).format('DD-MMM-YYYY');
@@ -1862,9 +1807,85 @@ const DateTime = {
                 moment('0001-01-01T00:00:00').format('HH:mm:ss') :
                 moment(date).format('HH:mm:ss');
     },
-    isValid: (value) => {
-        return value != null && value != "" && isNaN(value) && !isNaN(Date.parse(value));
+    monthMap: {
+        Jan: '01', Feb: '02', Mar: '03', Apr: '04',
+        May: '05', Jun: '06', Jul: '07', Aug: '08',
+        Sep: '09', Oct: '10', Nov: '11', Dec: '12'
     },
+    datePatterns: [
+        {
+            regex: /^(\d{2})-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-(\d{4})$/,
+            parse: (d) => `${d[3]}-${DateTime.monthMap[d[2]]}-${d[1]}T00:00:00`
+        },
+        {
+            regex: /^(\d{2})-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-(\d{4}) (\d{2}):(\d{2})$/,
+            parse: (d) => `${d[3]}-${DateTime.monthMap[d[2]]}-${d[1]}T${d[4]}:${d[5]}:00`
+        },
+        {
+            regex: /^(\d{2})-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-(\d{4}) (\d{2}):(\d{2}):(\d{2})$/,
+            parse: (d) => `${d[3]}-${DateTime.monthMap[d[2]]}-${d[1]}T${d[4]}:${d[5]}:${d[6]}`
+        },
+        {
+            regex: /^(\d{2})-(\d{2})-(\d{4})$/,
+            parse: (d) => `${d[3]}-${d[2]}-${d[1]}T00:00:00`
+        },
+        {
+            regex: /^(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})$/,
+            parse: (d) => `${d[3]}-${d[2]}-${d[1]}T${d[4]}:${d[5]}:00`
+        },
+        {
+            regex: /^(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2}):(\d{2})$/,
+            parse: (d) => `${d[3]}-${d[2]}-${d[1]}T${d[4]}:${d[5]}:${d[6]}`
+        },
+        {
+            regex: /^(\d{4})-(\d{2})-(\d{2})$/,
+            parse: (d) => `${d[1]}-${d[2]}-${d[3]}T00:00:00`
+        },
+        {
+            regex: /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})$/,
+            parse: (d) => `${d[1]}-${d[2]}-${d[3]}T${d[4]}:${d[5]}:00`
+        },
+        {
+            regex: /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/,
+            parse: (d) => `${d[1]}-${d[2]}-${d[3]}T${d[4]}:${d[5]}:${d[6]}`
+        },
+        {
+            regex: /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/,
+            parse: (d) => `${d[1]}-${d[2]}-${d[3]}T${d[4]}:${d[5]}:00`
+        },
+        {
+            regex: /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})$/,
+            parse: (d) => `${d[1]}-${d[2]}-${d[3]}T${d[4]}:${d[5]}:${d[6]}`
+        },
+        {
+            regex: /^(\d{4})-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-(\d{2})$/,
+            parse: (d) => `${d[1]}-${DateTime.monthMap[d[2]]}-${d[3]}T00:00:00`
+        },
+        {
+            regex: /^(\d{4})-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-(\d{2}) (\d{2}):(\d{2})$/,
+            parse: (d) => `${d[1]}-${DateTime.monthMap[d[2]]}-${d[3]}T${d[4]}:${d[5]}:00`
+        },
+        {
+            regex: /^(\d{4})-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/,
+            parse: (d) => `${d[1]}-${DateTime.monthMap[d[2]]}-${d[3]}T${d[4]}:${d[5]}:${d[6]}`
+        }
+    ],
+    isValid: (value) => {
+        if (!value || typeof value !== 'string') return false;        
+        return DateTime.datePatterns.some(({ regex }) => regex.test(value)) &&
+            !isNaN(new Date(value).getTime());
+    },
+    json: (input) => {
+        if (!input) {
+            return null;
+        }
+        input = input.trim();
+        if (!DateTime.isValid(input)) {
+            return null;
+        }
+        let date = new Date(input);        
+        return `${date.getFullYear().toString().padStart(4, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}T${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}.000Z`;
+    }
 }
 const Table = {
     add({
@@ -1874,6 +1895,7 @@ const Table = {
         isPrint = false,
         toggle = true,
         selectPick = false,
+        datePicker = false,
         action = 'destroy',
         mobileResponsive = true,
         detailFormatter = null,
@@ -1889,7 +1911,7 @@ const Table = {
         actionEvents = false,
         printTitle = '',
         reportDesc = '',
-        viewMode = ''
+        viewMode = false
 
     }) {
 
@@ -1957,15 +1979,18 @@ const Table = {
             $(`${id} input[type="checkbox"]`).parent('label').addClass('form-switch ps-0 pt-1');
             $(`${id} input[type="checkbox"]`).addClass('form-check-input');
         }
-        if (viewMode == "View" || viewMode == "view") {
+        if (viewMode) {
             $(`${id} input`).attr('disabled', true);
             $(`${id} textarea`).attr('disabled', true);
             $(`${id} select`).attr('disabled', true);
         }
         //Set Select As Select Pick
         if (selectPick) {
-            $(`${pram.id} tbody select.select-pick[data-isMatched="false"]`).val(null);
-            Dropdown.refresh({ selector: `${pram.id} tbody select.select-pick` });
+            $(`${id} tbody select.select-pick[data-isMatched="false"]`).val(null);
+            Dropdown.refresh({ selector: `${id} tbody select.select-pick` });
+        }
+        if (datePicker) {
+            DateTime.init();
         }
         //Print
         if (isPrint) {
@@ -2007,6 +2032,30 @@ const Table = {
             Print.table({ title: printTitle, style: style, content: htmlString, orientation: 'A4 landscape', print: false, tableId: '#tableSubGroup' });
         }
         //Note work on search input. for content
+        $(id).on('search.bs.table', function (e, arg1, arg2) {
+            //Toggle Style Reset
+            if (toggle) {
+                $(`${id} input[type="checkbox"]`).parent('label').parent('div.th-inner').addClass('p-0');
+                $(`${id} input[type="checkbox"]`).parent('label').addClass('form-switch ps-0 pt-1');
+                $(`${id} input[type="checkbox"]`).addClass('form-check-input');
+            }
+            //Select Pick Style Reset
+            if (selectPick) {
+                $(`${id} tbody select.select-pick[data-isMatched="false"]`).val(null);
+                Dropdown.refresh({ selector: `${id} tbody select.select-pick` });
+            }
+            //Set Responsive
+            if (mobileResponsive) {
+                $(id).addClass('table-mobile-responsive');
+                $(`${id} thead tr:not(.hide) th:not([colspan])`).each((index, element) => {
+                    if ($(element).attr('colspan') === undefined) {
+                        var thText = $(element).text().trim();
+                        $(`${id} tbody tr td:nth-child(${(index + 1)})`).attr('data-title', thText);
+                    }
+                });
+            }
+            /*console.log('Search Event Call' + toggle);*/
+        })
     },
     empty({ selector = '.table-default' }) {
         $(selector).attr('data-trim-on-search', false);
@@ -2050,6 +2099,15 @@ const Table = {
             return;
         }
         $(id).bootstrapTable('updateByUniqueId', { id: objId, row: obj });
+        //Set Responsive
+        if ($(id).hasClass('table-mobile-responsive')) {            
+            $(`${id} thead tr:not(.hide) th:not([colspan])`).each((index, element) => {
+                if ($(element).attr('colspan') === undefined) {
+                    var thText = $(element).text().trim();
+                    $(`${id} tbody tr td:nth-child(${(index + 1)})`).attr('data-title', thText);
+                }
+            });
+        }
     },
     updateByIndex({ id = '', index = -1, obj = {}, value = null, event = null, toggle = false }) {
         if (Field.isNullOrEmpty(id)) {
@@ -2065,7 +2123,7 @@ const Table = {
             return;
         }
         //Get Text Cursor Poition
-        let curStart = event == null ? -1 : document.getElementById(pram.event.target.id).selectionStart;
+        let curStart = event == null ? -1 : document.getElementById(event.target.id).selectionStart;
         //Update Table By Index
         $(id).bootstrapTable('updateRow', { index: index, row: obj });
         //Set Select As Select Pick
@@ -2076,6 +2134,15 @@ const Table = {
             $(`${id} input[type="checkbox"]`).parent('label').parent('div.th-inner').addClass('p-0');
             $(`${id} input[type="checkbox"]`).parent('label').addClass('form-switch ps-0 pt-1');
             $(`${id} input[type="checkbox"]`).addClass('form-check-input');
+        }
+        //Set Responsive
+        if ($(id).hasClass('table-mobile-responsive')) {
+            $(`${id} thead tr:not(.hide) th:not([colspan])`).each((index, element) => {
+                if ($(element).attr('colspan') === undefined) {
+                    var thText = $(element).text().trim();
+                    $(`${id} tbody tr td:nth-child(${(index + 1)})`).attr('data-title', thText);
+                }
+            });
         }
         //Set Cursor Position and focus
         if (event != null) {
@@ -2216,12 +2283,12 @@ const Dropdown = {
         id = '',
         data = [],
         value = 'Id',
-        text = 'Text',        
+        text = 'Text',
         icon = '',
         subText = '',
         html = '',
         initialValue = [],
-        json = false,        
+        json = false,
         isSelectPick = true,
         isEditable = false,
         disabled
@@ -2285,12 +2352,12 @@ const Dropdown = {
             }
         );
     },
-    set({ id = '', value = null, text = null }) {
+    set({ id = '', value = [], text = [] }) {
         if (!id) {
-            Message.show({ statusText: 'Id is unidefined' });
+            console.warn('Id is unidefined');
             return;
         }
-        SelectPick.set({ id: pram.id, value: pram.value, text: pram.text });
+        SelectPick.set({ id: id, value: value, text: text });
     },
     itemJson({ id = '' }) {
         if ($(`${id} option:selected`).attr('data-json') == undefined) {

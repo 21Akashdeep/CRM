@@ -46,11 +46,10 @@ class Authentication {
                             Message.show({ status: Message.Type.error, statusText: "You are not authorised to access this Application." });
                             return;
                         }
-                        location.replace(Url.App + "/Dashboard");
-
                         if ($(window).width() > 1000) {
-                            Cookie.set('SidebarView', "Off");
+                            Cookie.set({ name: 'SidebarView', value: "Off" });
                         }
+                        location.replace(Url.App + "/Dashboard");
                     }
                     else {
                         Message.show(response);

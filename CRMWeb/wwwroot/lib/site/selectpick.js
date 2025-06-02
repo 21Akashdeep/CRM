@@ -368,28 +368,26 @@ class SelectPick {
     static scaling(selectPick, coordinates) {
         let select = document.querySelector(`#${selectPick.attributes['data-id'].value}`);
         let parent = document.querySelector(SelectPick.#getAttrVal({ el: select, attr: SELECTPICK_DATA_PARENT, initVal: 'body' }));
-        //Set X-Scaling
         let selectPickMenu = selectPick.querySelector(`.${SELECTPICK_MENU}`);
-        selectPickMenu.style.removeProperty('maxWidth');
-        selectPickMenu.style.removeProperty('minWidth');
-        selectPickMenu.style.minWidth = coordinates.width + 'px';
-        let maxWidth = parent.offsetWidth > 1000 ? 1000 : parent.offsetWidth - 30;
-        selectPickMenu.style.maxWidth = maxWidth + 'px';
-
-        selectPickMenu.style.removeProperty('transform');                
-        let padding = 16;        
-        let overflow = selectPickMenu.offsetWidth - coordinates.width;
-        let availableSpace = selectPickMenu.offsetWidth - coordinates.x;
-        /*let overflowX = selectPickMenu.offsetWidth <= coordinates.width || parent.offsetWidth < 768 ? 0 : (parent.offsetWidth - coordinates.x);*/
-        let overflowX = selectPickMenu.offsetWidth <= Math.ceil(coordinates.width) || availableSpace <= 0 || parent.offsetWidth < 768 ? 0 : (overflow - availableSpace);
-        //let translateX = coordinates.width <= overflowX || parent.offsetWidth < 768 ? 0 : (parent.offsetWidth) - (coordinates.width + coordinates.x) - padding;
-        let translateX = overflowX;
-        selectPickMenu.style.transform = "translate(-" + translateX + "px, 0px)";
         //Set Y-Scaling
         let selectPickList = selectPickMenu.lastChild;
         let dataSize = parseInt(SelectPick.#getAttrVal({ el: select, attr: SELECTPICK_DATA_SIZE, initVal: '0' }));
         let selectPickItemHeight = selectPickMenu.lastChild.firstElementChild == null ? 0 : selectPickMenu.lastChild.firstElementChild.offsetHeight;
         selectPickList.style.maxHeight = (dataSize <= 1 ? window.innerHeight / 2 : (dataSize * selectPickItemHeight) + 5) + 'px';
+
+        //Set X-Scaling        
+        selectPickMenu.style.removeProperty('maxWidth');
+        selectPickMenu.style.removeProperty('minWidth');
+        //Set Max & Min Width
+        selectPickMenu.style.minWidth = coordinates.width + 'px';
+        let maxWidth = parent.offsetWidth > 1000 ? 1000 : parent.offsetWidth - 30;
+        selectPickMenu.style.maxWidth = maxWidth + 'px';
+        //Set X Transform
+        selectPickMenu.style.removeProperty('transform');
+        let padding = parent == document.body ? 14 : 10;
+        let overflowX = ((Math.ceil(coordinates.x) + selectPickMenu.offsetWidth) - parent.offsetWidth) + padding;
+        let translateX = overflowX < 0 ? 0 : overflowX;
+        selectPickMenu.style.transform = `translate(-${translateX}px, 0px)`;
     }
     static #specialKey(event) {
         if (event.code == "Escape") {
@@ -522,7 +520,7 @@ class SelectPick {
         });        
     }
     static set({ id= '', value= [], text=[] }) {        
-        value.map(vl => vl == null ? '' : vl.toString());        
+        value = value.map(vl => vl == null ? '' : vl.toString());        
         if (!id) {
             console.error("Select id is undefined.");
             return;

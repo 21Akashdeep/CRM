@@ -78,7 +78,7 @@
                 return;
             }
             var obj = Data.serializeToObject({ formId: "#formApi" });
-            obj.IsApprovalRequired = JSON.parse(obj.IsApprovalRequired);
+            /*obj.IsApprovalRequired = JSON.parse(obj.IsApprovalRequired);*/
             obj.SeqNo = Field.isNullOrEmpty(obj.SeqNo) ? 0 : obj.SeqNo;
             if (!obj.Id) {
                 obj.Id = 0;

@@ -76,51 +76,40 @@ namespace CRMApi.Repository
         {
             Message objMsg = new Message();
             List<Country> Country = new List<Country>();
-            try 
-            {
-                obj = obj == null ? new Country() : obj;
-                obj.ListStatus = obj.ListStatus.Count == 0 ? App.ActiveStatus : obj.ListStatus;
-                //Get Country List
-                var dbCountry = db.Country.Where(ap => obj.ListStatus.Contains(ap.Status)).AsQueryable();
-                dbCountry = obj.ListId.Count == 0 ? dbCountry : dbCountry.Where(ap => obj.ListId.Contains(ap.Id));                                
-                //Get Setting List
-                var dbSetting = db.Setting.Where(st => App.ActiveStatus.Contains(st.Status)).ToList();
-                //Get User List
-                var dbUser = db.User.Where(ur => App.ActiveStatus.Contains(ur.Status)).ToList();
-                //Country List
-                Country = (
-                    from ct in dbCountry
-                    join st in dbSetting on new { Value = ct.Status.ToString(), Name = App.SettingName.Status } equals new { st.Value, st.Name }
-                    join cb in dbUser on ct.CreatedBy equals cb.Id
-                    join ub in dbUser on ct.UpdatedBy equals ub.Id
-                    select new Country 
-                    {
-                        Id = ct.Id,
-                        Code = ct.Code,
-                        Name = ct.Name,
-                        Description = ct.Description,
-                        AdminDivType = ct.AdminDivType,
-                        PostalType = ct.PostalType,                        
-                        Status = ct.Status,
-                        StatusName = st.Description,
-                        StatusCss = st.CssClass ?? "",
-                        CreatedBy = ct.CreatedBy,
-                        CreatedByName = cb.Name,
-                        CreatedAt = ct.CreatedAt,
-                        UpdatedBy = ct.UpdatedBy,
-                        UpdatedByName = ub.Name,
-                        UpdatedAt = ct.UpdatedAt,
-                        IsEdit = ct.Status == App.Status.Enable ? true : false,
-                        IsDuplicate = true,
-                        IsDelete = ct.Status == App.Status.Enable ? true : false,
-                        IsEnable = ct.Status == App.Status.Delete ? true : false,                        
-                    }
-                ).ToList();
-            }
-            catch (Exception ex)             
-            {
-                Message.Exception(ref objMsg, ex);
-            }
+            obj = obj == null ? new Country() : obj;
+            obj.ListStatus = obj.ListStatus.Count == 0 ? App.ActiveStatus : obj.ListStatus;
+            //Get Country List
+            var dbCountry = db.Country.Where(ap => obj.ListStatus.Contains(ap.Status)).AsQueryable();
+            dbCountry = obj.ListId.Count == 0 ? dbCountry : dbCountry.Where(ap => obj.ListId.Contains(ap.Id));            
+            //Country List
+            Country = (
+                from ct in dbCountry
+                join st in db.Setting on new { Value = ct.Status.ToString(), Name = App.SettingName.Status } equals new { st.Value, st.Name }
+                join cb in db.User on ct.CreatedBy equals cb.Id
+                join ub in db.User on ct.UpdatedBy equals ub.Id
+                select new Country
+                {
+                    Id = ct.Id,
+                    Code = ct.Code,
+                    Name = ct.Name,
+                    Description = ct.Description,
+                    AdminDivType = ct.AdminDivType,
+                    PostalType = ct.PostalType,
+                    Status = ct.Status,
+                    StatusName = st.Description,
+                    StatusCss = st.CssClass ?? "",
+                    CreatedBy = ct.CreatedBy,
+                    CreatedByName = cb.Name,
+                    CreatedAt = ct.CreatedAt,
+                    UpdatedBy = ct.UpdatedBy,
+                    UpdatedByName = ub.Name,
+                    UpdatedAt = ct.UpdatedAt,
+                    IsEdit = ct.Status == App.Status.Enable ? true : false,
+                    IsDuplicate = true,
+                    IsDelete = ct.Status == App.Status.Enable ? true : false,
+                    IsEnable = ct.Status == App.Status.Delete ? true : false,
+                }
+            ).ToList();
             return Country;
         }
         public Message Print(Country obj, User User) 

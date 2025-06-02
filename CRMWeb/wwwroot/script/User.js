@@ -36,8 +36,7 @@ class User {
             if (!Field.isMandatory({ class: ".required" })) {
                 return;
             }
-            var obj = Data.serializeToObject({ formId: "#formUser" });
-            obj.DateOfBirth = DateTime.json(obj.DateOfBirth);
+            var obj = Data.serializeToObject({ formId: "#formUser" });            
             obj.Company = $('#tableCompany').bootstrapTable('getData').filter(c => c.IsAdded);
             obj.Api = $('#tableApi').bootstrapTable('getData').filter(ap => ap.View || ap.Add || ap.Update || ap.Delete || ap.Enable || ap.Print || ap.Import || ap.Export);
             obj.ApprovalRole = $('#tableApprovalRole').bootstrapTable('getData').filter(cp => cp.IsAdded);
@@ -209,10 +208,16 @@ tableUserStatus = (value, obj, index) => {
     return `<div class="${obj.StatusCss}">${obj.StatusDesc}<div>`;
 }
 tableUserCreatedByAndAt = (value, obj, index) => {
-    return `<table class="table-child"><tr><td>${obj.CreatedByName}</td></tr><tr><td>${DateTime.dateTime(obj.CreatedAt)}</td></tr></table>`;
+    return `
+        <div>${obj.CreatedByName}</div>
+        <div>${moment(obj.CreatedAt).format('DD-MMM-YYYY HH:mm')}</div>
+    `;
 }
 tableUserUpdatedByAndAt = (value, obj, index) => {
-    return `<table class="table-child"><tr><td>${obj.UpdatedByName}</td></tr><tr><td>${DateTime.dateTime(obj.UpdatedAt)}</td></tr></table>`;
+    return `
+            <div>${obj.UpdatedByName}</div>
+            <div>${DateTime.dateTime(obj.UpdatedAt)}</div>
+    `;
 }
 tableUserAction = (value, obj, index) => {
    let actionBtn = `

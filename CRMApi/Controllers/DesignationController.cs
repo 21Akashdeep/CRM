@@ -9,14 +9,14 @@ namespace CRMApi.Controllers
     [Route("api/[controller]/[action]")]
     [ApiController]
     [Authorize]
-    public class DepartmentController : ControllerBase
+    public class DesignationController : ControllerBase
     {
         private readonly DbCRM db;
-        private readonly RepoDepartment RepoDept;
-        public DepartmentController(DbCRM _db) 
+        private readonly RepoDesignation RepoDept;
+        public DesignationController(DbCRM _db) 
         {
             db = _db;
-            RepoDept = new RepoDepartment(db);
+            RepoDept = new RepoDesignation(db);
         }
         [HttpGet]
         public IActionResult GetViewOption()
@@ -35,7 +35,7 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }        
         [HttpPost]
-        public IActionResult Get(Department obj)
+        public IActionResult Get(Designation obj)
         {
             Message objMsg = new Message();
             try
@@ -52,7 +52,7 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPost]
-        public IActionResult Print(Department obj)
+        public IActionResult Print(Designation obj)
         {
             Message objMsg = new Message();
             try
@@ -68,7 +68,7 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPost]
-        public IActionResult Export(Department obj)
+        public IActionResult Export(Designation obj)
         {
             Message objMsg = new Message();
             try
@@ -84,7 +84,7 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPost]
-        public IActionResult Add(Department obj)
+        public IActionResult Add(Designation obj)
         {
             Message objMsg = new Message();
             try
@@ -107,7 +107,7 @@ namespace CRMApi.Controllers
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                Department obj = new Department();
+                Designation obj = new Designation();
                 obj.ListId.Add(Id);                                       
                 objMsg = RepoDept.Edit(obj, User);
             }
@@ -118,7 +118,7 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPatch]
-        public IActionResult Update(Department obj)
+        public IActionResult Update(Designation obj)
         {
             Message objMsg = new Message();
             try
@@ -141,7 +141,7 @@ namespace CRMApi.Controllers
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                Department obj = new Department();
+                Designation obj = new Designation();
                 obj.Id = Id;                
                 objMsg = RepoDept.Delete(obj, User);
             }
@@ -159,7 +159,7 @@ namespace CRMApi.Controllers
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                Department obj = new Department();
+                Designation obj = new Designation();
                 obj.Id = Id;                
                 objMsg = RepoDept.Enable(obj, User);
             }

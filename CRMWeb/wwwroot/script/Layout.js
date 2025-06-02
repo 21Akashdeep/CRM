@@ -177,9 +177,9 @@ class Layout {
     static sidebarOn(speed = 500) {
         if ($(window).width() <= 1000) {
             $('.sidebar').animate({ 'width': '250px' }, speed);
-            Cookie.set('SidebarView', 'On-SM');
+            Cookie.set({name:'SidebarView', value:'On-SM'});
         } else {            
-            Cookie.set('SidebarView', 'On');
+            Cookie.set({ name: 'SidebarView', value: 'On' });
             $('.sidebar').animate({ 'width': '250px' }, speed);
         }
         setTimeout(() => { $('.app-name').text(App.Info.Name); }, speed);
@@ -187,9 +187,9 @@ class Layout {
     static sidebarOff(speed = 500) {
         if ($(window).width() <= 1000) {
             $('.sidebar').animate({ 'width': '0px' }, speed);
-            Cookie.set('SidebarView', 'Off-SM');
+            Cookie.set({name:'SidebarView', value:'Off-SM'});
         } else {
-            Cookie.set('SidebarView', 'Off');
+            Cookie.set({name:'SidebarView', value:'Off'});
             $('.sidebar').animate({ 'width': '50px' }, speed);
         }
         $('.app-name').text(App.Info.Code);
@@ -198,7 +198,7 @@ class Layout {
         //By Pass Sys Admin
         if (App.User.Type == App.Setting.UserType.SysAdmin) return;
         //Get Form Name FromUrl
-        let ApiName = window.location.pathname.replace('/');
+        let ApiName = window.location.pathname.replace('/','');
         //Get Form Permission from session storage
         let Api = App.User.Api.find(x => x.ApiName == ApiName);
         if (Api == undefined) {

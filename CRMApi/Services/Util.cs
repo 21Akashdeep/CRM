@@ -464,7 +464,37 @@ namespace CRMApi.Services
             }
             return MailBody;
         }
-        
+        public static string AddressDesc(Composite.AddressDesc obj)
+        {
+            if (obj == null) return string.Empty;
+
+            var parts = new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(obj.Add1)) parts.Add(obj.Add1);
+            if (!string.IsNullOrWhiteSpace(obj.Add2)) parts.Add(obj.Add2);
+
+            if (!string.IsNullOrWhiteSpace(obj.PostOffice))
+            {
+                var post = obj.PostOffice;
+                if (!string.IsNullOrWhiteSpace(obj.PinCode))
+                    post += "-" + obj.PinCode;
+                parts.Add(post);
+            }
+
+            if (!string.IsNullOrWhiteSpace(obj.State))
+            {
+                var state = obj.State;
+                if (!string.IsNullOrWhiteSpace(obj.StateCode))
+                    state += "-" + obj.StateCode;
+                parts.Add(state);
+            }
+
+            if (!string.IsNullOrWhiteSpace(obj.Country)) parts.Add(obj.Country);
+            if (!string.IsNullOrWhiteSpace(obj.OtherText)) parts.Add(obj.OtherText);
+
+            return string.Join(", ", parts);
+        }
+
         public static string QRCodeBase64(string text) 
         {
             string base64 = "";
@@ -479,8 +509,8 @@ namespace CRMApi.Services
         {
             if (!String.IsNullOrEmpty(str))
             {
-                str = Regex.Replace(str.Trim(), @"\s+", " ");
-                return !String.IsNullOrEmpty(regExp) ? Regex.Replace(str, regExp, string.Empty) : str;
+                str = Regex.Replace(str.Trim(), @"\s+", " ");//Remove Extra Space
+                return !String.IsNullOrEmpty(regExp) ? Regex.Replace(str, regExp, string.Empty) : str; //Set Value According to Regexp
             }
             else 
             {
