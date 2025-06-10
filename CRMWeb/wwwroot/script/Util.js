@@ -1899,8 +1899,8 @@ const Table = {
         action = 'destroy',
         mobileResponsive = true,
         detailFormatter = null,
-        overflow = 'auto',
-        height = '68vh',
+        overflow = 'auto',        
+        maxHeight = '68vh',
         fontSize = 11,
         filterControl = false,
         showfooter = false,
@@ -1921,6 +1921,9 @@ const Table = {
         }
         if ($(id).attr('data-detail-formatter')) {
             detailFormatter = $(id).attr('data-detail-formatter');
+        }
+        if ($(id).attr('data-search')) {
+            search = JSON.parse($(id).attr('data-search'));
         }
 
         if (action == 'destroy') {
@@ -1955,11 +1958,21 @@ const Table = {
         //    $(event.currentTarget).find('.dropdown-menu.show').removeClass('show');
         //});
         //Table height        
-        $(id).parent().css({
-            "overflow-y": overflow,
-            "overflow-x": overflow,
-            "max-height": height,
-        });
+        if ($(id).attr('data-table-height')) {
+            $(id).parent().css({
+                "overflow-y": overflow,
+                "overflow-x": overflow,
+                "height": $(id).attr('data-table-height'),
+            });
+        }
+        else {
+            $(id).parent().css({
+                "overflow-y": overflow,
+                "overflow-x": overflow,
+                "max-height": maxHeight,
+            });
+        }        
+        
         //Font size
         $(id).css({ 'font-size': fontSize });
         //Set Responsive
@@ -1987,7 +2000,7 @@ const Table = {
         //Set Select As Select Pick
         if (selectPick) {
             $(`${id} tbody select.select-pick[data-isMatched="false"]`).val(null);
-            Dropdown.refresh({ selector: `${id} tbody select.select-pick` });
+            Dropdown.refresh({ selector: `${id} tbody select.select-pick` });            
         }
         if (datePicker) {
             DateTime.init();
@@ -2057,10 +2070,16 @@ const Table = {
             /*console.log('Search Event Call' + toggle);*/
         })
     },
-    empty({ selector = '.table-default' }) {
+    empty({ selector = '.table-default'}) {
         $(selector).attr('data-trim-on-search', false);
         $(selector).bootstrapTable('destroy');
         $(selector).bootstrapTable();
+
+        if ($(selector).attr('data-table-height')) {
+            $(selector).parent().css({
+                "height": $(selector).attr('data-table-height'),
+            });
+        }        
         //Table height        
         $(selector).parent().css({
             "overflow-y": 'auto',
@@ -2069,12 +2088,16 @@ const Table = {
         });
     },
     remove({ id = '', value = [-1], field = '$index', toggle = false }) {
-
         if (id == '') {
-            console.warn('Table Id or trDataIndex is empty.');
+            console.warn('Table Id or tr DataIndex is empty.');
             return;
+        }        
+        $(id).bootstrapTable('remove', { values: value, field: field, });
+        if ($(id).attr('data-table-height')) {
+            $(id).parent().css({                
+                "height": $(id).attr('data-table-height'),
+            });
         }
-        $(id).bootstrapTable('remove', { values: value, field: field });
         //Set Select As Select Pick
         $(`${id} tbody select.select-pick[data-isMatched="false"]`).val(null);
         Dropdown.refresh({ selector: `${id} tbody select.select-pick` });
@@ -2437,55 +2460,53 @@ const Dropdown = {
     }
 }
 class _Number {
-    static validate(pram = { value: 0, dp: 2, min: 0, max: 0 }) {
-        let value = 0;
-        //Vlidate Input value is Number or not
-        if (pram.value != undefined) {
+    static validate({ value = 0, dp = 2, min = 0, max = 0 } = {}) {
+        let result = 0;
+
+        // Validate input is number-compatible
+        if (value !== undefined) {
             const regex = /^[0-9.-]*$/;
-            const filteredValue = Array.from(pram.value).filter(char => regex.test(char)).join('');
-            value = filteredValue.replace(/^(.*?\..*?)\..*$/, '$1');
-            let isNegative = value.startsWith('-');
-            value = value.replaceAll('-', '');
-            value = isNegative ? `-${value}` : value;
-            //Validate Decimal Place
-            if (pram.dp != undefined && value.includes('.')) {
-                let num = value.split('.')[0].length == 0 ? '0' : value.split('.')[0];
-                let decimal = value.split('.')[1];
-                let decimalPlace = pram.dp;
-                decimalPlace = isNaN(decimalPlace) == false ? parseInt(decimalPlace) : 0;
-                decimal = decimal.length > decimalPlace ? `.${decimal.substring(0, decimalPlace)}` : decimalPlace > 0 ? `.${decimal}` : '';
-                value = `${num}${decimal}`;
+            const filteredValue = Array.from(value).filter(char => regex.test(char)).join('');
+            result = filteredValue.replace(/^(.*?\..*?)\..*$/, '$1');
+
+            let isNegative = result.startsWith('-');
+            result = result.replaceAll('-', '');
+            result = isNegative ? `-${result}` : result;
+
+            // Validate decimal places
+            if (dp !== undefined && result.includes('.')) {
+                let [intPart, decPart = ''] = result.split('.');
+                intPart = intPart.length === 0 ? '0' : intPart;
+                const decimalPlace = isNaN(dp) ? 0 : parseInt(dp);
+                const formattedDec = decimalPlace > 0 ? `.${decPart.slice(0, decimalPlace)}` : '';
+                result = `${intPart}${formattedDec}`;
             }
-            //Validate Max Value
-            if (pram.max != undefined) {
-                let max = pram.max;
-                max = isNaN(max) == false ? parseInt(max) : 0;
-                value = parseFloat(value) > max ? pram.max : value;
+
+            // Validate max
+            if (max !== undefined && !isNaN(max)) {
+                result = parseFloat(result) > max ? max : result;
             }
-            //Validate Min Value
-            if (pram.min != undefined) {
-                let min = pram.min;
-                min = isNaN(min) == false ? parseInt(min) : 0;
-                value = parseFloat(value) < min ? pram.min : value;
+
+            // Validate min
+            if (min !== undefined && !isNaN(min)) {
+                result = parseFloat(result) < min ? min : result;
             }
         }
-        return value;
-    }
-    static format(pram = { num: 0, dp: 0, currency: 'INR' }) {
-        pram.num = pram.num === undefined ? 0 : pram.num;
-        pram.dp = pram.dp === undefined ? 0 : pram.dp;
-        pram.currency = pram.currency === undefined ? '' : pram.currency;
-        let numFormat = Field.isNullOrEmpty(pram.currency) ?
-            new Intl.NumberFormat('en-IN', { minimumFractionDigits: pram.dp }) :
-            new Intl.NumberFormat('en-IN', { style: 'currency', currency: pram.currency, minimumFractionDigits: pram.dp });
-        let formattedNum = numFormat.format(pram.num);
-        if (!Field.isNullOrEmpty(pram.currency)) {
+
+        return result;
+    }    
+    static format({ num = 0, dp = 0, currency = null }) {        
+        let numFormat = Field.isNullOrEmpty(currency) ?
+            new Intl.NumberFormat('en-IN', { minimumFractionDigits: dp }) :
+            new Intl.NumberFormat('en-IN', { style: 'currency', currency: currency, minimumFractionDigits: dp });
+        let formattedNum = numFormat.format(num);
+        if (!Field.isNullOrEmpty(currency)) {
             let symbol = formattedNum.substring(0, 1);
             formattedNum = `${symbol} ${formattedNum.substring(1, formattedNum.length)}`;
         }
         return formattedNum;
     }
-    static toIndianWord(number) {
+    static toIndianWord({ number }) {
         number = number.toString();
         var sglDigit = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"],
             dblDigit = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"],
@@ -2610,7 +2631,7 @@ class _Number {
         } else str = "";
         return str
     }
-    static toInternationalWord(number) {
+    static toInternationalWord({ number }) {
         var th_val = ['', 'thousand', 'million', 'billion', 'trillion'];
         var dg_val = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
         var tn_val = ['ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
@@ -2679,8 +2700,7 @@ class _Number {
         str_val += 'only';
         return (str_val.replace(/\s+/g, ' ')).toUpperCase().trim();
     }
-
-    static toIndianNumber(number, decimalPlace = 2) {
+    static toIndianNumber({ number, decimalPlace = 2 }) {
         let rupee = new Intl.NumberFormat('en-IN', {
             style: 'currency',
             currency: 'INR',
@@ -2688,59 +2708,14 @@ class _Number {
         });
         return rupee.format(number).toString().replace("₹", "");
     }
-    static toIndianCurrency(number, decimalPlace = 2) {
+    static toIndianCurrency({number, decimalPlace = 2}) {
         let rupee = new Intl.NumberFormat('en-IN', {
             style: 'currency',
             currency: 'INR',
             minimumFractionDigits: decimalPlace
         });
         return rupee.format(number).replace("₹", "₹ ");
-    }
-    static validate1(value, min, max, decimalPlace) {
-        try {
-            var sign = "";
-            if (value == '-') {
-                return value;
-            }
-            if (value.includes('-')) {
-                sign = "-";
-                value = value.toString().split('-').length > 1 ? value.toString().split('-')[1] : value;
-            }
-            if (value == '') {
-                return sign + 0;
-            }
-            if (isNaN(value)) {
-                return sign + 0;
-            }
-
-            var beforeDecimal = Number(value.toString().split('.')[0]);
-            if (decimalPlace > 0) {
-                var afterDecimal = typeof (value.toString().split('.')[1]) == 'undefined' ? '' : value.toString().split('.')[1] == '' ? '.' : '.' + value.toString().split('.')[1];
-                if (afterDecimal.length > decimalPlace + 1) {
-                    value = beforeDecimal + afterDecimal.substring(0, decimalPlace + 1);
-                }
-                else {
-                    value = beforeDecimal + afterDecimal;
-                }
-            }
-            else {
-                value = beforeDecimal.toString().replace('.');
-            }
-
-            if (min != null && parseFloat(value) < min) {
-                return min;
-            }
-            if (max != null && parseFloat(value) > max) {
-                return min;
-            }
-            return sign + value.replaceAll('-', '');
-        }
-        catch (ex) {
-            console.log(ex);
-            return 0;
-        }
-
-    }
+    }    
 }
 
 String.prototype.toCamelCase = function () {

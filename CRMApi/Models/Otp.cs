@@ -1,15 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
 
 namespace CRMApi.Models
 {
-    public class ComplaintStatus
+    public class Otp
     {
         public int Id { get; set; }
-        public int ComplaintId { get; set; }
-        [NotMapped] public string? ComplaintNo { get; set; }
-        public string? Remarks { get; set; }
-        [NotMapped] public string OtpNo { get; set; } = String.Empty;
+        public string RefType { get; set; } = string.Empty;
+        public int RefId { get; set; }
+        public string RefNo { get; set; } = string.Empty;
+        public string OtpNo { get; set; } = string.Empty;
+        public DateTime Expiry { get; set; } = DateTime.Now;
         public int CompanyId { get; set; }
         [NotMapped] public string? CompanyDesc { get; set; }
         public int Status { get; set; }
@@ -22,10 +22,12 @@ namespace CRMApi.Models
         [NotMapped] public string UpdatedByName { get; set; } = string.Empty;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
         [NotMapped] public List<int> ListId { get; set; } = new List<int>();
-        [NotMapped] public List<int> ListComplaintId { get; set; } = new List<int>();
+        [NotMapped] public List<int> ListRefType { get; set; } = new List<int>();
+        [NotMapped] public List<int> ListRefId { get; set; } = new List<int>();
+        [NotMapped] public List<int> ListRefNo { get; set; } = new List<int>();
         [NotMapped] public DateTime FromDate { get; set; }
-        [NotMapped] public DateTime ToDate { get; set; }        
-        [NotMapped] public List<int> ListStatus { get; set; } = new List<int>();        
+        [NotMapped] public DateTime ToDate { get; set; }
+        [NotMapped] public List<int> ListStatus { get; set; } = new List<int>();
         [NotMapped] public bool IsDelete { get; set; } = false;
     }
 }

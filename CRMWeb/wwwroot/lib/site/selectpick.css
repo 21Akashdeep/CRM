@@ -27,6 +27,12 @@ select.select-pick {
     overflow: hidden;
     margin-bottom: 0;
 }
+.table .select-pick-toggle-btn {
+    font-size: 12px !important;
+    height: 28px;
+    padding-left: 7px;
+    padding-right: 5px;
+}
 .select-pick-toggle-btn:disabled {
     background-color: #e9ecef;
     color:black;
@@ -50,17 +56,21 @@ select.select-pick {
 .select-pick-toggle-btn .toggle-icon.up {
     transform: rotate(180deg);
 }
+
 .select-pick-menu {
     border: var(--border);
     border-radius: 5px;
     margin-top: 3px;
     position: absolute;
+    /*position: fixed;*/
     z-index: 1000;
     background-color: white;
-    display:none;
-    /*min-width: 100%; */
+    display: none;
 }
-
+.table .select-pick-menu {
+    /*position: initial;*/
+    
+}
 .select-pick-menu.menu-show {
     min-height: 25px;
     display: block;

@@ -162,22 +162,6 @@ namespace CRMApi.Controllers
                 Message.Exception(ref objMsg, ex);
             }
             return Ok(objMsg);
-        }        
-        [HttpPatch]
-        public async Task<IActionResult> AssignTo(Complaint obj) 
-        {
-            Message objMsg = new Message();            
-            try
-            {
-                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Update }, db, ref objMsg);
-                if (User == null) return Ok(objMsg);
-                objMsg = await RepoComplaint.AssignToAsync(obj, User);
-            }
-            catch (Exception ex)
-            {
-                Message.Exception(ref objMsg, ex);
-            }
-            return Ok(objMsg);
-        }
+        }                
     }
 }

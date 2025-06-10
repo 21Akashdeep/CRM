@@ -24,7 +24,8 @@
         public ApiName ApiName { get; set; } = new ApiName();
         public AprvRole AprvRole { get; set; } = new AprvRole();
         public Regexp Regexp { get; set; } = new Regexp();
-        
+        public RefType RefType { get; set; } = new RefType();
+
     }
     public class ConnectionStrings
     {
@@ -69,6 +70,8 @@
         public int WaitingForApproval { get; set; }
         public int Processing { get; set; }        
         public int PartialCompleted { get; set; }
+        public int Verified { get; set; }
+        public int UnVerified { get; set; }
     }
     public class Request
     {
@@ -137,6 +140,10 @@
         public string AlphaNum { get; set; } = null!;
         public string AlphaLgNum { get; set; } = null!;
         public string AlphaSmNum { get; set; } = null!;
+    }
+    public class RefType
+    {
+        public string Complaint { get; set; } = string.Empty;
     }
     public class ControllerInfo
     {

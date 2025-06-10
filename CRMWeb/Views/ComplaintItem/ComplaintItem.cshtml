@@ -1,0 +1,163 @@
+﻿@{
+    ViewData["Title"] = "Complaint Item";
+}
+
+<div class="card shadow">
+    <div class="card-header">
+        <span class="card-title">Complaint Item / View</span>
+        <button type="button" class="btn btn-sm btn-primary float-end rounded-5" id="btnNewEntry">
+            Add / Edit
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="row">            
+            <div class="col-md-2">
+                <label>Date Range</label>
+                <div class="input-group input-group-sm">
+                    <input id="DateRange" type="text" class="form-control ps-1 pe-0" readonly="" style="font-size:13px; height:31px;">
+                    <span class="input-group-text date-range-picker ps-1 pe-1"><i class="fa fa-calendar"></i></span>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label>Status</label>
+                <select id="ListStatus" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label>Complaint No.</label>
+                <select id="ListComplaintId" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label>Customer</label>
+                <select id="ListCustomerId" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <div class="btn-group">
+                    <button type="button" id="btnSearch" class="btn btn-sm btn-filter btn-outline-success" title="Search">
+                        <span class="fa fa-search"></span>
+                    </button>
+                    <button type="button" id="btnPrint" class="btn btn-sm btn-filter btn-outline-secondary" title="Print">
+                        <span class="fa fa-print"></span>
+                    </button>
+                    <button type="button" id="btnExport" class="btn btn-sm btn-filter btn-outline-primary" title="Export To Excel">
+                        <span class="fa fa-file-excel"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-md-12">
+                <table id="tableComplaintItem" class="table table-bordered table-hover table-default" border="1" data-sort-name="ComplaintNo" data-unique-id="Id" data-search="true">
+                    <thead>
+                        <tr>
+                            <th data-sortable="false" data-formatter="tableComplaintItemSlNo" class="text-center">#</th>
+                            <th data-sortable="true" data-formatter="tableComplaintItemComplaintDate" class="text-nowrap">Date</th>
+                            <th data-sortable="true" data-field="ComplaintNo" class="left-fix">Complaint No.</th>
+                            <th data-sortable="true" data-field="CustomerDesc" data-formatter="tableComplaintItemCustomerDesc" class="text-nowrap">Customer</th>
+                            <th data-sortable="true" data-field="Problem" data-formatter="tableComplaintItemProblem" class="text-nowrap">Problem</th>
+                            <th data-sortable="true" data-field="ItemDesc" data-formatter="tableComplaintItemDesc" class="text-nowrap">Item</th>
+                            <th data-sortable="true" data-field="Rate" data-formatter="tableComplaintItemRate" class="text-nowrap td-num">Rate</th>
+                            <th data-sortable="true" data-field="UnitDesc" class="text-nowrap">Unit</th>
+                            <th data-sortable="true" data-field="Qty" data-formatter="tableComplaintItemQty" class="text-nowrap td-num">Qty.</th>
+                            <th data-sortable="true" data-field="Amount" data-formatter="tableComplaintItemAmount" class="text-nowrap td-num">Amount</th>                            
+                            <th data-sortable="false" data-formatter="tableComplaintItemCreatedByAndAt" class="text-nowrap">Created By & At</th>
+                            <th data-formatter="tableComplaintItemStatus" class="text-nowrap text-center right-fix-2">Status</th>
+                            <th data-formatter="tableComplaintItemAction" data-events="tableComplaintItemActionEvent" class="not-print text-center right-fix">
+                                <i class="fa-solid fa-list-check"></i>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="modalComplaintItem" class="modal fade" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title"></span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <form id="formComplaintItem">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label>Complaint No.</label>
+                            <select id="ComplaintId" name="ComplaintId" class="select-pick required" data-search="true" data-size="4"></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Customer</label>
+                            <input type="text" id="CustomerDesc" name="CustomerDesc" class="form-control form-control-sm" readonly />
+                        </div>
+                        <div class="col-md-6">
+                            <label>Address</label>
+                            <input type="text" id="CustomerAddress" name="CustomerAddress" class="form-control form-control-sm" readonly />
+                        </div>
+                        <div class="col-md-12">
+                            <label>Problem</label>
+                            <textarea type="text" id="Problem" name="Problem" rows="4" cols="20" class="form-control form-control-sm" readonly></textarea>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">                        
+                        <div class="col-md-12">
+                            <table id="tableItem" class="table table-border table-default line-item" data-search="false" data-table-height="53.5vh">
+                                <thead>
+                                    <tr>
+                                        <th colspan="6">Item List<span class="text-mandatory"> *</span></th>
+                                        <th colspan="1" class="text-center">
+                                            <button type="button" id="btnAddItem" class="btn btn-sm btn-primary rounded-5" onclick="ComplaintItem.addItem()" style="min-height:25px; padding: 1px 6px 1px 7px;">
+                                                <span class="fa fa-plus"></span>
+                                            </button>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th data-formatter="tableItemSlNo">#</th>
+                                        <th data-formatter="tableItemDesc" data-events="tableItemDescEvent" class="description">Item</th>
+                                        <th data-formatter="tableItemRate" data-events="tableItemRateEvent" class="rate">Rate</th>
+                                        <th data-formatter="tableItemUnit" class="unit">Unit</th>
+                                        <th data-formatter="tableItemQty" data-events="tableItemQtyEvent" class="qty">Qty.</th>
+                                        <th data-formatter="tableItemAmount" data-events="tableItemAmountEvent" class="amount">Amount</th>
+                                        <th data-formatter="tableItemAction" data-events="tableItemActionEvent" class="text-center">
+                                            <i class="fa-solid fa-list-check"></i>
+                                        </th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>                                                
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnSave" class="btn btn-sm btn-success rounded-5">
+                    <span class="fa fa-save"></span>&nbsp;&nbsp;Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script src="~/script/ComplaintItem.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        $(function () {
+            ComplaintItem.init();
+        });
+    </script>
+}
+
+

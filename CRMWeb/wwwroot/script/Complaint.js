@@ -1,5 +1,4 @@
-﻿class Complaint {
-    static Item = [];
+﻿class Complaint {    
     static init() {
         Complaint.getViewOption({
             onSuccess: (response) => {
@@ -98,12 +97,12 @@
                 Complaint.getAddOption({
                     obj: obj,
                     onSuccess: (response) => {
-                        Dropdown.bind({ id: '#Complaint_AssignTo', data: response.data.AssignTo, value: 'Id', text: 'Name', subText: 'SubText' });
+                        Dropdown.bind({ id: '#Complaint_ForwardTo', data: response.data.ForwardTo, value: 'Id', text: 'Name', subText: 'SubText' });
                     }
                 });
             }
             else {
-                Dropdown.bind({ id: '#Complaint_AssignTo', data: [], value: 'Id', text: 'Name', subText: 'SubText' });
+                Dropdown.bind({ id: '#Complaint_ForwardTo', data: [], value: 'Id', text: 'Name', subText: 'SubText' });
             }            
         });
         $('#btnSave').on('click', () => {
@@ -111,7 +110,7 @@
                 return;
             }
             let obj = Data.serializeToObject({ formId: '#formComplaint' });                      
-            if (obj.AssignTo) {
+            if (obj.ForwardTo) {
                 Message.confirm({
                     msg: 'Do you want save & Assign to supervisor.',
                     confirmButtonText: 'Save',
@@ -149,22 +148,12 @@
                 Dropdown.bind({ id: '#Complaint_AdminDivId', data: response.data.AdminDiv, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#Complaint_CountryId', data: response.data.Country, value: 'Id', text: 'Description', initialValue: [App.Info.CountryId] });
                 Dropdown.bind({ id: '#Complaint_DepartmentId', data: response.data.Department, value: 'Id', text: 'Description' });
+                Dropdown.bind({ id: '#Complaint_ForwardTo', data: response.data.ForwardTo, value: 'Id', text: 'Name', subText: 'SubText' });
                 Dropdown.bind({ id: '#Complaint_Priority', data: response.data.Priority, value: 'Id', text: 'Description' });
-                Complaint.Item = response.data.Item;
+                
             }
         });        
-    }
-    static addItem() {
-        const obj = {
-            Id: 0,
-            ComplaintId: 0,
-            ItemId: 0,
-            Problem: '',
-            CompanyId: 0,
-            IsDelete: false
-        };
-        Table.add({ id: '#tableComplaintItem', data: obj, action: 'append', search: false, selectPick: true, overflow: 'visible', height: 'auto', mobileResponsive: false });
-    }
+    }    
     static add(obj) {
         Data.post({
             url: 'Complaint/Add',
@@ -191,8 +180,7 @@
                 Dropdown.bind({ id: '#Complaint_CountryId', data: Option.Country, value: 'Id', text: 'Description', initialValue: [App.Info.CountryId] });
                 Dropdown.bind({ id: '#Complaint_DepartmentId', data: Option.Department, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#Complaint_Priority', data: Option.Priority, value: 'Id', text: 'Description' });
-                Dropdown.bind({ id: '#Complaint_AssignTo', data: Option.AssignTo, value: 'Id', text: 'Name', subText: 'SubText' });
-                Complaint.Item = Option.Item;
+                Dropdown.bind({ id: '#Complaint_ForwardTo', data: Option.ForwardTo, value: 'Id', text: 'Name', subText: 'SubText' });                
                 //Assing Value in Form
                 let obj = response.obj;                
                 obj.Id = action == "Edit" ? obj.Id : null;                
@@ -279,36 +267,15 @@ window.tableComplaintSlNo = (value, obj, index) => {
 window.tableComplaintDate = (value, obj, index) => {
     return moment(obj.Date).format('DD-MMM-YYYY');
 }
-window.tableComplaintCustomerDesc = (value, obj, index) => {
-    let Address = [];
-    if (obj.Address1) {
-        Address.push(obj.Address1)
-    }
-    if (obj.Address2) {
-        Address.push(obj.Address2)
-    }
-    if (obj.PostOffice) {
-        Address.push(obj.PostOffice)
-    }
-    if (obj.PinCode) {
-        Address.push(obj.PinCode)
-    }
-    if (obj.District) {
-        Address.push(obj.District)
-    }
-    if (obj.AdminDivDesc) {
-        Address.push(obj.AdminDivDesc)
-    }
-    if (obj.CountryDesc) {
-        Address.push(obj.CountryDesc)
-    }
+window.tableComplaintCustomerDesc = (value, obj, index) => {    
     return `
-        <div class="fw-bold">${obj.CustomerDesc.match(/.{1,30}/g).join('<br>')}</div>
-        <div>${Address.join(', ').match(/.{1,50}/g).join('<br>').replaceAll(', ,', '')}</div>
-        <div>${obj.ContactNo}, ${obj.Email??""}</div>        
+        <div class="fw-bold">${obj.CustomerDesc.match(/.{1,40}/g).join('<br>')}</div>
+        <div>${obj.CustomerAddress.match(/.{1,40}/g).join('<br>')}</div>         
     `;
 }
-
+window.tableComplaintAssingTo = (value, obj, index) => {
+    return obj.AssignTo.length > 0 ? obj.AssignTo.map(x => x.AssignToName).join('<br>') : '-';
+}
 window.tableComplaintCustomerProblem = (value, obj, index) => {
     return `<div>${Field.isNullOrEmpty(obj.Problem) ? '-' : obj.Problem.match(/.{1,50}/g).join('<br>')}</div >`;
 }
@@ -372,56 +339,5 @@ window.tableComplaintActionEvent = {
     },
     'click .btn-delete': (e, value, obj, index) => {
         Complaint.delete({ id: obj.Id});
-    },    
-    'click .btn-assign-to': (e, value, obj, index) => {
-        Complaint.assignTo({ obj });
-    },
-}
-
-//Complaint Item
-window.tableComplaintItemSlNo = (value, obj, index) => {
-    return index + 1;
-}
-window.tableComplaintItemDesc = (value, obj, index) => {
-    return Dropdown.html({ id: `ComplaintItem_Desc_${index}`, className: 'select-pick complaint-item-desc complaint-required', data: Complaint.Item, value: 'Id', text: 'Description', initialValue: [obj.ItemId], json: true, title: 'Item', parent: '#tableComplaintItem', isSelectPick: true, addFn: 'Item.fill', editFn: 'Item.edit' });
-}
-window.tableComplaintItemDescEvent = {
-    'change .complaint-item-desc': (e, value, obj, index) => {
-        obj.ItemId = e.currentTarget.value;
-        let Item = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
-        if (Item != null) {
-            obj.ItemId = Item.Id;            
-            Table.updateByIndex({ id: '#tableComplaintItem', index: index, obj: obj, value: obj.ItemId, event: e });            
-        }
-    }
-}
-window.tableComplaintItemProblem = (value, obj, index) => {
-    return `<textarea id="ComplaintItem_Problem_${index}" class="form-control form-control-sm mb-0 complaint-item-problem complaint-required" rows="2" cols="40">${obj.Problem}</textarea>`;
-}
-window.tableComplaintItemProblemEvent = {
-    'input .complaint-item-problem': (e, value, obj, index) => {
-        obj.Problem = e.currentTarget.value;
-        Table.updateByIndex({ id: '#tableComplaintItem', index: index, obj: obj, value: obj.Problem, event: e });
-    }
-}
-window.tableComplaintItemAction = (value, obj, index) => {    
-    return `
-        <div class="btn-group">           
-            <button type="button" id="Complaint_Item_Action_${index}" class="btn btn-sm btn-outline-danger ps-1 pe-1 btn-complaint-item-delete" 
-                title="${obj.IsDelete > 0 ? "Delete Item" : "Remove Item"}">
-                <span class="${obj.Id > 0 ? "fa fa-trash" : "fa fa-times"}"></span>
-            </button>
-        </div>
-    `;     
-}
-window.tableComplaintItemActionEvent = {
-    'click .btn-complaint-item-delete': (e, value, obj, index) => {
-        if (obj.IsDelete) {
-            Complaint.deleteItem({ id: obj.Id, index: index });
-        }
-        else {
-            Table.remove({ id: '#tableComplaintItem', value: [index] });
-        }
-        
     }
 }

@@ -1,10 +1,10 @@
 ﻿@{
-    ViewData["Title"] = "Complaint Schedule Schedule";
+    ViewData["Title"] = "Complaint Assign";
 }
 
 <div class="card shadow">
     <div class="card-header">
-        <span class="card-title">Complaint Schedule / View</span>
+        <span class="card-title">Complaint Assign / View</span>
         <button type="button" class="btn btn-sm btn-primary float-end rounded-5" id="btnNewEntry">
             <span class="fa fa-plus"></span>&nbsp;&nbsp;Add
         </button>
@@ -12,17 +12,17 @@
     <div class="card-body">
         <div class="row">
             <div class="col-md-2">
+                <label>Status</label>
+                <select id="ListStatus" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                </select>
+            </div>
+            <div class="col-md-2">
                 <label>Date Range</label>
                 <div class="input-group input-group-sm">
                     <input id="DateRange" type="text" class="form-control ps-1 pe-0" readonly="" style="font-size:13px; height:31px;">
                     <span class="input-group-text date-range-picker ps-1 pe-1"><i class="fa fa-calendar"></i></span>
                 </div>
-            </div>
-            <div class="col-md-2">
-                <label>Status</label>
-                <select id="ListStatus" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
-                </select>
-            </div>
+            </div>            
             <div class="col-md-2">
                 <label>Complaint No.</label>
                 <select id="ListComplaintId" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
@@ -45,22 +45,21 @@
         <hr />
         <div class="row">
             <div class="col-md-12">
-                <table id="tableComplaintSchedule" class="table table-bordered table-hover table-default" border="1" data-sort-name="Id" data-unique-id="Id">
+                <table id="tableComplaintAssign" class="table table-bordered table-hover table-default" border="1" data-sort-name="ComplaintNo" data-unique-id="Id" data-search="true">
                     <thead>
                         <tr>
-                            <th data-sortable="false" data-formatter="tableComplaintScheduleSlNo" class="text-center">#</th>
-                            <th data-sortable="true" data-field="ComplaintNo" class="left-fix">Complaint No.</th>
-                            <th data-sortable="true" data-field="ItemDesc" data-formatter="tableComplaintScheduleCustomerDesc" class="text-nowrap">Customer</th>
-                            <th data-sortable="true" data-field="Problem" data-formatter="tableComplaintScheduleProblem" class="text-nowrap">Problem</th>
-                            <th data-sortable="true" data-formatter="tableComplaintScheduleAssignTo" class="text-nowrap">Assigned User</th>
-                            <th data-sortable="true" data-field="StartDateTime" data-formatter="tableComplaintScheduleStartDateTime" class="text-nowrap">Start Date Time</th>
-                            <th data-sortable="true" data-field="EndDateTime" data-formatter="tableComplaintScheduleEndDateTime" class="text-nowrap">End Date Time</th>
-                            <th data-sortable="true" data-field="CompletedDateTime" data-formatter="tableComplaintScheduleCompletedDateTime" class="text-nowrap">Completed Date Time</th>
-                            <th data-sortable="false"  data-formatter="tableComplaintScheduleRemarks" class="text-nowrap">Remarks</th>
-                            <th data-sortable="true" data-field="CreatedAt" data-formatter="tableComplaintScheduleCreatedByAndAt" class="text-nowrap">Created By & At</th>
-                            <th data-sortable="true" data-field="UpdatedAt" data-formatter="tableComplaintScheduleUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
-                            <th data-formatter="tableComplaintScheduleStatus" class="text-nowrap text-center right-fix-2">Status</th>
-                            <th data-formatter="tableComplaintScheduleAction" data-events="tableComplaintScheduleActionEvent" class="not-print text-center right-fix">
+                            <th data-sortable="false" data-formatter="tableComplaintAssignSlNo" class="text-center">#</th>
+                            <th data-sortable="true" data-formatter="tableComplaintAssignComplaintDate" class="text-nowrap">Date</th>
+                            <th data-sortable="true" data-field="ComplaintNo" class="left-fix">Complaint No.</th>                            
+                            <th data-sortable="true" data-field="ItemDesc" data-formatter="tableComplaintAssignCustomerDesc" class="text-nowrap">Customer</th>
+                            <th data-sortable="true" data-field="Problem" data-formatter="tableComplaintAssignProblem" class="text-nowrap">Problem</th>
+                            <th data-sortable="true" data-field="AssignBy" class="text-nowrap">Assign By</th>
+                            <th data-sortable="true" data-field="AssignToName" class="text-nowrap">Assign To</th>
+                            <th data-sortable="true" data-field="StartDateTime" data-formatter="tableComplaintAssignStartDateTime" class="text-nowrap">Start Date Time</th>
+                            <th data-sortable="true" data-field="StartDateTime" data-formatter="tableComplaintAssignEndDateTime" class="text-nowrap">End Date Time</th>
+                            <th data-sortable="true" data-field="CreatedAt" data-formatter="tableComplaintAssignCreatedByAndAt" class="text-nowrap">Created By & At</th>
+                            <th data-formatter="tableComplaintAssignStatus" class="text-nowrap text-center right-fix-2">Status</th>
+                            <th data-formatter="tableComplaintAssignAction" data-events="tableComplaintAssignActionEvent" class="not-print text-center right-fix">
                                 <i class="fa-solid fa-list-check"></i>
                             </th>
                         </tr>
@@ -71,7 +70,7 @@
         </div>
     </div>
 </div>
-<div id="modalComplaintSchedule" class="modal fade modal-draggable" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+<div id="modalComplaintAssign" class="modal fade modal-draggable" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -86,12 +85,11 @@
                 </div>
             </div>
             <div class="modal-body" style="min-height:75vh;">
-                <form id="formComplaintSchedule">
+                <form id="formComplaintAssign">
                     <div class="row">
                         <div class="col-md-3">
-                            <label>Complaint No.</label>
-                            <input type="hidden" name="Id" />
-                            <select id="ComplaintId" name="ComplaintId" class="select-pick required" data-search="true" data-size="4"></select>
+                            <label>Complaint No.</label>                            
+                            <select id="ComplaintId" name="Id" class="select-pick required" data-search="true" data-size="4"></select>
                         </div>                        
                         <div class="col-md-9">
                             <label>Customer</label>
@@ -103,7 +101,7 @@
                         </div>
                         <div class="col-md-12">
                             <label>Problem</label>
-                            <textarea type="text" id="Problem" name="Problem" rows="2" cols="20" class="form-control form-control-sm" readonly></textarea>
+                            <textarea type="text" id="Problem" name="Problem" rows="4" cols="20" class="form-control form-control-sm" readonly></textarea>
                         </div>
                     </div>
                     <hr />
@@ -123,12 +121,6 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <label>Remarks</label>
-                            <input type="text" id="Remarks" name="Remarks" class="form-control form-control-sm" maxlength="100"/>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
                             <table id="tableAssignTo" class="table table-border table-default">
                                 <thead>
                                     <tr>
@@ -136,13 +128,12 @@
                                     </tr>
                                     <tr>
                                         <th data-checkbox="true" data-formatter="tableAssignToIsSelected"></th>
-                                        <th data-field="Name">Service Eng. Name</th>
+                                        <th data-field="AssignToName">Service Eng. Name</th>
                                     </tr>
                                 </thead>
                             </table>
                         </div>
-                        
-                    </div>
+                    </div>                    
                 </form>
             </div>
             <div class="modal-footer">
@@ -157,10 +148,10 @@
 
 
 @section Scripts {    
-    <script src="~/script/ComplaintSchedule.js" asp-append-version="true"></script>
+    <script src="~/script/ComplaintAssign.js" asp-append-version="true"></script>
     <script type="text/javascript">
         $(function () {
-            ComplaintSchedule.init();
+            ComplaintAssign.init();
         });
     </script>
 }

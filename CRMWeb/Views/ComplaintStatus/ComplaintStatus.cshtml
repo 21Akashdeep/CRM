@@ -34,13 +34,13 @@
         <hr />
         <div class="row">
             <div class="col-md-12">                
-                <table id="tableComplaintSchedule" class="table table-bordered table-hover table-default" border="1" data-sort-name="Id" data-unique-id="Id">
+                <table id="tableComplaint" class="table table-bordered table-hover table-default" border="1" data-sort-name="Id" data-unique-id="Id">
                     <thead>
                         <tr>
-                            <th data-sortable="false" data-formatter="tableComplaintScheduleSlNo" class="text-center">#</th>
-                            <th data-sortable="true" data-formatter="tableComplaintScheduleComplaintInfo">Complaint Info</th>
-                            <th data-formatter="tableComplaintScheduleStatus" class="text-nowrap text-center">Status</th>
-                            <th data-formatter="tableComplaintScheduleAction" data-events="tableComplaintScheduleActionEvent" class="not-print text-center">
+                            <th data-sortable="false" data-formatter="tableComplaintSlNo" class="text-center">#</th>
+                            <th data-sortable="true" data-formatter="tableComplaintInfo">Complaint Info</th>
+                            <th data-formatter="tableComplaintStatus" class="text-nowrap text-center">Status</th>
+                            <th data-formatter="tableComplaintAction" data-events="tableComplaintActionEvent" class="not-print text-center">
                                 <i class="fa-solid fa-list-check"></i>
                             </th>
                         </tr>
@@ -66,21 +66,33 @@
                 </div>
             </div>
             <div class="modal-body" style="min-height:75vh;">
-                <form id="formStatus">
+                <form id="formComplaintStatus">
                     <div class="row">
                         <div class="col-md-6">
                             <label>Complaint No.</label>
-                            <input type="hidden" name="ComplaintId" />
+                            <input type="hidden" id="ComplaintId" name="ComplaintId" />
                             <input id="ComplaintNo" name="ComplaintNo" class="form-control form-control-sm required" readonly/>                            
                         </div>
                         <div class="col-md-6">
                             <label>Status</label>
                             <select id="Status" name="Status" class="select-pick required" data-search="true" data-size="4"></select>
-                        </div>
-                        <div class="col-md-12">
-                            <label>Remarks</label>
-                            <input type="text" id="Remarks" name="Remarks" class="form-control form-control-sm required" />
                         </div>                        
+                        <div class="col-md-12">
+                            <label>Remarks<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Remarks" name="Remarks" class="form-control form-control-sm required" />
+                        </div>
+                        <div class="col-md-4 send-otp hide">
+                            <label>OTP<span class="text-mandatory">*</span></label>
+                            <div class="input-group input-group-sm">
+                                <input id="OtpNo" name="OtpNo" class="form-control" autocomplete="off" data-num="true" maxlength="6" />
+                                <button type="button" id="btnSendOtp" class="input-group-text btn btn-sm btn-outline-success pt-1 pb-2" title="Search">
+                                    Send OTP
+                                </button>                                
+                            </div>
+                        </div>
+                        <div class="col-md-8 send-otp hide mt-4">
+                            <span id="OtpTimer" style="font-size:16px;"></span>
+                        </div>
                     </div>
                     <hr />                    
                     <div class="row">
@@ -88,10 +100,14 @@
                             <table id="tableComplaintStatus" class="table table-border table-default">
                                 <thead>                                    
                                     <tr>
-                                        <th data-field="ComplaintNo"></th>
+                                        <th data-formatter="tableComplaintStatusSlNo" class="text-center">#</th>
+                                        <th data-field="ComplaintNo">Complaint No.</th>
                                         <th data-field="Remarks">Remarks</th>
-                                        <th data-field="Status">Status</th>
-                                        <th data-field="tableComplaintStatusLogByAndAt">Log By & At</th>
+                                        <th data-formatter="tableComplaintStatusStatus">Status</th>
+                                        <th data-formatter="tableComplaintStatusLogByAndAt">Log By & At</th>
+                                        <th data-formatter="tableComplaintStatusAction" data-events="tableComplaintStatusActionEvents" class="text-center">
+                                            <i class="fa-solid fa-list-check"></i>
+                                        </th>
                                     </tr>
                                 </thead>
                             </table>

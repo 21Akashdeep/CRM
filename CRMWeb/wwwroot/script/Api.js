@@ -77,8 +77,7 @@
             if (!Field.isMandatory({ class: ".api-required" })) {
                 return;
             }
-            var obj = Data.serializeToObject({ formId: "#formApi" });
-            /*obj.IsApprovalRequired = JSON.parse(obj.IsApprovalRequired);*/
+            var obj = Data.serializeToObject({ formId: "#formApi" });            
             obj.SeqNo = Field.isNullOrEmpty(obj.SeqNo) ? 0 : obj.SeqNo;
             if (!obj.Id) {
                 obj.Id = 0;
