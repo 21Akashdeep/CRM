@@ -96,7 +96,7 @@ namespace CRMApi.Repository
                     Id = x.Value,
                     x.Description
                 }).ToListAsync();
-                var AssignTo = await (
+                var ForwardTo = await (
                     from usr in db.User
                     join dpt in db.Department on usr.DepartmentId equals dpt.Id
                     join deg in db.Designation on usr.DesignationId equals deg.Id
@@ -111,7 +111,7 @@ namespace CRMApi.Repository
                         SubText = $"{dpt.Code} - {dpt.Description}<br>{deg.Code} - {deg.Description}"
                     }
                 ).ToListAsync();                
-                Option.AssignTo = AssignTo.Where(x => x.ApprovalRole.Any(x => x.ApprovalRoleDesc == App.AprvRole.Supervisor)).ToList();
+                Option.ForwardTo = ForwardTo.Where(x => x.ApprovalRole.Any(x => x.ApprovalRoleDesc == App.AprvRole.Supervisor)).ToList();
                 objMsg.data = Option;
                 Message.Success(ref objMsg, "Record found");
             }
@@ -125,19 +125,51 @@ namespace CRMApi.Repository
         {
             //filter Complaint data
             obj = obj == null ? new Complaint() : obj;
-            obj.ListStatus = obj.ListStatus.Count == 0 ? App.ActiveStatus : obj.ListStatus;
-            var dbComplaintQuery = db.Complaint.Where(co => obj.ListStatus.Contains(co.Status) && co.CompanyId == User.CompanyId).AsQueryable();
-            dbComplaintQuery = obj.FromDate != default(DateTime) ? dbComplaintQuery.Where(co => co.Date.Date >= obj.FromDate.Date) : dbComplaintQuery;
-            dbComplaintQuery = obj.ToDate != default(DateTime) ? dbComplaintQuery.Where(co => co.Date.Date <= obj.ToDate.Date) : dbComplaintQuery;
-            dbComplaintQuery = obj.ListId.Any() ? dbComplaintQuery.Where(co => obj.ListId.Contains(co.Id)) : dbComplaintQuery;
-            dbComplaintQuery = obj.ListSupportMode.Any() ? dbComplaintQuery.Where(co => obj.ListSupportMode.Contains(co.SupportMode)) : dbComplaintQuery;
-            dbComplaintQuery = obj.ListCustomerId.Any() ? dbComplaintQuery.Where(co => obj.ListCustomerId.Contains(co.CustomerId)) : dbComplaintQuery;
-            dbComplaintQuery = obj.ListDeparmentId.Any() ? dbComplaintQuery.Where(co => obj.ListDeparmentId.Contains(co.DepartmentId)) : dbComplaintQuery;
-            dbComplaintQuery = obj.ListPriority.Any() ? dbComplaintQuery.Where(co => obj.ListPriority.Contains(co.Priority)) : dbComplaintQuery;
-            dbComplaintQuery = obj.ListAssignTo.Any() ? dbComplaintQuery.Where(co => obj.ListAssignTo.Contains(co.AssignTo ?? 0)) : dbComplaintQuery;
+            obj.ListStatus = obj.ListStatus.Count == 0 ? new List<int> { App.Status.SaveAsDraft, App.Status.Pending, App.Status.Scheduled } : obj.ListStatus;
+            var dbComplaintQuery = db.Complaint.AsQueryable();
+
+            dbComplaintQuery = db.Complaint.Where(co => obj.ListStatus.Contains(co.Status) && co.CompanyId == User.CompanyId).AsQueryable();
+            
+            if (obj.FromDate != default(DateTime)) 
+                dbComplaintQuery = dbComplaintQuery.Where(co => co.Date.Date >= obj.FromDate.Date);
+            if (obj.ToDate != default(DateTime)) 
+                dbComplaintQuery = dbComplaintQuery.Where(co => co.Date.Date <= obj.ToDate.Date);
+            if (obj.ListId.Any()) 
+                dbComplaintQuery = dbComplaintQuery.Where(co => obj.ListId.Contains(co.Id));
+            if (obj.ListSupportMode.Any()) 
+                dbComplaintQuery = dbComplaintQuery.Where(co => obj.ListSupportMode.Contains(co.SupportMode));
+            if (obj.ListCustomerId.Any()) 
+                dbComplaintQuery = dbComplaintQuery.Where(co => obj.ListCustomerId.Contains(co.CustomerId));
+            if (obj.ListDeparmentId.Any()) 
+                dbComplaintQuery = dbComplaintQuery.Where(co => obj.ListDeparmentId.Contains(co.DepartmentId));
+            if (obj.ListPriority.Any()) 
+                dbComplaintQuery = dbComplaintQuery.Where(co => obj.ListPriority.Contains(co.Priority));
+            if (obj.ListForwardTo.Any()) 
+                dbComplaintQuery = dbComplaintQuery.Where(co => obj.ListForwardTo.Contains(co.ForwardTo ?? 0));
 
             //Get Complaint 
-            var dbComplaint = await dbComplaintQuery.ToListAsync();            
+            var dbComplaint = await dbComplaintQuery.ToListAsync();
+
+            //Get Assing Complaint
+            var dbComplaintId = dbComplaint.Select(x => x.Id).ToList();
+            
+            var dbComplaintAssign = await (
+                from ca in db.ComplaintAssign
+                join at in db.User on ca.AssignTo equals at.Id
+                where App.ActiveStatus.Contains(ca.Status) &&  dbComplaintId.Contains(ca.ComplaintId)
+                select new ComplaintAssign
+                {
+                    Id = ca.Id,
+                    ComplaintId = ca.ComplaintId,
+                    AssignTo = ca.AssignTo,
+                    AssignToName = at.Name,
+                    Status = ca.Status,
+                    CreatedBy = ca.CreatedBy,
+                    CreatedAt = ca.CreatedAt,
+                    UpdatedBy = ca.UpdatedBy,
+                    UpdatedAt = ca.UpdatedAt
+                }
+            ).ToListAsync();
 
             //Get Complaint List
             var Complaint = (
@@ -149,8 +181,8 @@ namespace CRMApi.Repository
                 join de in db.Department on co.DepartmentId equals de.Id
                 join pr in db.Setting on new { Name = App.SettingName.Priority, Value = co.Priority.ToString() } equals new { pr.Name, pr.Value }
                 join st in db.Setting on new { Name = App.SettingName.Status, Value = co.Status.ToString() } equals new { st.Name, st.Value }
-                join at in db.User on co.AssignTo equals at.Id into dbAssignTo
-                from at in dbAssignTo.DefaultIfEmpty()
+                join at in db.User on co.ForwardTo equals at.Id into dbForwardTo
+                from at in dbForwardTo.DefaultIfEmpty()
                 join cb in db.User on co.CreatedBy equals cb.Id
                 join ub in db.User on co.UpdatedBy equals ub.Id
                 select new Complaint
@@ -171,15 +203,27 @@ namespace CRMApi.Repository
                     AdminDivDesc = ad.Description,
                     CountryId = co.CountryId,
                     CountryDesc = cn.Description,
+                    CustomerAddress = Util.AddressDesc(new Composite.AddressDesc
+                    {
+                        Add1 = co.Address1,
+                        Add2 = co.Address2,
+                        PinCode = co.PinCode,
+                        PostOffice = co.PostOffice,
+                        District = co.District,
+                        State = co.AdminDivDesc,
+                        Country = co.CountryDesc,
+                        OtherText = co.ContactNo
+                    }),
                     ContactNo = co.ContactNo,
                     Email = co.Email,
                     DepartmentId = co.DepartmentId,
                     DepartmentDesc = de.Description,
-                    AssignTo = co.AssignTo,
-                    AssignToName = at?.Name,
+                    ForwardTo = co.ForwardTo,
+                    ForwardToName = at?.Name,
                     Priority = co.Priority,
                     PriorityDesc = pr.Description,
-                    Problem = co.Problem,
+                    Problem = co.Problem,                    
+                    AssignTo = dbComplaintAssign.Where(ca=> ca.ComplaintId == co.Id).ToList(),
                     CompanyId = co.CompanyId,
                     Status = co.Status,
                     StatusDesc = st.Description,
@@ -190,9 +234,11 @@ namespace CRMApi.Repository
                     UpdatedBy = co.UpdatedBy,
                     UpdatedByName = ub.Name,
                     UpdatedAt = co.UpdatedAt,                    
-                    IsEdit = co.Status == App.Status.SaveAsDraft || co.Status == App.Status.Pending ? true : false,
-                    IsDelete = co.Status == App.Status.SaveAsDraft || co.Status == App.Status.Pending ? true : false,
-                    IsDuplicate = co.Status != App.Status.Delete ? true : false,                    
+                    IsEdit = co.Status == App.Status.SaveAsDraft || co.Status == App.Status.Pending || App.ByPassUserType.Contains(User.UserType) ? true : false,
+                    IsDelete = co.Status == App.Status.SaveAsDraft || co.Status == App.Status.Pending || App.ByPassUserType.Contains(User.UserType) ? true : false,
+                    IsDuplicate = co.Status != App.Status.Delete ? true : false,
+                    IsClose = App.ByPassUserType.Contains(User.UserType) ? true : false,
+                    IsAddStatus = co.Status == App.Status.Scheduled || co.Status == App.Status.Processing ? true : false,
                 }
             ).ToList();
             return Complaint;
@@ -261,7 +307,7 @@ namespace CRMApi.Repository
                     Email = co.Email,
                     DepartmentId = co.DepartmentId,
                     DepartmentDesc = de.Description,
-                    AssignTo = co.AssignTo,
+                    ForwardTo = co.ForwardTo,
                     Priority = co.Priority,
                     PriorityDesc = pr.Description,
                     CompanyId = co.CompanyId,
@@ -337,7 +383,7 @@ namespace CRMApi.Repository
                     co.ContactNo,
                     co.Email,
                     Priority = co.PriorityDesc,
-                    AssignTo = co.AssignToName,                    
+                    ForwardTo = co.ForwardToName,                    
                 }).ToList();
                 
                 DataTable objDataTable = Util.ListToDataTable(Complaint);
@@ -379,7 +425,7 @@ namespace CRMApi.Repository
                     return objMsg;
                 }
                 obj.CompanyId = User.CompanyId;
-                obj.Status = obj.AssignTo == null ? App.Status.SaveAsDraft : App.Status.Pending;
+                obj.Status = obj.ForwardTo == null ? App.Status.SaveAsDraft : App.Status.Pending;
                 obj.CreatedBy = User.Id;
                 obj.UpdatedBy = User.Id;               
                 db.Add(obj);
@@ -390,7 +436,7 @@ namespace CRMApi.Repository
                     //Reload Object & Assing Id
                     await db.Entry(obj).ReloadAsync();
                     obj.ListId.Add(obj.Id);
-                    if (obj.AssignTo != null)
+                    if (obj.ForwardTo != null)
                     {
                         obj.ListStatus.Add(App.Status.Pending);
                         obj.ListStatus.AddRange(App.ActiveStatus);
@@ -458,11 +504,10 @@ namespace CRMApi.Repository
                 UpdateComplaint.ContactNo = obj.ContactNo;
                 UpdateComplaint.Email = obj.Email;
                 UpdateComplaint.DepartmentId = obj.DepartmentId;
-                UpdateComplaint.AssignTo = obj.AssignTo;
-                UpdateComplaint.Priority = obj.Priority;
-                UpdateComplaint.AssignTo = obj.AssignTo;
+                UpdateComplaint.ForwardTo = obj.ForwardTo;
+                UpdateComplaint.Priority = obj.Priority;                
                 UpdateComplaint.Problem = obj.Problem;
-                UpdateComplaint.Status = obj.AssignTo == null ? App.Status.SaveAsDraft : App.Status.Pending;
+                UpdateComplaint.Status = obj.ForwardTo == null ? App.Status.SaveAsDraft : App.Status.Pending;
                 UpdateComplaint.UpdatedBy = User.Id;
                 UpdateComplaint.UpdatedAt = DateTime.Now;
                 db.Update(UpdateComplaint);
@@ -472,7 +517,7 @@ namespace CRMApi.Repository
                 if (objMsg.status == Message.Type.success)
                 {                    
                     obj.ListId.Add(obj.Id);
-                    if (obj.AssignTo != null) 
+                    if (obj.ForwardTo != null) 
                     {
                         obj.ListStatus.Add(App.Status.Pending);
                         obj.ListStatus.AddRange(App.ActiveStatus);
@@ -509,6 +554,30 @@ namespace CRMApi.Repository
                 DeleteComplaint.UpdatedBy = User.Id;
                 DeleteComplaint.UpdatedAt = DateTime.Now;               
                 db.Update(DeleteComplaint);
+                //Delete Complaint Assign
+                var DeleteComplaintAssign = await db.ComplaintAssign.Where(x => x.ComplaintId == Id).ToListAsync();
+                if (DeleteComplaintAssign.Any())
+                {
+                    foreach (var item in DeleteComplaintAssign)
+                    {
+                        item.Status = App.Status.Delete;
+                        item.UpdatedBy = User.Id;
+                        item.UpdatedAt = DateTime.Now;
+                        db.Update(item);
+                    }
+                }
+                //Delete Complaint Status
+                var DeleteComplaintStatus = await db.ComplaintStatus.Where(x => x.ComplaintId == Id).ToListAsync();
+                if (DeleteComplaintStatus.Any())
+                {
+                    foreach (var item in DeleteComplaintStatus)
+                    {
+                        item.Status = App.Status.Delete;
+                        item.UpdatedBy = User.Id;
+                        item.UpdatedAt = DateTime.Now;
+                        db.Update(item);
+                    }
+                }
                 int isSaveChanges = await db.SaveChangesAsync();
                 Message.Delete(ref objMsg, isSaveChanges, "");
                 if (objMsg.status == Message.Type.success)
@@ -528,40 +597,6 @@ namespace CRMApi.Repository
                 Message.Exception(ref objMsg, ex);
             }
             return objMsg;
-        }        
-        public async Task<Message> AssignToAsync(Complaint obj, User User) 
-        {
-            Message objMsg = new Message();
-            try 
-            {
-                var AssignToComplaint = await db.Complaint.FindAsync(obj.Id);
-                if (AssignToComplaint == null)
-                {
-                    Message.Error(ref objMsg, "Complaint did not find for assign the task.");
-                    return objMsg;
-                }
-                AssignToComplaint.AssignTo = obj.AssignTo;
-                AssignToComplaint.UpdatedBy = User.Id;
-                AssignToComplaint.UpdatedAt = DateTime.Now;
-                db.Update(AssignToComplaint);
-                int isSaveChanges = await db.SaveChangesAsync();
-                Message.Update(ref objMsg, isSaveChanges, "");
-                if (objMsg.status == Message.Type.success)
-                {
-                    //Get Complaint
-                    var Complaints = await ListAsync(new Complaint
-                    {
-                        ListId = new List<int> { AssignToComplaint.Id },
-                        ListStatus = new List<int> { App.Status.Delete }
-                    }, User);
-                    objMsg.obj = Complaints.FirstOrDefault();                    
-                }
-            }
-            catch (Exception ex) 
-            {
-                Message.Exception(ref objMsg, ex);
-            }
-            return objMsg;
-        }
+        }                
     }
 }

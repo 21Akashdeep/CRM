@@ -18,9 +18,8 @@ namespace CRMApi.Repository
             Message objMsg = new Message();
             try
             {
-                dynamic option = new ExpandoObject();
-                var dbDepartment = db.Department.Where(x => App.ActiveStatus.Contains(x.Status)).ToList();
-                var ListStatus = dbDepartment.Select(x => x.Status.ToString()).ToList();
+                dynamic option = new ExpandoObject();                
+                var ListStatus = db.Department.Select(x => x.Status.ToString()).ToList();
                 option.Status = (
                     from st in db.Setting                    
                     where App.ActiveStatus.Contains(st.Status) && st.Name == App.SettingName.Status && ListStatus.Contains(st.Value)

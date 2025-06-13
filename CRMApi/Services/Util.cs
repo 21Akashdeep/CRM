@@ -84,6 +84,20 @@ namespace CRMApi.Services
             var finalString = new String(stringChars);
             return finalString;
         }
+        public static string RandomNum()
+        {
+            var chars = "0123456789";
+            var stringChars = new char[6];
+            var random = new Random();
+
+            for (int i = 0; i < stringChars.Length; i++)
+            {
+                stringChars[i] = chars[random.Next(chars.Length)];
+            }
+
+            var finalString = new String(stringChars);
+            return finalString;
+        }
         public static List<ControllerInfo> GetControllerInfo()
         {
             Assembly asm = Assembly.GetExecutingAssembly();
@@ -204,9 +218,13 @@ namespace CRMApi.Services
 
                 ws.Cell("A2")
                     .SetValue(obj.ReportDesc)
-                    .Style.Font.SetFontSize(14)
+                    .Style.Font.SetFontSize(12)
                     .Font.SetBold(true)
+                    .Alignment.SetWrapText(true)                    
                     .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+                
+                ws.Row(2).Height = 30;
+
                 ws.Range(headerMergeRange.Replace("1", "2")).Merge(true).
                     Style.
                     Border.SetInsideBorder(XLBorderStyleValues.Thin).
@@ -490,9 +508,8 @@ namespace CRMApi.Services
             }
 
             if (!string.IsNullOrWhiteSpace(obj.Country)) parts.Add(obj.Country);
-            if (!string.IsNullOrWhiteSpace(obj.OtherText)) parts.Add(obj.OtherText);
-
-            return string.Join(", ", parts);
+            if (!string.IsNullOrWhiteSpace(obj.OtherText)) parts.Add(obj.OtherText);            
+            return string.Join(", ", parts).Replace(", ,", ",");
         }
 
         public static string QRCodeBase64(string text) 

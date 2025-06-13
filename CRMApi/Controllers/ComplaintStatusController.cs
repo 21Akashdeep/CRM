@@ -9,14 +9,14 @@ namespace CRMApi.Controllers
     [Route("api/[controller]/[action]")]
     [ApiController]
     [Authorize]
-    public class ComplaintController : ControllerBase
+    public class ComplaintStatusController : ControllerBase
     {
         private readonly DbCRM db;
-        private readonly RepoComplaint RepoComplaint;
-        public ComplaintController(DbCRM _db) 
+        private readonly RepoComplaintStatus RepoComplaintStatus;
+        public ComplaintStatusController(DbCRM _db) 
         {
             db = _db;
-            RepoComplaint = new RepoComplaint(db);
+            RepoComplaintStatus = new RepoComplaintStatus(db);
         }
         [HttpGet]
         public async Task<IActionResult> GetViewOption()
@@ -26,7 +26,7 @@ namespace CRMApi.Controllers
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoComplaint.GetViewOptionAsync();
+                objMsg = await RepoComplaintStatus.GetViewOptionAsync();
             }
             catch (Exception ex)
             {
@@ -35,31 +35,30 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPost]
-        public async Task<IActionResult> GetAddOption(Complaint obj)
+        public async Task<IActionResult> GetAddOption(ComplaintStatus obj)
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoComplaint.GetAddOptionAsync(obj);
+                objMsg = await RepoComplaintStatus.GetAddOptionAsync(obj, User);
             }
             catch (Exception ex)
             {
                 Message.Exception(ref objMsg, ex);
             }
             return Ok(objMsg);
-        }
-        
+        }               
         [HttpPost]
-        public async Task<IActionResult> Get(Complaint obj)
+        public async Task<IActionResult> GetComplaint(ComplaintStatus obj)
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoComplaint.GetAsync(obj, User);
+                objMsg = await RepoComplaintStatus.GetComplaintAsync(obj, User);
             }
             catch (Exception ex)
             {
@@ -68,30 +67,14 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPost]
-        public async Task<IActionResult> Print(Complaint obj)
-        {
-            Message objMsg = new Message();
-            try
-            {
-                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Print }, db, ref objMsg);
-                if (User == null) return Ok(objMsg);
-                objMsg = await RepoComplaint.PrintAsync(obj, User);
-            }
-            catch (Exception ex)
-            {
-                Message.Exception(ref objMsg, ex);
-            }
-            return Ok(objMsg);
-        }
-        [HttpPost]
-        public async Task<IActionResult> Export(Complaint obj)
+        public async Task<IActionResult> Add(ComplaintStatus obj)
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoComplaint.ExportAsync(obj, User);
+                objMsg = await RepoComplaintStatus.AddAsync(obj, User);
             }
             catch (Exception ex)
             {
@@ -100,46 +83,14 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPost]
-        public async Task<IActionResult> Add(Complaint obj)
+        public async Task<IActionResult> SendOtp(ComplaintStatus obj)
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoComplaint.AddAsync(obj, User);
-            }
-            catch (Exception ex)
-            {
-                Message.Exception(ref objMsg, ex);
-            }
-            return Ok(objMsg);
-        }
-        [HttpGet]
-        public async Task<IActionResult> Edit(int Id)
-        {
-            Message objMsg = new Message();
-            try
-            {
-                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
-                if (User == null) return Ok(objMsg);                
-                objMsg = await RepoComplaint.EditAsync(Id, User);
-            }
-            catch (Exception ex)
-            {
-                Message.Exception(ref objMsg, ex);
-            }
-            return Ok(objMsg);
-        }
-        [HttpPatch]
-        public async Task<IActionResult> Update(Complaint obj)
-        {
-            Message objMsg = new Message();
-            try
-            {
-                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
-                if (User == null) return Ok(objMsg);
-                objMsg = await RepoComplaint.UpdateAsync(obj, User);
+                objMsg = await RepoComplaintStatus.SendOtpAsync(obj, User);
             }
             catch (Exception ex)
             {
@@ -154,14 +105,14 @@ namespace CRMApi.Controllers
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
-                if (User == null) return Ok(objMsg);                
-                objMsg = await RepoComplaint.DeleteAsync(Id, User);
+                if (User == null) return Ok(objMsg);
+                objMsg = await RepoComplaintStatus.DeleteAsync(Id, User);
             }
             catch (Exception ex)
             {
                 Message.Exception(ref objMsg, ex);
             }
             return Ok(objMsg);
-        }                
+        }
     }
 }

@@ -316,8 +316,7 @@ class SelectPick {
         if (!selectPick.attributes[SELECTPICK_DATA_ID]) {
             console.error("Select Pick Data Id undefined.");
             return;
-        }
-        let coordinate = selectPick.getBoundingClientRect();
+        }        
         let selectId = selectPick.attributes[SELECTPICK_DATA_ID].value;
         let obj = SelectPick.#data.find(x => x.id == selectId);
         if (!obj) {
@@ -357,7 +356,7 @@ class SelectPick {
         }        
         //Scaling the selectpick
         if (selectPickMenu.classList.contains(SELECTPICK_MENU_SHOW)) {
-            SelectPick.scaling(selectPick, coordinate);
+            SelectPick.scaling(selectPick);
         }
         //List Key Action
         document.querySelectorAll(`.${SELECTPICK} li.${SELECTPICK_MENU_ITEM}`).forEach((el) => {
@@ -365,29 +364,35 @@ class SelectPick {
             el.addEventListener('keydown', SelectPick.#liKeyAction, false);
         });
     }
-    static scaling(selectPick, coordinates) {
+    static scaling(selectPick) {
         let select = document.querySelector(`#${selectPick.attributes['data-id'].value}`);
         let parent = document.querySelector(SelectPick.#getAttrVal({ el: select, attr: SELECTPICK_DATA_PARENT, initVal: 'body' }));
         let selectPickMenu = selectPick.querySelector(`.${SELECTPICK_MENU}`);
+        let coordinates = selectPick.getBoundingClientRect();
         //Set Y-Scaling
         let selectPickList = selectPickMenu.lastChild;
         let dataSize = parseInt(SelectPick.#getAttrVal({ el: select, attr: SELECTPICK_DATA_SIZE, initVal: '0' }));
-        let selectPickItemHeight = selectPickMenu.lastChild.firstElementChild == null ? 0 : selectPickMenu.lastChild.firstElementChild.offsetHeight;
-        selectPickList.style.maxHeight = (dataSize <= 1 ? window.innerHeight / 2 : (dataSize * selectPickItemHeight) + 5) + 'px';
-
+        let selectPickItemHeight = selectPickMenu.lastChild.firstElementChild == null ? 0 : selectPickMenu.lastChild.firstElementChild.offsetHeight;        
+        let selectPickMenuHeight = (dataSize <= 1 ? window.innerHeight / 2 : (dataSize * selectPickItemHeight) + 5)
+        selectPickList.style.maxHeight = `${selectPickMenuHeight}px`;
+        
         //Set X-Scaling        
         selectPickMenu.style.removeProperty('maxWidth');
         selectPickMenu.style.removeProperty('minWidth');
+
         //Set Max & Min Width
         selectPickMenu.style.minWidth = coordinates.width + 'px';
         let maxWidth = parent.offsetWidth > 1000 ? 1000 : parent.offsetWidth - 30;
         selectPickMenu.style.maxWidth = maxWidth + 'px';
-        //Set X Transform
+
+        //Set Transform
         selectPickMenu.style.removeProperty('transform');
         let padding = parent == document.body ? 14 : 10;
         let overflowX = ((Math.ceil(coordinates.x) + selectPickMenu.offsetWidth) - parent.offsetWidth) + padding;
         let translateX = overflowX < 0 ? 0 : overflowX;
-        selectPickMenu.style.transform = `translate(-${translateX}px, 0px)`;
+        let overflowY = window.innerHeight - (selectPick.getBoundingClientRect().y + selectPickMenu.offsetHeight);
+        let translateY = overflowY <= 10 ? -(selectPickMenu.offsetHeight + 33) : 0;
+        selectPickMenu.style.transform = `translate(-${translateX}px, ${translateY}px)`;
     }
     static #specialKey(event) {
         if (event.code == "Escape") {

@@ -268,7 +268,8 @@ namespace CRMApi.Repository
                     return objMsg;
                 }
                 objMsg.obj = Customer;                
-                Message.Success(ref objMsg, "Record found.");
+                objMsg.data = GetAddOption().data;
+                Message.Success(ref objMsg, "Record found.");                
             }
             catch (Exception ex) 
             {
@@ -281,7 +282,7 @@ namespace CRMApi.Repository
             Message objMsg = new Message();
             try 
             {
-                obj.Name = Util.SanitizeInput(obj.Name, App.Regexp.AlphaNum) ?? "";
+                obj.Name = Util.SanitizeInput(obj.Name, null) ?? "";
                 var dbCustomer = db.Customer.Where(ap => App.ActiveStatus.Contains(ap.Status)).ToList();
                 var duplicate = db.Customer.FirstOrDefault(ap => App.ActiveStatus.Contains(ap.Status) && (ap.Code == obj.Code || ap.Name == obj.Name || ap.Description == obj.Description) && ap.Id != obj.Id);
                 if (duplicate != null)
@@ -301,7 +302,7 @@ namespace CRMApi.Repository
                     Message.Error(ref objMsg, "Customer did not find for update.");
                     return objMsg;
                 }
-                UpdateCustomer.Code = obj.Code;
+                UpdateCustomer.Code = String.IsNullOrEmpty(obj.Code) ? UpdateCustomer.Code : obj.Code;
                 UpdateCustomer.Name = obj.Name;
                 UpdateCustomer.Description = obj.Description;
                 UpdateCustomer.CinNo = obj.CinNo;

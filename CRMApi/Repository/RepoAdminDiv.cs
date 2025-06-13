@@ -154,7 +154,7 @@ namespace CRMApi.Repository
                 }).ToList();
                 //Convert List To DataTable
                 DataTable objDataTable = Util.ListToDataTable(AdminDiv);
-                objCompany.SheetName = "State / Admin. Div. List";
+                objCompany.SheetName = "State_Admin. Div. List";
                 objCompany.ReportDesc = $"State / Admin. Div. - {DateTime.Now.ToString("dd-MMM-yyyy")}";
                 objMsg.base64 = Util.DataTableToBase64(objDataTable, objCompany);
                 Message.Get(ref objMsg, "");
@@ -214,7 +214,8 @@ namespace CRMApi.Repository
                     Message.Error(ref objMsg, "AdminDiv did not find for edit.");
                     return objMsg;
                 }
-                objMsg.obj = AdminDiv;                
+                objMsg.obj = AdminDiv;    
+                objMsg.data = GetAddOption().data;
                 Message.Success(ref objMsg, "Record found.");
             }
             catch (Exception ex) 

@@ -2,11 +2,11 @@
 
 namespace CRMWeb.Controllers
 {
-    public class ComplaintScheduleController : Controller
+    public class ComplaintAssignController : Controller
     {
         public IActionResult Index()
         {
-            return View("ComplaintSchedule");
+            return View("ComplaintAssign");
         }
     }
 }

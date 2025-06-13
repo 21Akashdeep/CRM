@@ -213,6 +213,7 @@ namespace CRMApi.Repository
                     return objMsg;
                 }
                 objMsg.obj = Zone;                
+                objMsg.data = GetAddOption().data;
                 Message.Success(ref objMsg, "Record found.");
             }
             catch (Exception ex) 

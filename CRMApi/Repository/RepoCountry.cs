@@ -219,7 +219,8 @@ namespace CRMApi.Repository
                     Message.Error(ref objMsg, "Country did not find for edit.");
                     return objMsg;
                 }
-                objMsg.obj = Country;                
+                objMsg.obj = Country;  
+                objMsg.data = GetAddOption().data;
                 Message.Success(ref objMsg, "Record found.");
             }
             catch (Exception ex) 
