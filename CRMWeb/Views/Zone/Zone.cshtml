@@ -1,9 +1,9 @@
 ﻿@{
-    ViewData["Title"] = "Customer";
+    ViewData["Title"] = "Zone";
 }
 <div class="card shadow">
     <div class="card-header">
-        <span class="card-title">Customer / View</span>
+        <span class="card-title">Zone / View</span>
         <button type="button" class="btn btn-sm btn-primary float-end rounded-5" data-action="Add" id="btnAdd">
             <span class="fa fa-plus"></span>&nbsp;&nbsp;Add
         </button>
@@ -16,7 +16,7 @@
                 </select>
             </div>
             <div class="col-md-4">
-                <label>Customer</label>
+                <label>Zone</label>
                 <select id="ListId" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
                 </select>
             </div>
@@ -38,25 +38,20 @@
         <hr />
         <div class="row">
             <div class="col-md-12">
-                <table id="tableCustomer" class="table table-bordered table-hover table-default" border="1" data-sort-name="Code" data-unique-id="Id">
+                <table id="tableZone" class="table table-bordered table-hover table-default" border="1" data-sort-name="Code" data-unique-id="Id">
                     <thead>
                         <tr>
-                            <th data-sortable="false" data-formatter="tableCustomerSLNo" class="text-center">#</th>
+                            <th data-sortable="false" data-formatter="tableZoneSLNo" class="text-center">#</th>
                             <th data-sortable="true" data-field="Code">Code</th>
-                            <th data-sortable="true" data-formatter="tableCustomerName" class="text-nowrap">Name</th>
-                            <th data-sortable="true" data-formatter="tableCustomerDescription" class="text-nowrap">Description</th>
-                            <th data-sortable="true" data-field="CinNo">CinNo</th>
-                            <th data-sortable="true" data-field="GstNo">GstNo</th>
-                            <th data-sortable="true" data-field="PanNo">PanNo</th>
-                            <th data-sortable="true" data-formatter="tableCustomerAddress" class="text-nowrap">Address</th>
-                            <th data-sortable="true" data-field="ContactNo">ContactNo</th>
-                            <th data-sortable="true" data-field="Email">Email</th>
-                            <th data-sortable="false" data-formatter="tableCustomerCreatedByAndAt" class="text-nowrap">Created By & At</th>
-                            <th data-sortable="false" data-formatter="tableCustomerUpdatedByAndAt" class="ext-nowrap">Updated By & At</th>
-                            <th data-sortable="false" data-formatter="tableCustomerStatus" class="Status text-center right-fix-2">Status</th>
-                            <th data-formatter="tableCustomerAction" data-events="tableCustomerActionEvent" class="not-print text-center right-fix">
+                            <th data-sortable="true" data-field="Name">Name</th>
+                            <th data-sortable="true" data-field="Description">Description</th>
+                            <th data-sortable="true" data-field="CountryDesc">Country</th>
+                            <th data-sortable="false" data-formatter="tableZoneCreatedByAndAt" class="text-nowrap">Created By & At</th>
+                            <th data-sortable="false" data-formatter="tableZoneUpdatedByAndAt" class="ext-nowrap">Updated By & At</th>
+                            <th data-sortable="false" data-formatter="tableZoneStatus" class="Status text-center right-fix-2">Status</th>
+                            <th data-formatter="tableZoneAction" data-events="tableZoneActionEvent" class="not-print text-center right-fix">
                                 <i class="fa fa-list-check"></i>
-                            </th> 
+                            </th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -66,14 +61,15 @@
     </div>
 </div>
 <!-- Api Add Modal -->
-<partial name="CustomerAdd.cshtml" />
+<partial name="ZoneAdd.cshtml" />
 @section Scripts {
 
-    <script src="~/script/Customer.js" asp-append-version="true"></script>
+    <script src="~/script/Zone.js" asp-append-version="true"></script>
     <script type="text/javascript">
         $(()=> {
-            Customer.init();
+            Zone.init();
         });
     </script>
 }
+
 

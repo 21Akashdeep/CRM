@@ -1,8 +1,8 @@
-﻿<div id="modalCountry" class="modal fade modal-draggable" data-bs-backdrop="static" tabindex="-1">
+﻿<div id="modalZone" class="modal fade modal-draggable" data-bs-backdrop="static" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <span class="modal-title">Country / Add</span>
+                <span class="modal-title">Zone / Add</span>
                 <div class="btn-group">
                     <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
                         <span class="fa fa-minus"></span>
@@ -13,29 +13,24 @@
                 </div>
             </div>
             <div class="modal-body" style="min-height:75vh;">
-                <form id="formCountry">
-                    <input type="hidden"id="Id" name="Id"/>
+                <form id="formZone">
+                    <input type="hidden" id="Id" name="Id" />
                     <div class="row">
                         <div class="col-md-12">
                             <label>Code<span class="text-mandatory">*</span></label>
-                            <input type="text" id="Country_Code" name="Code" autocomplete="off" class="form-control form-control-sm country-required" maxlength="16" />
+                            <input type="text" id="Zone_Code" name="Code" autocomplete="off" class="form-control form-control-sm zone-required" maxlength="16" />
                         </div>
                         <div class="col-md-12">
                             <label>Name<span class="text-mandatory">*</span></label>
-                            <input type="text" id="Country_Name" name="Name" autocomplete="off" class="form-control form-control-sm country-required" maxlength="50" />
+                            <input type="text" id="Zone_Name" name="Name" autocomplete="off" class="form-control form-control-sm zone-required" maxlength="50" />
                         </div>
                         <div class="col-md-12">
                             <label>Description<span class="text-mandatory">*</span></label>
-                            <input type="text" id="Country_Description" name="Description" autocomplete="off" class="form-control form-control-sm country-required" maxlength="100" />
+                            <input type="text" id="Zone_Description" name="Description" autocomplete="off" class="form-control form-control-sm zone-required" maxlength="100" />
                         </div>
                         <div class="col-md-12">
-                            <label>Administration Division Type<span class="text-mandatory">*</span></label>
-                            <select id="Country_AdminDivType" name="AdminDivType" class="select-pick" data-search="true" title="Nothing Selected" data-size="4">
-                            </select>
-                        </div>
-                        <div class="col-md-12">
-                            <label>Postal Type<span class="text-mandatory">*</span></label>
-                            <select id="Country_PostalType" name="PostalType" class="select-pick" data-search="true" title="Nothing Selected" data-size="4">
+                            <label>Country<span class="text-mandatory">*</span></label>
+                            <select id="Zone_Country" name="Country" class="select-pick" data-search="true" title="Nothing Selected" data-size="4">
                             </select>
                         </div>
 
@@ -43,10 +38,11 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" id="Country_btnSave" class="btn btn-sm btn-success rounded-5">
+                <button type="button" id="Zone_btnSave" class="btn btn-sm btn-success rounded-5">
                     <span class="fa fa-save"></span>&nbsp;&nbsp;Save
                 </button>
             </div>
         </div>
     </div>
 </div>
+

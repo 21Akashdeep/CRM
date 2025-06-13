@@ -80,14 +80,12 @@
             });
         });
         $('#Country_btnSave').on('click', () => {
-            if (!Field.isMandatory({ class: ".Country-required" })) {
+            if (!Field.isMandatory({ class: ".country-required" })) {
                 return;
             }
-            var obj = Data.serializeToObject({ formId: "#formCountry" });
-            obj.IsApprovalRequired = JSON.parse(obj.IsApprovalRequired);
-            obj.SeqNo = Field.isNullOrEmpty(obj.SeqNo) ? 0 : obj.SeqNo;
+            let obj = Data.serializeToObject({ formId: "#formCountry" });
             if (!obj.Id) {
-                obj.Id = 0;
+                
                 Country.add(obj);
             }
             else {
@@ -102,8 +100,8 @@
         Country.getAddOption((response) => {
             Modal.open({ id: '#modalCountry', title: 'Country / Add', action: 'Add' });
             $('#Country_SeqNo').val(0);
-            Dropdown.bind({ id: '#Country_AdminDivType', data: response.data.AdminDivType, value: 'Id', text: 'Description', subText: 'SubText', addFn: 'CountryGroup.fill', editFn: 'CountryGroup.edit', deleteFn: 'CountryGroup.delete' });
-            Dropdown.bind({ id: '#Country_PostalType', data: response.data.PostalType, value: 'Id', text: 'Description' });
+            Dropdown.bind({ id: '#Country_AdminDivType', data: response.data.AdminDivType, value: 'Value', text: 'Description' });
+            Dropdown.bind({ id: '#Country_PostalType', data: response.data.PostalType, value: 'Value', text: 'Description' });
         });
     }
     static add(obj) {
@@ -123,19 +121,18 @@
             Dropdown.bind({ id: '#ListId', data: response.data.Country, value: 'Id', text: 'Description', subText: "Code" });
         }
     }
-    static edit(id, viewMode = "Edit") {
+    static edit({ id, action = "Edit" }) {
         Data.get(
             {
                 url: `Country/Edit?Id=${id}`,
                 onSuccess: (response) => {
                     if (response.status == Message.Type.success) {
                         let obj = response.obj;
-                        obj.Id = viewMode == 'Edit' ? obj.Id : null;
-                        let title = viewMode == 'Edit' ? `Country / Edit (Code: ${obj.Code})` : `Country / Add`;
-                        Modal.open({ id: '#modalCountry', title: title, action: viewMode, obj: obj });
-
-                        Dropdown.bind({ id: '#Country_AdminDivType', data: response.data.AdminDivType, value: 'Id', text: 'Description', subText: 'SubText', addFn: 'CountryGroup.fill', editFn: 'CountryGroup.edit', deleteFn: 'CountryGroup.delete' });
-                        Dropdown.bind({ id: '#Country_PostalType', data: response.data.PostalType, value: 'Id', text: 'Description' });
+                        obj.Id = action == 'Edit' ? obj.Id : null;
+                        let title = action == 'Edit' ? `Country / Edit (Code: ${obj.Code})` : `Country / Add`;
+                        Modal.open({ id: '#modalCountry', title: title, action: action, obj: obj });
+                        Dropdown.bind({ id: '#Country_AdminDivType', data: response.data.AdminDivType, value: 'Value', text: 'Description'});
+                        Dropdown.bind({ id: '#Country_PostalType', data: response.data.PostalType, value: 'Value', text: 'Description' });
 
                     }
                     else {
@@ -149,13 +146,14 @@
         Data.update({ url: 'Country/Update', data: obj, onSuccess: Country.updateOnSuccess });
     }
     static updateOnSuccess = (response) => {
+        Message.show(response);
         if (response.status == Message.Type.success) {
             Modal.close({ id: "#modalCountry" });
             Table.updateById({ id: "#tableCountry", objId: response.obj.Id, obj: response.obj });
             Dropdown.bind({ id: '#ListId', data: response.data.Country, value: 'Id', text: 'Description', subText: "Code" });
         }
     }
-    static delete(id) {
+    static delete({ id }) {
         Message.confirm(
             {
                 msg: 'Do you want to delete??',
@@ -175,7 +173,7 @@
             Dropdown.bind({ id: '#ListId', data: response.data.Country, value: 'Id', text: 'Description', subText: "Code" });
         }
     }
-    static enable(id) {
+    static enable({ id }) {
         Message.confirm(
             {
                 msg: 'Do you want to enable??',
@@ -254,15 +252,15 @@ window.tableCountryAction = (value, obj, index) => {
 }
 window.tableCountryActionEvent = {
     'click .btn-edit': (e, value, obj, index) => {
-        Country.edit(obj.Id);
+        Country.edit({ id: obj.Id });
     },
     'click .btn-duplicate': (e, value, obj, index) => {
-        Country.edit(obj.Id, "Add");
+        Country.edit({ id: obj.Id, action: 'Add' });
     },
     'click .btn-delete': (e, value, obj, index) => {
-        Country.delete(obj.Id);
+        Country.delete({ id: obj.Id });
     },
     'click .btn-enable': (e, value, obj, index) => {
-        Country.enable(obj.Id);
+        Country.enable({ id: obj.Id });
     },
 }
