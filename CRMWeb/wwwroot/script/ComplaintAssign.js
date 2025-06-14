@@ -94,7 +94,8 @@
                 Message.show(response);
                 if (response.status == Message.Type.success) {
                     Modal.reset({ id: '#modalComplaintAssign' });
-                    $('#btnSearch').trigger('click');
+                    /*$('#btnSearch').trigger('click');*/
+                    Table.add({ id: '#tableComplaintAssign', data: response.data.ComplaintAssign, action: 'prepend' });
                     response.data.Complaint.map(x => { x.SubText = `<div class="fw-bold">${x.CustomerDesc}</div><div>${x.CustomerAddress}</div>` });
                     Dropdown.bind({ id: '#ComplaintId', data: response.data.Complaint, value: 'Id', text: 'Code', subText: 'SubText', json: true });
                 }

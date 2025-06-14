@@ -321,6 +321,7 @@ namespace CRMApi.Repository
                     dynamic data = new ExpandoObject();
                     var Complaint = await GetComplaintAsync(null, User);
                     data.Complaint = Complaint.data;
+                    data.ComplaintAssign = await ListAsync(new ComplaintAssign { ListId = obj.AssignTo.Select(x => x.Id).ToList() }, User);
                     objMsg.data = data;
                 }
             }
