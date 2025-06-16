@@ -14,7 +14,7 @@ namespace CRMApi.Models
         [MaxLength(10)] public string? Code { get; set; }
         [MaxLength(100)] public string Name { get; set; } = string.Empty;        
         public DateTime? DateOfBirth { get; set; }
-        [MaxLength(1)] public string? Gender { get; set; }
+        public string? Gender { get; set; }
         [MaxLength(100)] public string? FatherName { get; set; }
         public int DepartmentId { get; set; }
         [NotMapped] public string DepartmentDesc { get; set; } = string.Empty;
@@ -26,7 +26,7 @@ namespace CRMApi.Models
         public List<Composite.UserCompany> Company { get; set; } = new List<Composite.UserCompany>();
         public List<Composite.UserApi> Api { get; set; } = new List<Composite.UserApi>();
         public List<Composite.UserApprovalRole> ApprovalRole { get; set; } = new List<Composite.UserApprovalRole>();
-        public string Theme { get; set; } = String.Empty;
+        public string Theme { get; set; } = "purplin";
         public int Status { get; set; } = 1;
         [NotMapped] public string StatusDesc { get; set; } = string.Empty;
         [NotMapped] public string? StatusCss { get; set; } = string.Empty;
