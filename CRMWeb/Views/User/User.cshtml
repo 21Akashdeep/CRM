@@ -64,8 +64,8 @@
                             <th data-sortable="true" data-field="Theme" class="text-nowrap">Theme</th>
                             <th data-sortable="true" data-formatter="tableUserCreatedByAndAt" class="text-nowrap">Created By & At</th>
                             <th data-sortable="true" data-formatter="tableUserUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
-                            <th data-formatter="tableUserStatus" class="Status text-center">Status</th>
-                            <th data-formatter="tableUserAction" data-events="tableUserActionEvent" class="not-print text-center"><i class="fa-solid fa-list-check"></i></th>
+                            <th data-formatter="tableUserStatus" class="Status text-center right-fix-2">Status</th>
+                            <th data-formatter="tableUserAction" data-events="tableUserActionEvent" class="not-print text-center right-fix"><i class="fa-solid fa-list-check"></i></th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -128,6 +128,16 @@
                         <div class="col-md-2">
                             <label>Contact No.<span class="text-mandatory">*</span></label>
                             <input type="text" id="ContactNo" name="ContactNo" autocomplete="off" class="form-control form-control-sm required" data-num="true" data-decimal-place="0" data-min="0" data-max="9999999999" maxlength="10" />
+                        </div>
+                        <div class="col-md-2">
+                            <label>Department<span class="text-mandatory">*</span></label>
+                            <select id="Department" name="Department" class="select-pick required" data-search="true">
+                                </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Designation<span class="text-mandatory">*</span></label>
+                            <select id="Designation" name="Designation" class="select-pick required" data-search="true">
+                            </select>
                         </div>
                         <div class="col-md-2">
                             <label>Email<span class="text-mandatory">*</span></label>

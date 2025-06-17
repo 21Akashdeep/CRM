@@ -5,7 +5,9 @@ class User {
         User.getViewOption((response) => {
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: ['Description'], isSelectPicker: true });
             Dropdown.bind({ id: '#ListUserType', data: response.data.UserType, value: 'Value', text: ['Description'], isSelectPicker: true });
-            Dropdown.bind({ id: '#ListId', data: response.data.User, value: 'Id', text: ['UserId'], subText:'Name', isSelectPicker: true });        
+            Dropdown.bind({ id: '#ListId', data: response.data.User, value: 'Id', text: ['UserId'], subText: 'Name', isSelectPicker: true });
+            Dropdown.bind({ id: '#Department', data: response.data.Department, value: 'Value', text: ['Description'], isSelectPicker: true });
+            Dropdown.bind({ id: '#Designation', data: response.data.Designation, value: 'Value', text: ['Description'], isSelectPicker: true });
         });
         $('#btnSearch').on('click', () => {
             User.get('Get', (response) => {
@@ -69,6 +71,8 @@ class User {
                 Modal.open({ id: '#modalUser', title: 'User / Add', action: 'Add' });
                 $('#DateOfBirth').val('');
                 Dropdown.bind({ id: '#UserType', data: response.data.UserType, value: 'Value', text: ['Description'] });
+                Dropdown.bind({ id: '#Department', data: response.data.Department, value: 'Value', text: ['Description'], isSelectPicker: true });
+                Dropdown.bind({ id: '#Designation', data: response.data.Designation, value: 'Value', text: ['Description'], isSelectPicker: true });
                 Table.add({ id: '#tableCompany', data: response.data.Company });
                 Table.add({ id: '#tableApi', data: response.data.Api });
                 Table.add({ id: '#tableApprovalRole', data: response.data.AprRole });                                
