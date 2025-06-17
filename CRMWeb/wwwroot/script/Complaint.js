@@ -2,7 +2,7 @@
     static init() {
         Complaint.getViewOption({
             onSuccess: (response) => {
-                Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Id', text: 'Description' });
+                Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
                 Dropdown.bind({ id: '#ListCustomerId', data: response.data.Customer, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#ListId', data: response.data.Complaint, value: 'Id', text: 'Code' });                
             }
@@ -217,7 +217,7 @@
         if (response.status == Message.Type.success) {
             Modal.close({ id: '#modalComplaint' });
             Table.updateById({ id: '#tableComplaint', objId: response.obj.Id, obj: response.obj });
-            Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Id', text: 'Description' });            
+            Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });            
             Dropdown.bind({ id: '#ListId', data: response.data.Complaint, value: 'Id', text: 'Code' });                
         }
     }
@@ -236,7 +236,7 @@
         Message.show(response);
         if (response.status == Message.Type.success) {
             Table.updateById({ id: '#tableComplaint', objId: response.obj.Id, obj: response.obj });
-            Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Id', text: 'Description' });            
+            Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });            
             Dropdown.bind({ id: '#ListId', data: response.data.Complaint, value: 'Id', text: 'Code' });                
         }
     }

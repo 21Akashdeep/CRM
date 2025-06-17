@@ -302,8 +302,7 @@ namespace CRMApi.Repository
                 {
                     Message.Error(ref objMsg, "Company did not find for update.");
                     return objMsg;
-                }
-                UpdateCompany.Code = obj.Code;
+                }                
                 UpdateCompany.Name = obj.Name;
                 UpdateCompany.Description = obj.Description;
                 UpdateCompany.CinNo = obj.CinNo;

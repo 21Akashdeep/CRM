@@ -22,16 +22,12 @@ namespace CRMApi.Repository
             try
             {
                 dynamic Option = new ExpandoObject();
-                Option.Status = await (
-                    from cp in db.Complaint
-                    join st in db.Setting on new { Name = App.SettingName.Status, Value = cp.Status.ToString() } equals new { st.Name, st.Value }                    
-                    group new { st } by new { st.Name, st.Description, st.Value } into Setting
-                    select new
-                    {
-                        Id = Setting.Key.Value,
-                        Setting.Key.Description
-                    }
-                ).ToListAsync();
+                var ListStatus = await db.Complaint.GroupBy(x => new { x.Status }).Select(x => x.Key.Status.ToString()).ToListAsync();
+                Option.Status = await db.Setting.Where(st => App.ActiveStatus.Contains(st.Status) && st.Name == App.SettingName.Status && ListStatus.Contains(st.Value)).Select(st => new
+                {
+                    st.Value,
+                    st.Description
+                }).ToListAsync();                
                 Option.Complaint = await db.Complaint.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
                 {
                     x.Id,
@@ -125,7 +121,7 @@ namespace CRMApi.Repository
         {
             //filter Complaint data
             obj = obj == null ? new Complaint() : obj;
-            obj.ListStatus = obj.ListStatus.Count == 0 ? new List<int> { App.Status.SaveAsDraft, App.Status.Pending, App.Status.Scheduled } : obj.ListStatus;
+            obj.ListStatus = obj.ListStatus.Count == 0 ? new List<int> { App.Status.SaveAsDraft, App.Status.Pending, App.Status.Scheduled, App.Status.Processing } : obj.ListStatus;
             var dbComplaintQuery = db.Complaint.AsQueryable();
 
             dbComplaintQuery = db.Complaint.Where(co => obj.ListStatus.Contains(co.Status) && co.CompanyId == User.CompanyId).AsQueryable();
