@@ -3,11 +3,10 @@
 class User {
     static init() {            
         User.getViewOption((response) => {
-            Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: ['Description'], isSelectPicker: true });
-            Dropdown.bind({ id: '#ListUserType', data: response.data.UserType, value: 'Value', text: ['Description'], isSelectPicker: true });
-            Dropdown.bind({ id: '#ListId', data: response.data.User, value: 'Id', text: ['UserId'], subText: 'Name', isSelectPicker: true });
-            Dropdown.bind({ id: '#Department', data: response.data.Department, value: 'Value', text: ['Description'], isSelectPicker: true });
-            Dropdown.bind({ id: '#Designation', data: response.data.Designation, value: 'Value', text: ['Description'], isSelectPicker: true });
+            Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: ['Description'] });
+            Dropdown.bind({ id: '#ListUserType', data: response.data.UserType, value: 'Value', text: ['Description'] });
+            Dropdown.bind({ id: '#ListId', data: response.data.User, value: 'Id', text: ['UserId'], subText: 'Name' });
+           
         });
         $('#btnSearch').on('click', () => {
             User.get('Get', (response) => {
@@ -71,8 +70,8 @@ class User {
                 Modal.open({ id: '#modalUser', title: 'User / Add', action: 'Add' });
                 $('#DateOfBirth').val('');
                 Dropdown.bind({ id: '#UserType', data: response.data.UserType, value: 'Value', text: ['Description'] });
-                Dropdown.bind({ id: '#Department', data: response.data.Department, value: 'Value', text: ['Description'], isSelectPicker: true });
-                Dropdown.bind({ id: '#Designation', data: response.data.Designation, value: 'Value', text: ['Description'], isSelectPicker: true });
+                Dropdown.bind({ id: '#DepartmentId', data: response.data.Department, value: 'Id', text: ['Description'] });
+                Dropdown.bind({ id: '#DesignationId', data: response.data.Designation, value: 'Id', text: ['Description'] });
                 Table.add({ id: '#tableCompany', data: response.data.Company });
                 Table.add({ id: '#tableApi', data: response.data.Api });
                 Table.add({ id: '#tableApprovalRole', data: response.data.AprRole });                                
@@ -134,6 +133,8 @@ class User {
                 onSuccess: (response) => {
                     if (response.status == Message.Type.success) {                        
                         Dropdown.bind({ id: '#UserType', data: response.data.UserType, value: 'Value', text: ['Description'] });
+                        Dropdown.bind({ id: '#DepartmentId', data: response.data.Department, value: 'Id', text: ['Description'] });
+                        Dropdown.bind({ id: '#DesignationId', data: response.data.Designation, value: 'Id', text: ['Description'] });
                         let obj = response.obj;
                         obj.Id = action == 'Edit' ? obj.Id : null;
                         let title = action == 'Edit' ? `User / Edit (Code: ${obj.UserId})` : `User / Add`;
@@ -141,6 +142,7 @@ class User {
                         Table.add({ id: '#tableCompany', data: response.data.Company });
                         Table.add({ id: '#tableApi', data: response.data.Api });
                         Table.add({ id: '#tableApprovalRole', data: response.data.AprRole });
+                        
                     }
                     else {
                         Message.show(response);
