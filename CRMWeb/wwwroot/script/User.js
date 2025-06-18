@@ -204,6 +204,9 @@ class User {
     }
 }
 //===================Table User==========================//
+tableUserDateOfBirth = (value, obj, index) => {
+    return obj.DateOfBirth == null ? '-' : moment(obj.DateOfBirth).format('DD-MMM-YYYY');
+}
 tableUserEmail = (value, obj, index) => {    
     return obj.Email.match(/.{1,20}/g).join('<br>');
 }
