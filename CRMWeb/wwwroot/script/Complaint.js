@@ -54,6 +54,29 @@
         });
     }
     static initAdd() {
+        Customer.initAdd();
+        Customer.addOnSuccess = (response) => {
+            let obj = response.obj;
+            Modal.close({ id: '#modalCustomer' });
+            Complaint.getAddOption({
+                onSuccess: (response) => {
+                    Dropdown.bind({ id: '#Complaint_CustomerId', data: response.data.Customer, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
+                    Field.triggerOnChange('#Complaint_CustomerId');
+                }
+            });
+        }
+        Customer.updateOnSuccess = (response) => {
+            let obj = response.obj;
+            Modal.close({ id: '#modalCustomer' });
+            setTimeout(() => {
+                Complaint.getAddOption({
+                    onSuccess: (response) => {
+                        Dropdown.bind({ id: '#Complaint_CustomerId', data: response.data.Customer, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
+                        Field.triggerOnChange('#Complaint_CustomerId');
+                    }
+                });
+            }, 500);            
+        }
         $('#Complaint_CustomerId').on('change', () => {
             const obj = Dropdown.itemJson({ id: '#Complaint_CustomerId' });
             if (!obj) return;            
@@ -71,6 +94,8 @@
                 stateId: "#Complaint_AdminDivId",
                 countryId: "#Complaint_CountryId",
             });
+            $('#Complaint_ContactNo').val(obj.ContactNo);
+            $('#Complaint_Email').val(obj.Email);
             Field.triggerOnInput('#Complaint_Address1, #Complaint_PostOffice, #Complaint_District');
             Field.triggerOnChange('#Complaint_AdminDivId, #Complaint_CountryId');
         });
@@ -134,7 +159,7 @@
                     Complaint.update(obj);
                 }
             }            
-        });        
+        });
     }
     static getAddOption({ obj = {}, onSuccess }) {
         Data.post({ url: 'Complaint/GetAddOption', data: obj, onSuccess: onSuccess });
@@ -149,8 +174,7 @@
                 Dropdown.bind({ id: '#Complaint_CountryId', data: response.data.Country, value: 'Id', text: 'Description', initialValue: [App.Info.CountryId] });
                 Dropdown.bind({ id: '#Complaint_DepartmentId', data: response.data.Department, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#Complaint_ForwardTo', data: response.data.ForwardTo, value: 'Id', text: 'Name', subText: 'SubText' });
-                Dropdown.bind({ id: '#Complaint_Priority', data: response.data.Priority, value: 'Id', text: 'Description' });
-                
+                Dropdown.bind({ id: '#Complaint_Priority', data: response.data.Priority, value: 'Id', text: 'Description' });                
             }
         });        
     }    
@@ -185,8 +209,7 @@
                 let obj = response.obj;                
                 obj.Id = action == "Edit" ? obj.Id : null;                
                 let title = action == "Edit" ? `Complaint / Edit (Complaint No. : ${obj.Code})` : `Complaint / Add`;
-                Modal.open({ id: '#modalComplaint', title: title, action: action, obj: obj });                
-                Table.add({ id: '#tableComplaintItem', data: obj.ComplaintItem, search: false, selectPick: true, overflow: 'visible', height: 'auto', mobileResponsive: false });
+                Modal.open({ id: '#modalComplaint', title: title, action: action, obj: obj });                                
                 setTimeout(() => {
                     OnlineApi.pinCode({
                         pinCode: obj.PinCode,
@@ -200,8 +223,7 @@
                         countryId: "#Complaint_CountryId",
                         loader: true
                     });
-                }, 100);
-                
+                }, 100);                
             }
         });
     }
@@ -259,6 +281,46 @@
             }
         });        
     }    
+    static detailedView({ id, index }) {
+        Data.get({
+            url: `Complaint/GetDetailedView?Id=${id}`,
+            onSuccess: (response) => {                
+                if (response.status == Message.Type.success) {
+                    Modal.open({ id: '#modalComplaintDetailedView', title: 'Complaint / Detailed View', action: 'view' });
+                    let Complaint = response.obj.Complaint;
+                    $('#tableComplaintDetailedView tbody tr td').each(function () {
+                        let id = $(this).attr('id');
+                        if (id) {
+                            let value = Complaint[id.replace('Complaint-', '')];
+                            if (!value) {
+                                value = '-';
+                            }
+                            else if (id == 'Complaint-AssignTo') {
+                                value = Complaint.AssignTo.map(x => x.AssignToName).join(', ');
+                            }
+                            else if (DateTime.isValid(value)) {
+                                value = moment(value).format('DD-MMM-YYYY HH:mm');
+                            }
+                            $(this).html(`<b>:</b>&nbsp;&nbsp;${value}`);
+                        }
+                    });
+                    Table.add({ id: '#tableComplaintStatus', data: response.obj.ComplaintStatus });
+                    Table.add({ id: '#tableComplaintItem', data: response.obj.ComplaintItem });
+                }
+                else {
+                    Message.show(response);
+                }
+            }
+        });
+    }
+    static printDetailedView({ id, index }) {
+        Data.get({
+            url: `Complaint/PrintDetailedView?Id=${id}`,
+            onSuccess: (response) => {
+                console.log(response.obj);
+            }
+        });
+    }
 }
 //Complaint
 window.tableComplaintSlNo = (value, obj, index) => {
@@ -318,6 +380,13 @@ window.tableComplaintAction = (value, obj, index) => {
                         </a>
                     </li>` : ``
                 }
+                ${obj.IsDetailedView ? `
+                    <li>
+                        <a href="#" class="dropdown-item text-success btn-detailed-view" title="Detailed View">
+                            <span class="fa fa-list"></span>&nbsp;&nbsp;Detailed View
+                        </a>
+                    </li>` : ``
+                }
                 ${obj.IsEnable ? `
                     <li>
                         <a href="#" class="dropdown-item text-success btn-enable" title="Enable">
@@ -339,5 +408,29 @@ window.tableComplaintActionEvent = {
     },
     'click .btn-delete': (e, value, obj, index) => {
         Complaint.delete({ id: obj.Id});
+    },
+    'click .btn-detailed-view': (e, value, obj, index) => {
+        Complaint.detailedView({ id: obj.Id, index: index });
     }
+}
+
+//Complaint Status
+window.tableComplaintStatusSlNo = (value, obj, index) => {
+    return index + 1;
+}
+window.tableComplaintStatusLogByAndAt = (value, obj, index) => {
+    return `
+        <div>${obj.CreatedByName}</div>
+        <div>${moment(obj.CreatedAt).format('DD-MMM-YYYY')}</div>
+    `;
+}
+//Complaint Item
+window.tableComplaintItemSlNo = (value, obj, index) => {
+    return index + 1;
+}
+window.tableComplaintItemLogByAndAt = (value, obj, index) => {
+    return `
+        <div>${obj.CreatedByName}</div>
+        <div>${moment(obj.CreatedAt).format('DD-MMM-YYYY')}</div>
+    `;
 }

@@ -17,7 +17,7 @@
                     <input id="DateRange" type="text" class="form-control ps-1 pe-0" readonly="" style="font-size:13px; height:31px;">
                     <span class="input-group-text date-range-picker ps-1 pe-1"><i class="fa fa-calendar"></i></span>
                 </div>
-            </div>            
+            </div>
             <div class="col-md-2">
                 <label>Status</label>
                 <select id="ListStatus" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
@@ -45,7 +45,7 @@
                         <span class="fa fa-file-excel"></span>
                     </button>
                 </div>
-            </div>            
+            </div>
         </div>
         <hr />
         <div class="row">
@@ -56,9 +56,9 @@
                             <th data-sortable="false" data-formatter="tableComplaintSlNo" class="text-center">#</th>
                             <th data-sortable="true" data-field="Date" data-formatter="tableComplaintDate" class="text-nowrap">Date</th>
                             <th data-sortable="true" data-field="Code" class="left-fix">Complaint No.</th>
-                            <th data-sortable="true" data-field="SupportModeDesc">Support Mode</th>                            
+                            <th data-sortable="true" data-field="SupportModeDesc">Support Mode</th>
                             <th data-sortable="true" data-field="CustomerDesc" data-formatter="tableComplaintCustomerDesc" class="text-nowrap">Customer & Address</th>
-                            <th data-sortable="true" data-field="Problem" data-formatter="tableComplaintCustomerProblem" class="text-nowrap">Problem</th>                            
+                            <th data-sortable="true" data-field="Problem" data-formatter="tableComplaintCustomerProblem" class="text-nowrap">Problem</th>
                             <th data-sortable="true" data-field="DepartmentDesc">Department</th>
                             <th data-sortable="true" data-field="ForwardToName">Forward To</th>
                             <th data-sortable="true" data-formatter="tableComplaintAssingTo" class="text-nowrap">Assign To</th>
@@ -76,11 +76,150 @@
         </div>
     </div>
 </div>
+<!-- Detailed View -->
+<div id="modalComplaintDetailedView" class="modal fade" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Complaint / Detailed View</span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body" style="min-height:75vh;">
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <table id="tableComplaintDetailedView" class="table table-bordered" data-search="false">
+                            <thead>
+                                <tr>
+                                    <th colspan="2">Complaint</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold">Complaint No.</td>
+                                    <td id="Complaint-Code"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Complaint Date</td>
+                                    <td id="Complaint-Date"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Support Mode</td>
+                                    <td id="Complaint-SupportModeDesc"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Customer</td>
+                                    <td id="Complaint-CustomerDesc"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Address1</td>
+                                    <td id="Complaint-Address1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Address2</td>
+                                    <td id="Complaint-Address2"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Pin Code</td>
+                                    <td id="Complaint-PinCode"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Post Office</td>
+                                    <td id="Complaint-PostOffice"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">District</td>
+                                    <td id="Complaint-District"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">State</td>
+                                    <td id="Complaint-AdminDivDesc"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Country</td>
+                                    <td id="Complaint-CountryDesc"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Contact No.</td>
+                                    <td id="Complaint-ContactNo"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Email</td>
+                                    <td id="Complaint-Email"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Forward To</td>
+                                    <td id="Complaint-ForwardToName"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Assign To</td>
+                                    <td id="Complaint-AssignTo"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Start Date Time</td>
+                                    <td id="Complaint-StartDateTime"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">End Date Time</td>
+                                    <td id="Complaint-EndDateTime"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Completed Date Time</td>
+                                    <td id="Complaint-CompletedDateTime"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <table id="tableComplaintStatus" class="table table-bordered table-default" data-search="false">
+                            <thead>
+                                <tr>
+                                    <th colspan="3">Complaint Status</th>
+                                </tr>
+                                <tr>
+                                    <th data-formatter="tableComplaintStatusSlNo" class="text-center">#</th>
+                                    <th data-field="Remarks">Remarks</th>
+                                    <th data-formatter="tableComplaintStatusLogByAndAt">Log By & At</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <table id="tableComplaintItem" class="table table-bordered table-default" data-search="false">
+                            <thead>
+                                <tr>
+                                    <th colspan="6">Complaint Item</th>
+                                </tr>
+                                <tr>
+                                    <th data-formatter="tableComplaintItemSlNo" class="text-center">#</th>
+                                    <th data-field="ItemDesc">Item Description</th>
+                                    <th data-field="Rate" class="td-num">Rate</th>
+                                    <th data-field="Qty" class="td-num">Qty.</th>
+                                    <th data-field="Amount" class="td-num">Amount</th>
+                                    <th data-formatter="tableComplaintItemLogByAndAt">Log By & At</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Complaint Add Modal -->
 <partial name="ComplaintAdd.cshtml" />
+<!-- Complaint Add Modal -->
+<partial name="../Customer/CustomerAdd.cshtml" />
 
 
 @section Scripts {
+    <script src="~/script/Customer.js" asp-append-version="true"></script>
     <script src="~/script/Complaint.js" asp-append-version="true"></script>
     <script type="text/javascript">
         $(function () {

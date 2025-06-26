@@ -52,6 +52,7 @@ namespace CRMApi.Models
         [NotMapped] public bool IsDuplicate { get; set; } = false;
         [NotMapped] public bool IsClose { get; set; } = false;
         [NotMapped] public bool IsAddStatus { get; set; } = false;
+        [NotMapped] public bool IsDetailedView { get; set; } = false;
         [NotMapped] public DateTime FromDate { get; set; }
         [NotMapped] public DateTime ToDate { get; set; }        
         [NotMapped] public List<int> ListId { get; set; } = new List<int>();
