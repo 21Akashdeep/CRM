@@ -30,7 +30,7 @@
                         </div>
                         <div class="col-md-4">
                             <label>Customer<span class="text-mandatory">*</span></label>
-                            <select id="Complaint_CustomerId" name="CustomerId" class="select-pick complaint-required" data-search='true' data-size="4">
+                            <select id="Complaint_CustomerId" name="CustomerId" class="select-pick complaint-required" data-search='true' data-size="4" data-addFn="Customer.fill" data-editFn="Customer.edit">
                             </select>
                         </div>
                         <div class="col-md-4">
@@ -74,7 +74,7 @@
                             <select id="Complaint_DepartmentId" name="DepartmentId" class="select-pick complaint-required" data-search="true" data-size="4"></select>
                         </div>     
                         <div class="col-md-2">
-                            <label>Assign To</label>
+                            <label>Forward To</label>
                             <select id="Complaint_ForwardTo" name="ForwardTo" class="select-pick" data-search="true" data-size="4"></select>
                         </div>
                         <div class="col-md-2">

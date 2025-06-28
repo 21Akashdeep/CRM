@@ -99,6 +99,38 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
+        [HttpGet]
+        public async Task<IActionResult> GetDetailedView(int Id)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
+                if (User == null) return Ok(objMsg);
+                objMsg = await RepoComplaint.DetailedViewAsync(Id, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
+        [HttpGet]
+        public async Task<IActionResult> PrintDetailedView(int Id)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
+                if (User == null) return Ok(objMsg);
+                objMsg = await RepoComplaint.DetailedViewAsync(Id, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
         [HttpPost]
         public async Task<IActionResult> Add(Complaint obj)
         {

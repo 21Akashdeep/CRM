@@ -70,6 +70,8 @@ namespace CRMApi.Repository
                     x.District,
                     x.AdminDivId,
                     x.CountryId,
+                    x.ContactNo,
+                    x.Email,
                     SubText = Util.AddressDesc(new Composite.AddressDesc { Add1 = x.Address1, Add2 = x.Address2, PinCode = x.PinCode, PostOffice = x.PostOffice, OtherText = x.GstNo })
                 }).ToListAsync();
                 Option.AdminDiv = await db.AdminDiv.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
@@ -220,6 +222,9 @@ namespace CRMApi.Repository
                     PriorityDesc = pr.Description,
                     Problem = co.Problem,                    
                     AssignTo = dbComplaintAssign.Where(ca=> ca.ComplaintId == co.Id).ToList(),
+                    StartDateTime = co.StartDateTime,
+                    EndDateTime = co.EndDateTime,
+                    CompletedDateTime = co.CompletedDateTime,
                     CompanyId = co.CompanyId,
                     Status = co.Status,
                     StatusDesc = st.Description,
@@ -235,6 +240,7 @@ namespace CRMApi.Repository
                     IsDuplicate = co.Status != App.Status.Delete ? true : false,
                     IsClose = App.ByPassUserType.Contains(User.UserType) ? true : false,
                     IsAddStatus = co.Status == App.Status.Scheduled || co.Status == App.Status.Processing ? true : false,
+                    IsDetailedView = true
                 }
             ).ToList();
             return Complaint;
@@ -403,6 +409,36 @@ namespace CRMApi.Repository
                 {
                     Message.Success(ref objMsg, "Record found");
                 }                    
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+        public async Task<Message> DetailedViewAsync(int Id, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {                
+                var dbComplaint = await ListAsync(new Complaint { ListId = new List<int> { Id }, ListStatus = App.AllActiveStatus }, User);
+                var dbComplaintStatus = await new RepoComplaintStatus(db).ListAsync(new ComplaintStatus { ListComplaintId = new List<int> { Id } }, User);
+                var dbComplaintItem = await new RepoComplaintItem(db).ListAsync(new ComplaintItem { ListComplaintId = new List<int> { Id } }, User);
+                var Complaint = dbComplaint.Select(Complaint => new
+                {
+                    Complaint,
+                    ComplaintStatus = dbComplaintStatus,
+                    ComplaintItem = dbComplaintItem
+                }).FirstOrDefault();
+                objMsg.obj = Complaint;                
+                if (Complaint != null)
+                {
+                    Message.Success(ref objMsg, "Record found.");
+                }
+                else 
+                {
+                    Message.Error(ref objMsg, "Record did not find.");
+                }
             }
             catch (Exception ex)
             {
@@ -593,6 +629,7 @@ namespace CRMApi.Repository
                 Message.Exception(ref objMsg, ex);
             }
             return objMsg;
-        }                
+        }
+        
     }
 }

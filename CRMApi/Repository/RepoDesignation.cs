@@ -19,7 +19,7 @@ namespace CRMApi.Repository
             try
             {
                 dynamic option = new ExpandoObject();
-                var dbDesignation = db.Designation.Where(x => App.ActiveStatus.Contains(x.Status)).ToList();
+                var dbDesignation = db.Designation.ToList();
                 var ListStatus = dbDesignation.Select(x => x.Status.ToString()).ToList();
                 option.Status = (
                     from st in db.Setting                    
