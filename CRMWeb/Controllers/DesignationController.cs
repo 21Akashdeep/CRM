@@ -2,11 +2,11 @@
 
 namespace CRMWeb.Controllers
 {
-    public class DepartmentController : Controller
+    public class DesignationController : Controller
     {
         public IActionResult Index()
         {
-            return View("Department");
+            return View("Designation");
         }
     }
 }
