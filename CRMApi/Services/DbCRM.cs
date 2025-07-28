@@ -70,6 +70,7 @@ namespace CRMApi.Services
         public DbSet<AccountGroup> AccountGroup { get; set; }
         public DbSet<Godown> Godown { get; set; }
         public DbSet<Unit> Unit { get; set; }
+        public DbSet<Location> Location { get; set; }
         public DbSet<ItemGroup> ItemGroup { get; set; }
         public DbSet<ItemSubGroup> ItemSubGroup { get; set; }
         public DbSet<Item> Item { get; set; }
