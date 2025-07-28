@@ -13,9 +13,9 @@ namespace CRMApi.Controllers
     [Authorize]
     public class ApiGroupController : ControllerBase
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly RepoApiGroup RepoApiGroup;
-        public ApiGroupController(DbCRM _db) 
+        public ApiGroupController(DBCRM _db) 
         {
             db = _db;
             RepoApiGroup = new RepoApiGroup(db);

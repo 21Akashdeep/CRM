@@ -22,10 +22,10 @@ namespace CRMApi.Models
         [NotMapped] public string DesignationDesc { get; set; } = string.Empty;
         [MaxLength(10)] public string ContactNo { get; set; } = string.Empty;
         [MaxLength(100)] public string Email { get; set; } = string.Empty;
-        public DateTime? PasswordExpiredAt { get; set; }
-        public List<Composite.UserCompany> Company { get; set; } = new List<Composite.UserCompany>();
-        public List<Composite.UserApi> Api { get; set; } = new List<Composite.UserApi>();
-        public List<Composite.UserApprovalRole> ApprovalRole { get; set; } = new List<Composite.UserApprovalRole>();
+        public DateTime? PasswordExpiredAt { get; set; }        
+        public List<UserApi> Api { get; set; } = new List<UserApi>();
+        public List<UserApprovalRole> ApprovalRole { get; set; } = new List<UserApprovalRole>();
+        public List<UserLocation> Location { get; set; } = new List<UserLocation>();
         public string Theme { get; set; } = "purplin";
         public int Status { get; set; } = 1;
         [NotMapped] public string StatusDesc { get; set; } = string.Empty;
@@ -44,8 +44,7 @@ namespace CRMApi.Models
         [NotMapped] public DateTime TokenExpiry { get; set; }
         [NotMapped] public int ApiId { get; set; }
         [NotMapped] public string ApiName { get; set; } = string.Empty;
-        [NotMapped] public string ApiType { get; set; } = string.Empty;
-        [NotMapped] public int CompanyId { get; set; }        
+        [NotMapped] public string ApiType { get; set; } = string.Empty;        
         [NotMapped] public bool IsReSentPassword { get; set; } = false;
         [NotMapped] public bool IsEdit { get; set; } = false;
         [NotMapped] public bool IsDuplicate { get; set; } = false;

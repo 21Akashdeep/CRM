@@ -118,8 +118,8 @@ class Layout {
                             Modal.close({ id: '#modalEditProfile' });
                             let obj = response.data;
                             SessionStorage.set('User', JSON.stringify(obj.User));
-                            SessionStorage.set('Permission', JSON.stringify(obj.Permission));
-                            SessionStorage.set('AppMenu', Data.menuHtmlString(obj.AppMenu));                            
+                            SessionStorage.set('Api', JSON.stringify(obj.AppMenu));
+                            SessionStorage.set('Menu', Data.menuHtmlString(obj.AppMenu));                            
                             SessionStorage.set('Company', JSON.stringify(obj.Company));
                             location.reload();
                         }
@@ -200,7 +200,7 @@ class Layout {
         //Get Form Name FromUrl
         let ApiName = window.location.pathname.replace('/','');
         //Get Form Permission from session storage
-        let Api = App.User.Api.find(x => x.ApiName == ApiName);
+        let Api = App.Api.find(x => x.ApiName == ApiName);
         if (Api == undefined) {
             Message.show({ status: Message.Type.error, statusText: `You are not authorised to access ${ApiName} page.` });
             setTimeout(() => {
@@ -260,7 +260,7 @@ class Layout {
         Layout.runProgressBar();
     }
     static setMenu() {
-        $('.sidebar-body .menu').html(App.AppMenu);
+        $('.sidebar-body .menu').html(App.Menu);
         //Menu Item Click
         $('.menu-item').on('click', (e) => {
             let slidSpeed = 400;

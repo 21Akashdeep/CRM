@@ -11,10 +11,10 @@ namespace CRMApi.Repository
 {
     public class RepoComplaintAssign
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
         private readonly RepoComplaint RepoComplaint;
-        public RepoComplaintAssign(DbCRM _db)
+        public RepoComplaintAssign(DBCRM _db)
         {
             db = _db;
             RepoComplaint = new RepoComplaint(db);
@@ -123,12 +123,12 @@ namespace CRMApi.Repository
         {
             obj ??= new ComplaintAssign();
             obj.ListStatus = obj.ListStatus.Any() ? obj.ListStatus : App.ActiveStatus;
-            var dbComplaintAssignQuery = db.ComplaintAssign.Where(cs => obj.ListStatus.Contains(cs.Status) && cs.CompanyId == User.CompanyId).AsQueryable();            
+            var dbComplaintAssignQuery = db.ComplaintAssign.Where(cs => obj.ListStatus.Contains(cs.Status)).AsQueryable();            
             dbComplaintAssignQuery = obj.ListId.Any() ? dbComplaintAssignQuery.Where(cs => obj.ListId.Contains(cs.Id)) : dbComplaintAssignQuery;
             dbComplaintAssignQuery = obj.ListComplaintId.Any() ? dbComplaintAssignQuery.Where(cs => obj.ListComplaintId.Contains(cs.ComplaintId)) : dbComplaintAssignQuery;
             dbComplaintAssignQuery = obj.ListAssignToId.Any() ? dbComplaintAssignQuery.Where(cs => obj.ListAssignToId.Contains(cs.AssignTo)) : dbComplaintAssignQuery;
 
-            var dbComplaintQuery = db.Complaint.Where(co => App.AllActiveStatus.Contains(co.Status) && co.CompanyId == User.CompanyId).AsQueryable();
+            var dbComplaintQuery = db.Complaint.Where(co => App.AllActiveStatus.Contains(co.Status)).AsQueryable();
             dbComplaintQuery = obj.ListForwardToId.Any() ? dbComplaintQuery.Where(co => obj.ListForwardToId.Contains(co.ForwardTo ?? 0)) : dbComplaintQuery;
             dbComplaintQuery = dbComplaintQuery.Where(co => obj.FromDate == DateTime.MinValue || co.Date.Date >= obj.FromDate.Date);
             dbComplaintQuery = dbComplaintQuery.Where(co => obj.ToDate == DateTime.MinValue || co.Date.Date <= obj.ToDate.Date);
@@ -242,7 +242,7 @@ namespace CRMApi.Repository
 
                 DataTable objDataTable = Util.ListToDataTable(ComplaintAssign);
 
-                var objCompany = await db.Company.FirstOrDefaultAsync(pt => App.ActiveStatus.Contains(pt.Status) && pt.Id == User.CompanyId);
+                var objCompany = await db.Company.FirstOrDefaultAsync(pt => App.ActiveStatus.Contains(pt.Status));
                 if (objCompany == null)
                 {
                     Message.Error(ref objMsg, "Company Info did found");
@@ -305,8 +305,7 @@ namespace CRMApi.Repository
                 //Add Complaint Assign                                
                 obj.AssignTo.ForEach(x =>
                 {
-                    x.Id = 0;
-                    x.CompanyId = User.CompanyId;
+                    x.Id = 0;                    
                     x.Status = App.Status.Enable;
                     x.CreatedBy = User.Id;
                     x.CreatedAt = DateTime.Now;

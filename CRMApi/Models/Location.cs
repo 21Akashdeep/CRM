@@ -8,7 +8,7 @@ namespace CRMApi.Models
         public int Id { get; set; }
         [MaxLength(16)] public string Code { get; set; } = String.Empty;
         [MaxLength(100)] public string Name { get; set; } = String.Empty;
-        [MaxLength(200)] public string Description { get; set; } = String.Empty;
+        [MaxLength(200)] public string Description { get; set; } = String.Empty;        
         public int Status { get; set; } = 1;
         [NotMapped] public string StatusName { get; set; } = string.Empty;
         [NotMapped] public string StatusCss { get; set; } = string.Empty;
@@ -23,7 +23,7 @@ namespace CRMApi.Models
         [NotMapped] public bool IsDelete { get; set; } = false;
         [NotMapped] public bool IsEnable { get; set; } = false;
         [NotMapped] public bool IsDuplicate { get; set; } = false;
-        [NotMapped] public List<int> ListId { get; set; } = new List<int>();
+        [NotMapped] public List<int> ListId { get; set; } = new List<int>();        
         [NotMapped] public List<int> ListStatus { get; set; } = new List<int>();
     }
 }

@@ -7,9 +7,9 @@ namespace CRMApi.Repository
 {
     public class RepoZone
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
-        public RepoZone(DbCRM _db) 
+        public RepoZone(DBCRM _db) 
         {
             db = _db;
         }

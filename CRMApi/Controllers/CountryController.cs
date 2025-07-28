@@ -11,9 +11,9 @@ namespace CRMApi.Controllers
     [Authorize]
     public class CountryController : ControllerBase
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly RepoCountry RepoCountry;
-        public CountryController(DbCRM _db) 
+        public CountryController(DBCRM _db) 
         {
             db = _db;
             RepoCountry = new RepoCountry(db);

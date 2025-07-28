@@ -8,9 +8,9 @@ namespace CRMApi.Repository
 {
     public class RepoApprovalRole
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
-        public RepoApprovalRole(DbCRM _db) 
+        public RepoApprovalRole(DBCRM _db) 
         {
             db = _db;
         }
@@ -51,7 +51,7 @@ namespace CRMApi.Repository
         {
             obj = obj == null ? new ApprovalRole() : obj;
             obj.ListStatus = obj.ListStatus.Count == 0 ? App.ActiveStatus : obj.ListStatus;
-            var dbApprovalRole = db.ApprovalRole.Where(ag => obj.ListStatus.Contains(ag.Status) && ag.CompanyId == User.CompanyId).ToList();
+            var dbApprovalRole = db.ApprovalRole.Where(ag => obj.ListStatus.Contains(ag.Status)).ToList();
             dbApprovalRole = obj.ListId.Count == 0 ? dbApprovalRole : dbApprovalRole.Where(ag => obj.ListId.Contains(ag.Id)).ToList();
             
             var dbSetting = db.Setting.Where(st => App.ActiveStatus.Contains(st.Status)).ToList();
@@ -106,7 +106,7 @@ namespace CRMApi.Repository
             try
             {
                 //Get Party
-                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status) && pt.Id == User.CompanyId);
+                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status));
                 if (objCompany == null)
                 {
                     Message.Error(ref objMsg, "Company Info did found");

@@ -11,9 +11,9 @@ namespace CRMApi.Controllers
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
-        private readonly DbCRM db;        
+        private readonly DBCRM db;        
         private RepoAuthentication RepoAuthentication;
-        public AuthenticationController(DbCRM _db)
+        public AuthenticationController(DBCRM _db)
         {
             db = _db;
             RepoAuthentication = new RepoAuthentication(db);
@@ -35,12 +35,12 @@ namespace CRMApi.Controllers
         }
         [HttpPost]
         [AllowAnonymous]
-        public IActionResult Login(User obj)
+        public async Task<IActionResult> Login(User obj)
         {
             Message objMsg = new Message();
             try
             {
-                objMsg = RepoAuthentication.Auth(obj);
+                objMsg = await RepoAuthentication.Auth(obj);
             }
             catch (Exception ex)
             {

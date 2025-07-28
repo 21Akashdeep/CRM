@@ -9,9 +9,9 @@ namespace CRMApi.Repository
 {
     public class RepoUnit
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private AppSetting App = Util.AppSetting;
-        public RepoUnit(DbCRM _db) 
+        public RepoUnit(DBCRM _db) 
         {
             db = _db;
         }
@@ -145,7 +145,7 @@ namespace CRMApi.Repository
             try
             {                
                 //Get Company
-                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status) && pt.Id == User.CompanyId);
+                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status));
                 if (objCompany == null)
                 {
                     Message.Error(ref objMsg, "Company Info did found");
@@ -178,8 +178,7 @@ namespace CRMApi.Repository
         public Message Add(Unit obj, User User)
         {
             Message objMsg = new Message();
-            obj.Code = Util.SanitizeInput(obj.Code, App.Regexp.AlphaLgNum) ?? "";
-            obj.CompanyId = User.CompanyId;
+            obj.Code = Util.SanitizeInput(obj.Code, App.Regexp.AlphaLgNum) ?? "";            
             obj.CreatedBy = User.Id;
             obj.UpdatedBy = User.Id;
             //Validate Duplicate
@@ -231,7 +230,7 @@ namespace CRMApi.Repository
         public Message Update(Unit obj, User User)
         {
             Message objMsg = new Message();
-            obj.Code = Util.SanitizeInput(obj.Code ?? "", App.Regexp.AlphaLgNum);
+            obj.Code = Util.SanitizeInput(obj.Code ?? "", App.Regexp.AlphaLgNum)!;
             var Unit = db.Unit.ToList();
             if (Unit.Where(lo => lo.Code == obj.Code && lo.Id != obj.Id).Any())
             {

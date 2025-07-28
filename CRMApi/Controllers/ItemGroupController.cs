@@ -12,9 +12,9 @@ namespace CRMApi.Controllers
     [Authorize]
     public class ItemGroupController : ControllerBase
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private RepoItemGroup RepoItemGroup;
-        public ItemGroupController(DbCRM _db)
+        public ItemGroupController(DBCRM _db)
         {
             db = _db;
             RepoItemGroup = new RepoItemGroup(db);

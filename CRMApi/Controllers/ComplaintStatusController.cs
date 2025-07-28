@@ -11,9 +11,9 @@ namespace CRMApi.Controllers
     [Authorize]
     public class ComplaintStatusController : ControllerBase
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly RepoComplaintStatus RepoComplaintStatus;
-        public ComplaintStatusController(DbCRM _db) 
+        public ComplaintStatusController(DBCRM _db) 
         {
             db = _db;
             RepoComplaintStatus = new RepoComplaintStatus(db);

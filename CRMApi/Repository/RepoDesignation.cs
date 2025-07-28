@@ -7,9 +7,9 @@ namespace CRMApi.Repository
 {
     public class RepoDesignation
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
-        public RepoDesignation(DbCRM db)
+        public RepoDesignation(DBCRM db)
         {
             this.db = db;
         }
@@ -102,7 +102,7 @@ namespace CRMApi.Repository
             try
             {
                 //Get Company
-                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status) && pt.Id == User.CompanyId);
+                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status));
                 if (objCompany == null)
                 {
                     Message.Error(ref objMsg, "Company not found.");

@@ -12,9 +12,9 @@ namespace CRMApi.Repository
 {
     public class RepoCompany
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
-        public RepoCompany(DbCRM _db) 
+        public RepoCompany(DBCRM _db) 
         {
             db = _db;
         }
@@ -158,7 +158,7 @@ namespace CRMApi.Repository
             try 
             {
                 //Get Company
-                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status) && pt.Id == User.CompanyId);
+                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status));
                 if (objCompany == null)
                 {
                     Message.Error(ref objMsg, "Company Info did found");

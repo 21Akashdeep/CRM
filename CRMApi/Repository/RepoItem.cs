@@ -8,12 +8,12 @@ namespace CRMApi.Repository
 {
     public class RepoItem
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private AppSetting App = Util.AppSetting;
         private RepoItemGroup RepoItemGroup;
         private RepoItemSubGroup RepoItemSubGroup;
         private RepoUnit RepoUnit;
-        public RepoItem(DbCRM _db)
+        public RepoItem(DBCRM _db)
         {
             db = _db;
             RepoItemGroup = new RepoItemGroup(db);
@@ -189,7 +189,7 @@ namespace CRMApi.Repository
             try
             {
                 //Get Party
-                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status) && pt.Id == User.CompanyId);
+                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status));
                 if (objCompany == null)
                 {
                     Message.Error(ref objMsg, "Company Info did found");
@@ -242,8 +242,7 @@ namespace CRMApi.Repository
                 {
                     Message.Duplicate(ref objMsg, $"Item Description ({obj.Description}).");
                     return objMsg;
-                }
-                obj.CompanyId = User.CompanyId;
+                }                
                 obj.CreatedBy = User.Id;
                 obj.UpdatedBy = User.Id;
                 db.Add(obj);

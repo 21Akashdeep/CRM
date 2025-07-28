@@ -11,9 +11,9 @@ namespace CRMApi.Repository
 {
     public class RepoApproval
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private AppSetting App = Util.AppSetting;
-        public RepoApproval(DbCRM _db) 
+        public RepoApproval(DBCRM _db) 
         {
             db = _db;
         }
@@ -143,12 +143,7 @@ namespace CRMApi.Repository
                 }
                 // Get all the User-Roles mapping
                 var dbUser = db.User.Where(ur => App.ActiveStatus.Contains(ur.Status)).ToList();
-                var dbUserApRo = dbUser
-                  .SelectMany(x => x.ApprovalRole, (x, x1) => new
-                  {
-                      x.Id,
-                      x1.ApprovalRoleId
-                  }).ToList();
+                var dbUserApRo = db.UserApprovalRole.Select(x => new { x.Id, x.ApprovalRoleId }).ToList();                
                
                 // Get Approval Config mapping with roles
                 var ApprovalConfig = (

@@ -15,7 +15,7 @@ builder.Logging.AddDebug();    // Log to Debug Output
 //Database connectivity
 AppSetting App = Util.AppSetting;
 string ConString = builder.Configuration.GetConnectionString(App.DbName)!;
-builder.Services.AddDbContext<DbCRM>(options =>
+builder.Services.AddDbContext<DBCRM>(options =>
 {
     switch (App.DbName) 
     {

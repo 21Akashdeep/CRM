@@ -11,9 +11,9 @@ namespace CRMApi.Repository
 {
     public class RepoComplaintStatus
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
-        public RepoComplaintStatus(DbCRM _db)
+        public RepoComplaintStatus(DBCRM _db)
         {
             db = _db;
         }
@@ -71,7 +71,7 @@ namespace CRMApi.Repository
         {
             obj ??= new ComplaintStatus();
             obj.ListStatus = obj.ListStatus.Any() ? obj.ListStatus : new List<int> { App.Status.Processing, App.Status.Completed };
-            var dbComplaintStatusQuery = db.ComplaintStatus.Where(x => obj.ListStatus.Contains(x.Status) && x.CompanyId == User.CompanyId).AsQueryable();
+            var dbComplaintStatusQuery = db.ComplaintStatus.Where(x => obj.ListStatus.Contains(x.Status)).AsQueryable();
             dbComplaintStatusQuery = dbComplaintStatusQuery.Where(x => !obj.ListId.Any() || obj.ListId.Contains(x.Id));
             dbComplaintStatusQuery = dbComplaintStatusQuery.Where(x => !obj.ListComplaintId.Any() || obj.ListComplaintId.Contains(x.ComplaintId));
 
@@ -175,8 +175,7 @@ namespace CRMApi.Repository
                 dbComplaint.UpdatedAt = DateTime.Now;
                 db.Update(dbComplaint);
 
-                //Update Complaint Status
-                obj.CompanyId = User.CompanyId;
+                //Update Complaint Status                
                 obj.CreatedBy = User.Id;
                 obj.CreatedAt = DateTime.Now;
                 obj.UpdatedBy = User.Id;
@@ -213,7 +212,7 @@ namespace CRMApi.Repository
             Message objMsg = new Message();
             try 
             {
-                var Complaint = await db.Complaint.FirstOrDefaultAsync(x => x.Id == obj.ComplaintId && x.CompanyId == User.CompanyId);
+                var Complaint = await db.Complaint.FirstOrDefaultAsync(x => x.Id == obj.ComplaintId);
                 if (Complaint == null) 
                 {
                     Message.Error(ref objMsg, "Complaint did not find for send OPT.");
@@ -228,8 +227,7 @@ namespace CRMApi.Repository
                 {
                     RefType = App.RefType.Complaint,
                     RefId = Complaint.Id,
-                    RefNo = Complaint.Code,
-                    CompanyId = User.CompanyId,
+                    RefNo = Complaint.Code,                    
                     OtpNo = Util.RandomNum(),
                     Expiry = DateTime.Now.AddMinutes(15),
                     Status = App.Status.UnVerified,
@@ -267,7 +265,7 @@ namespace CRMApi.Repository
             Message objMsg = new Message();
             try
             {
-                var dbComplaintStatus = await db.ComplaintStatus.FirstOrDefaultAsync(x => x.Id == Id && x.CompanyId == User.CompanyId);
+                var dbComplaintStatus = await db.ComplaintStatus.FirstOrDefaultAsync(x => x.Id == Id);
                 if (dbComplaintStatus == null)
                 {
                     Message.Error(ref objMsg, "Complaint Status did find for delete");

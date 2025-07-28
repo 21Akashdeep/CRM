@@ -11,9 +11,9 @@ namespace CRMApi.Controllers
     [Authorize]
     public class AdminDivController : ControllerBase
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly RepoAdminDiv RepoAdminDiv;
-        public AdminDivController(DbCRM _db) 
+        public AdminDivController(DBCRM _db) 
         {
             db = _db;
             RepoAdminDiv = new RepoAdminDiv(db);

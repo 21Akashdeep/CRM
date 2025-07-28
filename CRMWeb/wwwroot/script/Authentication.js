@@ -39,9 +39,10 @@ class Authentication {
                 onSuccess: (response) => {
                     if (response.status == Message.Type.success) {
                         let obj = response.data;
-                        sessionStorage.setItem('User', JSON.stringify(obj.User));                        
+                        sessionStorage.setItem('User', JSON.stringify(obj.User));                                                
+                        sessionStorage.setItem('Api', obj.AppMenu);
+                        sessionStorage.setItem('Menu', Data.menuHtmlString(obj.AppMenu));
                         sessionStorage.setItem('Company', JSON.stringify(obj.Company));
-                        sessionStorage.setItem('AppMenu', Data.menuHtmlString(obj.AppMenu));                        
                         if (obj.AppMenu.length == 0 && obj.User.Type != App.Setting.UserType.SysAdmin) {
                             Message.show({ status: Message.Type.error, statusText: "You are not authorised to access this Application." });
                             return;

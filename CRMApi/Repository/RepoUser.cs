@@ -1,35 +1,31 @@
-﻿using DocumentFormat.OpenXml.Bibliography;
-using DocumentFormat.OpenXml.Office2016.Drawing.Command;
-using DocumentFormat.OpenXml.Presentation;
-using CRMApi.Models;
+﻿using CRMApi.Models;
 using CRMApi.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Dynamic;
 using System.Net.Mail;
-using System.Security.Cryptography.Xml;
 
 namespace CRMApi.Repository
 {
     public class RepoUser
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private AppSetting App = Util.AppSetting;
         //private RepoApi RepoApi;
         private RepoApprovalRole RepoApprovalRole;
-        public RepoUser(DbCRM _db) 
+        public RepoUser(DBCRM _db) 
         {
             db = _db;            
             RepoApprovalRole = new RepoApprovalRole(db);
         }        
         
-        public Message GetViewOption() 
+        public async Task<Message> GetViewOption() 
         {
             Message objMsg = new Message();
             try 
             {
-                var dbUser = db.User.ToList();
-                var dbSetting = db.Setting.Where(st => App.ActiveStatus.Contains(st.Status)).ToList();
+                var dbUser = await db.User.ToListAsync();
+                var dbSetting = await db.Setting.Where(st => App.ActiveStatus.Contains(st.Status)).ToListAsync();
                 
                 dynamic Options = new ExpandoObject();
 
@@ -66,7 +62,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message GetAddOption(int Id) 
+        public async Task<Message> GetAddOption(int Id) 
         {
             Message objMsg = new Message();
             try 
@@ -74,91 +70,85 @@ namespace CRMApi.Repository
                 dynamic Options = new ExpandoObject();
                 
                 //Get Setting Option
-                var dbSetting = db.Setting.Where(st => App.ActiveStatus.Contains(st.Status)).ToList();
+                var dbSetting = await db.Setting.Where(st => App.ActiveStatus.Contains(st.Status)).ToListAsync();
                 Options.UserType = dbSetting.Where(st => st.Name == App.SettingName.UserType).Select(st => new { st.Value, st.Description }).ToList();
 
                 //Get User
-                var dbUser = db.User.Where(ur => App.ActiveStatus.Contains(ur.Status)).ToList();                                                
+                var dbUser = await db.User.Where(ur => App.ActiveStatus.Contains(ur.Status)).ToListAsync();                                                
                 Options.User = dbUser.Select(ur => new
                 {
                     ur.Id,
                     ur.UserId,
                     ur.Name
                 }).ToList();
-
-                //Get Company Permission                
-                var dbCompany = db.Company.Where(x => App.ActiveStatus.Contains(x.Status)).ToList();
-                var dbUserCompany = dbUser.Where(x => x.Id == Id).SelectMany(x => x.Company).ToList();
-                Options.Company = (
-                    from com in dbCompany
-                    join uco in dbUserCompany on com.Id equals uco.CompanyId into UserCompany
-                    from uco in UserCompany.DefaultIfEmpty()
-                    select new 
-                    {                        
-                        CompanyId = com.Id,
-                        CompanyName = com.Name,
-                        CompanyDesc = com.Description,
-                        IsDefault = uco?.IsDefault ?? false,
-                        IsAdded = uco != null,
-                    }
-                ).ToList();
-
-                //Get Api Permission                
-                var dbApi = db.Api.Where(ap => App.ActiveStatus.Contains(ap.Status)).ToList();
-                var dbUserApi = dbUser.Where(x => x.Id == Id).SelectMany(x => x.Api).ToList();
-                Options.Api = (
-                    from api in dbApi
-                    join agp in db.ApiGroup on api.ApiGroupId equals agp.Id
-                    join set in dbSetting on new { Value = api.ApiType, Name = App.SettingName.ApiType } equals new { set.Value, set.Name }
-                    join ape in dbUserApi on api.Id equals ape.ApiId into ApiPer
-                    from ape in ApiPer.DefaultIfEmpty()
-                    orderby agp.SeqNo, api.SeqNo
-                    select new
+                //Get User Api
+                Options.Api = await (
+                    from api in db.Api
+                    join apg in db.ApiGroup on api.ApiGroupId equals apg.Id
+                    join set in db.Setting on new { Value = api.ApiType, Name = App.SettingName.ApiType } equals new { set.Value, set.Name }
+                    join uap in db.UserApi on new { ApiId = api.Id, UserId = Id, Status = App.Status.Enable } equals new { uap.ApiId, uap.UserId, uap.Status } into UserApi
+                    from uap in UserApi.DefaultIfEmpty()
+                    where App.ActiveStatus.Contains(api.Status)
+                    select new UserApi
                     {
+                        UserId = Id,
                         ApiId = api.Id,
-                        ApiName = api.Name,
                         ApiDesc = api.Description,
-                        ApiGroupDesc = agp.Description,
-                        api.ApiType,
                         ApiTypeDesc = set.Description,
-                        View = ape?.View ?? false,
-                        Add = ape?.Add ?? false,
-                        Update = ape?.Update ?? false,
-                        Delete = ape?.Delete ?? false,
-                        Enable = ape?.Enable ?? false,
-                        Print = ape?.Print ?? false,
-                        Import = ape?.Import ?? false,
-                        Export = ape?.Export ?? false,
-                        IsAdded = ape != null
+                        ApiGroupDesc = apg.Description,
+                        View = uap != null && uap.View,
+                        Add = uap != null && uap.Add,
+                        Update = uap != null && uap.Update,
+                        Delete = uap != null && uap.Delete,
+                        Enable = uap != null && uap.Enable,
+                        Print = uap != null && uap.Print,
+                        Import = uap != null && uap.Import,
+                        Export = uap != null && uap.Export,
+                        IsAdded = uap != null
                     }
-                ).ToList();
-
-                //Get Approval Role
-                var dbApprovalRole = db.ApprovalRole.Where(ar => App.ActiveStatus.Contains(ar.Status)).ToList();
-                var dbUserAprRole = dbUser.Where(x => x.Id == Id).SelectMany(x => x.ApprovalRole).ToList();
-                Options.AprRole = (
-                    from arl in dbApprovalRole
-                    join arp in dbUserAprRole on arl.Id equals arp.ApprovalRoleId into ApRo
-                    from arp in ApRo.DefaultIfEmpty()
-                    select new 
-                    {
-                        ApprovalRoleId = arl.Id,
-                        ApprovalRoleDesc = arl.Description,
-                        IsAdded = arp != null
+                ).ToListAsync();                
+                //Get User Location
+                Options.Location = await (
+                    from loc in db.Location
+                    join ulo in db.UserLocation on new { LocationId = loc.Id, UserId = Id, Status = App.Status.Enable } equals new { ulo.LocationId, ulo.UserId, ulo.Status } into UserLocation
+                    from ulo in UserLocation.DefaultIfEmpty()
+                    where App.ActiveStatus.Contains(loc.Status)
+                    select new UserLocation
+                    {                        
+                        UserId = Id,
+                        LocationId = loc.Id,
+                        LocationDesc = loc.Description,
+                        IsAdded = ulo != null,
                     }
-                ).ToList();
-                Options.Department = db.Department.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
+                ).ToListAsync();
+                //Get User Approval Role
+                Options.ApprovalRole = await (
+                    from apr in db.ApprovalRole
+                    join upr in db.UserApprovalRole on new { ApprovalRoleId = apr.Id , UserId = Id, Status = App.Status.Enable } equals new { upr.ApprovalRoleId, upr.UserId, upr.Status } into AprRole
+                    from upr in AprRole.DefaultIfEmpty()
+                    where App.ActiveStatus.Contains(apr.Id)
+                    select new UserApprovalRole
+                    {                        
+                        UserId = Id,
+                        ApprovalRoleId = apr.Id,
+                        ApprovalRoleDesc = apr.Description,
+                        IsAdded = upr != null,
+                    }
+                ).ToListAsync();
+                //Get Derpatment
+                Options.Department = await db.Department.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
                 {
                     x.Id,
                     x.Name,
                     x.Description
-                }).ToList();
-                Options.Designation = db.Designation.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
+                }).ToListAsync();
+                //Get Designation
+                Options.Designation = await db.Designation.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
                 {
                     x.Id,
                     x.Name,
                     x.Description
-                }).ToList();
+                }).ToListAsync();
                 objMsg.data = Options;
                 Message.Success(ref objMsg, "");
             } 
@@ -168,27 +158,71 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public List<User> List(User? obj, User objLogger)
+        public async Task< List<User>> ListAsync(User? obj, User objLogger)
         {            
             obj ??= new User();
             obj.ListStatus = obj.ListStatus.Count == 0 ? App.ActiveStatus : obj.ListStatus;
-            
-            var dbUsers = db.User.ToList();
+            var dbUser = db.User.Where(x => App.ActiveStatus.Contains(x.Status)).AsQueryable();
+            if (obj.ListUserType.Any())
+                dbUser = dbUser.Where(x => obj.ListUserType.Contains(x.UserType));
+            if(obj.ListId.Any())
+                dbUser = dbUser.Where(x => obj.ListId.Contains(x.Id));
 
-            var dbUser = dbUsers.Where(x => obj.ListStatus.Contains(x.Status)).ToList();            
-            dbUser = obj.ListUserType.Any() ? dbUser.Where(x => obj.ListUserType.Contains(x.UserType)).ToList() : dbUser;
-            dbUser = obj.ListId.Any() ? dbUser.Where(x => obj.ListId.Contains(x.Id)).ToList() : dbUser;
-           
-            var dbSetting = db.Setting.Where(st => App.ActiveStatus.Contains(st.Status)).ToList();
-            
-            var User = (
+            var ListUserId = dbUser.Select(x => x.Id).ToList();
+
+            var dbUserApi = (await (
+                from upi in db.UserApi
+                join api in db.Api on upi.ApiId equals api.Id                              
+                select new UserApi
+                {
+                    Id = upi.Id,
+                    UserId = upi.UserId,                    
+                    ApiId = upi.ApiId,
+                    ApiDesc = api.Description,
+                    View = upi.View,
+                    Add = upi.Add,
+                    Update = upi.Update,
+                    Delete = upi.Delete,
+                    Enable = upi.Enable,
+                    Print = upi.Print,
+                    Import = upi.Import,
+                    Export = upi.Export,
+                    Status = upi.Status
+                }
+            ).ToListAsync()).ToLookup(x=> x.UserId);
+
+            var dbUserLocation = (await (
+                from ulo in db.UserLocation
+                join loc in db.Location on ulo.LocationId equals loc.Id
+                select new UserLocation
+                {
+                    Id = ulo.Id,
+                    UserId = ulo.UserId,
+                    LocationId = ulo.LocationId,
+                    LocationDesc = loc.Description,                    
+                }
+            ).ToListAsync()).ToLookup(x => x.UserId);
+
+            var dbUserApprovalRole = (await (
+                from uar in db.UserApprovalRole
+                join apr in db.ApprovalRole on uar.ApprovalRoleId equals apr.Id
+                select new UserApprovalRole
+                {
+                    Id = uar.Id,
+                    UserId = uar.UserId,
+                    ApprovalRoleId = uar.ApprovalRoleId,
+                    ApprovalRoleDesc = apr.Description,
+                }
+            ).ToListAsync()).ToLookup(x => x.UserId);
+
+            var User = await (
                 from ur in dbUser                
-                join ut in dbSetting on new { Value = ur.UserType, Name = App.SettingName.UserType } equals new { ut.Value, ut.Name }
+                join ut in db.Setting on new { Value = ur.UserType, Name = App.SettingName.UserType } equals new { ut.Value, ut.Name }
                 join dt in db.Department on ur.DepartmentId equals dt.Id
                 join ds in db.Designation on ur.DesignationId equals ds.Id
-                join st in dbSetting on new { Value = ur.Status.ToString(), Name = App.SettingName.Status } equals new { st.Value, st.Name }
-                join cb in dbUsers on ur.CreatedBy equals cb.Id
-                join ub in dbUsers on ur.UpdatedBy equals ub.Id
+                join st in db.Setting on new { Value = ur.Status.ToString(), Name = App.SettingName.Status } equals new { st.Value, st.Name }
+                join cb in db.User on ur.CreatedBy equals cb.Id
+                join ub in db.User on ur.UpdatedBy equals ub.Id
                 select new User
                 {
                     Id = ur.Id,
@@ -207,10 +241,10 @@ namespace CRMApi.Repository
                     Email = ur.Email,
                     UserType = ur.UserType,
                     UserTypeDesc = ut.Description,                    
-                    PasswordExpiredAt = ur.PasswordExpiredAt,
-                    Company = ur.Company,
-                    Api = ur.Api,
-                    ApprovalRole = ur.ApprovalRole,
+                    PasswordExpiredAt = ur.PasswordExpiredAt,                    
+                    Api = dbUserApi[ur.Id].ToList(),
+                    ApprovalRole = dbUserApprovalRole[ur.Id].ToList(),
+                    Location = dbUserLocation[ur.Id].ToList(),                    
                     Theme = ur.Theme,                    
                     Status = ur.Status,
                     StatusDesc = st.Description,
@@ -227,15 +261,15 @@ namespace CRMApi.Repository
                     IsDelete = ur.Status == App.Status.Enable ? true : false,
                     IsEnable = ur.Status == App.Status.Delete ? true : false,
                 }
-            ).ToList();
+            ).ToListAsync();
             return User;
         }        
-        public Message Print(User obj, User objLogger)
+        public async Task<Message> Print(User obj, User objLogger)
         {
             Message objMsg = new Message();
             try
             {
-                objMsg.data = List(obj, objLogger);
+                objMsg.data = await ListAsync(obj, objLogger);
                 Message.Get(ref objMsg, "");
             }
             catch (Exception ex)
@@ -244,20 +278,20 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Export(User obj, User objLooger)
+        public async Task<Message> Export(User obj, User objLooger)
         {
             Message objMsg = new Message();
             try
             {
                 //Get Party
-                var objCompany = db.Company.Where(pt => App.ActiveStatus.Contains(pt.Status)).AsEnumerable().FirstOrDefault();
+                var objCompany = await db.Company.FirstOrDefaultAsync(pt => App.ActiveStatus.Contains(pt.Status));
                 if (objCompany == null)
                 {
                     Message.Error(ref objMsg, "Company Info did found");
                     return objMsg;
                 }
                 //Get User
-                var dbUser = List(obj, objLooger);
+                var dbUser = await ListAsync(obj, objLooger);
                 var User = dbUser.Select(u => new
                 {
                     u.Id,
@@ -270,10 +304,10 @@ namespace CRMApi.Repository
                     u.FatherName,
                     u.ContactNo,
                     u.Email,
-                    u.PasswordExpiredAt,
-                    Company = String.Join(", ", u.Company.Select(c=> c.CompanyDesc).ToList()),
+                    u.PasswordExpiredAt,                    
                     Api = String.Join(", ", u.Api.Select(c => c.ApiDesc).ToList()),
                     ApprovalRole = String.Join(", ", u.ApprovalRole.Select(c => c.ApprovalRoleDesc).ToList()),
+                    Location = String.Join(", ", u.Location.Select(c => c.LocationDesc).ToList()),
                     u.Theme,
                     Status = u.StatusDesc,
                     CreatedBy = u.CreatedByName,
@@ -295,13 +329,13 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Add(User obj, User objLogger) 
+        public async Task<Message> Add(User obj, User objLogger) 
         {
             Message objMsg = new Message();
             try 
             {
                 obj.UserId = Util.SanitizeInput(obj.UserId, $"{App.Regexp.AlphaNum}_")?? "";
-                var dbUser = db.User.Where(ur => App.ActiveStatus.Contains(ur.Status)).ToList();
+                var dbUser = await db.User.Where(ur => App.ActiveStatus.Contains(ur.Status)).ToListAsync();
                 if (dbUser.Where(ur => ur.UserId == obj.UserId).Count() > 0)
                 {
                     Message.Duplicate(ref objMsg, $"User Id : {obj.UserId}");
@@ -321,13 +355,31 @@ namespace CRMApi.Repository
                 obj.PasswordExpiredAt = DateTime.Now.AddMonths(24);
                 obj.CreatedBy = objLogger.Id;
                 obj.UpdatedBy = objLogger.Id;
-                
+                obj.Api.ForEach(x =>
+                {
+                    x.CreatedBy = objLogger.Id;
+                    x.UpdatedBy = objLogger.Id;
+                });
+                obj.ApprovalRole.ForEach(x =>
+                {
+                    x.CreatedBy = objLogger.Id;
+                    x.UpdatedBy = objLogger.Id;
+                });
+                obj.Location.ForEach(x =>
+                {
+                    x.CreatedBy = objLogger.Id;
+                    x.UpdatedBy = objLogger.Id;
+                });
                 db.Add(obj);
                 Message.Add(ref objMsg, db.SaveChanges(), "");
                 if (objMsg.status == Message.Type.success)
                 {
                     obj.ListId.Add(obj.Id);
-                    objMsg.obj = List(obj, objLogger);
+                    objMsg.obj = (await ListAsync(obj, objLogger)).FirstOrDefault();
+                    dynamic Option = new ExpandoObject();
+                    Option.ViewOption = (await GetViewOption()).data;
+                    Option.AddOption = (await GetAddOption(0)).data;
+                    objMsg.data = Option;
                     Message msg = new Message();
                     SentPassword(obj.Id, ref msg);
                     if (msg.status != Message.Type.success)
@@ -345,7 +397,7 @@ namespace CRMApi.Repository
         }
         public void SentPassword(int Id, ref Message objMsg)
         {
-            var obj = db.User.Where(ur => App.ActiveStatus.Contains(ur.Status) && ur.Id == Id).AsEnumerable().FirstOrDefault();
+            var obj = db.User.FirstOrDefault(ur => App.ActiveStatus.Contains(ur.Status) && ur.Id == Id);
             if (obj == null) 
             {
                 Message.Error(ref objMsg, "User did not find for Re-Sent Password");
@@ -356,7 +408,6 @@ namespace CRMApi.Repository
                 Message.Error(ref objMsg, "Email is empty.");
                 return;
             }
-
             string matter = @$"
                 <table style='width:30%;' cellpadding='4'>
                     <tr>
@@ -375,13 +426,13 @@ namespace CRMApi.Repository
             objMail.To.Add(obj.Email);
             Util.SentMail(db, objMail, $"User Login Credential", matter, "info", ref objMsg);
         }
-        public Message Update(User obj, User objLogger) 
+        public async Task<Message> Update(User obj, User objLogger) 
         {
             Message objMsg = new Message();
             try 
             {
                 obj.UserId = Util.SanitizeInput(obj.UserId, $"{App.Regexp.AlphaNum}_") ?? "";
-                var dbUser = db.User.Where(x => App.ActiveStatus.Contains(x.Status)).ToList();
+                var dbUser = await db.User.Where(x => App.ActiveStatus.Contains(x.Status)).ToListAsync();
                 if (dbUser.Where(ur => ur.UserId == obj.UserId && ur.Id != obj.Id).Count() > 0)
                 {
                     Message.Duplicate(ref objMsg, $"User Id : {obj.UserId}");
@@ -394,28 +445,99 @@ namespace CRMApi.Repository
                     return objMsg;
                 }                
                 UpdateUser.UserId = UpdateUser.UserId == "SysAdmin" ? UpdateUser.UserId : obj.UserId;
-                UpdateUser.UserType = obj.UserType;                
+                UpdateUser.UserType = obj.UserType;
                 UpdateUser.Code = obj.Code;
                 UpdateUser.Name = obj.Name;
                 UpdateUser.DateOfBirth = obj.DateOfBirth;
                 UpdateUser.FatherName = obj.FatherName;
                 UpdateUser.ContactNo = obj.ContactNo;
-                UpdateUser.Email = obj.Email;                
-                UpdateUser.PasswordExpiredAt = obj.PasswordExpiredAt == null || obj.PasswordExpiredAt == default(DateTime) ? UpdateUser.CreatedAt.AddMonths(24) : obj.PasswordExpiredAt;
-                UpdateUser.Company = obj.Company;
-                UpdateUser.Api = obj.Api;
+                UpdateUser.Email = obj.Email;
+                UpdateUser.PasswordExpiredAt = obj.PasswordExpiredAt == null || obj.PasswordExpiredAt == default(DateTime) ? UpdateUser.CreatedAt.AddMonths(24) : obj.PasswordExpiredAt;                                
                 UpdateUser.DepartmentId = obj.DepartmentId;
-                UpdateUser.DesignationId = obj.DesignationId;                
-                UpdateUser.ApprovalRole = obj.ApprovalRole;
+                UpdateUser.DesignationId = obj.DesignationId;                                
                 UpdateUser.UpdatedBy = objLogger.Id;
                 UpdateUser.UpdatedAt = DateTime.Now;
                 db.Update(UpdateUser);
-                Message.Update(ref objMsg, db.SaveChanges(), "");
+
+                //Update User Api
+                var UpdateUserApi = db.UserApi.Where(x => x.UserId == UpdateUser.Id).ToList();
+                UpdateUserApi.ForEach(x =>
+                {
+                    var UserApi = obj.Api.FirstOrDefault(x1 => x1.UserId == x.UserId && x1.ApiId == x.ApiId);
+                    x.View = UserApi != null && UserApi.View;
+                    x.Add = UserApi != null && UserApi.Add;
+                    x.Update = UserApi != null && UserApi.Update;
+                    x.Delete = UserApi != null && UserApi.Delete;
+                    x.Enable = UserApi != null && UserApi.Enable;
+                    x.Print = UserApi != null && UserApi.Print;
+                    x.Import = UserApi != null && UserApi.Import;
+                    x.Export = UserApi != null && UserApi.Export;
+                    x.Status = UserApi != null ? App.Status.Enable : App.Status.Cancel;
+                    x.UpdatedBy = objLogger.Id;
+                    x.UpdatedAt = DateTime.Now;
+                });
+                db.UpdateRange(UpdateUserApi);
+                //Add New User Api
+                var AddUserApi = obj.Api.Where(x => x.Id == 0 && !UpdateUserApi.Any(x1 => x1.UserId == x.UserId && x1.ApiId == x.ApiId)).ToList();
+                AddUserApi.ForEach(x =>
+                {
+                    x.Status = App.Status.Enable;
+                    x.CreatedBy = objLogger.Id;
+                    x.CreatedAt = DateTime.Now;
+                    x.UpdatedBy = objLogger.Id;
+                    x.UpdatedAt = DateTime.Now;
+                });
+                db.AddRange(AddUserApi);
+                
+                //Update User Approval Role
+                var UpdateUserApprovalRole = db.UserApprovalRole.Where(x => x.UserId == UpdateUser.Id).ToList();
+                UpdateUserApprovalRole.ForEach(x =>
+                {
+                    var UserApprovalRole = obj.ApprovalRole.FirstOrDefault(x1 => x1.UserId == x.UserId && x1.ApprovalRoleId == x.ApprovalRoleId);
+                    x.Status = UserApprovalRole != null ? App.Status.Enable : App.Status.Cancel;
+                    x.UpdatedBy = objLogger.Id;
+                    x.UpdatedAt = DateTime.Now;
+                });
+                db.UpdateRange(UpdateUserApprovalRole);
+                //Add New User Approval Role
+                var AddUserApprovalRole = obj.ApprovalRole.Where(x => x.Id == 0 && !UpdateUserApprovalRole.Any(x1 => x1.UserId == x.UserId && x1.ApprovalRoleId == x.ApprovalRoleId)).ToList();
+                AddUserApprovalRole.ForEach(x =>
+                {
+                    x.Status = App.Status.Enable;
+                    x.CreatedBy = objLogger.Id;
+                    x.CreatedAt = DateTime.Now;
+                    x.UpdatedBy = objLogger.Id;
+                    x.UpdatedAt = DateTime.Now;
+                });
+                db.AddRange(AddUserApprovalRole);
+
+                //Update User Location
+                var UpdateUserLocation = db.UserLocation.Where(x => x.UserId == UpdateUser.Id).ToList();
+                UpdateUserLocation.ForEach(x =>
+                {
+                    var UserLocation = obj.Location.FirstOrDefault(x1 => x1.UserId == x.UserId && x1.LocationId == x.LocationId);
+                    x.Status = UserLocation != null ? App.Status.Enable : x.Status = App.Status.Cancel;                    
+                    x.UpdatedBy = objLogger.Id;
+                    x.UpdatedAt = DateTime.Now;
+                });
+                db.UpdateRange(UpdateUserLocation);
+                //Add New User Location
+                var AddUserUserLocation = obj.Location.Where(x => x.Id == 0 && !UpdateUserLocation.Any(x1 => x1.UserId == x.UserId && x1.LocationId == x.LocationId)).ToList();
+                AddUserUserLocation.ForEach(x =>
+                {
+                    x.Status = App.Status.Enable;
+                    x.CreatedBy = objLogger.Id;
+                    x.CreatedAt = DateTime.Now;
+                    x.UpdatedBy = objLogger.Id;
+                    x.UpdatedAt = DateTime.Now;
+                });
+                db.AddRange(AddUserUserLocation);
+                Message.Update(ref objMsg, (await db.SaveChangesAsync()), "");
                 if (objMsg.status == Message.Type.success) 
                 {
                     obj.ListId.Add(UpdateUser.Id);
-                    objMsg.obj = List(obj, objLogger).FirstOrDefault();
-                    objMsg.data = GetViewOption().data;
+                    objMsg.obj = (await ListAsync(obj, objLogger)).FirstOrDefault();
+                    objMsg.data = (await GetViewOption()).data;
                 }
             }
             catch (Exception ex) 
@@ -425,12 +547,12 @@ namespace CRMApi.Repository
             return objMsg;
         }
         //This Method Only use by self User
-        public Message UpdateProfile(User obj)
+        public async Task<Message> UpdateProfile(User obj)
         {
             Message objMsg = new Message();
             try
             {
-                var dbUser = db.User.Where(usr => App.ActiveStatus.Contains(usr.Status) && usr.Id == obj.Id).AsEnumerable().FirstOrDefault();
+                var dbUser = await db.User.FirstOrDefaultAsync(usr => App.ActiveStatus.Contains(usr.Status) && usr.Id == obj.Id);
                 if (dbUser == null)
                 {
                     Message.Error(ref objMsg, "");
@@ -441,8 +563,8 @@ namespace CRMApi.Repository
                 dbUser.UpdatedAt = DateTime.Now;
                 dbUser.ApiType = obj.ApiType;
                 db.Update(dbUser);
-                Message.Update(ref objMsg, db.SaveChanges(), "");
-                objMsg.data = UserInfo(dbUser).data;
+                Message.Update(ref objMsg, (await db.SaveChangesAsync()), "");
+                objMsg.data = (await UserInfo(dbUser)).data;
             }
             catch (Exception ex)
             {
@@ -451,12 +573,12 @@ namespace CRMApi.Repository
             return objMsg;
         }
         //This Method only use by self user
-        public Message UpdatePassword(User obj)
+        public async Task<Message> UpdatePassword(User obj)
         {
             Message objMsg = new Message();
             try
             {                
-                var UpdateUser = db.User.Where(x => App.ActiveStatus.Contains(x.Status) && x.Id == obj.Id && x.Password == Util.Encrypt(obj.Password)).AsEnumerable().FirstOrDefault();
+                var UpdateUser = await db.User.FirstOrDefaultAsync(x => App.ActiveStatus.Contains(x.Status) && x.Id == obj.Id && x.Password == Util.Encrypt(obj.Password));
                 if (UpdateUser == null)
                 {
                     Message.Error(ref objMsg, "User did not find for update.");
@@ -471,7 +593,7 @@ namespace CRMApi.Repository
                 UpdateUser.UpdatedBy = obj.Id;
                 UpdateUser.UpdatedAt = DateTime.Now;
                 db.Update(UpdateUser);
-                Message.Update(ref objMsg, db.SaveChanges(), "");                
+                Message.Update(ref objMsg, (await db.SaveChangesAsync()), "");                
             }
             catch (Exception ex)
             {
@@ -479,12 +601,12 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }        
-        public Message Delete(User obj, User objLogger) 
+        public async Task<Message> Delete(User obj, User objLogger) 
         {
             Message objMsg = new Message();
             try 
             {
-                var DeleteUser = db.User.Where(ap => App.ActiveStatus.Contains(ap.Status) && ap.Id == obj.Id).AsEnumerable().FirstOrDefault();
+                var DeleteUser = await db.User.FirstOrDefaultAsync(ap => App.ActiveStatus.Contains(ap.Status) && ap.Id == obj.Id);
                 if (DeleteUser == null)
                 {
                     Message.Error(ref objMsg, "User did not find for delete.");
@@ -499,13 +621,13 @@ namespace CRMApi.Repository
                 DeleteUser.UpdatedBy = objLogger.Id;
                 DeleteUser.UpdatedAt = DateTime.Now;
                 db.Update(DeleteUser);
-                Message.Delete(ref objMsg, db.SaveChanges(), "");
+                Message.Delete(ref objMsg, (await db.SaveChangesAsync()), "");
                 if (objMsg.status == Message.Type.success)
                 {
                     obj.ListId.Add(obj.Id);
                     obj.ListStatus.Add(App.Status.Delete);
-                    objMsg.obj = List(obj, objLogger).FirstOrDefault();
-                    objMsg.data = GetViewOption().data;
+                    objMsg.obj = (await ListAsync(obj, objLogger)).FirstOrDefault();
+                    objMsg.data = (await GetViewOption()).data;
                 }
             }
             catch (Exception ex) 
@@ -514,12 +636,12 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Enable(User obj, User objLogger)
+        public async Task<Message> Enable(User obj, User objLogger)
         {
             Message objMsg = new Message();
             try
             {
-                var EnableUser = db.User.Where(ap => App.Status.Delete == ap.Status && ap.Id == obj.Id).AsEnumerable().FirstOrDefault();
+                var EnableUser = await db.User.FirstOrDefaultAsync(ap => App.Status.Delete == ap.Status && ap.Id == obj.Id);
                 if (EnableUser == null)
                 {
                     Message.Error(ref objMsg, "User did not find for enable.");
@@ -529,12 +651,12 @@ namespace CRMApi.Repository
                 EnableUser.UpdatedBy = objLogger.Id;
                 EnableUser.UpdatedAt = DateTime.Now;
                 db.Update(EnableUser);
-                Message.Delete(ref objMsg, db.SaveChanges(), "");
+                Message.Delete(ref objMsg, (await db.SaveChangesAsync()), "");
                 if (objMsg.status == Message.Type.success)
                 {
                     obj.ListId.Add(obj.Id);
-                    objMsg.obj = List(obj, objLogger).FirstOrDefault();
-                    objMsg.data = GetViewOption().data;
+                    objMsg.obj = (await ListAsync(obj, objLogger)).FirstOrDefault();
+                    objMsg.data = (await GetViewOption()).data;
                 }
             }
             catch (Exception ex)
@@ -543,17 +665,16 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message AppMenu(User obj) 
+        public async Task<Message> AppMenu(User obj) 
         {
             Message objMsg = new Message();
             try 
-            {                
-                
-                var dbUserApi = (
-                    from ape in obj.Api
+            {                                
+                var dbUserApi = await (
+                    from ape in db.UserApi
                     join api in db.Api on ape.ApiId equals api.Id
                     join apg in db.ApiGroup on api.ApiGroupId equals apg.Id
-                    where api.ApiType == obj.ApiType
+                    where api.ApiType == obj.ApiType && ape.UserId == obj.Id && App.ActiveStatus.Contains(ape.Status) && App.ActiveStatus.Contains(api.Status) 
                     select new
                     {
                         ape.ApiId,
@@ -576,7 +697,7 @@ namespace CRMApi.Repository
                         ape.Import,
                         ape.Export,
                     }
-                ).ToList();
+                ).ToListAsync();
                 
                 objMsg.data = dbUserApi.OrderBy(ape => ape.ApiGroupSeqNo).Where(ape => ape.ApiGroupParentId == 0)
                     .GroupBy(ape => new
@@ -628,7 +749,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message UserInfo(User obj)
+        public async Task<Message> UserInfo(User obj)
         {
             Message objMsg = new Message();
             try
@@ -639,12 +760,11 @@ namespace CRMApi.Repository
                     obj.Name,
                     Type = obj.UserType,
                     obj.Theme,
-                    AuthToken = Util.CreateJwtToken(obj),
-                    obj.Company,
-                    obj.Api
+                    AuthToken = Util.CreateJwtToken(obj),                    
+                    Api = obj.Api
                 };
-                data.Company = db.Company.FirstOrDefault(cp => App.ActiveStatus.Contains(cp.Status) && cp.Id == obj.CompanyId);
-                data.AppMenu = AppMenu(obj).data;
+                data.Company = db.Company.FirstOrDefault(cp => App.ActiveStatus.Contains(cp.Status));
+                data.AppMenu = (await AppMenu(obj)).data;
                 objMsg.status = Message.Type.success;
                 objMsg.statusText = "Login sucess";
                 objMsg.data = data;
