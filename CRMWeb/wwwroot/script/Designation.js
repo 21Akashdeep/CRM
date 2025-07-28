@@ -2,7 +2,7 @@
     static init() {
         Designation.getViewOption((response) => {
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
-            Dropdown.bind({ id: '#ListId', data: response.data.Designation, value: 'Id', text: 'Name', subText: 'Description' });
+            Dropdown.bind({ id: '#ListId', data: response.data.ListId, value: 'Id', text: 'Description', subText: "Code" });
         });
         $('#btnSearch').on('click', () => {
             Designation.get({
@@ -35,25 +35,24 @@
 
     }
     //Designation View
-    static getViewOption(onSuccess) {
+    static getViewOption(onSuccess = () => { }) {
         Data.get({ url: 'Designation/GetViewOption', onSuccess: onSuccess });
     }
     static get({ action, onSuccess }) {
-        let obj = {
+        var obj = {
             ListStatus: $('#ListStatus').val(),
-            ListId: $('#ListId').val(),
-            ListUQCG: $('#ListUQCG').val(),
-        };
+            ListId: $('#ListId').val()
+        }
         Data.post({ url: `Designation/${action}`, data: obj, onSuccess: onSuccess });
     }
     //Designation Add, Edit, Update & Delete
     static initAdd() {
         $('#Designation_btnSave').on('click', () => {
-            if (!Field.isMandatory({ class: ".item-group-required" })) {
+            if (!Field.isMandatory({ class: ".designation-required" })) {
                 return;
             }
             let obj = Data.serializeToObject({ formId: "#formDesignation" });
-            if (Field.isNullOrEmpty(obj.Id)) {
+            if (!obj.Id) {
                 Designation.add(obj);
             }
             else {
@@ -61,8 +60,12 @@
             }
         });
     }
+    static getAddOption(onSuccess) {
+        Data.get({ url: 'Designation/GetAddOption', onSuccess: onSuccess });
+    }
     static fill() {
         Modal.open({ id: '#modalDesignation', title: 'Designation / Add', action: 'add' });
+        $('#Customer_SeqNo').val(0);
     }
     static add(obj) {
         Data.post({ url: 'Designation/Add', data: obj, onSuccess: Designation.addOnSuccess });
@@ -70,36 +73,49 @@
     static addOnSuccess = (response) => {
         Message.show(response);
         if (response.status == Message.Type.success) {
-            Designation.setUiState({ action: 'Add', response: response });
+            Modal.reset({ id: "#modalDesignation" });
+            Table.add({ id: "#tableDesignation", data: response.obj, action: 'prepend' });
+            Dropdown.bind({ id: '#ListId', data: response.data.ListId, value: 'Id', text: 'Description', subText: "Code" });
         }
     }
-    static edit(id, action = "Edit") {
+    static edit({ id, action = "Edit" }) {
         Data.get(
             {
                 url: `Designation/Edit?Id=${id}`,
                 onSuccess: (response) => {
                     if (response.status == Message.Type.success) {
-                        let title = action == "Edit" ? `Designation / Edit (Code : ${response.obj.Code})` : `Designation / Add`;
-                        response.obj.Id = action == "Edit" ? response.obj.Id : null;
-                        Modal.open({ id: '#modalDesignation', title: title, action: action, obj: response.obj });
+                        let obj = response.obj;
+                        obj.Id = action == 'Edit' ? obj.Id : null;
+                        let title = action == 'Edit' ? `Designation / Edit (Code: ${obj.Code})` : `Designation / Add`;
+                        Modal.open({ id: '#modalDesignation', title: title, action: action, obj: obj });
                     }
                     else {
-                        Message.alert(response);
+                        Message.show(response);
                     }
                 }
             }
         );
     }
     static update(obj) {
-        Data.update({ url: 'Designation/Update', data: obj, onSuccess: Designation.updateOnSuccess });
+        Data.update(
+            {
+                url: 'Designation/Update',
+                data: obj,
+                onSuccess: (response) => {
+                    Message.show(response);
+                    Designation.updateOnSuccess(response);
+                }
+            }
+        );
     }
     static updateOnSuccess = (response) => {
-        Message.show(response);
         if (response.status == Message.Type.success) {
-            Designation.setUiState({ response: response });
+            Modal.close({ id: "#modalDesignation" });
+            Table.updateById({ id: "#tableDesignation", objId: response.obj.Id, obj: response.obj });
+            Dropdown.bind({ id: '#ListId', data: response.data.ListId, value: 'Id', text: 'Description', subText: "Code" });
         }
     }
-    static delete(id) {
+    static delete({ id }) {
         Message.confirm(
             {
                 msg: "Do you want to delete???",
@@ -120,10 +136,13 @@
     static deleteOnSuccess = (response) => {
         Message.show(response);
         if (response.status == Message.Type.success) {
-            Designation.setUiState({ response: response });
+            Table.updateById({ id: "#tableDesignation", objId: response.obj.Id, obj: response.obj });
+            Dropdown.bind({ id: '#ListId', data: response.data.ListId, value: 'Id', text: 'Description', subText: "Code" });
+            Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
+
         }
     }
-    static enable(id) {
+    static enable({ id }) {
         Message.confirm(
             {
                 msg: "Do you want to enable???",
@@ -144,35 +163,25 @@
     static enableOnSuccess = (response) => {
         Message.show(response);
         if (response.status == Message.Type.success) {
-            Designation.setUiState({ response: response });
+            Table.updateById({ id: "#tableDesignation", objId: response.obj.Id, obj: response.obj });
+            Dropdown.bind({ id: '#ListId', data: response.data.ListId, value: 'Id', text: 'Description', subText: "Code" });
+            Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
+
         }
     }
-    static setUiState({ action = null, response }) {
-        switch (action) {
-            case "Add":
-                Modal.reset({ id: '#modalDesignation' });
-                Table.add({ id: "#tableDesignation", data: response.obj, action: 'prepend' });
-                break;
-            default:
-                Modal.close({ id: '#modalDesignation' });
-                Table.updateById({ id: "#tableDesignation", objId: response.obj.Id, obj: response.obj });
-                break;
-        }
-        Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
-        Dropdown.bind({ id: '#ListId', data: response.data.Unit, value: 'Id', text: 'Description', subText: 'Name' });
-    }
+
 }
 window.tableDesignationSLNo = (value, obj, index) => {
     return index + 1;
 }
 window.tableDesignationStatus = (value, obj, index) => {
-    return `<div class="${obj.StatusCss}">${obj.StatusDesc}</div>`;
+    return `<div class="${obj.StatusCss}">${obj.StatusName}</div>`;
 }
-window.tableDesignationCreatedBy = (value, obj, index) => {
+window.tableDesignationCreatedByAndAt = (value, obj, index) => {
     return `<div>${obj.CreatedByName}</div>
             <div>${moment(obj.CreatedAt).format('DD-MMM-YYYY HH:mm:ss')}</div>`;
 }
-window.tableDesignationUpdatedBy = (value, obj, index) => {
+window.tableDesignationUpdatedByAndAt = (value, obj, index) => {
     return `<div>${obj.UpdatedByName}</div>
             <div>${moment(obj.UpdatedAt).format('DD-MMM-YYYY HH:mm:ss')}</div>`;
 }
@@ -216,15 +225,15 @@ window.tableDesignationAction = (value, obj, index) => {
 }
 window.tableDesignationActionEvent = {
     'click .btn-edit': (e, value, obj, index) => {
-        Designation.edit(obj.Id);
+        Designation.edit({ id: obj.Id });
     },
     'click .btn-duplicate': (e, value, obj, index) => {
-        Designation.edit(obj.Id, "Add");
+        Designation.edit({ id: obj.Id, action: 'Add' });
     },
     'click .btn-delete': (e, value, obj, index) => {
-        Designation.delete(obj.Id);
+        Designation.delete({ id: obj.Id });
     },
     'click .btn-enable': (e, value, obj, index) => {
-        Designation.enable(obj.Id);
+        Designation.enable({ id: obj.Id });
     }
 }
