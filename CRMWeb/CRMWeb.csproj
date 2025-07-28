@@ -12,25 +12,21 @@
     <Compile Remove="Views\NewFolder3\**" />
     <Compile Remove="Views\NewFolder4\**" />
     <Compile Remove="Views\NewFolder5\**" />
-    <Compile Remove="Views\NewFolder\**" />
     <Content Remove="Views\NewFolder1\**" />
     <Content Remove="Views\NewFolder2\**" />
     <Content Remove="Views\NewFolder3\**" />
     <Content Remove="Views\NewFolder4\**" />
     <Content Remove="Views\NewFolder5\**" />
-    <Content Remove="Views\NewFolder\**" />
     <EmbeddedResource Remove="Views\NewFolder1\**" />
     <EmbeddedResource Remove="Views\NewFolder2\**" />
     <EmbeddedResource Remove="Views\NewFolder3\**" />
     <EmbeddedResource Remove="Views\NewFolder4\**" />
     <EmbeddedResource Remove="Views\NewFolder5\**" />
-    <EmbeddedResource Remove="Views\NewFolder\**" />
     <None Remove="Views\NewFolder1\**" />
     <None Remove="Views\NewFolder2\**" />
     <None Remove="Views\NewFolder3\**" />
     <None Remove="Views\NewFolder4\**" />
     <None Remove="Views\NewFolder5\**" />
-    <None Remove="Views\NewFolder\**" />
   </ItemGroup>
 
   <ItemGroup>
