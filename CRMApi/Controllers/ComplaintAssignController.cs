@@ -11,9 +11,9 @@ namespace CRMApi.Controllers
     [Authorize]
     public class ComplaintAssignController : ControllerBase
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly RepoComplaintAssign RepoComplaintSchedule;
-        public ComplaintAssignController(DbCRM _db) 
+        public ComplaintAssignController(DBCRM _db) 
         {
             db = _db;
             RepoComplaintSchedule = new RepoComplaintAssign(db);

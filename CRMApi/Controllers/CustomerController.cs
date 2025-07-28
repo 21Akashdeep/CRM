@@ -11,9 +11,9 @@ namespace CRMApi.Controllers
     [Authorize]
     public class CustomerController : ControllerBase
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly RepoCustomer RepoCustomer;
-        public CustomerController(DbCRM _db)
+        public CustomerController(DBCRM _db)
         {
             db = _db;
             RepoCustomer = new RepoCustomer(db);

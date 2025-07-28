@@ -8,9 +8,9 @@ namespace CRMApi.Repository
 {
     public class RepoItemSubGroup
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private AppSetting App = Util.AppSetting;
-        public RepoItemSubGroup(DbCRM _db) 
+        public RepoItemSubGroup(DBCRM _db) 
         {
             db = _db;
         }
@@ -151,7 +151,7 @@ namespace CRMApi.Repository
             try
             {
                 //Get Company
-                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status) && pt.Id == User.CompanyId);
+                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status));
                 if (objCompany == null)
                 {
                     Message.Error(ref objMsg, "Company Info did found");
@@ -242,7 +242,7 @@ namespace CRMApi.Repository
         public Message Update(ItemSubGroup obj, User User)
         {
             Message objMsg = new Message();
-            obj.Code = Util.SanitizeInput(obj.Code ?? "", App.Regexp.AlphaLgNum);
+            obj.Code = Util.SanitizeInput(obj.Code ?? "", App.Regexp.AlphaLgNum)!;
             var ItemSubGroup = db.ItemSubGroup.ToList();
             if (ItemSubGroup.Where(isg => isg.Code == obj.Code && isg.Id != obj.Id).Count() > 0)
             {

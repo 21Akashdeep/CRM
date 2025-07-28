@@ -12,9 +12,9 @@ namespace CRMApi.Controllers
     [Authorize]
     public class ItemController : ControllerBase
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private RepoItem RepoItem;
-        public ItemController(DbCRM _db)
+        public ItemController(DBCRM _db)
         {
             db = _db;
             RepoItem = new RepoItem(db);

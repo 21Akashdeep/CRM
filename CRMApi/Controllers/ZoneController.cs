@@ -11,9 +11,9 @@ namespace CRMApi.Controllers
     [Authorize]
     public class ZoneController : ControllerBase
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly RepoZone RepoZone;
-        public ZoneController(DbCRM _db) 
+        public ZoneController(DBCRM _db) 
         {
             db = _db;
             RepoZone = new RepoZone(db);

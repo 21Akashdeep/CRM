@@ -7,49 +7,21 @@ using Newtonsoft.Json;
 
 namespace CRMApi.Services
 {
-    public class DbCRM:DbContext
+    public class DBCRM:DbContext
     {
-        public DbCRM(DbContextOptions<DbCRM> options): base(options) 
+        public DBCRM(DbContextOptions<DBCRM> options): base(options) 
         {
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //base.OnModelCreating(modelBuilder);
 
-            //Json Convert User Company Permisssion
-            var jsonUserCompany = new ValueConverter<List<Composite.UserCompany>, string>(
-                v => JsonConvert.SerializeObject(v),//Serialize List<CustomObject> to JSON string
-                v => JsonConvert.DeserializeObject<List<Composite.UserCompany>>(v)! //Deserialize JSON string back to List<CustomObject>
-            );            
-            modelBuilder.Entity<User>().Property(e => e.Company).HasConversion(jsonUserCompany).HasColumnType("json");
-
-            //Json Convert User Api Permisssion
-            var jsonUserApi = new ValueConverter<List<Composite.UserApi>, string>(
-                v => JsonConvert.SerializeObject(v),//Serialize List<CustomObject> to JSON string
-                v => JsonConvert.DeserializeObject<List<Composite.UserApi>>(v)! //Deserialize JSON string back to List<CustomObject>
-            );            
-            modelBuilder.Entity<User>().Property(e => e.Api).HasConversion(jsonUserApi).HasColumnType("json");
-
-            //Json Convert User Approval Role
-            var jsonUserApprovalRole = new ValueConverter<List<Composite.UserApprovalRole>, string>(
-                v => JsonConvert.SerializeObject(v),//Serialize List<CustomObject> to JSON string
-                v => JsonConvert.DeserializeObject<List<Composite.UserApprovalRole>>(v)! //Deserialize JSON string back to List<CustomObject>
-            );            
-            modelBuilder.Entity<User>().Property(e => e.ApprovalRole).HasConversion(jsonUserApprovalRole).HasColumnType("json");
-
             //Json Convert Approval Seq for Approval Config
             var jsonApprovalSeq = new ValueConverter<List<Composite.ApprovalSeq>, string>(
                 v => JsonConvert.SerializeObject(v),//Serialize List<CustomObject> to JSON string
                 v => JsonConvert.DeserializeObject<List<Composite.ApprovalSeq>>(v)! //Deserialize JSON string back to List<CustomObject>
             );            
-            modelBuilder.Entity<ApprovalConfig>().Property(e => e.ApprovalSeq).HasConversion(jsonApprovalSeq).HasColumnType("json");
-
-            //Json Convert Approval Seq for Approval Config
-            //var jsonComplaintAssignTo = new ValueConverter<List<Composite.ComplaintAssignTo>, string>(
-            //    v => JsonConvert.SerializeObject(v),//Serialize List<CustomObject> to JSON string
-            //    v => JsonConvert.DeserializeObject<List<Composite.ComplaintAssignTo>>(v)! //Deserialize JSON string back to List<CustomObject>
-            //);
-            //modelBuilder.Entity<ComplaintAssign>().Property(e => e.AssignTo).HasConversion(jsonComplaintAssignTo).HasColumnType("json");
+            modelBuilder.Entity<ApprovalConfig>().Property(e => e.ApprovalSeq).HasConversion(jsonApprovalSeq).HasColumnType("json");            
         }
         public DbSet<User> User { get; set; }
         public DbSet<Setting> Setting { get; set; }
@@ -63,7 +35,11 @@ namespace CRMApi.Services
         public DbSet<Log> Log { get; set; }
         public DbSet<ApiGroup> ApiGroup { get; set; }
         public DbSet<Api> Api { get; set; }
+        public DbSet<UserApi> UserApi { get; set; }
+        public DbSet<Location> Location { get; set; }
+        public DbSet<UserLocation> UserLocation { get; set; }
         public DbSet<ApprovalRole> ApprovalRole { get; set; }
+        public DbSet<UserApprovalRole> UserApprovalRole { get; set; }
         public DbSet<ApprovalConfig> ApprovalConfig { get; set; }
         public DbSet<Customer> Customer { get; set; }
         public DbSet<Approval> Approval { get; set; }

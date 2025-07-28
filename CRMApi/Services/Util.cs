@@ -265,7 +265,7 @@ namespace CRMApi.Services
         public static string CreateJwtToken(User obj)
         {
             string JwtToken = "";
-            string userJsonString = JsonConvert.SerializeObject(new { obj.Id, obj.TokenExpiry, obj.CompanyId });
+            string userJsonString = JsonConvert.SerializeObject(new { obj.Id, obj.TokenExpiry });
             var signingCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AppSetting.Jwt.Key)),
                 SecurityAlgorithms.HmacSha512Signature
@@ -288,7 +288,7 @@ namespace CRMApi.Services
             JwtToken = tokenHandler.WriteToken(token);
             return JwtToken;
         }
-        public static User? RequestVerify(Request Request, DbCRM db, ref Message objMsg)
+        public static User? RequestVerify(Request Request, DBCRM db, ref Message objMsg)
         {
             User? User = new User();
             var AuthorizationToken = Request.HttpRequest!.Headers["Authorization"].ToString().Replace("Bearer ", "");
@@ -323,8 +323,7 @@ namespace CRMApi.Services
                 Message.UnAuthorized(ref objMsg, "User did not find.");
                 return null;
             }
-            User.TokenExpiry = AuthUser.TokenExpiry;
-            User.CompanyId = AuthUser.CompanyId;            
+            User.TokenExpiry = AuthUser.TokenExpiry;                      
             //Set Api Name
             User.ApiName = Request.HttpRequest.RouteValues["controller"]?.ToString() ?? "";            
             //Is User Type Sys Admin Or Request Action Type UnAuthorised            
@@ -341,11 +340,11 @@ namespace CRMApi.Services
                 return null;
             }
             User.ApiId = dbApi.FirstOrDefault()?.Id ?? 0;
-            
-            
+
+            var dbUserApi = db.UserApi.Where(x => x.UserId == User.Id).ToList();
             //Check Permission            
             var dbApiPermission = (
-                from ape in User.Api
+                from ape in dbUserApi
                 join api in dbApi on ape.ApiId equals api.Id
                 where api.Name == User.ApiName
                 select new 
@@ -373,7 +372,7 @@ namespace CRMApi.Services
             }
             return User;
         }
-        public static void SentMail(DbCRM db, MailMessage Mail, string Subject, string Matter, string ColorType, ref Message objMsg)
+        public static void SentMail(DBCRM db, MailMessage Mail, string Subject, string Matter, string ColorType, ref Message objMsg)
         {
             try
             {

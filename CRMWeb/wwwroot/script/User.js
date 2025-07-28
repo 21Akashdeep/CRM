@@ -24,7 +24,7 @@ class User {
             });
         });
         $('#btnAdd').on('click', () => {            
-            User.fill();                
+            User.newEntry();                
         });
         $('#ContactNo').on('focusout', function () {
             if (parseFloat($('#ContactNo').val()) < 1000000000 || parseFloat($('#ContactNo').val()) > 9999999999) {
@@ -37,11 +37,11 @@ class User {
             if (!Field.isMandatory({ class: ".required" })) {
                 return;
             }
-            var obj = Data.serializeToObject({ formId: "#formUser" });            
-            obj.Company = $('#tableCompany').bootstrapTable('getData').filter(c => c.IsAdded);
+            var obj = Data.serializeToObject({ formId: "#formUser" });                        
             obj.Api = $('#tableApi').bootstrapTable('getData').filter(ap => ap.View || ap.Add || ap.Update || ap.Delete || ap.Enable || ap.Print || ap.Import || ap.Export);
-            obj.ApprovalRole = $('#tableApprovalRole').bootstrapTable('getData').filter(cp => cp.IsAdded);
-            if (Field.isNullOrEmpty(obj.Id)) {            
+            obj.Location = $('#tableLocation').bootstrapTable('getData').filter(lo => lo.IsAdded);
+            obj.ApprovalRole = $('#tableApprovalRole').bootstrapTable('getData').filter(ar => ar.IsAdded);
+            if (Field.isNullOrEmpty(obj.Id)) {
                 User.add(obj);
             }
             else {
@@ -64,17 +64,17 @@ class User {
     static getAddOption({ id = 0, onSuccess }) {        
         Data.get({ url: `User/GetAddOption?Id=${id}`, onSuccess: onSuccess });
     }
-    static fill() {
+    static newEntry() {
         User.getAddOption({
             onSuccess: (response) => {
                 Modal.open({ id: '#modalUser', title: 'User / Add', action: 'Add' });
                 $('#DateOfBirth').val('');
                 Dropdown.bind({ id: '#UserType', data: response.data.UserType, value: 'Value', text: ['Description'] });
                 Dropdown.bind({ id: '#DepartmentId', data: response.data.Department, value: 'Id', text: ['Description'] });
-                Dropdown.bind({ id: '#DesignationId', data: response.data.Designation, value: 'Id', text: ['Description'] });
-                Table.add({ id: '#tableCompany', data: response.data.Company });
+                Dropdown.bind({ id: '#DesignationId', data: response.data.Designation, value: 'Id', text: ['Description'] });                                
                 Table.add({ id: '#tableApi', data: response.data.Api });
-                Table.add({ id: '#tableApprovalRole', data: response.data.AprRole });                                
+                Table.add({ id: '#tableLocation', data: response.data.Location });
+                Table.add({ id: '#tableApprovalRole', data: response.data.ApprovalRole });                        
             }
         });
     }
@@ -120,7 +120,12 @@ class User {
         if (response.status == Message.Type.success) {
             Modal.reset({ id: '#modalUser' });
             Table.add({ id: "#tableUser", data: response.obj, action: 'prepend' });
-            Dropdown.bind({ id: '#ListId', data: response.data.User, value: 'Id', text: 'Description', subText: "Code" });
+            let viewOption = response.data.ViewOption;
+            Dropdown.bind({ id: '#ListId', data: viewOption.User, value: 'Id', text: 'Description', subText: "Code" });
+            let addOption = response.data.AddOption;
+            Table.add({ id: '#tableApi', data: addOption.Api });
+            Table.add({ id: '#tableLocation', data: addOption.Location });
+            Table.add({ id: '#tableApprovalRole', data: addOption.ApprovalRole });                        
         }
     }
     static reSentPassword(id) {
@@ -138,11 +143,10 @@ class User {
                         let obj = response.obj;
                         obj.Id = action == 'Edit' ? obj.Id : null;
                         let title = action == 'Edit' ? `User / Edit (Code: ${obj.UserId})` : `User / Add`;
-                        Modal.open({ id: '#modalUser', title: title, action: action, obj: obj });
-                        Table.add({ id: '#tableCompany', data: response.data.Company });
+                        Modal.open({ id: '#modalUser', title: title, action: action, obj: obj });                        
                         Table.add({ id: '#tableApi', data: response.data.Api });
-                        Table.add({ id: '#tableApprovalRole', data: response.data.AprRole });
-                        
+                        Table.add({ id: '#tableLocation', data: response.data.Location });
+                        Table.add({ id: '#tableApprovalRole', data: response.data.ApprovalRole });                        
                     }
                     else {
                         Message.show(response);
@@ -291,51 +295,7 @@ window.tableUserActionEvent = {
     }
 }
 
-//===================Table Company Permission==========================//
-tableCompanyCheckedFormatter = (value, obj, index) => {
-    let checkBox = `
-        <div class="form-switch" style="min-height:auto!important;">
-            <input class="form-check-input company-checked" type="checkbox" id="CheckBoxCompany_${index}" ${obj.IsAdded ? 'checked' : ''}/>
-        </div>
-    `;       
-    return checkBox;
-}
-window.tableCompanyCheckedEvent = {
-    'change .company-checked': (e, value, obj, index) => {
-        obj.IsAdded = $(e.target).is(':Checked') ? true : false;
-        $('#tableCompany').bootstrapTable('updateRow', { index: index, row: obj });
-        var Company = $('#tableCompany').bootstrapTable('getData').map((com) => {
-            if (obj.CompanyId != com.CompanyId) {
-                com.IsAdded = false;
-            }
-            return com;
-        });
-        Table.add({ id: '#tableCompany', data: Company });
-    }
-}
-tableCompanyIsDefaultFormatter = (value, obj, index) => {
-    let checkBox = `
-        <div class="form-switch" style="min-height:auto!important;">
-            <input class="form-check-input default-checked" type="checkbox" id="CheckBoxDefault_${index}" ${obj.IsDefault ? 'checked' :''}/>
-        </div>
-    `;    
-    return checkBox;
-}
-window.tableCompanyIsDefaultEvent = {    
-    'change .default-checked': (e, value, obj, index) => {
-        obj.IsDefault = $(e.target).is(':Checked') ? true : false;
-        $('#tableCompany').bootstrapTable('updateRow', { index: index, row: obj });
-        var Company = $('#tableCompany').bootstrapTable('getData').map((com) => {
-            if (obj.CompanyId != com.CompanyId) {
-                    com.IsDefault = false;
-                }
-                return com;
-            }
-        );
-        Table.add({ id: '#tableCompany', data: Company });
-    }
-}
-//===================Table Api Permission==========================//
+//===================Table Api==========================//
 tableApiIsAllColChecked = (value, obj, index) => {
     obj.IsAllColChecked = obj.View && obj.Add && obj.Update && obj.Delete && obj.Enable && obj.Print && obj.Export && obj.Import ? true : false;
     let checkBox = [];
@@ -473,18 +433,33 @@ window.tableApiExportEvent = {
     }
 }
 
-//===================Table Approval Role Permission==========================//
-tableApprovalRoleChecked = (value, obj, index) => {
+//=========================User Location==============================//
+window.tableLocationCheck = (value, obj, index) => {
     let checkBox = [];
     checkBox.push('<div class="form-switch" style="min-height:auto!important;">');
-    checkBox.push('<input class="form-check-input user-approval-role" type="checkbox" id="CheckBoxApprovalRole_' + index + '"');
+    checkBox.push('<input class="form-check-input checkbox-view" type="checkbox" id="CheckBoxView_' + index + '"');
     checkBox.push(obj.IsAdded ? ' checked/>' : '/>');
     checkBox.push('</div>');
     return checkBox.join('');
 }
-window.tableApprovalRoleCheckedEvent = {
-    'change .user-approval-role': (e, value, obj, index) => {
+window.tableLocationCheckEvent = {
+    'change .checkbox-view': (e, value, obj, index) => {
         obj.IsAdded = $(e.target).is(':Checked') ? true : false;
-        Table.updateById({ id:'#tableApprovalRole', objId: obj.ApprovalRoleId, obj: obj});             
+        Table.updateById({ id: '#tableLocation', objId: obj.LocationId, obj: obj });
+    }
+}
+//=========================User ApprovalRole==========================//
+window.tableApprovalRoleCheck = (value, obj, index) => {
+    let checkBox = [];
+    checkBox.push('<div class="form-switch" style="min-height:auto!important;">');
+    checkBox.push('<input class="form-check-input checkbox-view" type="checkbox" id="CheckBoxView_' + index + '"');
+    checkBox.push(obj.IsAdded ? ' checked/>' : '/>');
+    checkBox.push('</div>');
+    return checkBox.join('');
+}
+window.tableApprovalRoleCheckEvent = {
+    'change .checkbox-view': (e, value, obj, index) => {
+        obj.IsAdded = $(e.target).is(':Checked') ? true : false;
+        Table.updateById({ id: '#tableApprovalRole', objId: obj.ApprovalRoleId, obj: obj });
     }
 }

@@ -7,9 +7,9 @@ namespace CRMApi.Repository
 {
     public class RepoComplaintItem
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         AppSetting App = Util.AppSetting;
-        public RepoComplaintItem(DbCRM _db)
+        public RepoComplaintItem(DBCRM _db)
         {
             db = _db;
         }
@@ -133,7 +133,7 @@ namespace CRMApi.Repository
         {
             obj ??= new ComplaintItem();
             obj.ListStatus = obj.ListStatus.Any() ? obj.ListStatus : App.ActiveStatus;
-            var dbCompliantItemQuery = db.ComplaintItem.Where(ci => obj.ListStatus.Contains(ci.Status) && ci.CompanyId == User.CompanyId).AsQueryable();
+            var dbCompliantItemQuery = db.ComplaintItem.Where(ci => obj.ListStatus.Contains(ci.Status)).AsQueryable();
             dbCompliantItemQuery = dbCompliantItemQuery.Where(ci => !obj.ListComplaintId.Any() || obj.ListComplaintId.Contains(ci.ComplaintId));
             dbCompliantItemQuery = dbCompliantItemQuery.Where(ci => !obj.ListId.Any() || obj.ListId.Contains(ci.Id));
 
@@ -261,8 +261,7 @@ namespace CRMApi.Repository
                 if (AddComplaintItem.Any()) 
                 {
                     AddComplaintItem.ForEach(obj => {
-                        obj.Status = App.Status.Enable;
-                        obj.CompanyId = User.CompanyId;
+                        obj.Status = App.Status.Enable;                        
                         obj.CreatedBy = User.Id;
                         obj.CreatedAt = DateTime.Now;
                         obj.UpdatedBy = User.Id;

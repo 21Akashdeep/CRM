@@ -13,10 +13,10 @@ namespace CRMApi.Controllers
     [Authorize]
     public class SettingController : ControllerBase
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
         private readonly RepoSetting SettingRepo;
-        public SettingController(DbCRM _db)
+        public SettingController(DBCRM _db)
         {
             db = _db;
             SettingRepo = new RepoSetting(db);
@@ -99,7 +99,7 @@ namespace CRMApi.Controllers
                 if (User == null) return Ok(objMsg);
                 obj.User = User;
                 //Get Party
-                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status) && pt.Id == User.CompanyId);
+                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status));
                 if (objCompany == null)
                 {
                     Message.Error(ref objMsg, "Company Info did found");

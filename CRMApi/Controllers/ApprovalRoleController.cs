@@ -11,9 +11,9 @@ namespace CRMApi.Controllers
     [Authorize]
     public class ApprovalRoleController : ControllerBase
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly RepoApprovalRole RepoApprovalRole;
-        public ApprovalRoleController(DbCRM _db) 
+        public ApprovalRoleController(DBCRM _db) 
         {
             db = _db;
             RepoApprovalRole = new RepoApprovalRole(db);

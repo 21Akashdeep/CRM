@@ -10,9 +10,9 @@ namespace CRMApi.Repository
 {
     public class RepoComplaint
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
-        public RepoComplaint(DbCRM _db)
+        public RepoComplaint(DBCRM _db)
         {
             db = _db;
         }
@@ -126,7 +126,7 @@ namespace CRMApi.Repository
             obj.ListStatus = obj.ListStatus.Count == 0 ? new List<int> { App.Status.SaveAsDraft, App.Status.Pending, App.Status.Scheduled, App.Status.Processing } : obj.ListStatus;
             var dbComplaintQuery = db.Complaint.AsQueryable();
 
-            dbComplaintQuery = db.Complaint.Where(co => obj.ListStatus.Contains(co.Status) && co.CompanyId == User.CompanyId).AsQueryable();
+            dbComplaintQuery = db.Complaint.Where(co => obj.ListStatus.Contains(co.Status)).AsQueryable();
             
             if (obj.FromDate != default(DateTime)) 
                 dbComplaintQuery = dbComplaintQuery.Where(co => co.Date.Date >= obj.FromDate.Date);
@@ -390,7 +390,7 @@ namespace CRMApi.Repository
                 
                 DataTable objDataTable = Util.ListToDataTable(Complaint);
 
-                var objCompany = await db.Company.FirstOrDefaultAsync(pt => App.ActiveStatus.Contains(pt.Status) && pt.Id == User.CompanyId);
+                var objCompany = await db.Company.FirstOrDefaultAsync(pt => App.ActiveStatus.Contains(pt.Status));
                 if (objCompany == null)
                 {
                     Message.Error(ref objMsg, "Company Info did found");
@@ -455,8 +455,7 @@ namespace CRMApi.Repository
                 {
                     Message.Error(ref objMsg, "Contact No. should be 10 digit");
                     return objMsg;
-                }
-                obj.CompanyId = User.CompanyId;
+                }                
                 obj.Status = obj.ForwardTo == null ? App.Status.SaveAsDraft : App.Status.Pending;
                 obj.CreatedBy = User.Id;
                 obj.UpdatedBy = User.Id;               

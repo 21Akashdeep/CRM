@@ -12,9 +12,9 @@ namespace CRMApi.Controllers
     [Authorize]
     public class UnitController : ControllerBase
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private RepoUnit RepoUnit;
-        public UnitController(DbCRM _db)
+        public UnitController(DBCRM _db)
         {
             db = _db;
             RepoUnit = new RepoUnit(db);

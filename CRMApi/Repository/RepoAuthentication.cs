@@ -6,10 +6,10 @@ namespace CRMApi.Repository
 {
     public class RepoAuthentication
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
         private RepoUser RepoUser;
-        public RepoAuthentication(DbCRM _db) 
+        public RepoAuthentication(DBCRM _db) 
         {
             db = _db;
             RepoUser = new RepoUser(db);
@@ -28,7 +28,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public Message Auth(User obj)
+        public async Task<Message> Auth(User obj)
         {
             Message objMsg = new Message();
             try
@@ -40,10 +40,9 @@ namespace CRMApi.Repository
                     Message.Error(ref objMsg, "Opps, Invalid login credentials.");
                     return objMsg;
                 }
-                objUser.ApiType = obj.ApiType;                
-                objUser.CompanyId = objUser.Company.FirstOrDefault(c => c.IsDefault)?.CompanyId ?? 0;                
+                objUser.ApiType = obj.ApiType;                                
                 objUser.TokenExpiry = DateTime.Now.AddMinutes(Convert.ToDouble(App.Jwt.TokenExpireTimeInMinutes));
-                objMsg = RepoUser.UserInfo(objUser);
+                objMsg = await RepoUser.UserInfo(objUser);
             }
             catch (Exception ex)
             {

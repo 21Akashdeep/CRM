@@ -12,9 +12,9 @@ namespace CRMApi.Controllers
     [Authorize]
     public class ApprovalController : ControllerBase
     {
-        private readonly DbCRM db;        
+        private readonly DBCRM db;        
         private RepoApproval RepoApproval;
-        public ApprovalController(DbCRM _db) 
+        public ApprovalController(DBCRM _db) 
         {
             db = _db;            
             RepoApproval = new RepoApproval(db);

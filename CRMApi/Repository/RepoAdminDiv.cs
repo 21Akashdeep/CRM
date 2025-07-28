@@ -7,9 +7,9 @@ namespace CRMApi.Repository
 {
     public class RepoAdminDiv
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
-        public RepoAdminDiv(DbCRM _db) 
+        public RepoAdminDiv(DBCRM _db) 
         {
             db = _db;
         }
@@ -129,7 +129,7 @@ namespace CRMApi.Repository
             Message objMsg = new Message();
             try
             {   //Get Party
-                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status) && pt.Id == User.CompanyId);
+                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status));
                 if (objCompany == null)
                 {
                     Message.Error(ref objMsg, "Company Info did found");

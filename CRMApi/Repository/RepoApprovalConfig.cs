@@ -10,10 +10,10 @@ namespace CRMApi.Repository
 {
     public class RepoApprovalConfig
     {
-        public readonly DbCRM db;
+        public readonly DBCRM db;
         public AppSetting App = Util.AppSetting;
         public RepoApprovalRole RepoApprovalRole;
-        public RepoApprovalConfig(DbCRM _db)
+        public RepoApprovalConfig(DBCRM _db)
         {
             db = _db;
             RepoApprovalRole = new RepoApprovalRole(db);
@@ -172,7 +172,7 @@ namespace CRMApi.Repository
             try
             {
                 //Get Company
-                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status) && pt.Id == User.CompanyId);
+                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status));
                 if (objCompany == null)
                 {
                     Message.Error(ref objMsg, "Company Info did found");

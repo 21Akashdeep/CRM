@@ -11,9 +11,9 @@ namespace CRMApi.Controllers
     [Authorize]
     public class DepartmentController : ControllerBase
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly RepoDepartment RepoDept;
-        public DepartmentController(DbCRM _db) 
+        public DepartmentController(DBCRM _db) 
         {
             db = _db;
             RepoDept = new RepoDepartment(db);

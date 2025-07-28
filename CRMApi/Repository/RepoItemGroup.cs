@@ -9,10 +9,10 @@ namespace CRMApi.Repository
 {
     public class RepoItemGroup
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
         
-        public RepoItemGroup(DbCRM _db)
+        public RepoItemGroup(DBCRM _db)
         {
             db = _db;
         }
@@ -129,7 +129,7 @@ namespace CRMApi.Repository
             try
             {
                 //Get Party
-                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status) && pt.Id == User.CompanyId);
+                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status));
                 if (objCompany == null)
                 {
                     Message.Error(ref objMsg, "Company Info did found");
@@ -161,8 +161,7 @@ namespace CRMApi.Repository
         public Message Add(ItemGroup obj, User User)
         {
             Message objMsg = new Message();
-            obj.Code = Util.SanitizeInput(obj.Code ?? "", App.Regexp.AlphaLgNum)!;
-            obj.CompanyId = User.CompanyId;
+            obj.Code = Util.SanitizeInput(obj.Code ?? "", App.Regexp.AlphaLgNum)!;            
             obj.CreatedBy = User.Id;
             obj.UpdatedBy = User.Id;
             //Validate Duplicate
@@ -212,7 +211,7 @@ namespace CRMApi.Repository
         public Message Update(ItemGroup obj, User User)
         {
             Message objMsg = new Message();
-            obj.Code = Util.SanitizeInput(obj.Code ?? "", App.Regexp.AlphaLgNum);
+            obj.Code = Util.SanitizeInput(obj.Code ?? "", App.Regexp.AlphaLgNum)!;
             var ItemGroup = db.ItemGroup.ToList();
             if (ItemGroup.Where(ig => ig.Code == obj.Code && ig.Id != obj.Id).Count() > 0)
             {

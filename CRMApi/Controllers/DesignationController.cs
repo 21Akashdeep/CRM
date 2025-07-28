@@ -11,9 +11,9 @@ namespace CRMApi.Controllers
     [Authorize]
     public class DesignationController : ControllerBase
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly RepoDesignation RepoDept;
-        public DesignationController(DbCRM _db) 
+        public DesignationController(DBCRM _db) 
         {
             db = _db;
             RepoDept = new RepoDesignation(db);

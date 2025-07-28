@@ -1,7 +1,8 @@
 ﻿const App = {
     Setting: sessionStorage.getItem('Setting') ? JSON.parse(sessionStorage.getItem('Setting')) : null,
     User: sessionStorage.getItem('User') ? JSON.parse(sessionStorage.getItem('User')) : null,
-    AppMenu: sessionStorage.getItem('AppMenu') ? sessionStorage.getItem('AppMenu') : '',
+    Menu: sessionStorage.getItem('Menu') ? sessionStorage.getItem('Menu') : '',
+    Api: sessionStorage.getItem('Api') ? sessionStorage.getItem('Api') : [],
     Company: sessionStorage.getItem('Company') ? JSON.parse(sessionStorage.getItem('Company')) : null,
     Info: { Code: "CRM", Name: "CRM PORTAL", Desc: "CRM Portal", SubDesc: "Sign In", CountryId: 112 }
 }

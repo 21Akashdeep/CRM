@@ -13,9 +13,9 @@ namespace CRMApi.Repository
 {
     public class RepoApiGroup
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
-        public RepoApiGroup(DbCRM _db) 
+        public RepoApiGroup(DBCRM _db) 
         {
             db = _db;
         }
@@ -168,7 +168,7 @@ namespace CRMApi.Repository
             try
             {
                 //Get Party
-                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status) && pt.Id == User.CompanyId);
+                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status));
                 if (objCompany == null)
                 {
                     Message.Error(ref objMsg, "Company Info did found");
@@ -205,7 +205,7 @@ namespace CRMApi.Repository
             try 
             {                
                 //Sanitize Input
-                obj.Name = Util.SanitizeInput(obj.Name, $"{App.Regexp.Alpha} ");
+                obj.Name = Util.SanitizeInput(obj.Name, $"{App.Regexp.Alpha} ")!;
                 //Get Group
                 var dbApiGroup = db.ApiGroup.Where(gp => App.ActiveStatus.Contains(gp.Status) && gp.ParentId == obj.ParentId).ToList();
                 //Prevent Duplicate Name
@@ -266,7 +266,7 @@ namespace CRMApi.Repository
             try 
             {
                 //Sanitize Input
-                obj.Name = Util.SanitizeInput(obj.Name, $"{App.Regexp.Alpha} ");
+                obj.Name = Util.SanitizeInput(obj.Name, $"{App.Regexp.Alpha} ")!;
                 //Get Group
                 var dbApiGroup = db.ApiGroup.Where(gp => App.ActiveStatus.Contains(gp.Status)).ToList();
                 //Prevent Duplicate Name

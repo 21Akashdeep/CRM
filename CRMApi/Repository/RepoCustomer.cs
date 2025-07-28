@@ -7,9 +7,9 @@ namespace CRMApi.Repository
 {
     public class RepoCustomer
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
-        public RepoCustomer(DbCRM _db) 
+        public RepoCustomer(DBCRM _db) 
         {
             db = _db;
         }
@@ -156,7 +156,7 @@ namespace CRMApi.Repository
             try 
             {
                 //Get Company
-                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status) && pt.Id == User.CompanyId);
+                var objCompany = db.Company.FirstOrDefault(pt => App.ActiveStatus.Contains(pt.Status));
                 if (objCompany == null)
                 {
                     Message.Error(ref objMsg, "Customer Info did found");
@@ -236,8 +236,7 @@ namespace CRMApi.Repository
                     if (duplicate.Description == obj.Description)
                         Message.Duplicate(ref objMsg, $"Customer Description : {obj.Description} already exists.");
                     return objMsg;
-                } 
-                obj.CompanyId = User.CompanyId;
+                }                 
                 obj.CreatedBy = User.Id;
                 obj.UpdatedBy = User.Id;
                 db.Add(obj);
