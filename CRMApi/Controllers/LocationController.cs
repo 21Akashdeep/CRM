@@ -11,9 +11,9 @@ namespace CRMApi.Controllers
     [Authorize]
     public class LocationController : ControllerBase
     {
-        private readonly DbCRM db;
+        private readonly DBCRM db;
         private readonly RepoLocation RepoDept;
-        public LocationController(DbCRM _db)
+        public LocationController(DBCRM _db)
         {
             db = _db;
             RepoDept = new RepoLocation(db);
