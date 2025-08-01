@@ -8,6 +8,8 @@ namespace CRMApi.Models
         public string Code { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        public int LocationId { get; set; }
+        [NotMapped] public string LocationDesc { get; set; } = string.Empty;
         public string? CinNo { get; set; }
         public string GstNo { get; set; } = "URP";
         public string? PanNo { get; set; }
@@ -25,9 +27,7 @@ namespace CRMApi.Models
         public string? AccountNo { get; set; }
         public string? IfscCode { get; set; }
         public string? BankName { get; set; }
-        public string? BankAddress { get; set; }
-        public int CompanyId { get; set; } = 1;
-        [NotMapped] public string? CompanyDesc { get; set; }
+        public string? BankAddress { get; set; }        
         public int Status { get; set; } = 1;
         [NotMapped] public string StatusName { get; set; } = string.Empty;
         [NotMapped] public string StatusCss { get; set; } = string.Empty;

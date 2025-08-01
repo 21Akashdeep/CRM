@@ -25,6 +25,11 @@
                             <input type="text" id="Customer_Description" name="Description" autocomplete="off" class="form-control form-control-sm customer-required" maxlength="100" />
                         </div>
                         <div class="col-md-4">
+                            <label>Location<span class="text-mandatory">*</span></label>
+                            <select id="Customer_LocationId" name="LocationId" class="select-pick complaint-required" data-search='true' data-size="4" data-addFn="Location.fill" data-editFn="Location.edit">
+                            </select>
+                        </div>
+                        <div class="col-md-4">
                             <label>Cin No.</label>
                             <input type="text" id="Customer_CinNo" name="CinNo" autocomplete="off" class="form-control form-control-sm" maxlength="21" data-alpha-lg-num="true" />
                         </div>

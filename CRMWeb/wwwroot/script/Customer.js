@@ -4,6 +4,8 @@
         Customer.getViewOption((response) => {
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
             Dropdown.bind({ id: '#ListId', data: response.data.Customer, value: 'Id', text: 'Description', subText: "Code" });
+            Dropdown.bind({ id: '#ListLocationId', data: response.data.Location, value: 'Id', text: 'Description', subText: "Code" });
+
         });
         $('#btnSearch').on('click', () => {
             Customer.get({
@@ -80,6 +82,7 @@
             $('#Customer_SeqNo').val(0);
             Dropdown.bind({ id: '#Customer_CountryId', data: response.data.Country, value: 'Id', text: 'Description' });
             Dropdown.bind({ id: '#Customer_AdminDivId', data: response.data.AdminDiv, value: 'Id', text: 'Description' });
+            Dropdown.bind({ id: '#Customer_LocationId', data: response.data.Location, value: 'Id', text: 'Description' });
 
         });
     }
@@ -111,6 +114,7 @@
                         let title = action == 'Edit' ? `Customer / Edit (Code: ${obj.Code})` : `Customer / Add`;
                         Dropdown.bind({ id: '#Customer_CountryId', data: response.data.Country, value: 'Id', text: 'Description', subText: 'SubText' });
                         Dropdown.bind({ id: '#Customer_AdminDivId', data: response.data.AdminDiv, value: 'Id', text: 'Description' });
+                        Dropdown.bind({ id: '#Customer_LocationId', data: response.data.Location, value: 'Id', text: 'Description' });
                         Modal.open({ id: '#modalCustomer', title: title, action: action, obj: obj });
                         OnlineApi.pinCode({
                             pinCode: obj.PinCode,
@@ -149,6 +153,7 @@
             Modal.close({ id: "#modalCustomer" });
             Table.updateById({ id: "#tableCustomer", objId: response.obj.Id, obj: response.obj });
             Dropdown.bind({ id: '#ListId', data: response.data.Customer, value: 'Id', text: 'Description', subText: "Code" });
+
         }
     }
     static delete({ id }) {
@@ -228,6 +233,9 @@ window.tableCustomerAddress = (value, obj, index) => {
 };
 window.tableCustomerName = (value, obj, index) => {
     return obj.Name.match(/.{1,30}/g).join('<br>');;
+}
+window.tableCustomerLocation = (value, obj, index) => {
+    return obj.LocationDesc.match(/.{1,30}/g).join('<br>');;
 }
 window.tableCustomerDescription = (value, obj, index) => {
     return obj.Description.match(/.{1,30}/g).join('<br>');;

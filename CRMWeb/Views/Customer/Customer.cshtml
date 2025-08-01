@@ -10,14 +10,20 @@
     </div>
     <div class="card-body">
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-2">
                 <label>Status</label>
                 <select id="ListStatus" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="2" data-search="true" data-action="true" multiple>
                 </select>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-2">
                 <label>Customer</label>
                 <select id="ListId" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label>Location</label>
+                <select id="ListLocationId" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
                 </select>
             </div>
 
@@ -45,6 +51,7 @@
                             <th data-sortable="true" data-field="Code">Code</th>
                             <th data-sortable="true" data-formatter="tableCustomerName" class="text-nowrap">Name</th>
                             <th data-sortable="true" data-formatter="tableCustomerDescription" class="text-nowrap">Description</th>
+                            <th data-sortable="true" data-formatter="tableCustomerLocation">Location</th>
                             <th data-sortable="true" data-field="CinNo">CinNo</th>
                             <th data-sortable="true" data-field="GstNo">GstNo</th>
                             <th data-sortable="true" data-field="PanNo">PanNo</th>
@@ -67,8 +74,10 @@
 </div>
 <!-- Api Add Modal -->
 <partial name="CustomerAdd.cshtml" />
+<!-- Complaint Add Modal -->
+<partial name="../Location/LocationAdd.cshtml" />
 @section Scripts {
-
+    <script src="~/script/Location.js" asp-append-version="true"></script>
     <script src="~/script/Customer.js" asp-append-version="true"></script>
     <script type="text/javascript">
         $(()=> {

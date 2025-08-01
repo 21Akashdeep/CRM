@@ -49,7 +49,7 @@
     static initAdd() {
         $('#Location_btnSave').on('click', () => {
             if (!Field.isMandatory({ class: ".Location-required" })) {
-                return;
+                return; listid
             }
             let obj = Data.serializeToObject({ formId: "#formLocation" });
             if (!obj.Id) {

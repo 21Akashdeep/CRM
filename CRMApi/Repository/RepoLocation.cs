@@ -60,6 +60,7 @@ namespace CRMApi.Repository
                         Code = dpt.Code,
                         Name = dpt.Name,
                         Description = dpt.Description,
+                       
                         Status = dpt.Status,
                         StatusName = sts.Description,
                         StatusCss = sts.CssClass ?? "",

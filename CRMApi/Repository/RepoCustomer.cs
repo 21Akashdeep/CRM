@@ -35,7 +35,12 @@ namespace CRMApi.Repository
                     ag.Code,
                     ag.Name,
                     ag.Description,                    
-                }).ToList();                
+                }).ToList();
+                Option.Location = db.Location.Where(loc => App.ActiveStatus.Contains(loc.Status)).Select(loc => new
+                {
+                    loc.Id,
+                    loc.Description
+                }).ToList();
                 objMsg.data = Option;
                 Message.Success(ref objMsg, "Record found");
             }
@@ -67,6 +72,11 @@ namespace CRMApi.Repository
                     ag.AdminDivType,
                     ag.PostalType
                 }).ToList();
+                Option.Location = db.Location.Where(loc => App.ActiveStatus.Contains(loc.Status)).Select(loc => new
+                {
+                    loc.Id, 
+                    loc.Description
+                }).ToList();
                 objMsg.data = Option;
                 Message.Success(ref objMsg, "Record found");
             }
@@ -88,8 +98,8 @@ namespace CRMApi.Repository
             var Customer = (
                 from co in dbCustomer
                 join ad in db.AdminDiv on co.AdminDivId equals ad.Id
-                join cn in db.Country on co.CountryId equals cn.Id
-                join cm in db.Company on co.CompanyId equals cm.Id                
+                join cn in db.Country on co.CountryId equals cn.Id                
+                join Loc in db.Location on co.LocationId equals Loc.Id
                 join st in db.Setting on new { Value = co.Status.ToString(), Name = App.SettingName.Status } equals new { st.Value, st.Name }
                 join cb in db.User on co.CreatedBy equals cb.Id
                 join ub in db.User on co.UpdatedBy equals ub.Id
@@ -111,14 +121,14 @@ namespace CRMApi.Repository
                     AdminDivDesc = ad.Description,
                     CountryId = co.CountryId,                   
                     CountryDesc = cn.Description,
+                    LocationId = co.LocationId,
+                    LocationDesc = Loc.Description,
                     ContactNo = co.ContactNo,
                     Email = co.Email,
                     AccountNo = co.AccountNo,
                     IfscCode = co.IfscCode,
                     BankName = co.BankName,
-                    BankAddress = co.BankAddress,
-                    CompanyId = co.CompanyId,
-                    CompanyDesc = cm.Description,
+                    BankAddress = co.BankAddress,                    
                     Status = co.Status,
                     StatusName = st.Description,
                     StatusCss = st.CssClass ?? "",
@@ -303,7 +313,7 @@ namespace CRMApi.Repository
                 }
                 UpdateCustomer.Code = String.IsNullOrEmpty(obj.Code) ? UpdateCustomer.Code : obj.Code;
                 UpdateCustomer.Name = obj.Name;
-                UpdateCustomer.Description = obj.Description;
+                UpdateCustomer.Description = obj.Description;                
                 UpdateCustomer.CinNo = obj.CinNo;
                 UpdateCustomer.GstNo = obj.GstNo;
                 UpdateCustomer.PanNo = obj.PanNo;
@@ -320,7 +330,7 @@ namespace CRMApi.Repository
                 UpdateCustomer.IfscCode = obj.IfscCode;
                 UpdateCustomer.BankName = obj.BankName;
                 UpdateCustomer.BankAddress = obj.BankAddress;
-                UpdateCustomer.CountryId = obj.CountryId;
+                UpdateCustomer.LocationId = obj.LocationId;
                 UpdateCustomer.UpdatedBy = User.Id;
                 UpdateCustomer.UpdatedAt = DateTime.Now;
                 db.Update(UpdateCustomer);
