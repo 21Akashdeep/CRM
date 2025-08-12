@@ -4,12 +4,7 @@
         Customer.getViewOption((response) => {
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
             Dropdown.bind({ id: '#ListId', data: response.data.Customer, value: 'Id', text: 'Description', subText: "Code" });
-<<<<<<< HEAD
-            Dropdown.bind({ id: '#ListLocationId', data: response.data.Location, value: 'Id', text: 'Description', subText: "Code" });
-
-=======
             Dropdown.bind({ id: '#ListLocationId', data: response.data.Location, value: 'Id', text: 'Description' });
->>>>>>> 1244e7e3ecd33260659831764f77cd346f394e37
         });
         $('#btnSearch').on('click', () => {
             Customer.get({
@@ -156,7 +151,6 @@
             Modal.close({ id: "#modalCustomer" });
             Table.updateById({ id: "#tableCustomer", objId: response.obj.Id, obj: response.obj });
             Dropdown.bind({ id: '#ListId', data: response.data.Customer, value: 'Id', text: 'Description', subText: "Code" });
-
         }
     }
     static delete({ id }) {
@@ -236,9 +230,6 @@ window.tableCustomerAddress = (value, obj, index) => {
 };
 window.tableCustomerName = (value, obj, index) => {
     return obj.Name.match(/.{1,30}/g).join('<br>');;
-}
-window.tableCustomerLocation = (value, obj, index) => {
-    return obj.LocationDesc.match(/.{1,30}/g).join('<br>');;
 }
 window.tableCustomerDescription = (value, obj, index) => {
     return obj.Description.match(/.{1,30}/g).join('<br>');;
