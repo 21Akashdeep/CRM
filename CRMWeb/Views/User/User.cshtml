@@ -15,65 +15,69 @@
         </button>
     </div>
     <div class="card-body">
-        <div class="row">
-            <div class="col-md-2">
-                <label>Status</label>
-                <select id="ListStatus" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label>User Type</label>
-                <select id="ListUserType" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label>User Id</label>
-                <select id="ListId" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <div class="btn-group">
-                    <button type="button" id="btnSearch" class="btn btn-sm btn-filter btn-outline-success" title="Search">
-                        <span class="fa fa-search"></span>
-                    </button>
-                    <button type="button" id="btnPrint" class="btn btn-sm btn-filter btn-outline-secondary" title="Print">
-                        <span class="fa fa-print"></span>
-                    </button>
-                    <button type="button" id="btnExport" class="btn btn-sm btn-filter btn-outline-primary" title="Export To Excel">
-                        <span class="fa fa-file-excel"></span>
-                    </button>
+        <form autocomplete="off">
+            <div class="row">
+                <div class="col-md-2">
+                    <label>Status</label>
+                    <select id="ListStatus" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label>User Type</label>
+                    <select id="ListUserType" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label>User Id</label>
+                    <select id="ListId" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <div class="btn-group">
+                        <button type="button" id="btnSearch" class="btn btn-sm btn-filter btn-outline-success" title="Search">
+                            <span class="fa fa-search"></span>
+                        </button>
+                        <button type="button" id="btnPrint" class="btn btn-sm btn-filter btn-outline-secondary" title="Print">
+                            <span class="fa fa-print"></span>
+                        </button>
+                        <button type="button" id="btnExport" class="btn btn-sm btn-filter btn-outline-primary" title="Export To Excel">
+                            <span class="fa fa-file-excel"></span>
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-        <hr />
-        <div class="row">
-            <div class="col-md-12">
-                <table id="tableUser" class="table table-bordered table-hover table-default" border="1" data-sort-name="Id" data-unique-id="Id">
-                    <thead>
-                        <tr>
-                            <th data-sortable="true" data-field="UserId">User Id</th>                            
-                            <th data-sortable="true" data-field="UserTypeDesc">User Type</th>
-                            <th data-sortable="true" data-field="Name">Name</th>
-                            <th data-sortable="true" data-field="Code">Code</th>
-                            <th data-sortable="true" data-formatter="tableUserDateOfBirth">Date Of Birth</th>
-                            <th data-sortable="true" data-field="Gender">Gender</th>
-                            <th data-sortable="true" data-field="FatherName">Father's Name</th>
-                            <th data-sortable="true" data-field="DepartmentDesc">Department</th>
-                            <th data-sortable="true" data-field="DesignationDesc">Designation</th>
-                            <th data-sortable="true" data-field="ContactNo" class="text-nowrap">Contact No.</th>
-                            <th data-sortable="true" data-formatter="tableUserEmail">Email</th>                 
-                            <th data-sortable="true" data-formatter="tableUserPasswordExpiredAt" class="text-nowrap">Expired At</th>
-                            <th data-sortable="true" data-field="Theme" class="text-nowrap">Theme</th>
-                            <th data-sortable="true" data-formatter="tableUserCreatedByAndAt" class="text-nowrap">Created By & At</th>
-                            <th data-sortable="true" data-formatter="tableUserUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
-                            <th data-formatter="tableUserStatus" class="Status text-center right-fix-2">Status</th>
-                            <th data-formatter="tableUserAction" data-events="tableUserActionEvent" class="not-print text-center right-fix"><i class="fa-solid fa-list-check"></i></th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+            <hr />
+            <div class="row">
+                <div class="col-md-12">
+                    <table id="tableUser" class="table table-bordered table-hover table-default" border="1" data-sort-name="Id" data-unique-id="Id">
+                        <thead>
+                            <tr>
+                                <th data-sortable="true" data-field="UserId">User Id</th>
+                                <th data-sortable="true" data-field="UserTypeDesc">User Type</th>
+                                <th data-sortable="true" data-field="Name">Name</th>
+                                <th data-sortable="true" data-field="Code">Code</th>
+                                <th data-sortable="true" data-formatter="tableUserDateOfBirth">Date Of Birth</th>
+                                <th data-sortable="true" data-field="Gender">Gender</th>
+                                <th data-sortable="true" data-field="FatherName">Father's Name</th>
+                                <th data-sortable="true" data-field="DepartmentDesc">Department</th>
+                                <th data-sortable="true" data-field="DesignationDesc">Designation</th>
+                                <th data-sortable="true" data-field="ContactNo" class="text-nowrap">Contact No.</th>
+                                <th data-sortable="true" data-formatter="tableUserEmail">Email</th>
+                                <th data-sortable="true" data-formatter="tableUserPasswordExpiredAt" class="text-nowrap">Expired At</th>
+                                <th data-sortable="true" data-field="Theme" class="text-nowrap">Theme</th>
+                                <th data-sortable="true" data-formatter="tableUserCreatedByAndAt" class="text-nowrap">Created By & At</th>
+                                <th data-sortable="true" data-formatter="tableUserUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
+                                <th data-formatter="tableUserStatus" class="Status text-center right-fix-2">Status</th>
+                                <th data-formatter="tableUserAction" data-events="tableUserActionEvent" class="not-print text-center right-fix">
+                                    <i class="fa-solid fa-list-check"></i>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 <div id="modalUser" class="modal fade" data-bs-backdrop="static" tabindex="-1">
@@ -175,7 +179,7 @@
                                 </thead>
                                 <tbody></tbody>
                             </table>
-                        </div>                        
+                        </div>
                     </div>
                     <hr />
                     <div class="row">

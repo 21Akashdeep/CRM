@@ -72,6 +72,7 @@
         public int PartialCompleted { get; set; }
         public int Verified { get; set; }
         public int UnVerified { get; set; }
+        public int RequestForClose { get; set; }
     }
     public class Request
     {

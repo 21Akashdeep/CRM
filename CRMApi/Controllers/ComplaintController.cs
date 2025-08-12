@@ -50,7 +50,6 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
-        
         [HttpPost]
         public async Task<IActionResult> Get(Complaint obj)
         {

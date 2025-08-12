@@ -9,9 +9,7 @@ namespace CRMApi.Models
         public int RefId { get; set; }
         public string RefNo { get; set; } = string.Empty;
         public string OtpNo { get; set; } = string.Empty;
-        public DateTime Expiry { get; set; } = DateTime.Now;
-        public int CompanyId { get; set; }
-        [NotMapped] public string? CompanyDesc { get; set; }
+        public DateTime Expiry { get; set; } = DateTime.Now;        
         public int Status { get; set; }
         [NotMapped] public string StatusDesc { get; set; } = string.Empty;
         [NotMapped] public string? StatusCss { get; set; }

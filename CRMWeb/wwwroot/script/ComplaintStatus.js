@@ -135,11 +135,16 @@ window.tableComplaintSlNo = (value, obj, index) => {
     return index + 1;
 }
 window.tableComplaintInfo = (value, obj, index) => {
+    let labelStyle = "width:100px; font-weight: bold;";
     return `
-        <div>${moment(obj.Date).format('DD-MMM-YYYY')}, ${obj.Code}</div>
-        <div class="fw-bold">Customer</div>
-        <div>${obj.CustomerDesc.match(/.{1,50}/g).join('<br>')}</div>
-        <div>${obj.CustomerAddress.match(/.{1,50}/g).join('<br>')}</div>
+        <div><label style="${labelStyle}">Date</label> <b>:</b> ${moment(obj.Date).format('DD-MMM-YYYY')}</div>
+        <div><label style="${labelStyle}">Ticket No.</label> <b>:</b> ${obj.Code}</div>
+        <div><label style="${labelStyle}">Customer</label> <b>:</b> ${obj.CustomerDesc.match(/.{1,50}/g).join('<br>')}</div>
+        <div><label style="${labelStyle}">Department</label> <b>:</b> ${obj.Department}</div>
+        <div><label style="${labelStyle}">Location</label> <b>:</b> ${obj.CustomerLocation}</div>
+        <div><label style="${labelStyle}">Contact Person</label> <b>:</b> ${obj.ContactPerson}</div>
+        <div><label style="${labelStyle}">Contact No.</label> <b>:</b> ${obj.ContactNo}</div>
+        <div><label style="${labelStyle}">Email</label> <b>:</b> ${obj.Email}</div>
         <div class="fw-bold">Problem</div>
         <div>${obj.Problem.match(/.{1,50}/g).join('<br>')}</div>
     `;
@@ -148,23 +153,26 @@ window.tableComplaintStatus = (value, obj, index) => {
     return `<div class="${obj.StatusCss}">${obj.StatusDesc}</div>`;
 }
 window.tableComplaintAction = (value, obj, index) => {
-    let actionBtn = `
+    let actionBtn = [];
+    if (obj.IsAddStatus) {
+        actionBtn.push(`
+            <li>
+                <a href="#" class="dropdown-item text-success btn-new-entry" title="New Entry(Add Status)">
+                    <span class="fa fa-plus"></span>&nbsp;&nbsp;Add Status
+                </a>
+            </li>
+        `);
+    }
+    return `
         <div class="btn-group dropstart">
-            <button class="btn btn-sm border-0" data-bs-toggle="dropdown">
+            <button type="button" class="btn btn-sm border-0" data-bs-toggle="dropdown">
                 <i class="fa fa-ellipsis-v"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-lg-end mt-4">
-                ${obj.IsAddStatus ? `
-                    <li>
-                        <a href="#" class="dropdown-item text-success btn-new-entry" title="New Entry(Add Status)">
-                            <span class="fa fa-plus"></span>&nbsp;&nbsp;Add Status
-                        </a>
-                    </li>` : ``
-                }                                              
+                ${actionBtn.join('')}
             </ul>
         </div>
-    `;
-    return actionBtn;
+    `;     
 }
 window.tableComplaintActionEvent = {
     'click .btn-new-entry': (e, value, obj, row) => {

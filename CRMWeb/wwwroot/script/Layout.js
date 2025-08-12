@@ -118,8 +118,8 @@ class Layout {
                             Modal.close({ id: '#modalEditProfile' });
                             let obj = response.data;
                             SessionStorage.set('User', JSON.stringify(obj.User));
-                            SessionStorage.set('Api', JSON.stringify(obj.AppMenu));
-                            SessionStorage.set('Menu', Data.menuHtmlString(obj.AppMenu));                            
+                            SessionStorage.set('Api', JSON.stringify(obj.UserApi));
+                            SessionStorage.set('Menu', Data.menuHtmlString(obj.UserMenu));
                             SessionStorage.set('Company', JSON.stringify(obj.Company));
                             location.reload();
                         }

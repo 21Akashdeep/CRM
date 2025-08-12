@@ -2,7 +2,7 @@
     Setting: sessionStorage.getItem('Setting') ? JSON.parse(sessionStorage.getItem('Setting')) : null,
     User: sessionStorage.getItem('User') ? JSON.parse(sessionStorage.getItem('User')) : null,
     Menu: sessionStorage.getItem('Menu') ? sessionStorage.getItem('Menu') : '',
-    Api: sessionStorage.getItem('Api') ? sessionStorage.getItem('Api') : [],
+    Api: sessionStorage.getItem('Api') ? JSON.parse(sessionStorage.getItem('Api')) : [],
     Company: sessionStorage.getItem('Company') ? JSON.parse(sessionStorage.getItem('Company')) : null,
     Info: { Code: "CRM", Name: "CRM PORTAL", Desc: "CRM Portal", SubDesc: "Sign In", CountryId: 112 }
 }
@@ -97,7 +97,7 @@ const Util = {
 
 const Url = {
     App: window.location.origin,
-    Api: "http://localhost:5139/api/",
+    Api: "http://localhost:15282/api/",
     /*Api: "https://pcatscrmapi.dharunam.in/api/",*/
     get() {
         const params = new URLSearchParams(window.location.search);
@@ -1947,7 +1947,7 @@ const Table = {
                     showfooter: showfooter,
                     trimOnSearch: false,
                     detailView: detailFormatter != null ? true : false,
-                    detailFormatter: detailFormatter,
+                    detailFormatter: detailFormatter,                    
                 });
             }
         }
@@ -2044,7 +2044,7 @@ const Table = {
             style.push(".not-print{display:none;}");
             style.push("td.td-num{text-align:right;}");
             Print.table({ title: printTitle, style: style, content: htmlString, orientation: 'A4 landscape', print: false, tableId: '#tableSubGroup' });
-        }
+        }         
         //Note work on search input. for content
         $(id).on('search.bs.table', function (e, arg1, arg2) {
             //Toggle Style Reset
@@ -2074,8 +2074,14 @@ const Table = {
     empty({ selector = '.table-default'}) {
         $(selector).attr('data-trim-on-search', false);
         $(selector).bootstrapTable('destroy');
-        $(selector).bootstrapTable();
-
+        $(selector).bootstrapTable();        
+        //setTimeout(() => {
+        //    $('.fixed-table-toolbar input[type="search"]')
+        //    .attr('autocomplete', 'off')
+        //    .prop('autofocus', false)
+        //    .blur();
+        //    $(selector).bootstrapTable('resetSearch');
+        //}, 100);
         if ($(selector).attr('data-table-height')) {
             $(selector).parent().css({
                 "height": $(selector).attr('data-table-height'),
