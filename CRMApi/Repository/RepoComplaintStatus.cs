@@ -1,8 +1,5 @@
 ﻿using CRMApi.Models;
 using CRMApi.Services;
-using DocumentFormat.OpenXml.Drawing;
-using DocumentFormat.OpenXml.Office2016.Presentation.Command;
-using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.EntityFrameworkCore;
 using System.Dynamic;
 using System.Net.Mail;
@@ -13,9 +10,11 @@ namespace CRMApi.Repository
     {
         private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
+        private RepoComplaint RepoComplaint;
         public RepoComplaintStatus(DBCRM _db)
         {
             db = _db;
+            RepoComplaint = new RepoComplaint(db);
         }
         public async Task<Message> GetViewOptionAsync()
         {
@@ -23,13 +22,12 @@ namespace CRMApi.Repository
             try
             {
                 dynamic Option = new ExpandoObject();
-                var ListStatus = new List<int>() { App.Status.Scheduled, App.Status.Processing, App.Status.Completed };
+                var ListStatus = new List<int>() { App.Status.Pending, App.Status.Processing, App.Status.RequestForClose, App.Status.Completed };
                 Option.Status = await db.Setting.Where(x => x.Name == App.SettingName.Status && ListStatus.Select(value => value.ToString()).Contains(x.Value)).Select(x => new
                 {
                     x.Value,
                     x.Description
-                }).ToListAsync();
-
+                }).ToListAsync();                
                 Option.Complaint = await db.Complaint.Where(x => ListStatus.Contains(x.Status)).Select(x => new
                 {
                     ComplaintId = x.Id,
@@ -50,7 +48,7 @@ namespace CRMApi.Repository
             try
             {
                 dynamic Option = new ExpandoObject();
-                var ListStatus = new List<int>() { App.Status.Processing, App.Status.Completed };
+                var ListStatus = new List<int>() { App.Status.Processing, App.Status.RequestForClose, App.Status.Completed };
                 Option.Status = await db.Setting.Where(x => x.Name == App.SettingName.Status && ListStatus.Select(value => value.ToString()).Contains(x.Value)).Select(x => new
                 {
                     x.Value,
@@ -108,15 +106,15 @@ namespace CRMApi.Repository
             Message objMsg = new Message();
             try
             {
-                var Complaint = await new RepoComplaint(db).ListAsync(new Complaint
+                var Complaint = await RepoComplaint.ListAsync(new Complaint
                 {
                     ListId = obj.ListComplaintId,
                     FromDate = obj.FromDate,
                     ToDate = obj.ToDate,
-                    ListStatus = obj.ListStatus.Any() ? obj.ListStatus : new List<int> { App.Status.Scheduled, App.Status.Processing }
+                    ListStatus = obj.ListStatus.Any() ? obj.ListStatus : new List<int> { App.Status.Pending, App.Status.Processing },
+                    ListAssignTo = App.ByPassUserType.Contains(User.UserType) ? new List<int>() : new List<int> { User.Id }
                 }, User);
-                List<int> ListAssignTo = App.ByPassUserType.Contains(User.UserType) ? new List<int>() : new List<int> { User.Id };
-                objMsg.data = ListAssignTo.Any() ? Complaint.Where(x => x.AssignTo.Any(x1 => ListAssignTo.Contains(x1.AssignTo))).ToList() : Complaint;
+                objMsg.data = Complaint;
                 Message.Get(ref objMsg, "");
             }
             catch (Exception ex)
@@ -175,33 +173,64 @@ namespace CRMApi.Repository
                 dbComplaint.UpdatedAt = DateTime.Now;
                 db.Update(dbComplaint);
 
-                //Update Complaint Status                
+                //Add Complaint Status                
                 obj.CreatedBy = User.Id;
                 obj.CreatedAt = DateTime.Now;
                 obj.UpdatedBy = User.Id;
                 obj.UpdatedAt = DateTime.Now;
                 db.Add(obj);
                 
-                int isSaved = await db.SaveChangesAsync();
-                
-                Message.Add(ref objMsg, isSaved, "");
+                Message.Add(ref objMsg, (await db.SaveChangesAsync()), "");
                 
                 if (objMsg.status == Message.Type.success)
                 {
-                    obj.ListId.Add(obj.Id);
-                    var ComplaintStatus = await ListAsync(obj, User);                    
-                    var Complaint = await new RepoComplaint(db).ListAsync(new Complaint
+                    obj.ListId.Add(obj.Id);                    
+                    objMsg.data = new
                     {
-                        ListId = new List<int> { obj.ComplaintId },
-                        ListStatus = new List<int> { App.Status.Scheduled, App.Status.Processing, App.Status.Completed }
-                    }, User);
-                    dynamic data = new ExpandoObject();
-                    data.ComplaintStatus = ComplaintStatus;
-                    data.Complaint = Complaint.FirstOrDefault();
-                    objMsg.data = data;
+                        ComplaintStatus = (await ListAsync(obj, User)),
+                        Complaint = (await GetComplaintAsync(obj, User))
+                    };
+                    obj.StatusDesc = (await db.Setting.FirstOrDefaultAsync(x => App.ActiveStatus.Contains(x.Status) && x.Name == App.SettingName.Status && x.Value == obj.Status.ToString()))?.Description ?? "";
+                    Message objEmailMsg = await NotifyStatusViaEmail(obj);
+                    objMsg.status = objEmailMsg.status == Message.Type.success ? objMsg.status : Message.Type.warning;
+                    objMsg.statusText += $"<br>{objEmailMsg.statusText}";
                 }
             }
             catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+        public async Task<Message> NotifyStatusViaEmail(ComplaintStatus obj) 
+        {
+            Message objMsg = new Message();
+            try 
+            {
+                var Complaint = await db.Complaint.FirstOrDefaultAsync(x => x.Id == obj.ComplaintId);
+                if (Complaint == null) 
+                {
+                    Message.Error(ref objMsg, "Complaint did not find for notify.");
+                    return objMsg;
+                }
+                var User = await db.User.FirstOrDefaultAsync(x => x.Id == Complaint.CreatedBy);
+                if (User == null) 
+                {
+                    Message.Error(ref objMsg, "Complint logger email did not find for notify.");
+                    return objMsg;
+                }
+                MailMessage objMail = new MailMessage();
+                objMail.To.Add(Complaint.Email);
+                objMail.To.Add(User.Email);
+                string EmailBody = $@"                        
+                    <p>Complaint No. <strong>{Complaint.Code}</strong> has been updated with status <strong>{obj.StatusDesc}</strong>.</p>
+                    <p>Remarks: {obj.Remarks}</p>
+                ";
+                string ColorType = obj.Status == App.Status.Completed ? "success" : "warning";
+                Util.SentMail(db, objMail, "Complaint Status Update", EmailBody, ColorType, ref objMsg);
+                Message.Success(ref objMsg, "Email notification has been sent.");
+            }
+            catch (Exception ex) 
             {
                 Message.Exception(ref objMsg, ex);
             }

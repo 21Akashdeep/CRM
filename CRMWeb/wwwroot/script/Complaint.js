@@ -1,5 +1,5 @@
 ﻿class Complaint {    
-    static init() {
+    static init() {        
         Complaint.getViewOption({
             onSuccess: (response) => {
                 Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
@@ -31,7 +31,7 @@
                 }
             });
         });
-        $('#btnAdd').on('click', () => {
+        $('#btnNewEntry').on('click', () => {
             Complaint.newEntry();
         });
         Complaint.initAdd();
@@ -97,7 +97,13 @@
             $('#Complaint_ContactNo').val(obj.ContactNo);
             $('#Complaint_Email').val(obj.Email);
             Field.triggerOnInput('#Complaint_Address1, #Complaint_PostOffice, #Complaint_District');
-            Field.triggerOnChange('#Complaint_AdminDivId, #Complaint_CountryId');
+            Field.triggerOnChange('#Complaint_AdminDivId, #Complaint_CountryId');                
+            Complaint.getAddOption({
+                obj: { CustomerId: obj.Id },
+                onSuccess: (response) => {
+                    Table.add({ id: '#tableComplaintAssign', data: response.data.ComplaintAssing });
+                }
+            });
         });
         $('#Complaint_PinCode').on('input', () => {            
             let PinCode = $('#Complaint_PinCode').val();
@@ -134,31 +140,18 @@
             if (!Field.isMandatory({ class: '.complaint-required' })) {
                 return;
             }
-            let obj = Data.serializeToObject({ formId: '#formComplaint' });                      
-            if (obj.ForwardTo) {
-                Message.confirm({
-                    msg: 'Do you want save & Assign to supervisor.',
-                    confirmButtonText: 'Save',
-                    denyButtonText: "Don't Save",
-                    data: obj,
-                    onConfirm: (obj) => {
-                        if (!obj.Id) {
-                            Complaint.add(obj);
-                        }
-                        else {
-                            Complaint.update(obj);
-                        }
-                    }
-                });
+            let obj = Data.serializeToObject({ formId: '#formComplaint' });
+            obj.ComplaintAssign = $('#tableComplaintAssign').bootstrapTable('getData').filter(x => x.IsAdded);
+            if (obj.ComplaintAssign.length == 0) {
+                Message.error({ statusText: "Assing Complaint to atleast one person." });
+                return;
+            }
+            if (!obj.Id) {
+                Complaint.add(obj);
             }
             else {
-                if (!obj.Id) {
-                    Complaint.add(obj);
-                }
-                else {
-                    Complaint.update(obj);
-                }
-            }            
+                Complaint.update(obj);
+            }         
         });
     }
     static getAddOption({ obj = {}, onSuccess }) {
@@ -172,11 +165,10 @@
                 Dropdown.bind({ id: '#Complaint_CustomerId', data: response.data.Customer, value: 'Id', text: 'Description', json: true });
                 Dropdown.bind({ id: '#Complaint_AdminDivId', data: response.data.AdminDiv, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#Complaint_CountryId', data: response.data.Country, value: 'Id', text: 'Description', initialValue: [App.Info.CountryId] });
-                Dropdown.bind({ id: '#Complaint_DepartmentId', data: response.data.Department, value: 'Id', text: 'Description' });
-                Dropdown.bind({ id: '#Complaint_ForwardTo', data: response.data.ForwardTo, value: 'Id', text: 'Name', subText: 'SubText' });
+                Dropdown.bind({ id: '#Complaint_Department', data: response.data.Department, value: 'Value', text: 'Description', isEditable: true });
                 Dropdown.bind({ id: '#Complaint_Priority', data: response.data.Priority, value: 'Id', text: 'Description' });                
             }
-        });        
+        });
     }    
     static add(obj) {
         Data.post({
@@ -197,14 +189,13 @@
             url: `Complaint/Edit?Id=${id}`,
             onSuccess: (response) => {                
                 //Bind Option
-                let Option = response.data;                
+                let Option = response.data;
                 Dropdown.bind({ id: '#Complaint_SupportMode', data: Option.SupportMode, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#Complaint_CustomerId', data: Option.Customer, value: 'Id', text: 'Description', json: true });
                 Dropdown.bind({ id: '#Complaint_AdminDivId', data: Option.AdminDiv, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#Complaint_CountryId', data: Option.Country, value: 'Id', text: 'Description', initialValue: [App.Info.CountryId] });
-                Dropdown.bind({ id: '#Complaint_DepartmentId', data: Option.Department, value: 'Id', text: 'Description' });
-                Dropdown.bind({ id: '#Complaint_Priority', data: Option.Priority, value: 'Id', text: 'Description' });
-                Dropdown.bind({ id: '#Complaint_ForwardTo', data: Option.ForwardTo, value: 'Id', text: 'Name', subText: 'SubText' });                
+                Dropdown.bind({ id: '#Complaint_Department', data: Option.Department, value: 'Value', text: 'Description', isEditable: true });
+                Dropdown.bind({ id: '#Complaint_Priority', data: Option.Priority, value: 'Id', text: 'Description' });                
                 //Assing Value in Form
                 let obj = response.obj;                
                 obj.Id = action == "Edit" ? obj.Id : null;                
@@ -224,6 +215,7 @@
                         loader: true
                     });
                 }, 100);                
+                Table.add({ id: '#tableComplaintAssign', data: response.data.ComplaintAssing });
             }
         });
     }
@@ -280,47 +272,7 @@
                 });
             }
         });        
-    }    
-    static detailedView({ id, index }) {
-        Data.get({
-            url: `Complaint/GetDetailedView?Id=${id}`,
-            onSuccess: (response) => {                
-                if (response.status == Message.Type.success) {
-                    Modal.open({ id: '#modalComplaintDetailedView', title: 'Complaint / Detailed View', action: 'view' });
-                    let Complaint = response.obj.Complaint;
-                    $('#tableComplaintDetailedView tbody tr td').each(function () {
-                        let id = $(this).attr('id');
-                        if (id) {
-                            let value = Complaint[id.replace('Complaint-', '')];
-                            if (!value) {
-                                value = '-';
-                            }
-                            else if (id == 'Complaint-AssignTo') {
-                                value = Complaint.AssignTo.map(x => x.AssignToName).join(', ');
-                            }
-                            else if (DateTime.isValid(value)) {
-                                value = moment(value).format('DD-MMM-YYYY HH:mm');
-                            }
-                            $(this).html(`<b>:</b>&nbsp;&nbsp;${value}`);
-                        }
-                    });
-                    Table.add({ id: '#tableComplaintStatus', data: response.obj.ComplaintStatus });
-                    Table.add({ id: '#tableComplaintItem', data: response.obj.ComplaintItem });
-                }
-                else {
-                    Message.show(response);
-                }
-            }
-        });
-    }
-    static printDetailedView({ id, index }) {
-        Data.get({
-            url: `Complaint/PrintDetailedView?Id=${id}`,
-            onSuccess: (response) => {
-                console.log(response.obj);
-            }
-        });
-    }
+    }       
 }
 //Complaint
 window.tableComplaintSlNo = (value, obj, index) => {
@@ -331,14 +283,13 @@ window.tableComplaintDate = (value, obj, index) => {
 }
 window.tableComplaintCustomerDesc = (value, obj, index) => {    
     return `
-        <div class="fw-bold">${obj.CustomerDesc.match(/.{1,40}/g).join('<br>')}</div>
-        <div>${obj.CustomerAddress.match(/.{1,40}/g).join('<br>')}</div>         
+        <div class="fw-bold text-truncate ch-40" title="${obj.CustomerDesc}">${obj.CustomerDesc}</div>
+        <div class="fw-bold text-truncate ch-40" title="Location : ${obj.CustomerLocation}, Contact Person : ${obj.ContactPerson}, Department : ${obj.Department}">
+        ${obj.CustomerLocation}, ${obj.ContactPerson}, ${obj.Department}</div>
+        <div class="text-truncate ch-40" title="${obj.CustomerAddress}">${obj.CustomerAddress.trim()}</div>
     `;
 }
-window.tableComplaintAssingTo = (value, obj, index) => {
-    return obj.AssignTo.length > 0 ? obj.AssignTo.map(x => x.AssignToName).join('<br>') : '-';
-}
-window.tableComplaintCustomerProblem = (value, obj, index) => {
+window.tableComplaintProblem = (value, obj, index) => {    
     return `<div>${Field.isNullOrEmpty(obj.Problem) ? '-' : obj.Problem.match(/.{1,50}/g).join('<br>')}</div >`;
 }
 window.tableComplaintStatus = (value, obj, index) => {
@@ -353,51 +304,53 @@ window.tableComplaintUpdatedByAndAt = (value, obj, index) => {
             <div>${moment(obj.UpdatedAt).format('DD-MMM-YYYY HH:mm:ss')}</div>`;
 }
 window.tableComplaintAction = (value, obj, index) => {
-    let actionBtn = `
+    let actionBtn = [];
+    if (obj.IsEdit) {
+        actionBtn.push(`
+            <li>
+                <a href="#" class="dropdown-item text-success btn-edit" title="View / Edit">
+                    <span class="fa fa-edit"></span>&nbsp;&nbsp;View / Edit
+                </a>
+            </li>`
+        );
+    }
+    if (obj.IsDuplicate) {
+        actionBtn.push(`
+             <li>
+                <a href="#" class="dropdown-item text-primary btn-duplicate" title="Duplicate">
+                    <span class="fa fa-copy"></span>&nbsp;&nbsp;Duplicate
+                </a>
+            </li>
+        `);
+    }
+    if (obj.IsDelete) {
+        actionBtn.push(`
+            <li>
+                <a href="#" class="dropdown-item text-danger btn-delete" title="Delete">
+                    <span class="fa fa-trash"></span>&nbsp;&nbsp;Delete
+                </a>
+            </li>
+        `);
+    }
+    if (obj.IsEnable) {
+        actionBtn.push(`
+            <li>
+                <a href="#" class="dropdown-item text-success btn-enable" title="Enable">
+                    <span class="fa fa-toggle-on"></span>&nbsp;&nbsp;Enable
+                </a>
+            </li>
+        `);
+    }
+    return `
         <div class="btn-group dropstart">
-            <button class="btn btn-sm border-0" data-bs-toggle="dropdown">
+            <button type="button" class="btn btn-sm border-0" data-bs-toggle="dropdown">
                 <i class="fa fa-ellipsis-v"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-lg-end mt-4">
-                ${obj.IsEdit ? `
-                    <li>
-                        <a href="#" class="dropdown-item text-success btn-edit" title="View / Edit">
-                            <span class="fa fa-edit"></span>&nbsp;&nbsp;View / Edit
-                        </a>
-                    </li>` : ``
-                }
-                ${obj.IsDuplicate ? `
-                    <li>
-                        <a href="#" class="dropdown-item text-primary btn-duplicate" title="Duplicate">
-                            <span class="fa fa-copy"></span>&nbsp;&nbsp;Duplicate
-                        </a>
-                    </li>` : ``
-                }
-                ${obj.IsDelete ? `
-                    <li>
-                        <a href="#" class="dropdown-item text-danger btn-delete" title="Delete">
-                            <span class="fa fa-trash"></span>&nbsp;&nbsp;Delete
-                        </a>
-                    </li>` : ``
-                }
-                ${obj.IsDetailedView ? `
-                    <li>
-                        <a href="#" class="dropdown-item text-success btn-detailed-view" title="Detailed View">
-                            <span class="fa fa-list"></span>&nbsp;&nbsp;Detailed View
-                        </a>
-                    </li>` : ``
-                }
-                ${obj.IsEnable ? `
-                    <li>
-                        <a href="#" class="dropdown-item text-success btn-enable" title="Enable">
-                            <span class="fa fa-toggle-on"></span>&nbsp;&nbsp;Enable
-                        </a>
-                    </li>` : ``
-                }                
+                ${actionBtn.join('')}
             </ul>
         </div>
-    `;
-    return actionBtn;
+    `;    
 }
 window.tableComplaintActionEvent = {
     'click .btn-edit': (e, value, obj, index) => {
@@ -414,23 +367,19 @@ window.tableComplaintActionEvent = {
     }
 }
 
-//Complaint Status
-window.tableComplaintStatusSlNo = (value, obj, index) => {
-    return index + 1;
+
+//Complaint Assing
+window.tableComplaintAssignCheck = (value, obj, index) => {
+    let checkBox = [];
+    checkBox.push('<div class="form-switch" style="min-height:auto!important;">');
+    checkBox.push('<input class="form-check-input is-location-checked" type="checkbox" id="IsLocationChecked_' + index + '"');
+    checkBox.push(obj.IsAdded ? ' checked/>' : '/>');
+    checkBox.push('</div>');
+    return checkBox.join('');
 }
-window.tableComplaintStatusLogByAndAt = (value, obj, index) => {
-    return `
-        <div>${obj.CreatedByName}</div>
-        <div>${moment(obj.CreatedAt).format('DD-MMM-YYYY')}</div>
-    `;
-}
-//Complaint Item
-window.tableComplaintItemSlNo = (value, obj, index) => {
-    return index + 1;
-}
-window.tableComplaintItemLogByAndAt = (value, obj, index) => {
-    return `
-        <div>${obj.CreatedByName}</div>
-        <div>${moment(obj.CreatedAt).format('DD-MMM-YYYY')}</div>
-    `;
+window.tableComplaintAssignCheckEvent = {
+    'change .is-location-checked': (e, value, obj, index) => {
+        obj.IsAdded = $(e.target).is(':Checked') ? true : false;
+        Table.updateByIndex({ id: '#tableComplaintAssign', index: index, obj: obj, toggle: true });
+    }
 }

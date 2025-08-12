@@ -22,20 +22,17 @@ namespace CRMApi.Models
         public int CountryId { get; set; }
         [NotMapped] public string? CountryDesc { get; set; }
         [NotMapped] public string? CustomerAddress { get; set; }
-        public string? ContactNo { get; set; }
-        public string? Email { get; set; }
-        public int DepartmentId { get; set; }
-        [NotMapped] public string? DepartmentDesc { get; set; }
-        public int? ForwardTo { get; set; }        
-        [NotMapped] public string? ForwardToName { get; set; }
+        [NotMapped] public string? CustomerLocation { get; set; }
+        public string ContactPerson { get; set; } = string.Empty;
+        public string ContactNo { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Department { get; set; } = string.Empty;                      
         public int Priority { get; set; }
         [NotMapped] public string? PriorityDesc { get; set; }
         public string Problem { get; set; } = string.Empty;
         public DateTime? StartDateTime { get; set; }
         public DateTime? EndDateTime { get; set; }
-        public DateTime? CompletedDateTime { get; set; }
-        public int CompanyId { get; set; }
-        [NotMapped] public string? CompanyDesc { get; set; }
+        public DateTime? CompletedDateTime { get; set; }        
         public int Status { get; set; } = 1;
         [NotMapped] public string StatusDesc { get; set; } = string.Empty;
         [NotMapped] public string? StatusCss { get; set; }
@@ -45,7 +42,7 @@ namespace CRMApi.Models
         public int UpdatedBy { get; set; }
         [NotMapped] public string UpdatedByName { get; set; } = string.Empty;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
-        [NotMapped] public List<ComplaintAssign> AssignTo { get; set; } = new List<ComplaintAssign>();
+        public List<ComplaintAssign> ComplaintAssign { get; set; } = new List<ComplaintAssign>();
         [NotMapped] public bool IsEdit { get; set; } = false;
         [NotMapped] public bool IsDelete { get; set; } = false;
         [NotMapped] public bool IsEnable { get; set; } = false;
@@ -57,10 +54,9 @@ namespace CRMApi.Models
         [NotMapped] public DateTime ToDate { get; set; }        
         [NotMapped] public List<int> ListId { get; set; } = new List<int>();
         [NotMapped] public List<string> ListSupportMode { get; set; } = new List<string>();        
-        [NotMapped] public List<int> ListCustomerId { get; set; } = new List<int>();
-        [NotMapped] public List<int> ListDeparmentId { get; set; } = new List<int>();
-        [NotMapped] public List<int> ListPriority { get; set; } = new List<int>();
-        [NotMapped] public List<int> ListForwardTo { get; set; } = new List<int>();        
-        [NotMapped] public List<int> ListStatus { get; set; } = new List<int>();        
+        [NotMapped] public List<int> ListCustomerId { get; set; } = new List<int>();        
+        [NotMapped] public List<int> ListPriority { get; set; } = new List<int>();        
+        [NotMapped] public List<int> ListStatus { get; set; } = new List<int>();
+        [NotMapped] public List<int> ListAssignTo { get; set; } = new List<int>();
     }
 }

@@ -664,17 +664,25 @@ namespace CRMApi.Repository
                 Message.Exception(ref objMsg, ex);
             }
             return objMsg;
-        }
-        public async Task<Message> AppMenu(User obj) 
+        }        
+        public async Task<Message> UserInfo(User obj)
         {
             Message objMsg = new Message();
-            try 
-            {                                
-                var dbUserApi = await (
+            try
+            {                
+                var User = new
+                {
+                    obj.Name,
+                    Type = obj.UserType,
+                    obj.Theme,
+                    AuthToken = Util.CreateJwtToken(obj),                                        
+                };
+
+                var UserApi = await (
                     from ape in db.UserApi
                     join api in db.Api on ape.ApiId equals api.Id
                     join apg in db.ApiGroup on api.ApiGroupId equals apg.Id
-                    where api.ApiType == obj.ApiType && ape.UserId == obj.Id && App.ActiveStatus.Contains(ape.Status) && App.ActiveStatus.Contains(api.Status) 
+                    where api.ApiType == obj.ApiType && ape.UserId == obj.Id && App.ActiveStatus.Contains(ape.Status) && App.ActiveStatus.Contains(api.Status)
                     select new
                     {
                         ape.ApiId,
@@ -698,8 +706,8 @@ namespace CRMApi.Repository
                         ape.Export,
                     }
                 ).ToListAsync();
-                
-                objMsg.data = dbUserApi.OrderBy(ape => ape.ApiGroupSeqNo).Where(ape => ape.ApiGroupParentId == 0)
+
+                var UserMenu = UserApi.OrderBy(ape => ape.ApiGroupSeqNo).Where(ape => ape.ApiGroupParentId == 0)
                     .GroupBy(ape => new
                     {
                         ape.ApiGroupId,
@@ -711,7 +719,7 @@ namespace CRMApi.Repository
                         ape.Key.ApiGroupId,
                         ape.Key.ApiGroupIcon,
                         ape.Key.ApiGroupDesc,
-                        Menu = dbUserApi.OrderBy(me => me.ApiSeqNo).Where(me => me.ApiGroupId == ape.Key.ApiGroupId && me.ApiGroupParentId == 0)
+                        Menu = ape.OrderBy(me => me.ApiSeqNo)
                         .Select(me => new
                         {
                             me.ApiId,
@@ -719,7 +727,7 @@ namespace CRMApi.Repository
                             me.ApiName,
                             me.ApiDesc
                         }).ToList(),
-                        SubGroup = dbUserApi.OrderBy(sm => sm.ApiGroupSeqNo).Where(sm => sm.ApiGroupParentId > 0 && sm.ApiGroupParentId == ape.Key.ApiGroupId)
+                        SubGroup = UserApi.OrderBy(sm => sm.ApiGroupSeqNo).Where(sm => sm.ApiGroupParentId > 0 && sm.ApiGroupParentId == ape.Key.ApiGroupId)
                         .GroupBy(sm => new
                         {
                             sm.ApiGroupId,
@@ -731,7 +739,7 @@ namespace CRMApi.Repository
                             sm.Key.ApiGroupId,
                             sm.Key.ApiGroupIcon,
                             sm.Key.ApiGroupDesc,
-                            Menu = dbUserApi.OrderBy(me1 => me1.ApiSeqNo).Where(me1 => me1.ApiGroupParentId > 0 && me1.ApiGroupId == sm.Key.ApiGroupId).Select(me1 => new
+                            Menu = UserApi.OrderBy(me1 => me1.ApiSeqNo).Where(me1 => me1.ApiGroupParentId > 0 && me1.ApiGroupId == sm.Key.ApiGroupId).Select(me1 => new
                             {
                                 me1.ApiId,
                                 me1.ApiIcon,
@@ -740,34 +748,15 @@ namespace CRMApi.Repository
                             }).ToList()
                         })
                         .ToList()
-                    }).ToList();                
-                Message.Success(ref objMsg, "");
-            }
-            catch (Exception ex) 
-            {
-                Message.Exception(ref objMsg, ex);
-            }
-            return objMsg;
-        }
-        public async Task<Message> UserInfo(User obj)
-        {
-            Message objMsg = new Message();
-            try
-            {
-                dynamic data = new ExpandoObject();                
-                data.User = new
+                    }).ToList();
+                objMsg.data = new 
                 {
-                    obj.Name,
-                    Type = obj.UserType,
-                    obj.Theme,
-                    AuthToken = Util.CreateJwtToken(obj),                    
-                    Api = obj.Api
+                    User,
+                    UserApi,                    
+                    UserMenu,
+                    Company = db.Company.FirstOrDefault(cp => App.ActiveStatus.Contains(cp.Status)),
                 };
-                data.Company = db.Company.FirstOrDefault(cp => App.ActiveStatus.Contains(cp.Status));
-                data.AppMenu = (await AppMenu(obj)).data;
-                objMsg.status = Message.Type.success;
-                objMsg.statusText = "Login sucess";
-                objMsg.data = data;
+                Message.Success(ref objMsg, "Login Success");                
             }
             catch (Exception ex)
             {

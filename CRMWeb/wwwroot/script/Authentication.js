@@ -40,10 +40,10 @@ class Authentication {
                     if (response.status == Message.Type.success) {
                         let obj = response.data;
                         sessionStorage.setItem('User', JSON.stringify(obj.User));                                                
-                        sessionStorage.setItem('Api', obj.AppMenu);
-                        sessionStorage.setItem('Menu', Data.menuHtmlString(obj.AppMenu));
+                        sessionStorage.setItem('Api', JSON.stringify(obj.UserApi));
+                        sessionStorage.setItem('Menu', Data.menuHtmlString(obj.UserMenu));
                         sessionStorage.setItem('Company', JSON.stringify(obj.Company));
-                        if (obj.AppMenu.length == 0 && obj.User.Type != App.Setting.UserType.SysAdmin) {
+                        if (obj.UserMenu.length == 0 && obj.User.Type != App.Setting.UserType.SysAdmin) {
                             Message.show({ status: Message.Type.error, statusText: "You are not authorised to access this Application." });
                             return;
                         }

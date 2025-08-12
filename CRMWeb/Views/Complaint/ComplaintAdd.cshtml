@@ -62,21 +62,21 @@
                             <select id="Complaint_CountryId" name="CountryId" class="select-pick complaint-required" data-search="true" data-size="4"></select>
                         </div>
                         <div class="col-md-2">
+                            <label>Contact Person<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Complaint_ContactPerson" name="ContactPerson" autocomplete="off" class="form-control form-control-sm complaint-required" data-alpha-name="true" maxlength="100" />
+                        </div>
+                        <div class="col-md-2">
                             <label>Contact No.<span class="text-mandatory">*</span></label>
                             <input type="text" id="Complaint_ContactNo" name="ContactNo" autocomplete="off" class="form-control form-control-sm complaint-required" data-num="true" maxlength="10" />
                         </div>
                         <div class="col-md-2">
-                            <label>Email</label>
-                            <input type="text" id="Complaint_Email" name="Email" autocomplete="off" class="form-control form-control-sm" maxlength="100" />
+                            <label>Email<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Complaint_Email" name="Email" autocomplete="off" class="form-control form-control-sm complaint-required" maxlength="100" />
                         </div>
                         <div class="col-md-2">
                             <label>Department<span class="text-mandatory">*</span></label>
-                            <select id="Complaint_DepartmentId" name="DepartmentId" class="select-pick complaint-required" data-search="true" data-size="4"></select>
-                        </div>     
-                        <div class="col-md-2">
-                            <label>Forward To</label>
-                            <select id="Complaint_ForwardTo" name="ForwardTo" class="select-pick" data-search="true" data-size="4"></select>
-                        </div>
+                            <input type="text" id="Complaint_Department" name="Department" class="form-control form-control-sm es-input complaint-required" maxlength="50">
+                        </div>                             
                         <div class="col-md-2">
                             <label>Priority<span class="text-mandatory">*</span></label>
                             <select id="Complaint_Priority" name="Priority" class="select-pick complaint-required" data-search="true" data-size="4"></select>
@@ -85,8 +85,26 @@
                             <label>Problem<span class="text-mandatory">*</span></label>
                             <textarea type="text" id="Complaint_Problem" name="Problem" class="form-control form-control-sm complaint-required" rows="4" cols="20"></textarea>
                         </div>
-                    </div>                    
+                    </div>   
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table id="tableComplaintAssign" class="table table-bordered table-hover table-default" data-search="false" data-checkbox-header="false">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2">Complaint Assing To</th>
+                                    </tr>
+                                    <tr>
+                                        <th data-formatter="tableComplaintAssignCheck" data-events="tableComplaintAssignCheckEvent" class="text-center"></th>
+                                        <th data-field="UserName">User Name</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </form>
+                
             </div>
             <div class="modal-footer">
                 <button type="button" id="btnSave" class="btn btn-sm btn-success rounded-5">

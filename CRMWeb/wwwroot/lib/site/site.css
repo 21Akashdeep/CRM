@@ -1344,15 +1344,41 @@ hr {
     height:21px;
 }
 
-/*input, select, .select-pick-toggle-btn {
-    font-size: 0.75rem;
+.text-truncate {    
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;    
+    vertical-align: bottom;
+    cursor: pointer;
+}
+.text-truncate.ch-10 {
+    max-width: 10ch;
+}
+.text-truncate.ch-20 {
+    max-width: 20ch;
+}
+.text-truncate.ch-30 {
+    max-width: 30ch;
+}
+.text-truncate.ch-40 {
+    max-width: 40ch;
+}
+.text-truncate.ch-50 {
+    max-width: 50ch;
+}
+.text-truncate.ch-60 {
+    max-width: 60ch;
+}
+.text-truncate.ch-70 {
+    max-width: 70ch;
+}
+.text-truncate.ch-80 {
+    max-width: 80ch;
+}
+.text-truncate.ch-90 {
+    max-width: 90ch;
+}
+.text-truncate.ch-100 {
+    max-width: 100ch;
 }
 
-.input-group-sm > .form-control, .input-group-sm > .form-select, .input-group-sm > .input-group-text, .input-group-sm > .btn {
-    font-size: 0.75rem;
-}*/
-
-
-/*.jq-icon-error {
-    background-color:red!important;
-}*/

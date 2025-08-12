@@ -8,10 +8,8 @@ namespace CRMApi.Models
         public int Id { get; set; }
         public int ComplaintId { get; set; }
         [NotMapped] public string? ComplaintNo { get; set; }
-        public string? Remarks { get; set; }
-        [NotMapped] public string OtpNo { get; set; } = String.Empty;
-        public int CompanyId { get; set; }
-        [NotMapped] public string? CompanyDesc { get; set; }
+        public string? Remarks { get; set; }        
+        [NotMapped] public string OtpNo { get; set; } = String.Empty;        
         public int Status { get; set; }
         [NotMapped] public string StatusDesc { get; set; } = string.Empty;
         [NotMapped] public string? StatusCss { get; set; }

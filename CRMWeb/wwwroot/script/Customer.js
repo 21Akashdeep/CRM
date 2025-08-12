@@ -4,6 +4,7 @@
         Customer.getViewOption((response) => {
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
             Dropdown.bind({ id: '#ListId', data: response.data.Customer, value: 'Id', text: 'Description', subText: "Code" });
+            Dropdown.bind({ id: '#ListLocationId', data: response.data.Location, value: 'Id', text: 'Description' });
         });
         $('#btnSearch').on('click', () => {
             Customer.get({
@@ -29,8 +30,8 @@
                 }
             });
         });
-        $('#btnAdd').on('click', () => {
-            Customer.fill();
+        $('#btnNewEntry').on('click', () => {
+            Customer.newEntry();
         });
         Customer.initAdd();
     }
@@ -69,17 +70,17 @@
                 Customer.update(obj);
             }
         });
-
     }
     static getAddOption(onSuccess) {
         Data.get({ url: 'Customer/GetAddOption', onSuccess: onSuccess });
     }
-    static fill() {
+    static newEntry() {
         Customer.getAddOption((response) => {
             Modal.open({ id: '#modalCustomer', title: 'Customer / Add', action: 'Add' });
             $('#Customer_SeqNo').val(0);
             Dropdown.bind({ id: '#Customer_CountryId', data: response.data.Country, value: 'Id', text: 'Description' });
             Dropdown.bind({ id: '#Customer_AdminDivId', data: response.data.AdminDiv, value: 'Id', text: 'Description' });
+            Dropdown.bind({ id: '#Customer_LocationId', data: response.data.Location, value: 'Id', text: 'Description' });
 
         });
     }
@@ -111,6 +112,7 @@
                         let title = action == 'Edit' ? `Customer / Edit (Code: ${obj.Code})` : `Customer / Add`;
                         Dropdown.bind({ id: '#Customer_CountryId', data: response.data.Country, value: 'Id', text: 'Description', subText: 'SubText' });
                         Dropdown.bind({ id: '#Customer_AdminDivId', data: response.data.AdminDiv, value: 'Id', text: 'Description' });
+                        Dropdown.bind({ id: '#Customer_LocationId', data: response.data.Location, value: 'Id', text: 'Description' });
                         Modal.open({ id: '#modalCustomer', title: title, action: action, obj: obj });
                         OnlineApi.pinCode({
                             pinCode: obj.PinCode,
@@ -233,7 +235,7 @@ window.tableCustomerDescription = (value, obj, index) => {
     return obj.Description.match(/.{1,30}/g).join('<br>');;
 }
 tableCustomerStatus = (value, obj, index) => {
-    return `<div class="${obj.StatusCss}">${obj.StatusName}<div>`;
+    return `<div class="${obj.StatusCss}">${obj.StatusDesc}<div>`;
 }
 tableCustomerCreatedByAndAt = (value, obj, index) => {
     return `<div>${obj.CreatedByName}</div>

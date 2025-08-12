@@ -1,6 +1,4 @@
-﻿
-
-class User {
+﻿class User {
     static init() {            
         User.getViewOption((response) => {
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: ['Description'] });
@@ -235,7 +233,7 @@ tableUserUpdatedByAndAt = (value, obj, index) => {
 tableUserAction = (value, obj, index) => {
    let actionBtn = `
         <div class="btn-group dropstart">            
-            <button class="btn btn-sm border-0" data-bs-toggle="dropdown"><i class="fa fa-ellipsis-v"></i></button>
+            <button type="button" class="btn btn-sm border-0" data-bs-toggle="dropdown"><i class="fa fa-ellipsis-v"></i></button>
             <ul class="dropdown-menu dropdown-menu-lg-end mt-4">
                 ${obj.IsReSentPassword ?
                     `<li>
@@ -312,13 +310,12 @@ window.tableApiIsAllColCheckedEvent = {
         Table.updateById({ id: '#tableApi', objId: obj.ApiId, obj: obj });        
     }
 }
-tableApiView = (value, obj, index) => {
-    let checkBox = [];
-    checkBox.push('<div class="form-switch" style="min-height:auto!important;">');
-    checkBox.push('<input class="form-check-input checkbox-view" type="checkbox" id="CheckBoxView_' + index + '"');
-    checkBox.push(obj.View ? ' checked/>' : '/>');
-    checkBox.push('</div>');
-    return checkBox.join('');
+tableApiView = (value, obj, index) => {    
+    return `
+        <div class="form-switch" style="min-height:auto!important;">
+        <input class="form-check-input checkbox-view" type="checkbox" id="CheckBoxView_${index}" ${(obj.View ? 'checked':'')}/>
+        </div>
+    `;
 }
 window.tableApiViewEvent = {
     'change .checkbox-view': (e, value, obj, index) => {
@@ -327,13 +324,12 @@ window.tableApiViewEvent = {
         Table.updateById({ id: '#tableApi', objId: obj.ApiId, obj: obj });
     }
 }
-tableApiAdd = (value, obj, index) => {
-    let checkBox = [];
-    checkBox.push('<div class="form-switch" style="min-height:auto!important;">');
-    checkBox.push('<input class="form-check-input checkbox-add" type="checkbox" id="CheckBoxAdd_' + index + '"');
-    checkBox.push(obj.Add ? ' checked/>' : '/>');
-    checkBox.push('</div>');
-    return checkBox.join('');
+tableApiAdd = (value, obj, index) => {    
+    return `
+        <div class="form-switch" style="min-height:auto!important;">
+            <input type="checkbox" id="CheckBoxAdd_${index}" class="form-check-input checkbox-add" ${(obj.Add ? 'checked' : '')}/>
+        </div>
+    `;
 }
 window.tableApiAddEvent = {
     'change .checkbox-add': (e, value, obj, index) => {
@@ -342,13 +338,12 @@ window.tableApiAddEvent = {
         Table.updateById({ id: '#tableApi', objId: obj.ApiId, obj: obj });
     }
 }
-tableApiUpdate = (value, obj, index) => {
-    let checkBox = [];
-    checkBox.push('<div class="form-switch" style="min-height:auto!important;">');
-    checkBox.push('<input class="form-check-input checkbox-update" type="checkbox" id="CheckBoxUpdate_' + index + '"');
-    checkBox.push(obj.Update ? ' checked/>' : '/>');
-    checkBox.push('</div>');
-    return checkBox.join('');
+tableApiUpdate = (value, obj, index) => {    
+    return `
+        <div class="form-switch" style="min-height:auto!important;">
+            <input type="checkbox" id="CheckBoxUpdate_${index}" class="form-check-input checkbox-update" ${(obj.Update ? 'checked' : '')}/>
+        </div>
+    `;
 }
 window.tableApiUpdateEvent = {
     'change .checkbox-update': (e, value, obj, index) => {
@@ -357,13 +352,12 @@ window.tableApiUpdateEvent = {
         Table.updateById({ id: '#tableApi', objId: obj.ApiId, obj: obj });
     }
 }
-tableApiDelete = (value, obj, index) => {
-    let checkBox = [];
-    checkBox.push('<div class="form-switch" style="min-height:auto!important;">');
-    checkBox.push('<input class="form-check-input checkbox-delete" type="checkbox" id="CheckBoxDelete_' + index + '"');
-    checkBox.push(obj.Delete ? ' checked/>' : '/>');
-    checkBox.push('</div>');
-    return checkBox.join('');
+tableApiDelete = (value, obj, index) => {    
+    return `
+        <div class="form-switch" style="min-height:auto!important;">
+            <input type="checkbox" id="CheckBoxDelete_${index}" class="form-check-input checkbox-delete" ${(obj.Delete ? 'checked' : '')}/>
+        </div>
+    `;
 }
 window.tableApiDeleteEvent = {
     'change .checkbox-delete': (e, value, obj, index) => {
@@ -372,13 +366,12 @@ window.tableApiDeleteEvent = {
         Table.updateById({ id: '#tableApi', objId: obj.ApiId, obj: obj });
     }
 }
-tableApiEnable = (value, obj, index) => {
-    let checkBox = [];
-    checkBox.push('<div class="form-switch" style="min-height:auto!important;">');
-    checkBox.push('<input class="form-check-input checkbox-enable" type="checkbox" id="CheckBoxEnable_' + index + '"');
-    checkBox.push(obj.Enable ? ' checked/>' : '/>');
-    checkBox.push('</div>');
-    return checkBox.join('');
+tableApiEnable = (value, obj, index) => {    
+    return `
+        <div class="form-switch" style="min-height:auto!important;">
+            <input type="checkbox" id="CheckBoxEnable_${index}" class="form-check-input checkbox-enable" ${(obj.Enable ? 'checked' : '')}/>
+        </div>
+    `;
 }
 window.tableApiEnableEvent = {
     'change .checkbox-enable': (e, value, obj, index) => {
@@ -387,13 +380,12 @@ window.tableApiEnableEvent = {
         Table.updateById({ id: '#tableApi', objId: obj.ApiId, obj: obj });
     }
 }
-tableApiPrint = (value, obj, index) => {
-    let checkBox = [];
-    checkBox.push('<div class="form-switch" style="min-height:auto!important;">');
-    checkBox.push('<input class="form-check-input checkbox-print" type="checkbox" id="CheckBoxPrint_' + index + '"');
-    checkBox.push(obj.Print ? ' checked/>' : '/>');
-    checkBox.push('</div>');
-    return checkBox.join('');
+tableApiPrint = (value, obj, index) => {    
+    return `
+        <div class="form-switch" style="min-height:auto!important;">
+            <input type="checkbox" id="CheckBoxPrint_${index}" class="form-check-input checkbox-print" ${(obj.Print ? 'checked' : '')}/>
+        </div>
+    `;
 }
 window.tableApiPrintEvent = {
     'change .checkbox-print': (e, value, obj, index) => {
@@ -402,13 +394,12 @@ window.tableApiPrintEvent = {
         Table.updateById({ id: '#tableApi', objId: obj.ApiId, obj: obj });
     }
 }
-tableApiImport = (value, obj, index) => {
-    let checkBox = [];
-    checkBox.push('<div class="form-switch" style="min-height:auto!important;">');
-    checkBox.push('<input class="form-check-input checkbox-import" type="checkbox" id="CheckBoxImport_' + index + '"');
-    checkBox.push(obj.Import ? ' checked/>' : '/>');
-    checkBox.push('</div>');
-    return checkBox.join('');
+tableApiImport = (value, obj, index) => {    
+    return `
+        <div class="form-switch" style="min-height:auto!important;">
+            <input type="checkbox" id="CheckBoxImport_${index}" class="form-check-input checkbox-import" ${(obj.Import ? 'checked' : '')}/>
+        </div>
+    `;
 }
 window.tableApiImportEvent = {
     'change .checkbox-import': (e, value, obj, index) => {
@@ -417,13 +408,12 @@ window.tableApiImportEvent = {
         Table.updateById({ id: '#tableApi', objId: obj.ApiId, obj: obj });
     }
 }
-tableApiExport = (value, obj, index) => {
-    let checkBox = [];
-    checkBox.push('<div class="form-switch" style="min-height:auto!important;">');
-    checkBox.push('<input class="form-check-input checkbox-export" type="checkbox" id="CheckBoxExport_' + index + '"');
-    checkBox.push(obj.Export ? ' checked/>' : '/>');
-    checkBox.push('</div>');
-    return checkBox.join('');
+tableApiExport = (value, obj, index) => {    
+    return `
+        <div class="form-switch" style="min-height:auto!important;">
+            <input type="checkbox" id="CheckBoxExport_${index}" class="form-check-input checkbox-export" ${(obj.Export ? 'checked' : '')}/>
+        </div>
+    `;
 }
 window.tableApiExportEvent = {
     'change .checkbox-export': (e, value, obj, index) => {
@@ -434,31 +424,29 @@ window.tableApiExportEvent = {
 }
 
 //=========================User Location==============================//
-window.tableLocationCheck = (value, obj, index) => {
-    let checkBox = [];
-    checkBox.push('<div class="form-switch" style="min-height:auto!important;">');
-    checkBox.push('<input class="form-check-input checkbox-view" type="checkbox" id="CheckBoxView_' + index + '"');
-    checkBox.push(obj.IsAdded ? ' checked/>' : '/>');
-    checkBox.push('</div>');
-    return checkBox.join('');
+window.tableLocationCheck = (value, obj, index) => {    
+    return `
+        <div class="form-switch" style="min-height:auto!important;">
+            <input type="checkbox" id="CheckedLocation_${index}" class="form-check-input checked-location" ${(obj.IsAdded ? 'checked' : '')}/>
+        </div>
+    `;
 }
 window.tableLocationCheckEvent = {
-    'change .checkbox-view': (e, value, obj, index) => {
+    'change .checked-location': (e, value, obj, index) => {
         obj.IsAdded = $(e.target).is(':Checked') ? true : false;
         Table.updateById({ id: '#tableLocation', objId: obj.LocationId, obj: obj });
     }
 }
 //=========================User ApprovalRole==========================//
-window.tableApprovalRoleCheck = (value, obj, index) => {
-    let checkBox = [];
-    checkBox.push('<div class="form-switch" style="min-height:auto!important;">');
-    checkBox.push('<input class="form-check-input checkbox-view" type="checkbox" id="CheckBoxView_' + index + '"');
-    checkBox.push(obj.IsAdded ? ' checked/>' : '/>');
-    checkBox.push('</div>');
-    return checkBox.join('');
+window.tableApprovalRoleCheck = (value, obj, index) => {    
+    return `
+        <div class="form-switch" style="min-height:auto!important;">
+            <input type="checkbox" id="CheckedAprRole_${index}" class="form-check-input checked-apr-role" ${(obj.IsAdded ? 'checked' : '')}/>
+        </div>
+    `;
 }
 window.tableApprovalRoleCheckEvent = {
-    'change .checkbox-view': (e, value, obj, index) => {
+    'change .checked-apr-role': (e, value, obj, index) => {
         obj.IsAdded = $(e.target).is(':Checked') ? true : false;
         Table.updateById({ id: '#tableApprovalRole', objId: obj.ApprovalRoleId, obj: obj });
     }

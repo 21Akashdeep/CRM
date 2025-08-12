@@ -85,7 +85,7 @@ namespace CRMApi.Repository
                     join cu in db.Customer on cm.CustomerId equals cu.Id
                     join ad in db.AdminDiv on cm.AdminDivId equals ad.Id
                     join co in db.Country on cm.CountryId equals co.Id
-                    where ListStatus.Contains(cm.Status) && cm.CompanyId == User.Id
+                    where ListStatus.Contains(cm.Status)
                     orderby cm.Code
                     select new
                     {
