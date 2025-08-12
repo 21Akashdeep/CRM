@@ -42,7 +42,7 @@ namespace CRMApi.Controllers
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoComplaint.GetAddOptionAsync(obj);
+                objMsg = await RepoComplaint.GetAddOptionAsync(obj, User);
             }
             catch (Exception ex)
             {
@@ -193,6 +193,22 @@ namespace CRMApi.Controllers
                 Message.Exception(ref objMsg, ex);
             }
             return Ok(objMsg);
-        }                
+        }
+        [HttpPatch]
+        public async Task<IActionResult> Close(int Id) 
+        {
+            Message objMsg = new Message();
+            try 
+            {
+                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
+                if (User == null) return Ok(objMsg);
+                objMsg = await RepoComplaint.Close(Id, User);
+            } 
+            catch (Exception ex) 
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
     }
 }

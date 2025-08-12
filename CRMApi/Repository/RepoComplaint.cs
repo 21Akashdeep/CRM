@@ -48,7 +48,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public async Task<Message> GetAddOptionAsync(Complaint obj)
+        public async Task<Message> GetAddOptionAsync(Complaint obj, User User)
         {
             Message objMsg = new Message();
             try
@@ -59,7 +59,8 @@ namespace CRMApi.Repository
                     Id = x.Value,
                     x.Description
                 }).ToListAsync();
-                Option.Customer = await db.Customer.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
+                var dbCustomer = await new RepoCustomer(db).ListAsync(null, User);
+                Option.Customer = dbCustomer.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
                 {
                     x.Id,
                     x.Description,
@@ -71,9 +72,10 @@ namespace CRMApi.Repository
                     x.AdminDivId,
                     x.CountryId,
                     x.ContactNo,
-                    x.Email,
+                    x.Email,                    
+                    x.LocationDesc,
                     SubText = Util.AddressDesc(new Composite.AddressDesc { Add1 = x.Address1, Add2 = x.Address2, PinCode = x.PinCode, PostOffice = x.PostOffice, OtherText = x.GstNo })
-                }).ToListAsync();
+                }).ToList();
                 Option.AdminDiv = await db.AdminDiv.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
                 {
                     x.Id,
@@ -98,6 +100,7 @@ namespace CRMApi.Repository
                 Option.ComplaintAssing = await (
                     from usr in db.User
                     join ulo in db.UserLocation on usr.Id equals ulo.UserId
+                    join loc in db.Location on ulo.LocationId equals loc.Id
                     join cus in db.Customer on ulo.LocationId equals cus.LocationId
                     join coa in dbComplaintAssign on new {UserId = usr.Id, ComplaintId = obj.Id} equals new { coa.UserId, coa.ComplaintId } into ComplaintAssign
                     from coa in ComplaintAssign.DefaultIfEmpty()
@@ -108,6 +111,7 @@ namespace CRMApi.Repository
                         ComplaintId = coa != null ? coa.ComplaintId : 0,
                         UserId = usr.Id,
                         UserName = usr.Name,
+                        LocationDesc = loc.Description,
                         IsAdded = coa != null,
                     }
                 ).ToListAsync();                
@@ -173,8 +177,7 @@ namespace CRMApi.Repository
                     District = co.District,
                     AdminDivId = co.AdminDivId,
                     AdminDivDesc = ad.Description,
-                    CountryId = co.CountryId,
-                    
+                    CountryId = co.CountryId,                    
                     CountryDesc = cn.Description,
                     CustomerAddress = Util.AddressDesc(new Composite.AddressDesc
                     {
@@ -210,7 +213,7 @@ namespace CRMApi.Repository
                     IsEdit = co.Status == App.Status.SaveAsDraft || co.Status == App.Status.Pending || App.ByPassUserType.Contains(User.UserType) ? true : false,
                     IsDelete = co.Status == App.Status.SaveAsDraft || co.Status == App.Status.Pending || App.ByPassUserType.Contains(User.UserType) ? true : false,
                     IsDuplicate = co.Status != App.Status.Delete ? true : false,
-                    IsClose = App.ByPassUserType.Contains(User.UserType) ? true : false,
+                    IsClose = App.ByPassUserType.Contains(User.UserType) || co.Status == App.Status.RequestForClose ? true : false,
                     IsAddStatus = co.Status == App.Status.Pending || co.Status == App.Status.Processing ? true : false,
                     IsDetailedView = true
                 }
@@ -468,7 +471,7 @@ namespace CRMApi.Repository
                     Message.Error(ref objMsg, "Complaint did not find for edit.");
                     return objMsg;
                 }
-                var AddOption = await GetAddOptionAsync(obj);
+                var AddOption = await GetAddOptionAsync(obj, User);
                 objMsg.obj = obj;
                 objMsg.data = AddOption.data;
                 Message.Success(ref objMsg, "Record found");
@@ -646,6 +649,7 @@ namespace CRMApi.Repository
                                 <tr><th style='text-align:left;'>Contact No.</th><td><b>:</b> {obj.ContactNo}</td></tr>
                                 <tr><th style='text-align:left;'>Email</th><td><b>:</b> {obj.Email}</td></tr>
                                 <tr><th style='text-align:left;'>Address</th><td><b>:</b> {obj.CustomerAddress}</td></tr>
+                                <tr><th style='text-align:left;'>priority</th><td><b>:</b> {obj.PriorityDesc}</td></tr>
                                 <tr><td colspan='2' style='text-align:left;'><b>Problem :</b><div>{obj.Problem.Replace("\r\n", "<br/>")}</div></td></tr>
                             </tbody>
                         </table>
@@ -670,6 +674,40 @@ namespace CRMApi.Repository
                 Message.Exception(ref objMsg, ex);
             }
             return objMsg;
-        }        
+        }
+        public async Task<Message> Close(int Id, User User) 
+        {
+            Message objMsg = new Message();
+            try 
+            {
+                var dbComplaintQuery = db.Complaint.Where(co => co.Id == Id).AsQueryable();                
+                if (User.UserType != App.UserType.SysAdmin) 
+                {
+                    dbComplaintQuery = dbComplaintQuery.Where(co => co.Status == App.Status.RequestForClose);
+                }
+                var Complaint = await dbComplaintQuery.FirstOrDefaultAsync();
+                if (Complaint == null) 
+                {
+                    Message.Error(ref objMsg, "Complaint did not for close");
+                    return objMsg;
+                }
+                Complaint.Status = App.Status.Completed;
+                Complaint.UpdatedBy = User.Id;
+                Complaint.UpdatedAt = DateTime.Now;
+                db.Update(Complaint);
+                Message.Close(ref objMsg, (await db.SaveChangesAsync()), "");
+                if (objMsg.status == Message.Type.success)
+                {
+                    Complaint.ListId.Add(Id);
+                    objMsg.obj = (await ListAsync(Complaint, User)).FirstOrDefault();
+                    objMsg.data = (await GetViewOptionAsync()).data;
+                }
+            }
+            catch (Exception ex) 
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
     }
 }

@@ -79,7 +79,7 @@ namespace CRMApi.Repository
             try
             {
                 dynamic Option = new ExpandoObject();
-                var ListStatus = App.ByPassUserType.Contains(User.UserType) ? App.AllActiveStatus : new List<int>() { App.Status.Scheduled, App.Status.Processing };
+                var ListStatus = App.ByPassUserType.Contains(User.UserType) ? App.AllActiveStatus : new List<int>() { App.Status.Pending, App.Status.Processing };
                 Option.Complaint = await (
                     from cm in db.Complaint
                     join cu in db.Customer on cm.CustomerId equals cu.Id

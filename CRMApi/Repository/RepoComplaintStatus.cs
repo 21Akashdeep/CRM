@@ -27,12 +27,19 @@ namespace CRMApi.Repository
                 {
                     x.Value,
                     x.Description
-                }).ToListAsync();                
-                Option.Complaint = await db.Complaint.Where(x => ListStatus.Contains(x.Status)).Select(x => new
-                {
-                    ComplaintId = x.Id,
-                    ComplaintNo = x.Code
                 }).ToListAsync();
+                Option.Complaint = await (
+                    from com in db.Complaint
+                    join cus in db.Customer on com.CustomerId equals cus.Id
+                    join loc in db.Location on cus.LocationId equals loc.Id
+                    where ListStatus.Contains(com.Status)
+                    select new 
+                    {
+                        ComplaintId = com.Id,
+                        ComplaintNo = com.Code,
+                        SubText = $"<b>{cus.Description}</b><br/>{loc.Description}"
+                    }
+                ).ToListAsync();                
                 objMsg.data = Option;
                 Message.Success(ref objMsg, "Record found");
             }
@@ -111,7 +118,7 @@ namespace CRMApi.Repository
                     ListId = obj.ListComplaintId,
                     FromDate = obj.FromDate,
                     ToDate = obj.ToDate,
-                    ListStatus = obj.ListStatus.Any() ? obj.ListStatus : new List<int> { App.Status.Pending, App.Status.Processing },
+                    ListStatus = obj.ListStatus.Any() ? obj.ListStatus : new List<int> { App.Status.Pending, App.Status.Processing, App.Status.RequestForClose },
                     ListAssignTo = App.ByPassUserType.Contains(User.UserType) ? new List<int>() : new List<int> { User.Id }
                 }, User);
                 objMsg.data = Complaint;
@@ -213,10 +220,20 @@ namespace CRMApi.Repository
                     Message.Error(ref objMsg, "Complaint did not find for notify.");
                     return objMsg;
                 }
+                if (String.IsNullOrEmpty(Complaint.Email)) 
+                {
+                    Message.Error(ref objMsg, "Customer email did not find for notify.");
+                    return objMsg;
+                }
                 var User = await db.User.FirstOrDefaultAsync(x => x.Id == Complaint.CreatedBy);
                 if (User == null) 
                 {
-                    Message.Error(ref objMsg, "Complint logger email did not find for notify.");
+                    Message.Error(ref objMsg, "Complaint logger email did not find for notify.");
+                    return objMsg;
+                }
+                if (String.IsNullOrEmpty(User.Email))
+                {
+                    Message.Error(ref objMsg, "Service Eng. email did not find for notify.");
                     return objMsg;
                 }
                 MailMessage objMail = new MailMessage();

@@ -472,6 +472,7 @@ namespace CRMApi.Services
                             {Matter}
                             <p><br>Regards,<br>{objMailService.AppName}<br>{objMailService.CompanyName}<br></p>
                         </div>
+                        <div id='EmailFooter' style='padding:5px;'><p>This is a system-generated email. Please do not reply.</p></div>
                     </div>
                 ";
             }

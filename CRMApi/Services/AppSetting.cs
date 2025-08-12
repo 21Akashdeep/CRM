@@ -66,13 +66,12 @@
         public int Completed { get; set; }
         public int SaveAsDraft { get; set; }        
         public int Pending { get; set; }
-        public int Scheduled { get; set; }
-        public int WaitingForApproval { get; set; }
-        public int Processing { get; set; }        
+        public int Processing { get; set; }
+        public int RequestForClose { get; set; }
+        public int WaitingForApproval { get; set; }           
         public int PartialCompleted { get; set; }
         public int Verified { get; set; }
-        public int UnVerified { get; set; }
-        public int RequestForClose { get; set; }
+        public int UnVerified { get; set; }        
     }
     public class Request
     {
