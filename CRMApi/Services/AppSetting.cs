@@ -10,6 +10,7 @@
         public string DbName { get; set; } = string.Empty;
         public string CrosOrigin { get; set; } = string.Empty;        
         public AppJwt Jwt { get; set; } = new AppJwt();
+        public DocPath DocPath { get; set; } = new DocPath();
         public SettingName SettingName { get; set; } = new SettingName();
         public Status Status { get; set; } = new Status();
         public List<int> AllActiveStatus { get; set; } = new List<int>();
@@ -153,5 +154,11 @@
         public string? ReturnType { get; set; }
         public string? Attributes { get; set; }
     }
-    
+
+    public class DocPath
+    {
+
+        public string ProjTechDoc { get; set; } = string.Empty;
+        public string ProjTechDocSufix { get; set; } = string.Empty;
+    }
 }

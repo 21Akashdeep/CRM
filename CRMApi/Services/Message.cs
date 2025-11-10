@@ -9,9 +9,11 @@ namespace CRMApi.Services
         public dynamic data { get; set; } = new List<string>();
         public dynamic? obj { get; set; } = new { };
         public string? base64 { get; set; }
+        public string? filePath { get; set; }
         public List<int> tranId { get; set; } = new List<int>();
         public dynamic company { get; set; } = new { };
         public string? redirectPage { get; set; }
+        
         public static void Add(ref Message objMsg, int status, string text)
         {
             if (status > 0)

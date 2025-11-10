@@ -26,6 +26,14 @@ namespace CRMApi.Models
             public int Id { get; set; }
             public string Name { get; set; } = String.Empty;
         }
+        public class Document
+        {
+            public byte[] Base64 { get; set; } = Array.Empty<byte>();
+            public string Base64String { get; set; } = String.Empty;
+            public string MimeType { get; set; } = String.Empty;
+            public string FilePath { get; set; } = String.Empty;
+            public string FileName { get; set; } = String.Empty;
+        }
     }
 }
 

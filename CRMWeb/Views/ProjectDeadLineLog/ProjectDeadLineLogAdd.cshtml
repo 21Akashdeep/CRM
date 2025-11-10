@@ -1,0 +1,48 @@
+﻿<div id="modalProjectDeadLineLog" class="modal fade modal-draggable" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">ProjectDeadLineLog / Add</span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body" style="min-height:75vh;">
+                <form id="formProjectDeadLineLog">
+                    <div class="row">
+                        <div class="col-md-12">
+                            @* <label> Code<span class="text-mandatory">*</span></label>
+                            <input type="hidden" id="ProjectDeadLineLog_Code" name="Code" />
+                            <input type="text" id="ProjectDeadLineLog_Code" name="Code" autocomplete="off" class="form-control form-control-sm ProjectDeadLineLog-required" maxlength="50" /> *@
+                            <label>Project Name<span class="text-mandatory">*</span></label>
+                            <select id="ProjectDesc" name="ProjectDesc" class="form-control form-control-sm select-pick item-required" data-search="true" data-size="4">
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label> ProjectDeadLine Date<span class="text-mandatory">*</span></label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" id="DeadLineDate" name="DeadLineDate" autocomplete="off" class="form-control form-control-sm" maxlength="100" readonly />
+                                <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <label>Reason<span class="text-mandatory">*</span></label>
+                            <textarea type="text" id="Reason" name="Reason" rows="4" cols="20" class="form-control form-control-sm"></textarea>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="ProjectDeadLineLog_btnSave" class="btn btn-sm btn-success rounded-5">
+                    <span class="fa fa-save"></span>&nbsp;&nbsp;Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

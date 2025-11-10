@@ -470,7 +470,11 @@ namespace CRMApi.Services
                         <div id='EmailCardBody' style='padding:5px;'>
                             <p>Dear Sir/Madam,</p>
                             {Matter}
-                            <p><br>Regards,<br>{objMailService.AppName}<br>{objMailService.CompanyName}<br></p>
+                            <p>
+                                <br>Regards,
+                                <br>{objMailService.CompanyName}<br>
+                                <a href='{objMailService.AppUrl}' target='_blank'>{objMailService.AppName}</a>
+                            </p>                            
                         </div>
                     </div>
                 ";
@@ -532,6 +536,56 @@ namespace CRMApi.Services
             {
                 return str;
             }
-        }        
+        }
+        
+        private static readonly Dictionary<string, string> MimeToExtension = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "image/jpeg", "jpg" },
+            { "image/png", "png" },
+            { "image/gif", "gif" },
+            { "image/webp", "webp" },
+            { "application/pdf", "pdf" },
+            { "text/plain", "txt" },
+            { "text/csv", "csv" },
+            { "application/msword", "doc" },
+            { "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "docx" },
+            { "application/vnd.ms-excel", "xls" },
+            { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx" }
+        };
+        public static Message AddFile(Composite.Document Document)
+
+        {
+            Message objMsg = new Message();
+            try
+                
+            {
+                
+                if (Document.MimeType == null || Document.Base64 == null)
+                {
+                    Message.Warning(ref objMsg, "Mime Type or Base64 is empty");
+                    return objMsg;
+                }
+                //Delete Un-Used File
+                var AddedFiles = Directory.GetFiles(Document.FilePath).Where(file =>
+                                 string.Equals(Path.GetFileNameWithoutExtension(file),
+                                 Document.FileName,
+                                 StringComparison.OrdinalIgnoreCase)).ToList();
+                AddedFiles.ForEach(file =>
+                {
+                    try { File.Delete(file); } catch (Exception) { }
+                });
+                //Add New File
+                string extension = MimeToExtension.ContainsKey(Document.MimeType) ? MimeToExtension[Document.MimeType] : "bin";
+                string filePath = Path.Combine(Document.FilePath, $"{Document.FileName}.{extension}");
+                File.WriteAllBytes(filePath, Document.Base64);
+                Message.Success(ref objMsg, "Document has been added.");
+                objMsg.filePath = filePath;
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
     }
 }

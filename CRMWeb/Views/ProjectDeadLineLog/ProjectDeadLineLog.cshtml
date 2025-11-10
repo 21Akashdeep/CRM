@@ -1,0 +1,74 @@
+﻿@{
+    ViewData["Title"] = "ProjectDeadLineLog";
+}
+<div class="card shadow">
+    <div class="card-header">
+        <span class="card-title">ProjectDeadLineLog / View</span>
+        <button type="button" class="btn btn-sm btn-primary float-end rounded-5" data-action="Add" id="btnAdd">
+            <span class="fa fa-plus"></span>&nbsp;&nbsp;Add
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <label>Status</label>
+                <select id="ListStatus" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="2" data-search="true" data-action="true" multiple>
+                </select>
+            </div>
+            @* <div class="col-md-4">
+                <label> ProjectDeadLine Date<span class="text-mandatory">*</span></label>
+                <div class="input-group input-group-sm">
+                    <input type="text" id="ProjectDeadLineLog" name="ProjectDeadLineLog" autocomplete="off" class="form-control form-control-sm" maxlength="100" readonly />
+                    <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
+                </div>
+            </div> *@
+
+            <div class="col-md-4">
+                <div class="btn-group">
+                    <button type="button" id="btnSearch" class="btn btn-sm btn-filter btn-outline-success" data-action="View" title="Search">
+                        <span class="fa fa-search"></span>
+                    </button>
+                    <button type="button" id="btnPrint" class="btn btn-sm btn-filter btn-outline-secondary" data-action="Print" title="Print">
+                        <span class="fa fa-print"></span>
+                    </button>
+                    <button type="button" id="btnExport" class="btn btn-sm btn-filter btn-outline-primary" data-action="Export" title="Export To Excel">
+                        <span class="fa fa-file-excel"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-md-12">
+                <table id="tableProjectDeadLineLog" class="table table-bordered table-hover table-default" border="1" data-sort-name="Code" data-unique-id="Id">
+                    <thead>
+                        <tr>
+                            @* <th data-sortable="true" data-field="Code">Code</th> *@
+                            <th data-sortable="true" data-field="ProjectDesc">Project Name</th>
+                            <th data-sortable="true" data-formatter="tableProjectDeadLineDate">DeadLine Date</th>
+                            <th data-sortable="true" data-field="Reason">Reason</th>
+                            <th data-sortable="false" data-formatter="tableProjectDeadLineLogCreatedByAndAt" class="text-nowrap">Created By & At</th>
+                            <th data-sortable="false" data-formatter="tableProjectDeadLineLogUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
+                            <th data-sortable="false" data-formatter="tableProjectDeadLineLogStatus" class="Status text-center">Status</th>
+                            <th data-formatter="tableProjectDeadLineLogAction" data-events="tableProjectDeadLineLogActionEvent" class="not-print text-center">
+                                <i class="fa fa-list-check"></i>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Api Add Modal -->
+<partial name="ProjectDeadLineLogAdd.cshtml" />
+@section Scripts {
+
+    <script src="~/script/ProjectDeadLineLog.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        $(()=> {
+            ProjectDeadLineLog.init();
+        });
+    </script>
+}

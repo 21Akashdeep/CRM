@@ -1,4 +1,4 @@
-using CRMApi.Services;
+﻿using CRMApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -17,9 +17,9 @@ AppSetting App = Util.AppSetting;
 string ConString = builder.Configuration.GetConnectionString(App.DbName)!;
 builder.Services.AddDbContext<DBCRM>(options =>
 {
-    switch (App.DbName) 
+    switch (App.DbName)
     {
-        case "Oracle":            
+        case "Oracle":
             options.UseOracle(ConString).LogTo(Console.WriteLine, LogLevel.Information);
             break;
         case "SqlServer":
@@ -124,7 +124,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c => { c.ConfigObject.AdditionalItems["persistAuthorization"] = true; });
 }
-else 
+else
 {
     app.UseSwagger();
     app.UseSwaggerUI(c => { c.ConfigObject.AdditionalItems["persistAuthorization"] = true; });
