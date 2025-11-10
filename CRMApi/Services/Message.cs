@@ -40,6 +40,19 @@ namespace CRMApi.Services
                 objMsg.statusText = "Record has not updated.!!!\n" + text;
             }
         }
+        public static void Close(ref Message objMsg, int status, string text)
+        {
+            if (status > 0)
+            {
+                objMsg.status = Type.success;
+                objMsg.statusText = "Record has closed successfully.\n" + text;
+            }
+            else
+            {
+                objMsg.status = Type.error;
+                objMsg.statusText = "Record has not closed.!!!\n" + text;
+            }
+        }
         public static void Get(ref Message objMsg, string text)
         {
             if (objMsg.data.Count > 0)

@@ -96,6 +96,7 @@
             });
             $('#Complaint_ContactNo').val(obj.ContactNo);
             $('#Complaint_Email').val(obj.Email);
+            $('#Complaint_LocationDesc').val(obj.LocationDesc);
             Field.triggerOnInput('#Complaint_Address1, #Complaint_PostOffice, #Complaint_District');
             Field.triggerOnChange('#Complaint_AdminDivId, #Complaint_CountryId');                
             Complaint.getAddOption({
@@ -236,6 +237,19 @@
             Dropdown.bind({ id: '#ListId', data: response.data.Complaint, value: 'Id', text: 'Code' });                
         }
     }
+    static close({ id }) {
+        Data.update({
+            url: `Complaint/Close?Id=${id}`,
+            onSuccess: (response) => {
+                Message.show(response);
+                if (response.status == Message.Type.success) {
+                    Table.updateById({ id: '#tableComplaint', objId: response.obj.Id, obj: response.obj });
+                    Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
+                    Dropdown.bind({ id: '#ListId', data: response.data.Complaint, value: 'Id', text: 'Code' });  
+                }
+            }
+        });
+    }
     static delete({ id }) {
         Message.confirm({
             msg: 'Do you want to delete',
@@ -324,6 +338,15 @@ window.tableComplaintAction = (value, obj, index) => {
             </li>
         `);
     }
+    if (obj.IsClose) {
+        actionBtn.push(`
+             <li>
+                <a href="#" class="dropdown-item text-danger btn-close-complaint" title="Duplicate">
+                    <span class="fa fa-times"></span>&nbsp;&nbsp;Close
+                </a>
+            </li>
+        `);
+    }
     if (obj.IsDelete) {
         actionBtn.push(`
             <li>
@@ -359,6 +382,9 @@ window.tableComplaintActionEvent = {
     },
     'click .btn-duplicate': (e, value, obj, index) => {
         Complaint.edit({ id: obj.Id, action: 'Add' });
+    },
+    'click .btn-close-complaint': (e, value, obj, index) => {
+        Complaint.close({ id: obj.Id });
     },
     'click .btn-delete': (e, value, obj, index) => {
         Complaint.delete({ id: obj.Id});

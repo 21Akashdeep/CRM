@@ -476,6 +476,7 @@ namespace CRMApi.Services
                                 <a href='{objMailService.AppUrl}' target='_blank'>{objMailService.AppName}</a>
                             </p>                            
                         </div>
+                        <div id='EmailFooter' style='padding:5px;'><p>This is a system-generated email. Please do not reply.</p></div>
                     </div>
                 ";
             }

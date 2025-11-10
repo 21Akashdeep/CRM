@@ -74,6 +74,10 @@
                             <input type="text" id="Complaint_Email" name="Email" autocomplete="off" class="form-control form-control-sm complaint-required" maxlength="100" />
                         </div>
                         <div class="col-md-2">
+                            <label>Location<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Complaint_LocationDesc" name="LocationDesc" autocomplete="off" class="form-control form-control-sm complaint-required" readonly maxlength="200" />
+                        </div>
+                        <div class="col-md-2">
                             <label>Department<span class="text-mandatory">*</span></label>
                             <input type="text" id="Complaint_Department" name="Department" class="form-control form-control-sm es-input complaint-required" maxlength="50">
                         </div>                             
@@ -92,11 +96,12 @@
                             <table id="tableComplaintAssign" class="table table-bordered table-hover table-default" data-search="false" data-checkbox-header="false">
                                 <thead>
                                     <tr>
-                                        <th colspan="2">Complaint Assing To</th>
+                                        <th colspan="3">Complaint Assing To</th>
                                     </tr>
                                     <tr>
                                         <th data-formatter="tableComplaintAssignCheck" data-events="tableComplaintAssignCheckEvent" class="text-center"></th>
                                         <th data-field="UserName">User Name</th>
+                                        <th data-field="LocationDesc">Location</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>

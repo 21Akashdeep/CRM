@@ -3,7 +3,7 @@
         ComplaintStatus.getViewOption({
             onSuccess: (response) => {
                 Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description', });
-                Dropdown.bind({ id: '#ListComplaintId', data: response.data.Complaint, value: 'ComplaintId', text: 'ComplaintNo' });
+                Dropdown.bind({ id: '#ListComplaintId', data: response.data.Complaint, value: 'ComplaintId', text: 'ComplaintNo', subText: 'SubText' });
             }
         });
         $('#btnSearch').on('click', () => {
