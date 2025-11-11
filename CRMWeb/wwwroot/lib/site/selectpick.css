@@ -61,15 +61,13 @@ select.select-pick {
     border: var(--border);
     border-radius: 5px;
     margin-top: 3px;
-    position: absolute;
-    /*position: fixed;*/
+    position: absolute;    
     z-index: 1000;
     background-color: white;
     display: none;
 }
 .table .select-pick-menu {
-    /*position: initial;*/
-    
+    /*position: initial;*/    
 }
 .select-pick-menu.menu-show {
     min-height: 25px;

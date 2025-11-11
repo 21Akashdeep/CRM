@@ -1027,7 +1027,7 @@ nav {
     }
 
     [data-theme="dark"] .content-body .table.table-default {
-        outline: var(--theme-dark-border);
+        /*outline: var(--theme-dark-border);*/
     }
     /*[data-theme="dark"] .content-body .fixed-table-body {
     border: var(--theme-dark-border);
