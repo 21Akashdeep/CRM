@@ -97,8 +97,8 @@ const Util = {
 
 const Url = {
     App: window.location.origin,
-    Api: "http://localhost:15282/api/",
-    /*Api: "https://pcatscrmapi.dharunam.in/api/",*/
+    Api: "http://localhost:5139/api/",
+    /*Api: "https://apicrm.p-cats.co.in/api",*/
     get() {
         const params = new URLSearchParams(window.location.search);
         const obj = {};

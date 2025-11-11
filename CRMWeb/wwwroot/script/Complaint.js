@@ -220,6 +220,7 @@
             }
         });
     }
+    
     static update(obj) {
         Data.update({
             url: 'Complaint/Update',

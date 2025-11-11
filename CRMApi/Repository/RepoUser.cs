@@ -80,6 +80,7 @@ namespace CRMApi.Repository
                     ur.Id,
                     ur.UserId,
                     ur.Name
+                    //ur.Gender
                 }).ToList();
                 //Get User Api
                 Options.Api = await (
@@ -449,6 +450,7 @@ namespace CRMApi.Repository
                 UpdateUser.Code = obj.Code;
                 UpdateUser.Name = obj.Name;
                 UpdateUser.DateOfBirth = obj.DateOfBirth;
+                UpdateUser.Gender = obj.Gender;
                 UpdateUser.FatherName = obj.FatherName;
                 UpdateUser.ContactNo = obj.ContactNo;
                 UpdateUser.Email = obj.Email;
