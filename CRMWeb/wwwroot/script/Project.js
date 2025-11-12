@@ -211,7 +211,7 @@ window.tableProjectSLNo = (value, obj, index) => {
     return index + 1;
 }
 window.tableProjectStatus = (value, obj, index) => {
-    return `<div class="${obj.StatusCss}">${obj.StatusName}</div>`;
+    return `<div class="${obj.StatusCss}">${obj.StatusDesc}</div>`;
 }
 window.tableProjectCreatedByAndAt = (value, obj, index) => {
     return `<div>${obj.CreatedByName}</div>

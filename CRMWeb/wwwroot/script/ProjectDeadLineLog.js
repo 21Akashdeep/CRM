@@ -177,8 +177,8 @@
 window.tableProjectDeadLineLogSLNo = (value, obj, index) => {
     return index + 1;
 }
-window.tableProjectDeadLineLogStatus = (value, obj, index) => {
-    return `<div class="${obj.StatusCss}">${obj.StatusName}</div>`;
+window.tableProjectDeadLineLogStatus = (value, obj, index) => { 
+    return `<div class="${obj.StatusCss}">${obj.StatusDesc}</div>`;
 }
 window.tableProjectDeadLineDate = (value, obj, index) => {
     return `<div>${moment(obj.DeadLineDate).format('DD-MMM-YYYY')}</div>`;

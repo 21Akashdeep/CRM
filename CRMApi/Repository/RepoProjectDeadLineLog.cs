@@ -73,7 +73,7 @@ namespace CRMApi.Repository
                         DeadLineDate = dpt.DeadLineDate,
                         Reason = dpt.Reason,
                         Status = dpt.Status,
-                        //StatusName = sts.Description,
+                        StatusDesc = sts.Description,
                         StatusCss = sts.CssClass ?? "",
                         CreatedBy = dpt.CreatedBy,
                         CreatedByName = cby.Name,

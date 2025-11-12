@@ -76,7 +76,7 @@ namespace CRMApi.Repository
                         TechnicalDoc = dpt.TechnicalDoc,
                         Description = dpt.Description,
                         Status = dpt.Status,
-                        //StatusName = sts.Description,
+                        StatusDesc = sts.Description,
                         StatusCss = sts.CssClass ?? "",
                         CreatedBy = dpt.CreatedBy,
                         CreatedByName = cus.Name,
