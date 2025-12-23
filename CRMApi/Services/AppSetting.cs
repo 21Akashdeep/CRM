@@ -53,6 +53,7 @@
         public string SupportMode { get; set; } = string.Empty;
         public string Priority { get; set; } = string.Empty;
         public string Returnable { get; set; } = string.Empty;
+        public string JntvtiCateGory {  get; set; } = string.Empty;
     }
     public class Status
     {
@@ -159,5 +160,14 @@
 
         public string ProjTechDoc { get; set; } = string.Empty;
         public string ProjTechDocSufix { get; set; } = string.Empty;
+    }
+
+
+    public class JntvtiCateGory
+    {
+        public string Platinum { get; set; } = string.Empty;
+        public string Gold { get; set; } = string.Empty;
+        public string Silver { get; set; } = string.Empty;
+
     }
 }
