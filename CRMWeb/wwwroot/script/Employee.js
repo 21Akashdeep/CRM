@@ -3,7 +3,8 @@
     static init() {
         Employee.getViewOption((response) => {
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
-            Dropdown.bind({ id: '#ListId', data: response.data.Employee, value: 'Id', text: 'Description', subText: "Code" });
+            Dropdown.bind({ id: '#ListQualification', data: response.data.Qualification, value: 'Id', text: 'Description' });
+            Dropdown.bind({ id: '#ListJntvtiCategory', data: response.data.JntvtiCategory, value: 'value', text: 'Description'});
         });
         $('#btnSearch').on('click', () => {
             Employee.get();
@@ -17,6 +18,9 @@
         $('#btnAdd').on('click', () => {
             Employee.fill();
         });
+        $('#btnNewEntry').on('click', () => {
+            Employee.newEntry();
+        });
         Employee.initAdd();
     }
     static getViewOption(onSuccess = () => { }) {
@@ -24,8 +28,11 @@
     }
     static get() {
         var obj = {
+
             ListStatus: $('#ListStatus').val(),
-            //ListId: $('#ListId').val()
+            ListGender: $('#ListGender').val(),
+            ListJntvtiCategory: $('#ListJntvtiCategory').val(),
+            ListQualification: $('#ListQualification').val()
         }
         Data.post(
             {
@@ -66,19 +73,11 @@
                 }
             }
         );
+
     }
+
     //Employee Add
     static initAdd() {
-        $('#Employee_PinCode').on('input', () => {
-            let PinCode = $('#Employee_PinCode').val();
-            OnlineApi.pinCode({
-                pinCode: PinCode,
-                postOfficeId: "#Employee_PostOffice",
-                districtId: "#Employee_District",
-                stateId: "#Employee_AdminDivType",
-                PostalType: "#Employee_PostalType"
-            });
-        });
         $('#Employee_btnSave').on('click', () => {
             if (!Field.isMandatory({ class: ".Employee-required" })) {
                 return;
@@ -96,14 +95,31 @@
     static getAddOption(onSuccess) {
         Data.get({ url: 'Employee/GetAddOption', onSuccess: onSuccess });
     }
-    static fill() {
+    static newEntry() {
         Employee.getAddOption((response) => {
-            Modal.open({ id: '#modalEmployee', title: 'Employee / Add', action: 'Add' });
-            $('#Employee_SeqNo').val(0);
-            Dropdown.bind({ id: '#Employee_AdminDivType', data: response.data.AdminDivType, value: 'Value', text: 'Description' });
-            Dropdown.bind({ id: '#Employee_PostalType', data: response.data.PostalType, value: 'Value', text: 'Description' });
+            console.log(response);
+            Modal.open({
+                id: '#modalEmployee',
+                title: 'Employee / Add',
+                action: 'Add'
+            });
+
+            Dropdown.bind({
+                id: '#Employee_Qualification',
+                data: response.data.qualification,
+                value: 'Id',
+                text: 'Description'
+            });
+            Dropdown.bind({
+                id: '#Employee_JntvtiCategory',
+                data: response.data.JntvtiCategory,
+                value: 'Id',
+                text: 'Description'
+            });
         });
     }
+
+
     static add(obj) {
         Data.post(
             {
@@ -130,9 +146,19 @@
                         let obj = response.obj;
                         obj.Id = action == 'Edit' ? obj.Id : null;
                         let title = action == 'Edit' ? `Employee / Edit (Code: ${obj.Code})` : `Employee / Add`;
+                        Dropdown.bind({
+                            id: '#Employee_Qualification',
+                            data: response.data.qualification,
+                            value: 'Id',
+                            text: 'Description'
+                        });
+                        Dropdown.bind({
+                            id: '#Employee_JntvtiCategory',
+                            data: response.data.JntvtiCategory,
+                            value: 'Id',
+                            text: 'Description'
+                        });
                         Modal.open({ id: '#modalEmployee', title: title, action: action, obj: obj });
-                        Dropdown.bind({ id: '#Employee_AdminDivType', data: response.data.AdminDivType, value: 'Value', text: 'Description' });
-                        Dropdown.bind({ id: '#Employee_PostalType', data: response.data.PostalType, value: 'Value', text: 'Description' });
 
                     }
                     else {
@@ -195,6 +221,21 @@
         }
     }
 }
+
+window.tableEmployeeGender = (value, obj, index) => {
+    switch (obj.Gender) {
+        case 'M': return 'Male';
+        case 'F': return 'Female';
+        case 'T': return 'Transgender';
+        default: return '';
+    }
+};
+
+window.tableEmployeeDob = (value, obj, index) => {
+    if (!obj.DOB) return '-';
+
+    return moment(obj.DOB).format('DD-MMM-YYYY');
+};
 window.tableEmployeeSLNo = (value, obj, index) => {
     return index + 1;
 }

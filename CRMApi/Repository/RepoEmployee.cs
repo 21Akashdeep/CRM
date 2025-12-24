@@ -30,12 +30,18 @@ namespace CRMApi.Repository
                     st.Value,
                     st.Description
                 }).ToListAsync();
-                Option.Employee = await db.Employee.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
+                Option.JntvtiGrade = await db.Setting.Where(x =>App.ActiveStatus.Contains(x.Status) && x.Name == "JntvtiCategory").Select(x => new
+                 {
+                    x.Id,
+                    x.Description
+                 }).ToListAsync();
+                Option.Qualification = await db.Qualification.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
                 {
                     x.Id,
-                    x.Name
+                    x.Description
                 }).ToListAsync();
-               
+
+
                 objMsg.data = Option;
                 Message.Success(ref objMsg, "Record found");
             }
@@ -45,17 +51,25 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public async Task<Message> GetAddOptionAsync(Employee obj, User User)
+        public async Task<Message> GetAddOptionAsync()
         {
             Message objMsg = new Message();
             try
             {
                 dynamic Option = new ExpandoObject();
-                Option.Qualification = await db.Setting.Where(x => App.ActiveStatus.Contains(x.Status) && x.Name == App.SettingName.JntvtiCateGory).Select(x => new
+                Option.JntvtiCategory = await db.Setting.Where(x => App.ActiveStatus.Contains(x.Status) && x.Name == App.SettingName.JntvtiCateGory).Select(x => new
                 {
                     Id = x.Value,
                     x.Description
                 }).ToListAsync();
+
+                Option.qualification = await db.Qualification.Where(x => App.ActiveStatus.Contains(x.Status)).Select
+                    (x => new
+                    {
+                        x.Id,
+                        x.Description
+                    }
+                    ).ToListAsync();
 
 
 
@@ -97,6 +111,10 @@ namespace CRMApi.Repository
                 dbEmployeeQuery = dbEmployeeQuery.Where(co => obj.ListId.Contains(co.Id));
             if (obj.ListGender.Any())
                 dbEmployeeQuery = dbEmployeeQuery.Where(co => obj.ListGender.Contains(co.Gender));
+            if (obj.ListJntvtiCategory.Any())
+                dbEmployeeQuery = dbEmployeeQuery.Where(co => obj.ListJntvtiCategory.Contains(co.JntvtiCategory));
+            if (obj.ListQualification.Any())
+                dbEmployeeQuery = dbEmployeeQuery.Where(co => obj.ListQualification.Contains(co.QualificationId));
 
 
             //Get Employee List
@@ -113,12 +131,18 @@ namespace CRMApi.Repository
                     Name = em.Name,
                     DOB = em.DOB,
                     Gender = em.Gender,
-                    Email=em.Email,
-                    JntvtiCategory=sm.Value,
+                    Email =em.Email,
+                    JntvtiCategory = em.JntvtiCategory,
+                    JntvtiCategoryDesc = sm.Description,
+                    QualificationId = em.QualificationId,
                     ContactNo = em.ContactNo,
                     GuardianName = em.GuardianName,
                     IsEpfDeduct = em.IsEpfDeduct,
                     IsEsiDeduct = em.IsEsiDeduct,
+                    EsiNo  = em.EsiNo,
+                    GuardianRelation = em.GuardianRelation,
+                    MaritalStatus = em.MaritalStatus,
+                    UanNo = em.UanNo,
                     QualificationDesc = qu.Description,
                     Status = em.Status,
                     StatusDesc = st.Description,
@@ -214,32 +238,199 @@ namespace CRMApi.Repository
         }
         public async Task<Message> AddAsync(Employee obj, User User)
         {
-            
             Message objMsg = new Message();
             try
             {
-                //Sanitize Input
-                //obj.Code = Util.SanitizeInput(obj.Code, null) ?? "";
+          
                 obj.Name = Util.SanitizeInput(obj.Name, null) ?? "";
-                var duplicate = db.Employee.FirstOrDefault(ap => App.ActiveStatus.Contains(ap.Status) && (ap.Name == obj.Name));
+                obj.Gender = Util.SanitizeInput(obj.Gender, null) ?? "";
+                obj.GuardianRelation = Util.SanitizeInput(obj.GuardianRelation, null) ?? "";
+                obj.GuardianName = Util.SanitizeInput(obj.GuardianName, null) ?? "";
+                obj.MaritalStatus = Util.SanitizeInput(obj.MaritalStatus, null) ?? "";
+                obj.JntvtiCategory = Util.SanitizeInput(obj.JntvtiCategory, null) ?? "";
+                obj.ContactNo = Util.SanitizeInput(obj.ContactNo, null) ?? "";
+                obj.Email = Util.SanitizeInput(obj.Email, null) ?? "";
+                obj.UanNo = Util.SanitizeInput(obj.UanNo, null) ?? "";
+                obj.EsiNo = Util.SanitizeInput(obj.EsiNo, null) ?? "";
+
+                var duplicate = await db.Employee.FirstOrDefaultAsync(ap =>
+                    App.ActiveStatus.Contains(ap.Status) &&
+                    (
+                        ap.Name == obj.Name ||
+                        (obj.Email != "" && ap.Email == obj.Email) ||
+                        (obj.ContactNo != "" && ap.ContactNo == obj.ContactNo)
+                    )
+                );
 
                 if (duplicate != null)
                 {
-                    //if (duplicate.Code == obj.Code)
-                    //    Message.Duplicate(ref objMsg, $"Employee Code : {obj.Code} already exists.");
                     if (duplicate.Name == obj.Name)
-                        Message.Duplicate(ref objMsg, $"Employee Name : {obj.Name} already exists.");                
+                        Message.Duplicate(ref objMsg, $"Employee Name : {obj.Name} already exists.");
+
+                    else if (obj.Email != "" && duplicate.Email == obj.Email)
+                        Message.Duplicate(ref objMsg, $"Employee Email : {obj.Email} already exists.");
+
+                    else if (obj.ContactNo != "" && duplicate.ContactNo == obj.ContactNo)
+                        Message.Duplicate(ref objMsg, $"Employee Contact No : {obj.ContactNo} already exists.");
+
                     return objMsg;
                 }
+
+
                 obj.CreatedBy = User.Id;
                 obj.UpdatedBy = User.Id;
-                db.Add(obj);
-                Message.Add(ref objMsg, db.SaveChanges(), "");
+
+                db.Employee.Add(obj);
+                Message.Add(ref objMsg, await db.SaveChangesAsync(), "");
+
                 if (objMsg.status == Message.Type.success)
                 {
-                    db.Entry(obj).Reload();
+                    await db.Entry(obj).ReloadAsync();
+
                     obj.ListId.Add(obj.Id);
-                    objMsg.obj = await ListAsync(obj, User);
+
+                    objMsg.obj = (await ListAsync(obj, User)).FirstOrDefault();
+                    objMsg.data = (await GetViewOptionAsync()).data;
+                }
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+
+        public async Task<Message> EditAsync(int Id, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                Employee? obj = new Employee();
+                obj.ListId.Add(Id);
+                obj.ListStatus.AddRange(App.AllActiveStatus);
+                obj = (await ListAsync(obj, User)).FirstOrDefault();
+                if (obj == null)
+                {
+                    Message.Error(ref objMsg, "Employee did not find for edit.");
+                    return objMsg;
+                }
+                var AddOption = await GetAddOptionAsync();
+                objMsg.obj = obj;
+                objMsg.data = AddOption.data;
+                Message.Success(ref objMsg, "Record found");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+
+        private async Task GetAddOptionAsync(Employee obj, User user)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<Message> UpdateAsync(Employee obj, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                // 🔹 Sanitize inputs
+               
+                var dbEmployee = db.Employee.ToList();
+
+                // 🔹 Duplicate Name check
+                if (dbEmployee.Any(x => x.Name == obj.Name && x.Id != obj.Id))
+                {
+                    Message.Duplicate(ref objMsg, $"Employee Name {obj.Name}");
+                    return objMsg;
+                }
+
+                // 🔹 Duplicate Contact check
+                if (!string.IsNullOrEmpty(obj.ContactNo) &&
+                    dbEmployee.Any(x => x.ContactNo == obj.ContactNo && x.Id != obj.Id))
+                {
+                    Message.Duplicate(ref objMsg, $"Contact No {obj.ContactNo}");
+                    return objMsg;
+                }
+
+                // 🔹 Fetch existing record
+                var UpdateEmployee = dbEmployee.FirstOrDefault(x => x.Id == obj.Id);
+                if (UpdateEmployee == null)
+                {
+                    Message.Error(ref objMsg, "Employee not found for update.");
+                    return objMsg;
+                }
+
+                // 🔹 Update fields
+                UpdateEmployee.Name = obj.Name;
+                UpdateEmployee.DOB = obj.DOB;
+                UpdateEmployee.Gender = obj.Gender;
+                UpdateEmployee.GuardianRelation = obj.GuardianRelation;
+                UpdateEmployee.GuardianName = obj.GuardianName;
+                UpdateEmployee.MaritalStatus = obj.MaritalStatus;
+                UpdateEmployee.JntvtiCategory = obj.JntvtiCategory;
+                UpdateEmployee.QualificationId = obj.QualificationId;
+                UpdateEmployee.ContactNo = obj.ContactNo;
+                UpdateEmployee.Email = obj.Email;
+                UpdateEmployee.IsEpfDeduct = obj.IsEpfDeduct;
+                UpdateEmployee.UanNo = obj.UanNo;
+                UpdateEmployee.IsEsiDeduct = obj.IsEsiDeduct;
+                UpdateEmployee.EsiNo = obj.EsiNo;
+                UpdateEmployee.Status = obj.Status;
+
+                
+
+                // 🔹 Audit
+                UpdateEmployee.UpdatedBy = User.Id;
+                UpdateEmployee.UpdatedAt = DateTime.Now;
+
+                db.Update(UpdateEmployee);
+
+                Message.Update(ref objMsg, await db.SaveChangesAsync(), "");
+
+                // 🔹 Return updated data
+                if (objMsg.status == Message.Type.success)
+                {
+                    obj.ListId.Add(obj.Id);
+                    objMsg.obj = ListAsync(obj, User);
+                    objMsg.data = GetViewOptionAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+
+
+
+
+        public async Task<Message> DeleteAsync(int Id, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var DeleteEmployee = db.Employee.Where(it => it.Id == Id).AsEnumerable().FirstOrDefault();
+                if (DeleteEmployee == null)
+                {
+                    Message.Error(ref objMsg, "Item did not find for delete.");
+                    return objMsg;
+                }
+                DeleteEmployee.Status = App.Status.Delete;
+                DeleteEmployee.UpdatedBy = User.Id;
+                DeleteEmployee.UpdatedAt = DateTime.Now;
+                db.Update(DeleteEmployee);
+
+
+                Message.Delete(ref objMsg, db.SaveChanges(), "");
+                if (objMsg.status == Message.Type.success)
+                {
+                    DeleteEmployee.ListStatus.Add(App.Status.Delete);
+                    DeleteEmployee.ListId.Add(Id);
+                    objMsg.obj = await ListAsync(DeleteEmployee, User);
                     objMsg.data = await GetViewOptionAsync();
                 }
             }
@@ -249,258 +440,36 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        //public async Task<Message> EditAsync(int Id, User User)
-        //{
-        //    Message objMsg = new Message();
-        //    try
-        //    {
-        //        Employee? obj = new Employee();
-        //        obj.ListId.Add(Id);
-        //        obj.ListStatus.AddRange(App.AllActiveStatus);
-        //        obj = (await ListAsync(obj, User)).FirstOrDefault();
-        //        if (obj == null)
-        //        {
-        //            Message.Error(ref objMsg, "Employee did not find for edit.");
-        //            return objMsg;
-        //        }
-        //        var AddOption = await GetAddOptionAsync(obj, User);
-        //        objMsg.obj = obj;
-        //        objMsg.data = AddOption.data;
-        //        Message.Success(ref objMsg, "Record found");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Message.Exception(ref objMsg, ex);
-        //    }
-        //    return objMsg;
-        //}
-        //public async Task<Message> UpdateAsync(Employee obj, User User)
-        //{
-        //    Message objMsg = new Message();
-        //    try
-        //    {
-        //        var UpdateEmployee = await db.Employee.FindAsync(obj.Id);
-        //        if (UpdateEmployee == null)
-        //        {
-        //            Message.Error(ref objMsg, "Employee did not find for update.");
-        //            return objMsg;
-        //        }
-        //        UpdateEmployee.Date = obj.Date;
-        //        UpdateEmployee.SupportMode = obj.SupportMode;
-        //        UpdateEmployee.CustomerId = obj.CustomerId;
-        //        UpdateEmployee.Address1 = obj.Address1;
-        //        UpdateEmployee.Address2 = obj.Address2;
-        //        UpdateEmployee.PinCode = obj.PinCode;
-        //        UpdateEmployee.PostOffice = obj.PostOffice;
-        //        UpdateEmployee.District = obj.District;
-        //        UpdateEmployee.AdminDivId = obj.AdminDivId;
-        //        UpdateEmployee.EmployeeId = obj.EmployeeId;
-        //        UpdateEmployee.ContactPerson = obj.ContactPerson;
-        //        UpdateEmployee.ContactNo = obj.ContactNo;
-        //        UpdateEmployee.Email = obj.Email;
-        //        UpdateEmployee.Department = obj.Department;
-        //        UpdateEmployee.Priority = obj.Priority;
-        //        UpdateEmployee.Problem = obj.Problem;
-        //        UpdateEmployee.UpdatedBy = User.Id;
-        //        UpdateEmployee.UpdatedAt = DateTime.Now;
-        //        db.Update(UpdateEmployee);
-        //        //Update Employee Assing
-        //        var UpdateEmployeeAssign = await db.EmployeeAssign.Where(x => x.EmployeeId == obj.Id).ToListAsync();
-        //        UpdateEmployeeAssign.ForEach(x =>
-        //        {
-        //            var EmployeeAssign = obj.EmployeeAssign.FirstOrDefault(ca => ca.Id == x.Id);
-        //            x.Status = EmployeeAssign != null ? UpdateEmployee.Status : App.Status.Cancel;
-        //            x.UpdatedBy = User.Id;
-        //            x.UpdatedAt = DateTime.Now;
-        //        });
-        //        db.UpdateRange(UpdateEmployeeAssign);
-        //        //Add Employee Assing
-        //        var AddEmployeeAssign = obj.EmployeeAssign.Where(x => x.Id == 0 && !UpdateEmployeeAssign.Any(x1 => x1.EmployeeId == x.EmployeeId && x1.UserId == x.UserId)).ToList();
-        //        AddEmployeeAssign.ForEach(x =>
-        //        {
-        //            x.EmployeeId = obj.Id;
-        //            x.Status = UpdateEmployee.Status;
-        //            x.CreatedBy = User.Id;
-        //            x.UpdatedBy = User.Id;
-        //        });
-        //        db.AddRange(AddEmployeeAssign);
-        //        Message.Update(ref objMsg, (await db.SaveChangesAsync()), "");
-        //        if (objMsg.status == Message.Type.success)
-        //        {
-        //            obj.ListId.Add(obj.Id);
-        //            var Employee = (await ListAsync(obj, User)).FirstOrDefault();
-        //            if (Employee != null)
-        //            {
-        //                Employee.EmployeeAssign = obj.EmployeeAssign;
-        //                Message msg = await NotifyEmployeeLogByEmail(Employee, false);
-        //                objMsg.status = msg.status != Message.Type.success ? msg.status : objMsg.status;
-        //                objMsg.statusText += msg.statusText;
-        //            }
-        //            objMsg.obj = Employee;
-        //            objMsg.data = (await GetViewOptionAsync()).data;
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Message.Exception(ref objMsg, ex);
-        //    }
-        //    return objMsg;
-        //}
-        //public async Task<Message> DeleteAsync(int Id, User User)
-        //{
-        //    Message objMsg = new Message();
-        //    try
-        //    {
-        //        var DeleteEmployee = await db.Employee.FindAsync(Id);
-        //        if (DeleteEmployee == null)
-        //        {
-        //            Message.Error(ref objMsg, "Employee did not find for update.");
-        //            return objMsg;
-        //        }
-        //        DeleteEmployee.Status = App.Status.Delete;
-        //        DeleteEmployee.UpdatedBy = User.Id;
-        //        DeleteEmployee.UpdatedAt = DateTime.Now;
-        //        db.Update(DeleteEmployee);
-        //        //Delete Employee Assign
-        //        var DeleteEmployeeAssign = await db.EmployeeAssign.Where(x => x.EmployeeId == Id).ToListAsync();
-        //        if (DeleteEmployeeAssign.Any())
-        //        {
-        //            foreach (var item in DeleteEmployeeAssign)
-        //            {
-        //                item.Status = DeleteEmployee.Status;
-        //                item.UpdatedBy = User.Id;
-        //                item.UpdatedAt = DateTime.Now;
-        //                db.Update(item);
-        //            }
-        //        }
-        //        //Delete Employee Status
-        //        var DeleteEmployeeStatus = await db.EmployeeStatus.Where(x => x.EmployeeId == Id).ToListAsync();
-        //        if (DeleteEmployeeStatus.Any())
-        //        {
-        //            foreach (var item in DeleteEmployeeStatus)
-        //            {
-        //                item.Status = DeleteEmployee.Status;
-        //                item.UpdatedBy = User.Id;
-        //                item.UpdatedAt = DateTime.Now;
-        //                db.Update(item);
-        //            }
-        //        }
-        //        Message.Delete(ref objMsg, (await db.SaveChangesAsync()), "");
-        //        if (objMsg.status == Message.Type.success)
-        //        {
-        //            DeleteEmployee.ListId.Add(Id);
-        //            DeleteEmployee.ListStatus.Add(App.Status.Delete);
-        //            objMsg.obj = (await ListAsync(DeleteEmployee, User)).FirstOrDefault();
-        //            objMsg.data = (await GetViewOptionAsync()).data;
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Message.Exception(ref objMsg, ex);
-        //    }
-        //    return objMsg;
-        //}
-        //public async Task<Message> NotifyEmployeeLogByEmail(Employee obj, bool IsReg)
-        //{
-        //    Message objMsg = new Message();
-        //    try
-        //    {
-        //        //Sent Email To Customer
-        //        if (IsReg)
-        //        {
-        //            string CustomerMailBody = $"Your Employee No. {obj.Code} has been registered. ";
-        //            var CustomerMail = new MailMessage();
-        //            CustomerMail.To.Add(obj.Email);
-        //            Util.SentMail(db, CustomerMail, $"Employee Registered: {obj.Code}", CustomerMailBody, "info", ref objMsg);
-        //            objMsg.statusText = objMsg.status == Message.Type.success ? "Email has been sent to the customer." : "Failed to send email to the customer.";
-        //        }
-        //        else
-        //        {
-        //            objMsg.status = Message.Type.success;
-        //        }
-        //        //Sent Email To Serice Eng
-        //        var ListId = obj.EmployeeAssign.Select(ca => ca.UserId).ToList();
-        //        var ListUserEmail = await db.User.Where(x => App.ActiveStatus.Contains(x.Status) && ListId.Contains(x.Id)).Select(x => x.Email).ToListAsync();
-        //        var UserMail = new MailMessage();
-        //        ListUserEmail.ForEach(Email => { UserMail.To.Add(Email); });
-        //        if (ListUserEmail.Any())
-        //        {
-        //            var UserMailBody = new StringBuilder();
-        //            UserMailBody.AppendLine("<p>");
-        //            UserMailBody.AppendLine($"You have been assigned Employee No. {obj.Code}.<br/>");
-        //            UserMailBody.AppendLine($"Please resolve it at the earliest possible.");
-        //            UserMailBody.AppendLine("</p><hr/>");
-        //            UserMailBody.AppendLine($@"
-        //                <table style='width:90%; border-collapse: collapse;' border='0'>
-        //                    <tbody>
-        //                        <tr><th colspan='2' style='text-align:left;'>Employee Info :</th></tr>
-        //                        <tr><th style='text-align:left;'>Customer</th><td><b>:</b> {obj.CustomerDesc}</td></tr>
-        //                        <tr><th style='text-align:left;'>Location</th><td><b>:</b> {obj.CustomerLocation}</td></tr>
-        //                        <tr><th style='text-align:left;'>Department</th><td><b>:</b> {obj.Department}</td></tr>
-        //                        <tr><th style='text-align:left;'>Contact Person</th><td><b>:</b> {obj.ContactPerson}</td></tr>
-        //                        <tr><th style='text-align:left;'>Contact No.</th><td><b>:</b> {obj.ContactNo}</td></tr>
-        //                        <tr><th style='text-align:left;'>Email</th><td><b>:</b> {obj.Email}</td></tr>
-        //                        <tr><th style='text-align:left;'>Address</th><td><b>:</b> {obj.CustomerAddress}</td></tr>
-        //                        <tr><th style='text-align:left;'>priority</th><td><b>:</b> {obj.PriorityDesc}</td></tr>
-        //                        <tr><td colspan='2' style='text-align:left;'><b>Problem :</b><div>{obj.Problem.Replace("\r\n", "<br/>")}</div></td></tr>
-        //                    </tbody>
-        //                </table>
-        //                <hr/>
-        //            ");
-        //            Thread.Sleep(1000);
-        //            Message objMsgEng = new Message();
-        //            Util.SentMail(db, UserMail, $"Employee Assigned: {obj.Code}", UserMailBody.ToString(), "info", ref objMsgEng);
-        //            if (objMsg.status != Message.Type.success || objMsgEng.status != Message.Type.success)
-        //            {
-        //                objMsg.status = objMsg.status != Message.Type.success && objMsgEng.status != Message.Type.success ? Message.Type.error : Message.Type.warning;
-        //            }
-        //            else
-        //            {
-        //                objMsg.status = Message.Type.success;
-        //            }
-        //            objMsg.statusText += $"<br>{(objMsgEng.status == Message.Type.success ? "Email sent to assigned engineer(s)." : "Failed to notify assigned engineer(s).")}";
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Message.Exception(ref objMsg, ex);
-        //    }
-        //    return objMsg;
-        //}
-        //public async Task<Message> Close(int Id, User User)
-        //{
-        //    Message objMsg = new Message();
-        //    try
-        //    {
-        //        var dbEmployeeQuery = db.Employee.Where(co => co.Id == Id).AsQueryable();
-        //        if (User.UserType != App.UserType.SysAdmin)
-        //        {
-        //            dbEmployeeQuery = dbEmployeeQuery.Where(co => co.Status == App.Status.RequestForClose);
-        //        }
-        //        var Employee = await dbEmployeeQuery.FirstOrDefaultAsync();
-        //        if (Employee == null)
-        //        {
-        //            Message.Error(ref objMsg, "Employee did not for close");
-        //            return objMsg;
-        //        }
-        //        Employee.Status = App.Status.Completed;
-        //        Employee.UpdatedBy = User.Id;
-        //        Employee.UpdatedAt = DateTime.Now;
-        //        db.Update(Employee);
-        //        Message.Close(ref objMsg, (await db.SaveChangesAsync()), "");
-        //        if (objMsg.status == Message.Type.success)
-        //        {
-        //            Employee.ListId.Add(Id);
-        //            objMsg.obj = (await ListAsync(Employee, User)).FirstOrDefault();
-        //            objMsg.data = (await GetViewOptionAsync()).data;
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Message.Exception(ref objMsg, ex);
-        //    }
-        //    return objMsg;
-        //}
+        public Message Enable(int Id, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var EnableEmployee = db.Employee.Where(it => it.Id == Id).AsEnumerable().FirstOrDefault();
+                if (EnableEmployee == null)
+                {
+                    Message.Error(ref objMsg, "Item did not find for delete.");
+                    return objMsg;
+                }
+                EnableEmployee.Status = App.Status.Enable;
+                EnableEmployee.UpdatedBy = User.Id;
+                EnableEmployee.UpdatedAt = DateTime.Now;
+                db.Update(EnableEmployee);
+
+                Message.Enable(ref objMsg, db.SaveChanges(), "");
+                if (objMsg.status == Message.Type.success)
+                {
+                    EnableEmployee.ListId.Add(Id);
+                    objMsg.obj =  ListAsync(EnableEmployee, User);
+                    objMsg.data =  GetViewOptionAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
 
     }
 }

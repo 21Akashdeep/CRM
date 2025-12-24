@@ -1,5 +1,166 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿<div id="modalEmployee" class="modal fade" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen modal-dialog-scrollable modal-lg" role="document">
+        <div class="modal-content">
+
+            <!-- Header -->
+            <div class="modal-header">
+                <span class="modal-title">Employee / Add</span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body" style="min-height:75vh;">
+                <form id="formEmployee">
+                    <div class="row g-2">
+
+                        <input type="hidden" id="Employee_Id" name="Id" />
+
+                        <!-- Name -->
+                        <div class="col-md-3">
+                            <label>Name <span class="text-mandatory">*</span></label>
+                            <input type="text" id="Employee_Name" name="Name"
+                                   class="form-control form-control-sm employee-required"
+                                   maxlength="100" autocomplete="off" />
+                        </div>
+
+                        <!-- Gender -->
+                        <div class="col-md-3">
+                            <label>Gender</label>                    
+                            <select id="Employee_Gender" name="Gender" class="form-control form-control-sm select-pick">
+                                <option value="M">Male</option>
+                                <option value="F">Female</option>
+                                <option value="T">Transgender</option>
+                            </select>
+
+                        </div>
+
+                        <!-- DOB -->
+                        <div class="col-md-3">
+                            <label>DOB <span class="text-mandatory">*</span></label>
+                            <input type="date" id="Employee_DOB" name="DOB"
+                                   class="form-control form-control-sm employee-required"
+                                   value="@Model?.DOB?.ToString("yyyy-MM-dd")" />
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>GuardianName <span class="text-mandatory">*</span></label>
+                            <input type="text" id="Employee_GuardianName" name="GuardianName"
+                                   class="form-control form-control-sm employee-required"
+                                   maxlength="100" autocomplete="off" />
+                        </div>
+
+                        <!-- Guardian Relation -->
+                        <div class="col-md-3">
+                            <label>Guardian Relation</label>
+                            <select id="Employee_GuardianRelation" name="GuardianRelation"
+                                    class="form-control form-control-sm select-pick">
+                                <option value="F">Father</option>
+                                <option value="H">Husband</option>
+                                
+                            </select>
+                        </div>
+                     
+
+                        <!-- Marital Status -->
+                        <div class="col-md-3">
+                            <label>Marital Status</label>
+                            <select id="Employee_MaritalStatus" name="MaritalStatus"
+                                    class="form-control form-control-sm select-pick">
+                                <option value="Y">Yes</option>
+                                <option value="N">No</option>
+
+                            </select>
+                        </div>
+
+                    
+                        <!-- Qualification -->
+                        <div class="col-md-3">
+                            <label>Qualification <span class="text-mandatory">*</span></label>
+                            <select id="Employee_Qualification" name="QualificationId"
+                                    class="form-control form-control-sm select-pick employee-required"
+                                    data-search="true" data-size="4">
+                            </select>
+                        </div>
+
+                            <!-- Category -->
+                        <div class="col-md-3">
+                            <label>JNTVTI Grade</label>
+                            <select id="Employee_JntvtiCategory" name="JntvtiCategory"
+                                    class="form-control form-control-sm select-pick">
+                            </select>
+                        </div>
+
+
+                        <!-- Contact -->
+                        <div class="col-md-3">
+                            <label>Contact No <span class="text-mandatory">*</span></label>
+                            <input type="text" id="Employee_ContactNo" name="ContactNo"
+                                   class="form-control form-control-sm employee-required"
+                                   maxlength="10" data-num="true" />
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-md-3">
+                            <label>Email</label>
+                            <input type="email" id="Employee_Email" name="Email"
+                                   class="form-control form-control-sm"
+                                   maxlength="100" />
+                        </div>
+
+                        <!-- EPF -->
+                        <div class="col-md-3">
+                            <label>EPF Deduct</label>
+                            <select id="Employee_IsEpfDeduct" name="IsEpfDeduct"
+                                    class="form-control form-control-sm select-pick">
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>UAN No</label>
+                            <input type="text" id="Employee_UanNo" name="UanNo"
+                                   class="form-control form-control-sm"
+                                   maxlength="12" />
+                        </div>
+
+                        <!-- ESI -->
+                        <div class="col-md-3">
+                            <label>ESI Deduct</label>
+                            <select id="Employee_IsEsiDeduct" name="IsEsiDeduct"
+                                    class="form-control form-control-sm select-pick">
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>ESI No</label>
+                            <input type="text" id="Employee_EsiNo" name="EsiNo"
+                                   class="form-control form-control-sm"
+                                   maxlength="12" />
+                        </div>
+
+                       
+
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer">
+                <button type="button" id="Employee_btnSave" class="btn btn-sm btn-success rounded-5">
+                    <span class="fa fa-save"></span>&nbsp;&nbsp;Save
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

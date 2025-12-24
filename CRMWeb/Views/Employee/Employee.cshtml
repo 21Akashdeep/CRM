@@ -17,7 +17,30 @@
                     <select id="ListStatus" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
                     </select>
                 </div>
-               
+
+                <div class="col-md-2">
+                    <label>Gender</label>
+                    <select id="ListGender" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple name="Gender" >
+                            <option value="M">Male</option>
+                            <option value="F">Female</option>
+                            <option value="T">Transgender</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label>JNTVTI Qualification</label>
+                    <select id="ListQualification" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                    </select>
+                </div>
+
+
+                <div class="col-md-2">
+                    <label>JNTVTI Category</label>
+                    <select id="ListJntvtiCategory" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                    </select>
+                </div>
+
+
                 <div class="col-md-1">
                     <div class="btn-group">
                         <button type="button" id="btnSearch" class="btn btn-sm btn-filter btn-outline-success" title="Search">
@@ -43,12 +66,15 @@
                         <thead>
                             <tr>
                                 <th data-sortable="false" data-formatter="tableEmployeeSLNo" class="text-center">#</th>
-                                <th data-sortable="true" data-field="Name">name</th>
-                                <th data-sortable="true" data-field="Gender">Gender</th>
-                                <th data-sortable="true" data-field="DOB">DOB</th>
-                                <th data-sortable="true" data-field="GuardianName">GuardianName</th>
-                                <th data-sortable="true" data-field="QualificationDesc">Qualification</th>
-                                <th data-sortable="true" data-field="JntvtiCateGory">Jntvti Grade</th>
+                                <th data-sortable="true" data-field="Name">Name</th>
+                                <th data-sortable="true" data-field="Gender"data-formatter="tableEmployeeGender"> Gender </th>
+                                <th data-sortable="true" data-field="DOB" data-formatter="tableEmployeeDob">DOB</th>
+                                <th data-sortable="true" data-field="GuardianName">Guardian Name</th>
+                                <th data-sortable="true" data-field="QualificationDesc">JNTVTI Qualification</th>
+                                <th data-sortable="true" data-field="JntvtiCategoryDesc">JNTVTI Category</th>
+                                <th data-sortable="true" data-field="UanNo">UAN No</th>
+                                <th data-sortable="true" data-field="EsiNo">ESI No</th>
+                                <th data-sortable="true" data-field="ContactNo">Contact</th>
                                 <th data-sortable="true" data-field="Email">Email</th>
                                 <th data-sortable="true" data-field="CreatedAt" data-formatter="tableEmployeeCreatedByAndAt" class="text-nowrap">Created By & At</th>
                                 <th data-sortable="true" data-field="UpdatedAt" data-formatter="tableEmployeeUpdatedByAndAt" class="text-nowrap">Updated By & At</th>

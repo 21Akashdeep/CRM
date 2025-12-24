@@ -15,7 +15,7 @@
 
     <div class="card-body">
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label>Status</label>
                 <select id="ListStatus"
                         class="form-control form-control-sm select-pick"
@@ -27,7 +27,7 @@
                 </select>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label>Qualification</label>
                 <select id="ListId"
                         class="form-control form-control-sm select-pick"
@@ -79,30 +79,12 @@
                        data-unique-id="Id">
                     <thead>
                         <tr>
-                            <th data-sortable="false"
-                                data-formatter="tableQualificationSLNo"
-                                class="text-center">#</th>
-
-                            <th data-sortable="true"
-                                data-field="Code">Code</th>
-
-                            <th data-sortable="true"
-                                data-field="Name">Name</th>
-
-                            <th data-sortable="true"
-                                data-field="Description">Description</th>
-
-                            <th data-sortable="false"
-                                data-formatter="tableQualificationCreatedByAndAt"
-                                class="text-nowrap">
-                                Created By & At
-                            </th>
-
-                            <th data-sortable="false"
-                                data-formatter="tableQualificationUpdatedByAndAt"
-                                class="text-nowrap">
-                                Updated By & At
-                            </th>
+                            <th data-sortable="false"data-formatter="tableQualificationSLNo"class="text-center">#</th>
+                            <th data-sortable="true" data-field="Code">Code</th>
+                            <th data-sortable="true" data-field="Name">Name</th>
+                            <th data-sortable="true" data-field="Description">Description</th>
+                            <th data-sortable="false" data-formatter="tableQualificationCreatedByAndAt" class="text-nowrap"> Created By & At </th>
+                            <th data-sortable="false" data-formatter="tableQualificationUpdatedByAndAt" class="text-nowrap"> Updated By & At</th>
 
                             <th data-sortable="false"
                                 data-formatter="tableQualificationStatus"
