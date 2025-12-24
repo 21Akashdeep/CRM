@@ -6,13 +6,13 @@ namespace CRMApi.Models
     public class Employee
     {
         public int Id { get; set; }
-        [MaxLength(16)] public string Code { get; set; } = string.Empty;
+
         [MaxLength(100)] public string Name { get; set; } = string.Empty;
         [MaxLength(1)] public string Gender { get; set; } = string.Empty;
         public DateTime DOB { get; set; }
         [MaxLength(1)] public string GuardianRelation { get; set; } = string.Empty;
         [MaxLength(200)] public string GuardianName { get; set; } = string.Empty;
-        [MaxLength(1)] public string MaritialStatus { get; set; } = string.Empty;
+        [MaxLength(1)] public string MaritalStatus { get; set; } = string.Empty;
         [MaxLength(1)] public string JntvtiCategory { get; set; } = string.Empty;
         public int QualificationId { get; set; }
         [NotMapped] public string QualificationDesc { get; set; } = string.Empty;
@@ -36,6 +36,7 @@ namespace CRMApi.Models
         [NotMapped] public List<int> ListId { get; set; } = new List<int>();
         [NotMapped] public List<int> ListStatus { get; set; } = new List<int>();
         [NotMapped] public List<string> ListGender { get; set; } = new List<string>();
+
 
         [NotMapped] public bool IsEdit { get; set; } = false;
         [NotMapped] public bool IsDelete { get; set; } = false;
