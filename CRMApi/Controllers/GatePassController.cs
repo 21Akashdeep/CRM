@@ -99,85 +99,85 @@ namespace CRMApi.Controllers
         //    return Ok(objMsg);
         //}
 
-        //[HttpPost]
-        //public async Task<IActionResult> Add(GatePass obj)
-        //{
-        //    Message objMsg = new Message();
-        //    try
-        //    {
-        //        var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
-        //        if (User == null) return Ok(objMsg);
-        //        objMsg = await RepoGatePass.AddAsync(obj, User);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Message.Exception(ref objMsg, ex);
-        //    }
-        //    return Ok(objMsg);
-        //}
-        //[HttpGet]
-        //public async Task<IActionResult> Edit(int Id)
-        //{
-        //    Message objMsg = new Message();
-        //    try
-        //    {
-        //        var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
-        //        if (User == null) return Ok(objMsg);
-        //        objMsg = await RepoGatePass.EditAsync(Id, User);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Message.Exception(ref objMsg, ex);
-        //    }
-        //    return Ok(objMsg);
-        //}
-        //[HttpPatch]
-        //public async Task<IActionResult> Update(GatePass obj)
-        //{
-        //    Message objMsg = new Message();
-        //    try
-        //    {
-        //        var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
-        //        if (User == null) return Ok(objMsg);
-        //        objMsg = await RepoGatePass.UpdateAsync(obj, User);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Message.Exception(ref objMsg, ex);
-        //    }
-        //    return Ok(objMsg);
-        //}
-        //[HttpDelete]
-        //public async Task<IActionResult> Delete(int Id)
-        //{
-        //    Message objMsg = new Message();
-        //    try
-        //    {
-        //        var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
-        //        if (User == null) return Ok(objMsg);
-        //        objMsg = await RepoGatePass.DeleteAsync(Id, User);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Message.Exception(ref objMsg, ex);
-        //    }
-        //    return Ok(objMsg);
-        //}
-        //public IActionResult Enable(int Id)
-        //{
-        //    Message objMsg = new Message();
-        //    try
-        //    {
-        //        var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Enable }, db, ref objMsg);
-        //        if (User == null) return Ok(objMsg);
-        //        objMsg = RepoGatePass.Enable(Id, User);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Message.Exception(ref objMsg, ex);
-        //    }
-        //    return Ok(objMsg);
-        //}
+        [HttpPost]
+        public async Task<IActionResult> Add(GatePass obj)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
+                if (User == null) return Ok(objMsg);
+                objMsg = await RepoGatePass.AddAsync(obj, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
+        [HttpGet]
+        public async Task<IActionResult> Edit(int Id)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
+                if (User == null) return Ok(objMsg);
+                objMsg = await RepoGatePass.EditAsync(Id, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
+        [HttpPatch]
+        public async Task<IActionResult> Update(GatePass obj)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
+                if (User == null) return Ok(objMsg);
+                objMsg = await RepoGatePass.UpdateAsync(obj, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int Id)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
+                if (User == null) return Ok(objMsg);
+                objMsg = await RepoGatePass.DeleteAsync(Id, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
+        public IActionResult Enable(int Id)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Enable }, db, ref objMsg);
+                if (User == null) return Ok(objMsg);
+                objMsg = RepoGatePass.Enable(Id, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
 
     }
 

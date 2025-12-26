@@ -3,15 +3,14 @@
     static init() {
         Employee.getViewOption((response) => {
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
-            Dropdown.bind({ id: '#ListLocation', data: response.data.Location, value: 'Id', text: 'Description' });
-            Dropdown.bind({ id: '#ListDepartment', data: response.data.Department, value: 'value', text: 'Description' });
-            Dropdown.bind({ id: '#ListPassType', data: response.data.PassType, value: 'value', text: 'Description' });
+            Dropdown.bind({ id: '#ListJntvtiCategory', data: response.data.JntvtiCategory, value: 'Value', text: 'Description' });
+            Dropdown.bind({ id: '#ListQualification', data: response.data.Qualification, value: 'Id', text: 'Description' });
         });
         $('#btnSearch').on('click', () => {
             Employee.get();
         });
         $('#btnPrint').on('click', () => {
-            Employee.print();
+            Employee.print(); 
         });
         $('#btnExport').on('click', () => {
             Employee.export();
@@ -23,6 +22,16 @@
             Employee.newEntry();
         });
         Employee.initAdd();
+
+        $('#Employee_IsEpfDeduct').on('change', function () {
+            toggleUAN();
+        });
+
+        $('#Employee_IsEsiDeduct').on('change', function () {
+            toggleESI();
+        });
+        toggleUAN();
+        toggleESI();
     }
     static getViewOption(onSuccess = () => { }) {
         Data.get({ url: 'Employee/GetViewOption', onSuccess: onSuccess });
@@ -119,6 +128,7 @@
             });
         });
     }
+
 
 
     static add(obj) {
@@ -305,4 +315,24 @@ window.tableEmployeeActionEvent = {
     'click .btn-enable': (e, value, obj, index) => {
         Employee.enable({ id: obj.Id });
     },
+}
+
+function toggleUAN() {
+    if ($('#Employee_IsEpfDeduct').val() === "0") {
+        $('#Employee_UanNo')
+            .val('')
+            .prop('disabled', true);
+    } else {
+        $('#Employee_UanNo').prop('disabled', false);
+    }
+}
+
+function toggleESI() {
+    if ($('#Employee_IsEsiDeduct').val() === "0") {
+        $('#Employee_EsiNo')
+            .val('')
+            .prop('disabled', true);
+    } else {
+        $('#Employee_EsiNo').prop('disabled', false);
+    }
 }

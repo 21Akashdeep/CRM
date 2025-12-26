@@ -4,6 +4,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Dynamic;
+using System.Linq;
 using System.Net.Mail;
 using System.Runtime.Intrinsics.Arm;
 using System.Text;
@@ -67,15 +68,15 @@ namespace CRMApi.Repository
             {
                 dynamic Option = new ExpandoObject();
 
-                Option.Location = await db.GatePass.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
+                Option.Company = await db.Company.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
                 {
                     x.Id,
-                    x.Location
+                    x.Description
                 }).ToListAsync();
-                Option.Department = await db.GatePass.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
+                Option.Employee = await db.Employee.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
                 {
                     x.Id,
-                    x.Department
+                    x.Name
                 }).ToListAsync();
 
                 Option.PassType = await db.Setting.Where(x => App.ActiveStatus.Contains(x.Status) && x.Category == "PassType").Select(x => new
@@ -101,9 +102,9 @@ namespace CRMApi.Repository
             var dbGatePassQuery = db.GatePass.Where(co => obj.ListStatus.Contains(co.Status)).AsQueryable();
 
             if (obj.ListId.Any()) dbGatePassQuery = dbGatePassQuery.Where(co => obj.ListId.Contains(co.Id));
-            if (obj.ListLocation.Any()) dbGatePassQuery = dbGatePassQuery.Where(co => obj.ListLocation.Contains(co.Location));
-            if (obj.ListDepartment.Any()) dbGatePassQuery = dbGatePassQuery.Where(co => obj.ListDepartment.Contains(co.Department));
-            if (obj.ListGatePassType.Any()) dbGatePassQuery = dbGatePassQuery.Where(co => obj.ListGatePassType.Contains(co.Type));
+            dbGatePassQuery = obj.ListLocation.Any() ? dbGatePassQuery.Where(gt => obj.ListLocation.Contains(gt.Id)) : dbGatePassQuery;
+            dbGatePassQuery = obj.ListDepartment.Any() ? dbGatePassQuery.Where(gt => obj.ListDepartment.Contains(gt.Id)) : dbGatePassQuery;            
+            if (obj.ListPassType.Any()) dbGatePassQuery = dbGatePassQuery.Where(co => obj.ListPassType.Contains(co.Type));
 
             var GatePassList = await (
                 from gp in dbGatePassQuery
@@ -125,14 +126,21 @@ namespace CRMApi.Repository
                     EmployeeId = gp.EmployeeId,
                     EmployeeDesc = em != null ? em.Name : "-",
                     ExpiryOn = gp.ExpiryOn,
+                    Department = gp.Department,
+                    IdentifyMark = gp.IdentifyMark,
+                    Location = gp.Location,
+                    SafetyPassNo = gp.SafetyPassNo,
                     TrainingExpiryOn = gp.TrainingExpiryOn,
                     MedicalExpiryOn = gp.MedicalExpiryOn,
+                    WorkOrderNo = gp.WorkOrderNo,
+                    IssuedOn = gp.IssuedOn,
                     LabourLicenseExpiryOn = gp.LabourLicenseExpiryOn,
                     Status = gp.Status,
                     StatusDesc = st != null ? st.Description : "",
                     StatusCss = st != null ? st.CssClass : "",
                     CreatedBy = gp.CreatedBy,
                     CreatedByName = cb.Name,
+                    CompanyId = gp.CompanyId,
                     CreatedAt = gp.CreatedAt,
                     UpdatedBy = gp.UpdatedBy,
                     UpdatedByName = ub.Name,
@@ -220,240 +228,215 @@ namespace CRMApi.Repository
         //    }
         //    return objMsg;
         //}
-        //public async Task<Message> AddAsync(GatePass obj, User User)
-        //{
-        //    Message objMsg = new Message();
-        //    try
-        //    {
+        public async Task<Message> AddAsync(GatePass obj, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                // 1. Sanitize Input Strings
+                obj.GatePassNo = Util.SanitizeInput(obj.GatePassNo, null) ?? "";
+                obj.Type = Util.SanitizeInput(obj.Type, null) ?? "";
+                obj.IdentifyMark = Util.SanitizeInput(obj.IdentifyMark, null) ?? "";
+                obj.WorkOrderNo = Util.SanitizeInput(obj.WorkOrderNo, null) ?? "";
+                obj.Location = Util.SanitizeInput(obj.Location, null) ?? "";
+                obj.Department = Util.SanitizeInput(obj.Department, null) ?? "";
+                obj.SafetyPassNo = Util.SanitizeInput(obj.SafetyPassNo, null) ?? "";
 
-        //        obj.Name = Util.SanitizeInput(obj.Name, null) ?? "";
-        //        obj.Gender = Util.SanitizeInput(obj.Gender, null) ?? "";
-        //        obj.GuardianRelation = Util.SanitizeInput(obj.GuardianRelation, null) ?? "";
-        //        obj.GuardianName = Util.SanitizeInput(obj.GuardianName, null) ?? "";
-        //        obj.MaritalStatus = Util.SanitizeInput(obj.MaritalStatus, null) ?? "";
-        //        obj.JntvtiCategory = Util.SanitizeInput(obj.JntvtiCategory, null) ?? "";
-        //        obj.ContactNo = Util.SanitizeInput(obj.ContactNo, null) ?? "";
-        //        obj.Email = Util.SanitizeInput(obj.Email, null) ?? "";
-        //        obj.UanNo = Util.SanitizeInput(obj.UanNo, null) ?? "";
-        //        obj.EsiNo = Util.SanitizeInput(obj.EsiNo, null) ?? "";
+                // 2. Check for Duplicates (Checking active passes with the same GatePassNo)
+                var duplicate = await db.GatePass.FirstOrDefaultAsync(ap =>
+                    App.ActiveStatus.Contains(ap.Status) &&
+                    obj.GatePassNo != "" &&
+                    ap.GatePassNo == obj.GatePassNo
+                );
 
-        //        var duplicate = await db.GatePass.FirstOrDefaultAsync(ap =>
-        //            App.ActiveStatus.Contains(ap.Status) &&
-        //            (
-        //                ap.GatePassNo == obj.GatePassNo ||
-        //                (obj.Email != "" && ap.Email == obj.Email) ||
-        //                (obj.ContactNo != "" && ap.ContactNo == obj.ContactNo)
-        //            )
-        //        );
+                if (duplicate != null)
+                {
+                    Message.Duplicate(ref objMsg, $"Gate Pass No : {obj.GatePassNo} already exists.");
+                    return objMsg;
+                }
 
-        //        if (duplicate != null)
-        //        {
-        //            if (duplicate.Name == obj.Name)
-        //                Message.Duplicate(ref objMsg, $"GatePass Name : {obj.Name} already exists.");
+                // 3. Set Audit Fields
+                obj.CreatedBy = User.Id;
+                obj.UpdatedBy = User.Id;
+                obj.CreatedAt = DateTime.Now;
+                obj.UpdatedAt = DateTime.Now;
+                obj.Status = 1; 
 
-        //            else if (obj.Email != "" && duplicate.Email == obj.Email)
-        //                Message.Duplicate(ref objMsg, $"GatePass Email : {obj.Email} already exists.");
+                db.GatePass.Add(obj);
+                Message.Add(ref objMsg, await db.SaveChangesAsync(), "");
 
-        //            else if (obj.ContactNo != "" && duplicate.ContactNo == obj.ContactNo)
-        //                Message.Duplicate(ref objMsg, $"GatePass Contact No : {obj.ContactNo} already exists.");
+               
+                if (objMsg.status == Message.Type.success)
+                {     
+                    await db.Entry(obj).ReloadAsync();
+                    obj.ListId = new List<int> { obj.Id };
+                    objMsg.obj = (await ListAsync(obj, User)).FirstOrDefault();
+                    objMsg.data = (await GetViewOptionAsync()).data;
+                }
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
 
-        //            return objMsg;
-        //        }
-
-
-        //        obj.CreatedBy = User.Id;
-        //        obj.UpdatedBy = User.Id;
-
-        //        db.GatePass.Add(obj);
-        //        Message.Add(ref objMsg, await db.SaveChangesAsync(), "");
-
-        //        if (objMsg.status == Message.Type.success)
-        //        {
-        //            await db.Entry(obj).ReloadAsync();
-
-        //            obj.ListId.Add(obj.Id);
-
-        //            objMsg.obj = (await ListAsync(obj, User)).FirstOrDefault();
-        //            objMsg.data = (await GetViewOptionAsync()).data;
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Message.Exception(ref objMsg, ex);
-        //    }
-        //    return objMsg;
-        //}
-
-        //public async Task<Message> EditAsync(int Id, User User)
-        //{
-        //    Message objMsg = new Message();
-        //    try
-        //    {
-        //        GatePass? obj = new GatePass();
-        //        obj.ListId.Add(Id);
-        //        obj.ListStatus.AddRange(App.AllActiveStatus);
-        //        obj = (await ListAsync(obj, User)).FirstOrDefault();
-        //        if (obj == null)
-        //        {
-        //            Message.Error(ref objMsg, "GatePass did not find for edit.");
-        //            return objMsg;
-        //        }
-        //        var AddOption = await GetAddOptionAsync();
-        //        objMsg.obj = obj;
-        //        objMsg.data = AddOption.data;
-        //        Message.Success(ref objMsg, "Record found");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Message.Exception(ref objMsg, ex);
-        //    }
-        //    return objMsg;
-        //}
+        public async Task<Message> EditAsync(int Id, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                GatePass? obj = new GatePass();
+                obj.ListId.Add(Id);
+                obj.ListStatus.AddRange(App.AllActiveStatus);
+                obj = (await ListAsync(obj, User)).FirstOrDefault();
+                if (obj == null)
+                {
+                    Message.Error(ref objMsg, "GatePass did not find for edit.");
+                    return objMsg;
+                }
+                var AddOption = await GetAddOptionAsync();
+                objMsg.obj = obj;
+                objMsg.data = AddOption.data;
+                Message.Success(ref objMsg, "Record found");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
 
         //private async Task GetAddOptionAsync(GatePass obj, User user)
         //{
         //    throw new NotImplementedException();
         //}
 
-        //public async Task<Message> UpdateAsync(GatePass obj, User User)
-        //{
-        //    Message objMsg = new Message();
-        //    try
-        //    {
-        //        // 🔹 Sanitize inputs
+        public async Task<Message> UpdateAsync(GatePass obj, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var dbGatePass = db.GatePass.ToList();
 
-        //        var dbGatePass = db.GatePass.ToList();
+                if (dbGatePass.Any(x => x.EmployeeId == obj.EmployeeId && x.Id != obj.Id))
+                {
+                    Message.Duplicate(ref objMsg, $"GatePass Name {obj.EmployeeDesc}");
+                    return objMsg;
+                }
+                if (!string.IsNullOrEmpty(obj.GatePassNo) &&
+                    dbGatePass.Any(x => x.GatePassNo == obj.GatePassNo && x.Id != obj.Id))
+                {
+                    Message.Duplicate(ref objMsg, $"Contact No {obj.GatePassNo}");
+                    return objMsg;
+                }
 
-        //        // 🔹 Duplicate Name check
-        //        if (dbGatePass.Any(x => x.Name == obj.Name && x.Id != obj.Id))
-        //        {
-        //            Message.Duplicate(ref objMsg, $"GatePass Name {obj.Name}");
-        //            return objMsg;
-        //        }
+                var UpdateGatePass = dbGatePass.FirstOrDefault(x => x.Id == obj.Id);
+                if (UpdateGatePass == null)
+                {
+                    Message.Error(ref objMsg, "GatePass not found for update.");
+                    return objMsg;
+                }
+                UpdateGatePass.EmployeeId = obj.EmployeeId;
+                UpdateGatePass.GatePassNo = obj.GatePassNo;
+                UpdateGatePass.Type = obj.Type;
+                UpdateGatePass.IdentifyMark = obj.IdentifyMark;
+                UpdateGatePass.WorkOrderNo = obj.WorkOrderNo;
+                UpdateGatePass.CompanyId = obj.CompanyId;
+                UpdateGatePass.Location = obj.Location;
+                UpdateGatePass.Department = obj.Department;
+                UpdateGatePass.IssuedOn = obj.IssuedOn;
+                UpdateGatePass.ExpiryOn = obj.ExpiryOn;
+                UpdateGatePass.MedicalExpiryOn = obj.MedicalExpiryOn;
+                UpdateGatePass.LabourLicenseExpiryOn = obj.LabourLicenseExpiryOn;
+                UpdateGatePass.TrainingExpiryOn = obj.TrainingExpiryOn;
+                UpdateGatePass.SafetyPassNo = obj.SafetyPassNo;
+                UpdateGatePass.Status = obj.Status;
 
-        //        // 🔹 Duplicate Contact check
-        //        if (!string.IsNullOrEmpty(obj.ContactNo) &&
-        //            dbGatePass.Any(x => x.ContactNo == obj.ContactNo && x.Id != obj.Id))
-        //        {
-        //            Message.Duplicate(ref objMsg, $"Contact No {obj.ContactNo}");
-        //            return objMsg;
-        //        }
+                UpdateGatePass.UpdatedBy = User.Id;
+                UpdateGatePass.UpdatedAt = DateTime.Now;
 
-        //        // 🔹 Fetch existing record
-        //        var UpdateGatePass = dbGatePass.FirstOrDefault(x => x.Id == obj.Id);
-        //        if (UpdateGatePass == null)
-        //        {
-        //            Message.Error(ref objMsg, "GatePass not found for update.");
-        //            return objMsg;
-        //        }
+                db.Update(UpdateGatePass);
 
-        //        // 🔹 Update fields
-        //        UpdateGatePass.Name = obj.Name;
-        //        UpdateGatePass.DOB = obj.DOB;
-        //        UpdateGatePass.Gender = obj.Gender;
-        //        UpdateGatePass.GuardianRelation = obj.GuardianRelation;
-        //        UpdateGatePass.GuardianName = obj.GuardianName;
-        //        UpdateGatePass.MaritalStatus = obj.MaritalStatus;
-        //        UpdateGatePass.JntvtiCategory = obj.JntvtiCategory;
-        //        UpdateGatePass.QualificationId = obj.QualificationId;
-        //        UpdateGatePass.ContactNo = obj.ContactNo;
-        //        UpdateGatePass.Email = obj.Email;
-        //        UpdateGatePass.IsEpfDeduct = obj.IsEpfDeduct;
-        //        UpdateGatePass.UanNo = obj.UanNo;
-        //        UpdateGatePass.IsEsiDeduct = obj.IsEsiDeduct;
-        //        UpdateGatePass.EsiNo = obj.EsiNo;
-        //        UpdateGatePass.Status = obj.Status;
+                Message.Update(ref objMsg, await db.SaveChangesAsync(), "");
 
-
-
-        //        // 🔹 Audit
-        //        UpdateGatePass.UpdatedBy = User.Id;
-        //        UpdateGatePass.UpdatedAt = DateTime.Now;
-
-        //        db.Update(UpdateGatePass);
-
-        //        Message.Update(ref objMsg, await db.SaveChangesAsync(), "");
-
-        //        // 🔹 Return updated data
-        //        if (objMsg.status == Message.Type.success)
-        //        {
-        //            obj.ListId.Add(obj.Id);
-        //            objMsg.obj = ListAsync(obj, User);
-        //            objMsg.data = GetViewOptionAsync();
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Message.Exception(ref objMsg, ex);
-        //    }
-        //    return objMsg;
-        //}
+                if (objMsg.status == Message.Type.success)
+                {
+                    obj.ListId.Add(obj.Id);
+                    objMsg.obj = ListAsync(obj, User);
+                    objMsg.data = GetViewOptionAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
 
 
+        public async Task<Message> DeleteAsync(int Id, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var DeleteGatePass = db.GatePass.Where(it => it.Id == Id).AsEnumerable().FirstOrDefault();
+                if (DeleteGatePass == null)
+                {
+                    Message.Error(ref objMsg, "Item did not find for delete.");
+                    return objMsg;
+                }
+                DeleteGatePass.Status = App.Status.Delete;
+                DeleteGatePass.UpdatedBy = User.Id;
+                DeleteGatePass.UpdatedAt = DateTime.Now;
+                db.Update(DeleteGatePass);
 
 
-        //public async Task<Message> DeleteAsync(int Id, User User)
-        //{
-        //    Message objMsg = new Message();
-        //    try
-        //    {
-        //        var DeleteGatePass = db.GatePass.Where(it => it.Id == Id).AsEnumerable().FirstOrDefault();
-        //        if (DeleteGatePass == null)
-        //        {
-        //            Message.Error(ref objMsg, "Item did not find for delete.");
-        //            return objMsg;
-        //        }
-        //        DeleteGatePass.Status = App.Status.Delete;
-        //        DeleteGatePass.UpdatedBy = User.Id;
-        //        DeleteGatePass.UpdatedAt = DateTime.Now;
-        //        db.Update(DeleteGatePass);
+                Message.Delete(ref objMsg, db.SaveChanges(), "");
+                if (objMsg.status == Message.Type.success)
+                {
+                    DeleteGatePass.ListStatus.Add(App.Status.Delete);
+                    DeleteGatePass.ListId.Add(Id);
+                    objMsg.obj = await ListAsync(DeleteGatePass, User);
+                    objMsg.data = await GetViewOptionAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+        public Message Enable(int Id, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var EnableGatePass = db.GatePass.Where(it => it.Id == Id).AsEnumerable().FirstOrDefault();
+                if (EnableGatePass == null)
+                {
+                    Message.Error(ref objMsg, "Pass did not find for delete.");
+                    return objMsg;
+                }
+                EnableGatePass.Status = App.Status.Enable;
+                EnableGatePass.UpdatedBy = User.Id;
+                EnableGatePass.UpdatedAt = DateTime.Now;
+                db.Update(EnableGatePass);
 
-
-        //        Message.Delete(ref objMsg, db.SaveChanges(), "");
-        //        if (objMsg.status == Message.Type.success)
-        //        {
-        //            DeleteGatePass.ListStatus.Add(App.Status.Delete);
-        //            DeleteGatePass.ListId.Add(Id);
-        //            objMsg.obj = await ListAsync(DeleteGatePass, User);
-        //            objMsg.data = await GetViewOptionAsync();
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Message.Exception(ref objMsg, ex);
-        //    }
-        //    return objMsg;
-        //}
-        //public Message Enable(int Id, User User)
-        //{
-        //    Message objMsg = new Message();
-        //    try
-        //    {
-        //        var EnableGatePass = db.GatePass.Where(it => it.Id == Id).AsEnumerable().FirstOrDefault();
-        //        if (EnableGatePass == null)
-        //        {
-        //            Message.Error(ref objMsg, "Item did not find for delete.");
-        //            return objMsg;
-        //        }
-        //        EnableGatePass.Status = App.Status.Enable;
-        //        EnableGatePass.UpdatedBy = User.Id;
-        //        EnableGatePass.UpdatedAt = DateTime.Now;
-        //        db.Update(EnableGatePass);
-
-        //        Message.Enable(ref objMsg, db.SaveChanges(), "");
-        //        if (objMsg.status == Message.Type.success)
-        //        {
-        //            EnableGatePass.ListId.Add(Id);
-        //            objMsg.obj = ListAsync(EnableGatePass, User);
-        //            objMsg.data = GetViewOptionAsync();
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Message.Exception(ref objMsg, ex);
-        //    }
-        //    return objMsg;
-        //}
+                Message.Enable(ref objMsg, db.SaveChanges(), "");
+                if (objMsg.status == Message.Type.success)
+                {
+                    EnableGatePass.ListId.Add(Id);
+                    objMsg.obj = ListAsync(EnableGatePass, User);
+                    objMsg.data = GetViewOptionAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
 
     }
 }

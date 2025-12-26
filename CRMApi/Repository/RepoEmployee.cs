@@ -30,9 +30,9 @@ namespace CRMApi.Repository
                     st.Value,
                     st.Description
                 }).ToListAsync();
-                Option.JntvtiGrade = await db.Setting.Where(x =>App.ActiveStatus.Contains(x.Status) && x.Name == "JntvtiCategory").Select(x => new
+                Option.JntvtiCategory = await db.Setting.Where(x =>App.ActiveStatus.Contains(x.Status) && x.Name == "JntvtiCategory").Select(x => new
                  {
-                    x.Id,
+                    x.Value,
                     x.Description
                  }).ToListAsync();
                 Option.Qualification = await db.Qualification.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
@@ -326,10 +326,10 @@ namespace CRMApi.Repository
             return objMsg;
         }
 
-        private async Task GetAddOptionAsync(Employee obj, User user)
-        {
-            throw new NotImplementedException();
-        }
+        //private async Task GetAddOptionAsync(Employee obj, User user)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         public async Task<Message> UpdateAsync(Employee obj, User User)
         {
