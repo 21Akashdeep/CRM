@@ -58,6 +58,7 @@ namespace CRMApi.Services
         public DbSet<ProjectDeadLineLog> ProjectDeadLineLog { get; set; }
         public DbSet<Qualification> Qualification { get; set; }
         public DbSet<Employee> Employee { get; set; }
+        public DbSet<GatePass> GatePass { get; set; }
 
     }
 }

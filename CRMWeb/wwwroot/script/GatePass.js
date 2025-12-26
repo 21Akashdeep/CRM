@@ -1,46 +1,46 @@
-﻿class Employee {
-    //Employee List
+﻿class GatePass {
+    //GatePass List
     static init() {
-        Employee.getViewOption((response) => {
+        GatePass.getViewOption((response) => {
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
-            Dropdown.bind({ id: '#ListLocation', data: response.data.Location, value: 'Id', text: 'Description' });
-            Dropdown.bind({ id: '#ListDepartment', data: response.data.Department, value: 'value', text: 'Description' });
+            Dropdown.bind({ id: '#ListLocation', data: response.data.Location, value: 'Id', text: 'Location' });
+            Dropdown.bind({ id: '#ListDepartment', data: response.data.Department, value: 'Id', text: 'Department' });
             Dropdown.bind({ id: '#ListPassType', data: response.data.PassType, value: 'value', text: 'Description' });
         });
         $('#btnSearch').on('click', () => {
-            Employee.get();
+            GatePass.get();
         });
         $('#btnPrint').on('click', () => {
-            Employee.print();
+            GatePass.print();
         });
         $('#btnExport').on('click', () => {
-            Employee.export();
+            GatePass.export();
         });
         $('#btnAdd').on('click', () => {
-            Employee.fill();
+            GatePass.fill();
         });
         $('#btnNewEntry').on('click', () => {
-            Employee.newEntry();
+            GatePass.newEntry();
         });
-        Employee.initAdd();
+        GatePass.initAdd();
     }
     static getViewOption(onSuccess = () => { }) {
-        Data.get({ url: 'Employee/GetViewOption', onSuccess: onSuccess });
+        Data.get({ url: 'GatePass/GetViewOption', onSuccess: onSuccess });
     }
     static get() {
         var obj = {
 
             ListStatus: $('#ListStatus').val(),
-            ListGender: $('#ListGender').val(),
-            ListJntvtiCategory: $('#ListJntvtiCategory').val(),
-            ListQualification: $('#ListQualification').val()
+            ListLocation: $('#ListLocation').val(),
+            ListDepartment: $('#ListDepartment').val(),
+            ListPassType: $('#ListPassType').val()
         }
         Data.post(
             {
-                url: 'Employee/Get',
+                url: 'GatePass/Get',
                 data: obj,
                 onSuccess: (response) => {
-                    Table.add({ id: '#tableEmployee', data: response.data });
+                    Table.add({ id: '#tableGatePass', data: response.data });
                 }
             }
         );
@@ -52,10 +52,10 @@
         }
         Data.post(
             {
-                url: 'Employee/Print',
+                url: 'GatePass/Print',
                 data: obj,
                 onSuccess: (response) => {
-                    Table.add({ id: '#tableEmployee', data: response.data, isPrint: true });
+                    Table.add({ id: '#tableGatePass', data: response.data, isPrint: true });
                 }
             }
         );
@@ -67,52 +67,52 @@
         }
         Data.post(
             {
-                url: 'Employee/Export',
+                url: 'GatePass/Export',
                 data: obj,
                 onSuccess: (response) => {
-                    Export.Base64ToExcel({ base64: response.base64, fielName: "Employee" });
+                    Export.Base64ToExcel({ base64: response.base64, fielName: "GatePass" });
                 }
             }
         );
 
     }
 
-    //Employee Add
+    //GatePass Add
     static initAdd() {
-        $('#Employee_btnSave').on('click', () => {
-            if (!Field.isMandatory({ class: ".Employee-required" })) {
+        $('#GatePass_btnSave').on('click', () => {
+            if (!Field.isMandatory({ class: ".GatePass-required" })) {
                 return;
             }
-            let obj = Data.serializeToObject({ formId: "#formEmployee" });
+            let obj = Data.serializeToObject({ formId: "#formGatePass" });
             if (!obj.Id) {
 
-                Employee.add(obj);
+                GatePass.add(obj);
             }
             else {
-                Employee.update(obj);
+                GatePass.update(obj);
             }
         });
     }
     static getAddOption(onSuccess) {
-        Data.get({ url: 'Employee/GetAddOption', onSuccess: onSuccess });
+        Data.get({ url: 'GatePass/GetAddOption', onSuccess: onSuccess });
     }
     static newEntry() {
-        Employee.getAddOption((response) => {
+        GatePass.getAddOption((response) => {
             console.log(response);
             Modal.open({
-                id: '#modalEmployee',
-                title: 'Employee / Add',
+                id: '#modalGatePass',
+                title: 'GatePass / Add',
                 action: 'Add'
             });
 
             Dropdown.bind({
-                id: '#Employee_Qualification',
+                id: '#GatePass_Qualification',
                 data: response.data.qualification,
                 value: 'Id',
                 text: 'Description'
             });
             Dropdown.bind({
-                id: '#Employee_JntvtiCategory',
+                id: '#GatePass_JntvtiCategory',
                 data: response.data.JntvtiCategory,
                 value: 'Id',
                 text: 'Description'
@@ -124,42 +124,42 @@
     static add(obj) {
         Data.post(
             {
-                url: 'Employee/Add',
+                url: 'GatePass/Add',
                 data: obj,
-                onSuccess: Employee.addOnSuccess
+                onSuccess: GatePass.addOnSuccess
             }
         );
     }
     static addOnSuccess = (response) => {
         Message.show(response);
         if (response.status == Message.Type.success) {
-            Modal.reset({ id: "#modalEmployee" });
-            Table.add({ id: "#tableEmployee", data: response.obj, action: 'prepend' });
-            Dropdown.bind({ id: '#ListId', data: response.data.Employee, value: 'Id', text: 'Description', subText: "Code" });
+            Modal.reset({ id: "#modalGatePass" });
+            Table.add({ id: "#tableGatePass", data: response.obj, action: 'prepend' });
+            Dropdown.bind({ id: '#ListId', data: response.data.GatePass, value: 'Id', text: 'Description', subText: "Code" });
         }
     }
     static edit({ id, action = "Edit" }) {
         Data.get(
             {
-                url: `Employee/Edit?Id=${id}`,
+                url: `GatePass/Edit?Id=${id}`,
                 onSuccess: (response) => {
                     if (response.status == Message.Type.success) {
                         let obj = response.obj;
                         obj.Id = action == 'Edit' ? obj.Id : null;
-                        let title = action == 'Edit' ? `Employee / Edit (Code: ${obj.Code})` : `Employee / Add`;
+                        let title = action == 'Edit' ? `GatePass / Edit (Code: ${obj.Code})` : `GatePass / Add`;
                         Dropdown.bind({
-                            id: '#Employee_Qualification',
+                            id: '#GatePass_Qualification',
                             data: response.data.qualification,
                             value: 'Id',
                             text: 'Description'
                         });
                         Dropdown.bind({
-                            id: '#Employee_JntvtiCategory',
+                            id: '#GatePass_JntvtiCategory',
                             data: response.data.JntvtiCategory,
                             value: 'Id',
                             text: 'Description'
                         });
-                        Modal.open({ id: '#modalEmployee', title: title, action: action, obj: obj });
+                        Modal.open({ id: '#modalGatePass', title: title, action: action, obj: obj });
 
                     }
                     else {
@@ -170,14 +170,14 @@
         );
     }
     static update(obj) {
-        Data.update({ url: 'Employee/Update', data: obj, onSuccess: Employee.updateOnSuccess });
+        Data.update({ url: 'GatePass/Update', data: obj, onSuccess: GatePass.updateOnSuccess });
     }
     static updateOnSuccess = (response) => {
         Message.show(response);
         if (response.status == Message.Type.success) {
-            Modal.close({ id: "#modalEmployee" });
-            Table.updateById({ id: "#tableEmployee", objId: response.obj.Id, obj: response.obj });
-            Dropdown.bind({ id: '#ListId', data: response.data.Employee, value: 'Id', text: 'Description', subText: "Code" });
+            Modal.close({ id: "#modalGatePass" });
+            Table.updateById({ id: "#tableGatePass", objId: response.obj.Id, obj: response.obj });
+            Dropdown.bind({ id: '#ListId', data: response.data.GatePass, value: 'Id', text: 'Description', subText: "Code" });
         }
     }
     static delete({ id }) {
@@ -188,7 +188,7 @@
                 denyButtonText: 'Dont Delete',
                 data: id,
                 onConfirm: (id) => {
-                    Data.delete({ url: `Employee/Delete?Id=${id}`, onSuccess: Employee.deleteOnSuccess });
+                    Data.delete({ url: `GatePass/Delete?Id=${id}`, onSuccess: GatePass.deleteOnSuccess });
                 }
             }
         );
@@ -196,8 +196,8 @@
     static deleteOnSuccess = (response) => {
         Message.show(response);
         if (response.status == Message.Type.success) {
-            Table.updateById({ id: "#tableEmployee", objId: response.obj.Id, obj: response.obj });
-            Dropdown.bind({ id: '#ListId', data: response.data.Employee, value: 'Id', text: 'Description', subText: "Code" });
+            Table.updateById({ id: "#tableGatePass", objId: response.obj.Id, obj: response.obj });
+            Dropdown.bind({ id: '#ListId', data: response.data.GatePass, value: 'Id', text: 'Description', subText: "Code" });
         }
     }
     static enable({ id }) {
@@ -208,7 +208,7 @@
                 denyButtonText: 'Dont Enable',
                 data: id,
                 onConfirm: (id) => {
-                    Data.update({ url: `Employee/Enable?Id=${id}`, onSuccess: Employee.enableOnSuccess });
+                    Data.update({ url: `GatePass/Enable?Id=${id}`, onSuccess: GatePass.enableOnSuccess });
 
                 }
             }
@@ -217,44 +217,41 @@
     static enableOnSuccess = (response) => {
         Message.show(response);
         if (response.status == Message.Type.success) {
-            Table.updateById({ id: "#tableEmployee", objId: response.obj.Id, obj: response.obj });
-            Dropdown.bind({ id: '#ListId', data: response.data.Employee, value: 'Id', text: 'Description', subText: "Code" });
+            Table.updateById({ id: "#tableGatePass", objId: response.obj.Id, obj: response.obj });
+            Dropdown.bind({ id: '#ListId', data: response.data.GatePass, value: 'Id', text: 'Description', subText: "Code" });
         }
     }
 }
 
-window.tableEmployeeGender = (value, obj, index) => {
-    switch (obj.Gender) {
-        case 'M': return 'Male';
-        case 'F': return 'Female';
-        case 'T': return 'Transgender';
-        default: return '';
-    }
-};
 
-window.tableEmployeeDob = (value, obj, index) => {
-    if (!obj.DOB) return '-';
+window.tableGatePassName = (value, obj, index) => {
+    return (obj.EmployeeDesc || "").match(/.{1,30}/g)?.join('<br>') || "-";
+}
 
-    return moment(obj.DOB).format('DD-MMM-YYYY');
-};
-window.tableEmployeeSLNo = (value, obj, index) => {
+window.tableGatePassIssueOn = (value) => value ? moment(value).format('DD-MMM-YYYY') : '-';
+window.tableGatePassExpiryOn = (value) => value ? moment(value).format('DD-MMM-YYYY') : '-';
+window.tableGatePassTrainingExpiryOn = (value) => value ? moment(value).format('DD-MMM-YYYY') : '-';
+window.tableGatePassMedicalExpiryOn = (value) => value ? moment(value).format('DD-MMM-YYYY') : '-';
+window.tableGatePassLabourLicenseExpiryOn = (value) => value ? moment(value).format('DD-MMM-YYYY') : '-';
+
+window.tableGatePassSLNo = (value, obj, index) => {
     return index + 1;
 }
-window.tableEmployeeName = (value, obj, index) => {
+window.tableGatePassName = (value, obj, index) => {
     return obj.Name.match(/.{1,30}/g).join('<br>');;
 }
-window.tableEmployeeStatus = (value, obj, index) => {
+window.tableGatePassStatus = (value, obj, index) => {
     return `<div class="${obj.StatusCss}">${obj.StatusDesc}</div>`;
 }
-window.tableEmployeeCreatedByAndAt = (value, obj, index) => {
+window.tableGatePassCreatedByAndAt = (value, obj, index) => {
     return `<div>${obj.CreatedByName}</div>
             <div>${moment(obj.CreatedAt).format('DD-MMM-YYYY HH:mm:ss')}</div>`;
 }
-window.tableEmployeeUpdatedByAndAt = (value, obj, index) => {
+window.tableGatePassUpdatedByAndAt = (value, obj, index) => {
     return `<div>${obj.UpdatedByName}</div>
             <div>${moment(obj.UpdatedAt).format('DD-MMM-YYYY HH:mm:ss')}</div>`;
 }
-window.tableEmployeeAction = (value, obj, index) => {
+window.tableGatePassAction = (value, obj, index) => {
     let actionBtn = `
         <div class="btn-group dropstart">            
             <button class="btn btn-sm border-0" data-bs-toggle="dropdown"><i class="fa fa-ellipsis-v"></i></button>
@@ -292,17 +289,17 @@ window.tableEmployeeAction = (value, obj, index) => {
     `;
     return actionBtn;
 }
-window.tableEmployeeActionEvent = {
+window.tableGatePassActionEvent = {
     'click .btn-edit': (e, value, obj, index) => {
-        Employee.edit({ id: obj.Id });
+        GatePass.edit({ id: obj.Id });
     },
     'click .btn-duplicate': (e, value, obj, index) => {
-        Employee.edit({ id: obj.Id, action: 'Add' });
+        GatePass.edit({ id: obj.Id, action: 'Add' });
     },
     'click .btn-delete': (e, value, obj, index) => {
-        Employee.delete({ id: obj.Id });
+        GatePass.delete({ id: obj.Id });
     },
     'click .btn-enable': (e, value, obj, index) => {
-        Employee.enable({ id: obj.Id });
+        GatePass.enable({ id: obj.Id });
     },
 }
