@@ -3,7 +3,7 @@
     static init() {
         GatePass.getViewOption((response) => {
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
-            Dropdown.bind({ id: '#ListLocation', data: response.data.Location, value: 'Id', text: 'Location' });
+            Dropdown.bind({ id: '#ListLocation', data: response.data.Location, value: 'Id', text: 'Name' });
             Dropdown.bind({ id: '#ListDepartment', data: response.data.Department, value: 'Id', text: 'Department' });
             Dropdown.bind({ id: '#ListPassType', data: response.data.PassType, value: 'Value', text: 'Description' });
         });
@@ -118,6 +118,12 @@
                 text: 'Description'
             });
             Dropdown.bind({
+                id: '#GatePass_Location',
+                data: response.data.Location,
+                value: 'Id',
+                text: 'Description'
+            });
+            Dropdown.bind({
                 id: '#GatePass_Company',
                 data: response.data.Company,
                 value: 'Id',
@@ -171,8 +177,6 @@
                             data: response.data.Company,
                             value: 'Id',
                             text: 'Description',
-                            
-
                         });
                         Modal.open({ id: '#modalGatePass', title: title, action: action, obj: obj });
 
@@ -243,6 +247,10 @@ window.tableGatePassName = (value, obj, index) => {
     return (obj.EmployeeDesc || "").match(/.{1,30}/g)?.join('<br>') || "-";
 }
 
+window.tableGatePassName = (value, obj, index) => {
+    return (obj.LocationDesc || "").match(/.{1,30}/g)?.join('<br>') || "-";
+}
+
 window.tableGatePassIssueOn = (value, obj, index) => {
    return  `<div>${moment(obj.IssuedOn).format('DD-MMM-YYYY HH:mm:ss')}</div>`
 }
@@ -258,11 +266,6 @@ window.tableGatePassTrainingExpiryOn = (value, obj, index) => {
 window.tableGatePassLabourLicenseExpiryOn = (value, obj, index) => {
     return `<div>${moment(obj.LabourLicenseExpiryOn).format('DD-MMM-YYYY HH:mm:ss')}</div>`
 }
-//window.tableGatePassExpiryOn = (value) => value ? moment(value).format('DD-MMM-YYYY') : '-';
-//window.tableGatePassTrainingExpiryOn = (value) => value ? moment(value).format('DD-MMM-YYYY') : '-';
-//window.tableGatePassMedicalExpiryOn = (value) => value ? moment(value).format('DD-MMM-YYYY') : '-';
-//window.tableGatePassLabourLicenseExpiryOn = (value) => value ? moment(value).format('DD-MMM-YYYY') : '-';
-
 window.tableGatePassSLNo = (value, obj, index) => {
     return index + 1;
 }

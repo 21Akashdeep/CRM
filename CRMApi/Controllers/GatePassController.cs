@@ -82,22 +82,22 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
-        //[HttpPost]
-        //public async Task<IActionResult> Export(GatePass obj)
-        //{
-        //    Message objMsg = new Message();
-        //    try
-        //    {
-        //        var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
-        //        if (User == null) return Ok(objMsg);
-        //        objMsg = await RepoGatePass.ExportAsync(obj, User);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Message.Exception(ref objMsg, ex);
-        //    }
-        //    return Ok(objMsg);
-        //}
+        [HttpPost]
+        public async Task<IActionResult> Export(GatePass obj)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
+                if (User == null) return Ok(objMsg);
+                objMsg = await RepoGatePass.ExportAsync(obj, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
 
         [HttpPost]
         public async Task<IActionResult> Add(GatePass obj)
@@ -163,6 +163,7 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
+        [HttpPatch]
         public IActionResult Enable(int Id)
         {
             Message objMsg = new Message();

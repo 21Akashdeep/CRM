@@ -1,5 +1,5 @@
 ﻿
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+
 
 @{
 }
@@ -26,118 +26,111 @@
                     <div class="row g-2">
 
                         <input type="hidden" id="GatePass_Id" name="Id" />
-
-                       @* Employe  *@
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <label>Employee <span class="text-mandatory">*</span></label>
                             <select id="GatePass_Employee" name="EmployeeId"
-                                    class="form-control form-control-sm select-pick GatePass-required"
+                                    class="form-control form-control-sm select-pick GatePass-required data-search='true'"
                                     data-search="true" data-size="4">
                             </select>
                         </div>
-
-                        @* PassType *@
-                        <div class="col-md-3">
-                            <label>Pass Type</label>
+                        <div class="col-md-2">
+                            <label>Pass Type  <span class="text-mandatory">*</span></label>
                             <select id="GatePass_PassType" name="Type"
-                                    class="form-control form-control-sm select-pick">
+                                    class="form-control form-control-sm select-pick data-search='true' GatePass-required">
                             </select>
                         </div>
-
-                        @* GatePassNo *@
-                        <div class="col-md-3">
-                            <label>Pass No</label>
+                        <div class="col-md-2">
+                            <label>Pass No <span class="text-mandatory">*</span></label>
                             <input type="text" id="GatePass_GatePassNo" name="GatePassNo"
-                                   class="form-control form-control-sm"
+                                   class="form-control form-control-sm GatePass-required"
                                    maxlength="12" />
                         </div>
-
-                        <!-- Identify Mark -->
-                        <div class="col-md-3">
-                            <label>Identify Mark <span class="text-mandatory">*</span></label>
+                        <div class="col-md-2">
+                            <label>Identify Mark</label>
                             <input type="text" id="GatePass_IdentifyMark" name="IdentifyMark"
-                                   class="form-control form-control-sm GatePass-required"
+                                   class="form-control form-control-sm"
                                    maxlength="100" autocomplete="off" />
                         </div>
 
-                        <div class="col-md-3">
-                            <label>Work Order No</label>
+                        <div class="col-md-2">
+                            <label>Work Order No <span class="text-mandatory">*</span></label>
                             <input type="text" id="GatePass_WorkOrderNo" name="WorkOrderNo"
-                                   class="form-control form-control-sm"
+                                   class="form-control form-control-sm GatePass-required"
                                    maxlength="12" />
                         </div>
 
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <label>Company<span class="text-mandatory">*</span></label>
                             <select id="GatePass_Company" name="CompanyId"
-                                    class="form-control form-control-sm select-pick GatePass-required"
+                                    class="form-control form-control-sm select-pick GatePass-required data-search='true'"
                                     data-search="true" data-size="4">
                             </select>
                         </div>
 
-                        <div class="col-md-3">
+                        @* <div class="col-md-2"> *@
+                        @*     <label>Location<span class="text-mandatory">*</span></label> *@
+                        @*     <input type="text" id="GatePass_Location" name="LocationId" *@
+                        @*            class="form-control form-control-sm GatePass-required" *@
+                        @*            maxlength="100" autocomplete="off" /> *@
+                        @* </div> *@
+
+                        <div class="col-md-2">
                             <label>Location<span class="text-mandatory">*</span></label>
-                            <input type="text" id="GatePass_Location" name="Location"
-                                   class="form-control form-control-sm GatePass-required"
-                                   maxlength="100" autocomplete="off" />
+                            <select id="GatePass_Location" name="LocationId"
+                                    class="form-control form-control-sm select-pick GatePass-required data-search='true'"
+                                    data-search="true" data-size="4">
+                            </select>
                         </div>
 
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label>Department<span class="text-mandatory">*</span></label>
                             <input type="text" id="GatePass_Department" name="Department"
                                    class="form-control form-control-sm GatePass-required"
                                    maxlength="100" autocomplete="off" />
                         </div>
 
-                        <div class="col-md-3">
-                            <label>Safety Pass No</label>
+                        <div class="col-md-2">
+                            <label>Safety Pass No<span class="text-mandatory">*</span></label>
                             <input type="text" id="GatePass_SafetyPassNo" name="SafetyPassNo"
-                                   class="form-control form-control-sm"
+                                   class="form-control form-control-sm  GatePass-required"
                                    maxlength="12" />
                         </div>
 
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label>Issued On <span class="text-mandatory">*</span></label>
                             <div class="input-group input-group-sm">
                             <input type="text" id="GatePass_IssuedOn" name="IssuedOn" class="form-control form-control-sm GatePass-required" data-date-format="DD-MMM-YYYY"/>
                             <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
                         </div>
                     </div>
-
-                        @* ExpiryOn *@
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label>Expiry On <span class="text-mandatory">*</span></label>
                             <div class="input-group input-group-sm">
                             <input type="text" id="GatePass_ExpiryOn" name="ExpiryOn" class="form-control form-control-sm GatePass-required " data-date-format="DD-MMM-YYYY"/>
                             <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
                             </div>
                         </div>
-
-
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label>Training Expiry On <span class="text-mandatory">*</span></label>
                             <div class="input-group input-group-sm">
                             <input type="text" id="GatePass_TrainingExpiryOn" name="TrainingExpiryOn" class="form-control form-control-sm GatePass-required" data-date-format="DD-MMM-YYYY"/>
                                 <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
                             </div>
                         </div>
-
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label>Medical Expiry On <span class="text-mandatory">*</span></label>
                             <div class="input-group input-group-sm">
                             <input type="text" id="GatePass_MedicalExpiryOn" name="MedicalExpiryOn" class="form-control form-control-sm GatePass-required" data-date-format="DD-MMM-YYYY"/>
                                 <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
                                 </div>
                         </div>
-
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label>Labour License Expiry On <span class="text-mandatory">*</span></label>
                             <div class="input-group input-group-sm">
                             <input type="text" id="GatePass_LabourLicenseExpiryOn" name="LabourLicenseExpiryOn"class="form-control form-control-sm GatePass-required" data-date-format="DD-MMM-YYYY"/>
                                 <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
                                     </div>
                         </div>
-
                     </div>
                 </form>
             </div>
