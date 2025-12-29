@@ -14,119 +14,113 @@
                     </button>
                 </div>
             </div>
-
             <!-- Body -->
             <div class="modal-body" style="min-height:75vh;">
                 <form id="formEmployee">
                     <div class="row g-2">
                         <input type="hidden" id="Employee_Id" name="Id" />
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <label>Name <span class="text-mandatory">*</span></label>
                             <input type="text" id="Employee_Name" name="Name"
-                                   class="form-control form-control-sm employee-required"
+                                   class="form-control form-control-sm Employee-required"
                                    maxlength="100" autocomplete="off" />
                         </div>
                         <div class="col-md-2">
-                            <label>Gender</label>                    
-                            <select id="Employee_Gender" name="Gender" class="form-control form-control-sm select-pick">
+                            <label>Gender<span class="text-mandatory">*</span></label>
+                            <select id="Employee_Gender" name="Gender" class="form-control form-control-sm select-pick required Employee-required" data-search='true'>
                                 <option value="M">Male</option>
                                 <option value="F">Female</option>
                                 <option value="T">Transgender</option>
                             </select>
 
                         </div>
-
-                        @* <div class="col-md-3"> *@
-                        @*     <label>DOB <span class="text-mandatory">*</span></label> *@
-                        @*     <input type="date" id="Employee_DOB" name="DOB" *@
-                        @*            class="form-control form-control-sm employee-required" *@
-                        @*            value="@Model?.DOB?.ToString("yyyy-MM-dd")" /> *@
-                        @* </div> *@
-
-
                         <div class="col-md-2">
                             <label>Date of Birth<span class="text-mandatory">*</span></label>
                             <div class="input-group input-group-sm">
-                                <input type="text" id="Employee_DOB" name="DOB" autocomplete="off" class="form-control complaint-required" maxlength="50" data-date-format="DD-MMM-YYYY" />
+                                <input type="text" id="Employee_DOB" name="DOB" autocomplete="off" class="form-control Employee-required" maxlength="50" data-date-format="DD-MMM-YYYY" />
                                 <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
                             </div>
                         </div>
+
                         <div class="col-md-2">
-                            <label>Guardian Relation</label>
-                            <select id="Employee_GuardianRelation" name="GuardianRelation"
-                                    class="form-control form-control-sm select-pick">
-                                <option value="F">Father</option>
-                                <option value="H">Husband</option>
-                                
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label>GuardianName <span class="text-mandatory">*</span></label>
-                            <input type="text" id="Employee_GuardianName" name="GuardianName"
-                                   class="form-control form-control-sm employee-required"
-                                   maxlength="100" autocomplete="off" />
-                        </div>
-                        <div class="col-md-3">
-                            <label>Marital Status</label>
+                            <label>Marital Status<span class="text-mandatory">*</span></label>
                             <select id="Employee_MaritalStatus" name="MaritalStatus"
-                                    class="form-control form-control-sm select-pick">
+                                    class="form-control form-control-sm select-pick Employee-required select-pick required" data-search='true'>
                                 <option value="Y">Yes</option>
                                 <option value="N">No</option>
 
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <label>Qualification <span class="text-mandatory">*</span></label>
+
+
+                        <div class="col-md-2">
+                            <label>Guardian Relation<span class="text-mandatory">*</span></label>
+                            <select id="Employee_GuardianRelation" name="GuardianRelation"
+                                    class="form-control form-control-sm select-pick Employee-required select-pick required" data-search='true'>
+                                <option value="F">Father</option>
+                                <option value="H">Husband</option>
+                                
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label>GuardianName<span class="text-mandatory">*</span><span class="text-mandatory">*</span></label>
+                            <input type="text" id="Employee_GuardianName" name="GuardianName"
+                                   class="form-control form-control-sm Employee-required"
+                                   maxlength="100" autocomplete="off" />
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <label>Qualification<span class="text-mandatory">*</span></label>
                             <select id="Employee_Qualification" name="QualificationId"
-                                    class="form-control form-control-sm select-pick employee-required"
+                                    class="form-control form-control-sm select-pick Employee-required"
                                     data-search="true" data-size="4">
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <label>JNTVTI Grade</label>
+                        <div class="col-md-2">
+                            <label>JNTVTI Grade<span class="text-mandatory">*</span></label>
                             <select id="Employee_JntvtiCategory" name="JntvtiCategory"
-                                    class="form-control form-control-sm select-pick">
+                                    class="form-control form-control-sm select-pick Employee-required select-pick required" data-search='true'>
                             </select>
                         </div>
 
-                        <div class="col-md-3">
-                            <label>Contact No <span class="text-mandatory">*</span></label>
+                        <div class="col-md-2">
+                            <label>Contact No<span class="text-mandatory">*</span></label>
                             <input type="text" id="Employee_ContactNo" name="ContactNo"
-                                   class="form-control form-control-sm employee-required"
+                                   class="form-control form-control-sm Employee-required"
                                    maxlength="10" data-num="true" />
                         </div>
-                        <div class="col-md-3">
-                            <label>Email</label>
+                        <div class="col-md-2">
+                            <label>Email<span class="text-mandatory">*</span></label>
                             <input type="email" id="Employee_Email" name="Email"
-                                   class="form-control form-control-sm"
+                                   class="form-control form-control-sm Employee-required"
                                    maxlength="100" />
                         </div>
-                        <div class="col-md-3">
-                            <label>EPF Deduct</label>
+                        <div class="col-md-2">
+                            <label>EPF Deduct<span class="text-mandatory">*</span></label>
                             <select id="Employee_IsEpfDeduct" name="IsEpfDeduct"
-                                    class="form-control form-control-sm select-pick">
+                                    class="form-control form-control-sm select-pick Employee-required" data-search='true'>
                                 <option value="0">No</option>
                                 <option value="1">Yes</option>
                             </select>
                         </div>
 
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label>UAN No</label>
                             <input type="text" id="Employee_UanNo" name="UanNo"
                                    class="form-control form-control-sm"
                                    maxlength="12" />
                         </div>
 
-                        <div class="col-md-3">
-                            <label>ESI Deduct</label>
+                        <div class="col-md-2">
+                            <label>ESI Deduct<span class="text-mandatory">*</span></label>
                             <select id="Employee_IsEsiDeduct" name="IsEsiDeduct"
-                                    class="form-control form-control-sm select-pick">
+                                    class="form-control form-control-sm select-pick Employee-required" data-search='true'>
                                 <option value="0">No</option>
                                 <option value="1">Yes</option>
                             </select>
                         </div>
 
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label>ESI No</label>
                             <input type="text" id="Employee_EsiNo" name="EsiNo"
                                    class="form-control form-control-sm"

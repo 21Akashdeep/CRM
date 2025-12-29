@@ -32,10 +32,10 @@ namespace CRMApi.Repository
                     st.Value,
                     st.Description
                 }).ToListAsync();
-                Option.Location = await db.GatePass.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
+                Option.Location = await db.Location.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
                 {
                     x.Id,
-                    x.Location
+                    x.Name
                 }).ToListAsync();
                 Option.Department = await db.GatePass.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
                 {
@@ -45,7 +45,6 @@ namespace CRMApi.Repository
 
                 Option.PassType =  await db.Setting.Where(x => App.ActiveStatus.Contains(x.Status) && x.Category == "PassType").Select (x => new
                 {
-
                     x.Value,
                     x.Description
 
@@ -81,11 +80,17 @@ namespace CRMApi.Repository
 
                 Option.PassType = await db.Setting.Where(x => App.ActiveStatus.Contains(x.Status) && x.Category == "PassType").Select(x => new
                 {
-
                     x.Value,
                     x.Description
 
                 }).ToListAsync();
+
+                Option.Location = await db.Location.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
+                {
+                    x.Id,
+                    x.Description,
+                }).ToListAsync();
+
                 objMsg.data = Option;
                 Message.Success(ref objMsg, "Record found");
             }
@@ -103,16 +108,18 @@ namespace CRMApi.Repository
 
             if (obj.ListId.Any()) dbGatePassQuery = dbGatePassQuery.Where(co => obj.ListId.Contains(co.Id));
             dbGatePassQuery = obj.ListLocation.Any() ? dbGatePassQuery.Where(gt => obj.ListLocation.Contains(gt.Id)) : dbGatePassQuery;
-            dbGatePassQuery = obj.ListDepartment.Any() ? dbGatePassQuery.Where(gt => obj.ListDepartment.Contains(gt.Id)) : dbGatePassQuery;            
+            dbGatePassQuery = obj.ListDepartment.Any() ? dbGatePassQuery.Where(gt => obj.ListDepartment.Contains(gt.Id)) : dbGatePassQuery;
             if (obj.ListPassType.Any()) dbGatePassQuery = dbGatePassQuery.Where(co => obj.ListPassType.Contains(co.Type));
 
             var GatePassList = await (
                 from gp in dbGatePassQuery
                 join em in db.Employee on gp.EmployeeId equals em.Id into emJoin
                 from em in emJoin.DefaultIfEmpty()
+                join lo in db.Location on gp.LocationId equals lo.Id into lojoin
+                from lo in lojoin.DefaultIfEmpty()
                 join st1 in db.Setting on new { Category = "PassType", Value = gp.Type } equals new { Category = st1.Category, Value = st1.Value } into st1Join
                 from st1 in st1Join.DefaultIfEmpty()
-                join st in db.Setting on new { Name = App.SettingName.Status, Value = gp.Status.ToString() }equals new { st.Name, st.Value } into stJoin
+                join st in db.Setting on new { Name = App.SettingName.Status, Value = gp.Status.ToString() } equals new { st.Name, st.Value } into stJoin
                 from st in stJoin.DefaultIfEmpty()
                 join cb in db.User on gp.CreatedBy equals cb.Id
                 join ub in db.User on gp.UpdatedBy equals ub.Id
@@ -128,7 +135,7 @@ namespace CRMApi.Repository
                     ExpiryOn = gp.ExpiryOn,
                     Department = gp.Department,
                     IdentifyMark = gp.IdentifyMark,
-                    Location = gp.Location,
+                    LocationId = gp.LocationId,
                     SafetyPassNo = gp.SafetyPassNo,
                     TrainingExpiryOn = gp.TrainingExpiryOn,
                     MedicalExpiryOn = gp.MedicalExpiryOn,
@@ -154,6 +161,8 @@ namespace CRMApi.Repository
 
             return GatePassList;
         }
+
+
         public async Task<Message> GetAsync(GatePass obj, User User)
         {
             Message objMsg = new Message();
@@ -190,11 +199,20 @@ namespace CRMApi.Repository
         //        var dbGatePass = await ListAsync(obj, User);
         //        var GatePass = db.GatePass.Select(em => new
         //        {
-        //            em.Name,
-        //            Gender = em.Gender,
-        //            em.DOB,
-        //            Qualification = em.QualificationDesc,
-
+        //            Name = em.EmployeeDesc,
+        //            PassType = em.TypeDesc,
+        //            PassNo = em.GatePassNo,
+        //            PassIssuedOn = em.IssuedOn,
+        //            PassExpiredOn = em.ExpiryOn,
+        //            WorkOrderNo = em.WorkOrderNo,
+        //            IdentityMark = em.IdentifyMark,
+        //            Location = em.LocationDesc,
+        //            Department = em.Department,
+        //            MedicalExpiryOn = em.MedicalExpiryOn,
+        //            LabourLicenseExpiryOn = em.LabourLicenseExpiryOn,
+        //            TranningExpiryOn = em.TrainingExpiryOn,
+        //            SafetyPassNo = em.SafetyPassNo,
+        //            Company = em.CompanyId,
         //            Status = em.StatusDesc,
 
 
@@ -226,8 +244,109 @@ namespace CRMApi.Repository
         //    {
         //        Message.Exception(ref objMsg, ex);
         //    }
+
         //    return objMsg;
         //}
+
+        //public async Task<Message> ExportAsync(GatePass obj, User User)
+        //{
+        //    Message objMsg = new Message();
+        //    try
+        //    {
+        //        var list = await ListAsync(obj, User);
+
+        //        if (!list.Any())
+        //        {
+        //            Message.Error(ref objMsg, "Record did not find");
+        //            return objMsg;
+        //        }
+
+        //        DataTable dt = Util.ListToDataTable(list);
+
+        //        var company = await db.Company
+        //            .FirstOrDefaultAsync(x => App.ActiveStatus.Contains(x.Status));
+
+        //        if (company == null)
+        //        {
+        //            Message.Error(ref objMsg, "Company Info did not found");
+        //            return objMsg;
+        //        }
+
+        //        company.SheetName = "GatePass List";
+        //        company.ReportDesc =
+        //            $"GatePass List Generated On - {DateTime.Now:dd-MMM-yyyy HH:mm}";
+
+        //        objMsg.base64 = Util.DataTableToBase64(dt, company);
+        //        Message.Get(ref objMsg, "");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Message.Exception(ref objMsg, ex);
+        //    }
+
+        //    return objMsg;
+        //}
+
+
+
+
+
+        public async Task<Message> ExportAsync(GatePass obj, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                // Get filtered GatePass list
+                var dbGatePass = await ListAsync(obj, User);
+
+                // Select ONLY required columns for export
+                var gatePassExport = dbGatePass.Select(gp => new
+                {
+                    Employee = gp.EmployeeDesc,
+                    PassType = gp.TypeDesc,
+                    PassNo = gp.GatePassNo,
+                    IdentifyMark = gp.IdentifyMark,
+                    WorkOrderNo = gp.WorkOrderNo,
+                    Company = gp.CompanyId,
+                    Location = gp.LocationId,
+                    Department = gp.Department,
+                    SafetyPassNo = gp.SafetyPassNo,
+                    IssuedOn = gp.IssuedOn.ToString("dd-MMM-yyyy"),
+                    ExpiryOn = gp.ExpiryOn.ToString("dd-MMM-yyyy"),
+                    MedicalExpiryOn = gp.MedicalExpiryOn.ToString("dd-MMM-yyyy"),
+                    LabourLicenceExpiryOn = gp.LabourLicenseExpiryOn.ToString("dd-MMM-yyyy"),
+                    TranningExpiryOn = gp.TrainingExpiryOn.ToString("dd-MMM-yyyy")
+                }).ToList();
+
+
+                DataTable objDataTable = Util.ListToDataTable(gatePassExport);
+
+                var objCompany = await db.Company
+                    .FirstOrDefaultAsync(pt => App.ActiveStatus.Contains(pt.Status));
+
+                if (objCompany == null)
+                {
+                    Message.Error(ref objMsg, "Company Info not found");
+                    return objMsg;
+                }
+
+                objCompany.SheetName = "Gate Pass List";
+                objCompany.ReportDesc =
+                    $"Gate Pass List Generated On - {DateTime.Now:dd-MMM-yyyy HH:mm}";
+
+                objMsg.base64 = Util.DataTableToBase64(objDataTable, objCompany);
+
+                if (string.IsNullOrEmpty(objMsg.base64))
+                    Message.Error(ref objMsg, "Record not found");
+                else
+                    Message.Success(ref objMsg, "Record found");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
         public async Task<Message> AddAsync(GatePass obj, User User)
         {
             Message objMsg = new Message();
@@ -235,32 +354,16 @@ namespace CRMApi.Repository
             {
                 // 1. Sanitize Input Strings
                 obj.GatePassNo = Util.SanitizeInput(obj.GatePassNo, null) ?? "";
-                obj.Type = Util.SanitizeInput(obj.Type, null) ?? "";
-                obj.IdentifyMark = Util.SanitizeInput(obj.IdentifyMark, null) ?? "";
-                obj.WorkOrderNo = Util.SanitizeInput(obj.WorkOrderNo, null) ?? "";
-                obj.Location = Util.SanitizeInput(obj.Location, null) ?? "";
+                obj.WorkOrderNo = Util.SanitizeInput(obj.WorkOrderNo, null) ?? "";           
                 obj.Department = Util.SanitizeInput(obj.Department, null) ?? "";
                 obj.SafetyPassNo = Util.SanitizeInput(obj.SafetyPassNo, null) ?? "";
 
-                // 2. Check for Duplicates (Checking active passes with the same GatePassNo)
-                var duplicate = await db.GatePass.FirstOrDefaultAsync(ap =>
-                    App.ActiveStatus.Contains(ap.Status) &&
-                    obj.GatePassNo != "" &&
-                    ap.GatePassNo == obj.GatePassNo
-                );
-
-                if (duplicate != null)
-                {
-                    Message.Duplicate(ref objMsg, $"Gate Pass No : {obj.GatePassNo} already exists.");
-                    return objMsg;
-                }
-
-                // 3. Set Audit Fields
+             
                 obj.CreatedBy = User.Id;
                 obj.UpdatedBy = User.Id;
                 obj.CreatedAt = DateTime.Now;
                 obj.UpdatedAt = DateTime.Now;
-                obj.Status = 1; 
+                obj.Status = App.Status.Enable; 
 
                 db.GatePass.Add(obj);
                 Message.Add(ref objMsg, await db.SaveChangesAsync(), "");
@@ -268,9 +371,12 @@ namespace CRMApi.Repository
                
                 if (objMsg.status == Message.Type.success)
                 {     
-                    await db.Entry(obj).ReloadAsync();
                     obj.ListId = new List<int> { obj.Id };
                     objMsg.obj = (await ListAsync(obj, User)).FirstOrDefault();
+                    //objMsg.obj = (await ListAsync(new GatePass
+                    //{
+                    //    ListId = new List<int> { obj.Id },
+                    //}, User)).FirstOrDefault();
                     objMsg.data = (await GetViewOptionAsync()).data;
                 }
             }
@@ -280,7 +386,6 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-
         public async Task<Message> EditAsync(int Id, User User)
         {
             Message objMsg = new Message();
@@ -306,12 +411,6 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-
-        //private async Task GetAddOptionAsync(GatePass obj, User user)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
         public async Task<Message> UpdateAsync(GatePass obj, User User)
         {
             Message objMsg = new Message();
@@ -343,7 +442,7 @@ namespace CRMApi.Repository
                 UpdateGatePass.IdentifyMark = obj.IdentifyMark;
                 UpdateGatePass.WorkOrderNo = obj.WorkOrderNo;
                 UpdateGatePass.CompanyId = obj.CompanyId;
-                UpdateGatePass.Location = obj.Location;
+                UpdateGatePass.LocationId = obj.LocationId;
                 UpdateGatePass.Department = obj.Department;
                 UpdateGatePass.IssuedOn = obj.IssuedOn;
                 UpdateGatePass.ExpiryOn = obj.ExpiryOn;
@@ -363,7 +462,7 @@ namespace CRMApi.Repository
                 if (objMsg.status == Message.Type.success)
                 {
                     obj.ListId.Add(obj.Id);
-                    objMsg.obj = ListAsync(obj, User);
+                    objMsg.obj =await ListAsync(obj, User);
                     objMsg.data = GetViewOptionAsync();
                 }
             }
@@ -373,8 +472,6 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-
-
         public async Task<Message> DeleteAsync(int Id, User User)
         {
             Message objMsg = new Message();
