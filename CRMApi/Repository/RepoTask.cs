@@ -7,8 +7,11 @@ using Microsoft.EntityFrameworkCore;
 using System.Buffers.Text;
 using System.Data;
 using System.Dynamic;
+using System.Net.Mail;
+using System.Text;
 using static CRMApi.Dto.DtoDocument;
 using static CRMApi.Dto.DtoTask;
+using Task = CRMApi.Models.Task;
 
 
 
@@ -388,10 +391,25 @@ namespace CRMApi.Repository
                     }).ToList()
                 };
                 db.Add(task);
+
+
                 Message.Add(ref objMsg, (await db.SaveChangesAsync()), "");
+                var DtoTaskList = await ListAsync(new DtoTaskFltr { ListId = new List<int> { task.Id } }, User);
+                if (task!= null)
+                {
+                   
+                    foreach (var item in task.TaskItem)
+                    {
+
+                        Message msg = await NotifyComplaintLogByEmail(item, DtoTaskList, true);
+                        objMsg.status = msg.status != Message.Type.success ? msg.status : objMsg.status;
+                        objMsg.statusText += msg.statusText;
+
+                    }
+                }             
                 if (objMsg.status == Message.Type.success)
-                {                    
-                    objMsg.obj =  await ListAsync(new DtoTaskFltr { ListId = new List<int> { task.Id} }, User);
+                {
+                    objMsg.obj = DtoTaskList;
                     objMsg.data = GetViewOption().data;
                 }                
             }
@@ -522,7 +540,9 @@ namespace CRMApi.Repository
 
                 //Update Task Item
 
-                //Update Task Item Document                
+                //Update Task Item Document
+                //
+                var DtoTaskList = await ListAsync(new DtoTaskFltr { ListId = new List<int> { obj.Id } }, User);
                 foreach (var item in obj.TaskItem)
                 {
                     var taskItem = await db.TaskItem
@@ -560,9 +580,78 @@ namespace CRMApi.Repository
 
                     db.Update(taskItem);
 
+                    Message msg = await NotifyComplaintLogByEmail(taskItem, DtoTaskList, true);
+                    objMsg.status = msg.status != Message.Type.success ? msg.status : objMsg.status;
+                    objMsg.statusText += msg.statusText;
+
                 }
                 Message.Update(ref objMsg, await db.SaveChangesAsync(), "");
+
                 return objMsg;                           
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+
+        public async Task<Message> NotifyComplaintLogByEmail(TaskItem obj, List<DtoTaskList> tskobj,bool IsReg)
+        {
+            Message objMsg = new Message();
+            try
+            {               
+                var ListId = obj.AssignToList.Select(ca => ca.Id).ToList();
+                var ListUserEmail = await db.User.Where(x => App.ActiveStatus.Contains(x.Status) && ListId.Contains(x.Id)).Select(x => x.Email).ToListAsync();
+                var AssignedPer = await db.User .Where(x =>App.ActiveStatus.Contains(x.Status) && x.Id == obj.UpdatedBy)
+               .Select(x => new
+                 {
+                   x.Id,
+                   x.ContactNo,
+                   x.Email,
+                   x.Name
+                  })
+               .FirstOrDefaultAsync();
+                string assignedName = AssignedPer?.Name ?? "N/A";
+                string assignedContact = AssignedPer?.ContactNo ?? "N/A";
+                var UserMail = new MailMessage();
+                ListUserEmail.ForEach(Email => { UserMail.To.Add(Email); });
+                if (ListUserEmail.Any())
+                {
+                    var UserMailBody = new StringBuilder();
+                    UserMailBody.AppendLine("<p>");
+                    UserMailBody.AppendLine($"You have been assigned Task Id. {tskobj[0].Code}.<br/>");
+                    UserMailBody.AppendLine($"Please Complete the Task As Per Estemated Time.");
+                    UserMailBody.AppendLine("</p><hr/>");
+                    UserMailBody.AppendLine($@"
+                        <table style='width:90%; border-collapse: collapse;' border='0'>
+                            <tbody>                              
+                                  <tr><th style='text-align:left;'>Task Description</th><td><b>:</b> {obj.Description}</td></tr>
+                                 <tr><th style='text-align:left;'>TaskItem Id</th><td><b>:</b> {obj.Id}</td></tr>
+                                <tr><th style='text-align:left;'>Project</th><td><b>:</b> {tskobj[0].CustomerDesc}</td></tr>
+                               <tr><th style='text-align:left;'>Assigned By</th><td><b>:</b> {assignedName}</td></tr>
+                                <tr><th style='text-align:left;'>Contac No</th><td><b>:</b> {assignedContact}</td></tr>
+                                <tr><th style='text-align:left;'>Start Date</th><td><b>:</b> {obj.StartDateTime}</td></tr>
+                                <tr><th style='text-align:left;'>End Date</th><td><b>:</b> {obj.EndDateTime}</td></tr>
+                                 <tr><th style='text-align:left;'>Complete Task WithIn</th><td><b>:</b> {obj.EstimatedDays} Days</td></tr>
+                               
+                            </tbody>
+                        </table>
+                        <hr/>
+                    ");
+                    Thread.Sleep(1000);
+                    Message objMsgEng = new Message();
+                    Util.SentMail(db, UserMail, $"Assigned Task: {tskobj[0].Code}", UserMailBody.ToString(), "info", ref objMsgEng);
+                    if (objMsg.status != Message.Type.success || objMsgEng.status != Message.Type.success)
+                    {
+                        objMsg.status = objMsg.status != Message.Type.success && objMsgEng.status != Message.Type.success ? Message.Type.error : Message.Type.warning;
+                    }
+                    else
+                    {
+                        objMsg.status = Message.Type.success;
+                    }
+                    objMsg.statusText += $"<br>{(objMsgEng.status == Message.Type.success ? "Email sent to assigned engineer(s)." : "Failed to notify assigned engineer(s).")}";
+                }
             }
             catch (Exception ex)
             {
