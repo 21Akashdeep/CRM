@@ -720,10 +720,12 @@ const _File = {
                 const byteArray = new Uint8Array(byteNumbers);
                 const blob = new Blob([byteArray], { type: mimeType });
                 const blobUrl = URL.createObjectURL(blob);
-
-                _File.setIframe({ iframeId: iframeId, mimeType: mimeType, src: blobUrl });
-                $(iframeId).hide().fadeIn(650);
+                if (iframeId != "") {
+                    _File.setIframe({ iframeId: iframeId, mimeType: mimeType, src: blobUrl });
+                    $(iframeId).hide().fadeIn(650);
+                }                
                 let doc = {
+                    Name: FileName,
                     Base64: base64,
                     MimeType: mimeType,
                     BlobUrl: blobUrl,
@@ -823,7 +825,13 @@ const _File = {
             document.body.removeChild(a);
         }
     },
-    blobUrl({ base64 = "", mimeType = "" }) {
+    blobUrl({ base64 = null, mimeType = null }) {
+        if (Field.isNullOrEmpty(base64)) {
+            return null;
+        }
+        else if (Field.isNullOrEmpty(mimeType)) {
+            return null;
+        }
         // Convert base64 to binary
         const byteCharacters = atob(base64);
         const byteNumbers = Array.from(byteCharacters, char => char.charCodeAt(0));
@@ -1639,12 +1647,14 @@ const DateTime = {
                 picker.container.find(".calendar-table").hide();
             });
     },
-    dateTimePicker({ selector = '.date-time-picker', minDate = moment(), maxDate = moment().add(10, 'y') } = {}) {        
+    dateTimePicker({ selector = '.date-time-picker', defaultDate = true, minDate = moment(), maxDate = moment().add(10, 'y') } = {}) {        
         var inputId = "";
-        $(selector).each((index, element) => {            
-            inputId = `#${$(element).prev('input').attr('id')}`;
-            $(inputId).val(moment().format("DD-MMM-YYYY HH:mm")).trigger('change');
-        });
+        if (defaultDate) {
+            $(selector).each((index, element) => {
+                inputId = `#${$(element).prev('input').attr('id')}`;
+                $(inputId).val(moment().format("DD-MMM-YYYY HH:mm")).trigger('change');
+            });
+        }        
         $(selector).on('click', (e) => {            
             inputId = `#${$(e.currentTarget).prev('input').attr('id')}`;
             DateTime.pickerFunction = () => { }
@@ -1662,7 +1672,7 @@ const DateTime = {
                 timePicker24Hour: true,
             },
             (fromDate) => {
-                $(inputId).val(moment(fromDate).format("DD-MMM-YYYY HH:mm")).trigger('change');
+                $(inputId).val(moment(fromDate).format("DD-MMM-YYYY HH:mm")).trigger('change');                
                 DateTime.pickerFunction();
             }
         ).on('showCalendar.daterangepicker', (ev, picker) => {
@@ -1897,6 +1907,7 @@ const Table = {
         toggle = true,
         selectPick = false,
         datePicker = false,
+        dateTimePicker = false,
         action = 'destroy',
         mobileResponsive = true,
         detailFormatter = null,
@@ -2003,8 +2014,11 @@ const Table = {
             $(`${id} tbody select.select-pick[data-isMatched="false"]`).val(null);
             Dropdown.refresh({ selector: `${id} tbody select.select-pick` });            
         }
+        if (dateTimePicker) {
+            DateTime.dateTimePicker({ defaultDate: false });
+        }
         if (datePicker) {
-            DateTime.init();
+            DateTime.datePicker();
         }
         //Print
         if (isPrint) {
