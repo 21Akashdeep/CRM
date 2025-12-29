@@ -1,7 +1,9 @@
-﻿using CRMApi.Models;
+﻿using CRMApi.Dto;
+using CRMApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Newtonsoft.Json;
+using Task = CRMApi.Models.Task;
 
 
 
@@ -21,7 +23,13 @@ namespace CRMApi.Services
                 v => JsonConvert.SerializeObject(v),//Serialize List<CustomObject> to JSON string
                 v => JsonConvert.DeserializeObject<List<Composite.ApprovalSeq>>(v)! //Deserialize JSON string back to List<CustomObject>
             );            
-            modelBuilder.Entity<ApprovalConfig>().Property(e => e.ApprovalSeq).HasConversion(jsonApprovalSeq).HasColumnType("json");            
+            modelBuilder.Entity<ApprovalConfig>().Property(e => e.ApprovalSeq).HasConversion(jsonApprovalSeq).HasColumnType("json");
+            //Task Item Assing To
+            var jsonTaskItemAssingTo = new ValueConverter<List<DtoTask.DtoTaskAssingTo>, string>(
+                v => JsonConvert.SerializeObject(v),//Serialize List<CustomObject> to JSON string
+                v => JsonConvert.DeserializeObject<List<DtoTask.DtoTaskAssingTo>>(v)! //Deserialize JSON string back to List<CustomObject>
+            );
+            modelBuilder.Entity<TaskItem>().Property(e => e.AssignToList).HasConversion(jsonTaskItemAssingTo).HasColumnType("json");
         }
         public DbSet<User> User { get; set; }
         public DbSet<Setting> Setting { get; set; }
@@ -55,7 +63,11 @@ namespace CRMApi.Services
         public DbSet<ComplaintItem> ComplaintItem { get; set; }
         public DbSet<Otp> Otp { get; set; }
         public DbSet<Project> Project { get; set; }
-        public DbSet<ProjectDeadLineLog> ProjectDeadLineLog { get; set; }
+        public DbSet<ProjectModule> ProjectModule { get; set; }
+        public DbSet<Task> Task { get; set; }
+        public DbSet<TaskItem> TaskItem { get; set; }
+
+
 
     }
 }

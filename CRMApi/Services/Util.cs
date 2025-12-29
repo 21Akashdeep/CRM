@@ -1,21 +1,23 @@
 ﻿using ClosedXML.Excel;
+using CRMApi.Dto;
+using CRMApi.Models;
+using DocumentFormat.OpenXml.Spreadsheet;
 using ExcelDataReader;
 using Microsoft.AspNetCore.Mvc;
-using System.Data;
-using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
-using CRMApi.Models;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Net.Mail;
-using System.Net;
-using System.Text.RegularExpressions;
 using QRCoder;
+using System.Data;
 using System.Drawing;
-using DocumentFormat.OpenXml.Spreadsheet;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net;
+using System.Net.Mail;
+using System.Reflection;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
 
 
 namespace CRMApi.Services
@@ -553,8 +555,40 @@ namespace CRMApi.Services
             { "application/vnd.ms-excel", "xls" },
             { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx" }
         };
+        public static (string FilePath, Message Message) AddFile(DtoDocument.DtoDocAdd Document)
+        {
+            var objMsg = new Message();
+            string filePath = "";
+            try
+            {
+                if (Document.MimeType == null || Document.Base64 == null)
+                {
+                    Message.Warning(ref objMsg, "Mime Type or Base64 is empty");
+                    return (filePath, objMsg);
+                }
+                //Delete Un-Used File
+                var AddedFiles = Directory.GetFiles(Document.FilePath).Where(file =>
+                                 string.Equals(Path.GetFileNameWithoutExtension(file),
+                                 Document.FileName,
+                                 StringComparison.OrdinalIgnoreCase)).ToList();
+                AddedFiles.ForEach(file =>
+                {
+                    try { File.Delete(file); } catch (Exception) { }
+                });
+                //Add New File
+                string extension = MimeToExtension.ContainsKey(Document.MimeType) ? MimeToExtension[Document.MimeType] : "bin";
+                filePath = Path.Combine(Document.FilePath, $"{Document.FileName}.{extension}");
+                File.WriteAllBytes(filePath, Document.Base64);
+                Message.Success(ref objMsg, "Document has been added.");
+                objMsg.filePath = filePath;
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return (filePath, objMsg);
+        }
         public static Message AddFile(Composite.Document Document)
-
         {
             Message objMsg = new Message();
             try
@@ -588,5 +622,88 @@ namespace CRMApi.Services
             }
             return objMsg;
         }
+        public static Message DeleteFile(string FilePath)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                if (!File.Exists(FilePath))
+                {
+                    Message.Error(ref objMsg, "File not found.");
+                    return objMsg;
+                }
+                File.Delete(FilePath);
+                Message.Success(ref objMsg, "File has been deleted.");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+        public static Message GetFile1(string FilePath)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                if (!File.Exists(FilePath))
+                {
+                    Message.Error(ref objMsg, "File not found.");
+                    return objMsg;
+                }
+                var fileBytes = File.ReadAllBytes(FilePath);
+                var provider = new FileExtensionContentTypeProvider();
+                if (!provider.TryGetContentType(FilePath, out string? mimeType))
+                {
+                    mimeType = "application/octet-stream"; // fallback
+                }
+                objMsg.obj = new
+                {
+                    Base64 = Convert.ToBase64String(fileBytes),
+                    MimeType = mimeType,
+                };
+                objMsg.base64 = $"data:{mimeType};base64,{Convert.ToBase64String(fileBytes)}";
+                Message.Success(ref objMsg, "File found");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+        public static (string Name, string MimeType, string Base64, Message Message) GetFile(string FilePath)
+        {
+            var objMsg = new Message();
+            string fileName = "", mimeType = "", base64 = "";
+            try
+            {
+                if(String.IsNullOrEmpty(FilePath))
+                {
+                    Message.Error(ref objMsg, "File path is empty.");
+                    return (fileName, mimeType, base64, objMsg);
+                }
+                if (!File.Exists(FilePath))
+                {
+                    Message.Error(ref objMsg, "File not found.");
+                    return (fileName, mimeType, base64, objMsg);
+                }
+                var fileBytes = File.ReadAllBytes(FilePath);
+                var provider = new FileExtensionContentTypeProvider();
+                if (!provider.TryGetContentType(FilePath, out string? _mimeType))
+                {
+                    mimeType = "application/octet-stream"; // fallback
+                }
+                fileName = Path.GetFileName(FilePath);
+                mimeType = _mimeType!;
+                base64 = Convert.ToBase64String(fileBytes);
+                Message.Success(ref objMsg, "File found");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return (fileName, mimeType, base64, objMsg);
+        }
+
     }
 }

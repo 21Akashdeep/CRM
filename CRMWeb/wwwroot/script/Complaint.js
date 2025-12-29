@@ -394,7 +394,6 @@ window.tableComplaintActionEvent = {
     }
 }
 
-
 //Complaint Assing
 window.tableComplaintAssignCheck = (value, obj, index) => {
     let checkBox = [];
@@ -404,6 +403,7 @@ window.tableComplaintAssignCheck = (value, obj, index) => {
     checkBox.push('</div>');
     return checkBox.join('');
 }
+
 window.tableComplaintAssignCheckEvent = {
     'change .is-location-checked': (e, value, obj, index) => {
         obj.IsAdded = $(e.target).is(':Checked') ? true : false;
