@@ -63,6 +63,10 @@ namespace CRMApi.Services
         public DbSet<ComplaintItem> ComplaintItem { get; set; }
         public DbSet<Otp> Otp { get; set; }
         public DbSet<Project> Project { get; set; }
+        public DbSet<ProjectDeadLineLog> ProjectDeadLineLog { get; set; }
+        public DbSet<Qualification> Qualification { get; set; }
+        public DbSet<Employee> Employee { get; set; }
+        public DbSet<GatePass> GatePass { get; set; }
         public DbSet<ProjectModule> ProjectModule { get; set; }
         public DbSet<Task> Task { get; set; }
         public DbSet<TaskItem> TaskItem { get; set; }

@@ -58,6 +58,9 @@
         public string Priority { get; set; } = string.Empty;
         public string Returnable { get; set; } = string.Empty;
         public string TaskCategory { get; set; } = string.Empty;
+        public string JntvtiCateGory {  get; set; } = string.Empty;
+        public string PassType { get; set; } = string.Empty;
+
     }
     public class Status
     {
@@ -182,6 +185,21 @@
         public string  NewTask { get; set; } = null!;
         public string Complete { get; set; } = null!;
         public string Service { get; set; } = null!;
+
+    }
+
+
+    public class JntvtiCateGory
+    {
+        public string Platinum { get; set; } = string.Empty;
+        public string Gold { get; set; } = string.Empty;
+        public string Silver { get; set; } = string.Empty;
+
+    }
+    public class PassType
+    {
+        public string GatePass { get; set; } = string.Empty;
+        public string HeightPass { get; set; } = string.Empty;
 
     }
 }
