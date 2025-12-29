@@ -117,6 +117,8 @@ namespace CRMApi.Repository
                 from em in emJoin.DefaultIfEmpty()
                 join lo in db.Location on gp.LocationId equals lo.Id into lojoin
                 from lo in lojoin.DefaultIfEmpty()
+                join co in db.Company on gp.CompanyId equals co.Id into cojoin
+                from co in cojoin.DefaultIfEmpty()
                 join st1 in db.Setting on new { Category = "PassType", Value = gp.Type } equals new { Category = st1.Category, Value = st1.Value } into st1Join
                 from st1 in st1Join.DefaultIfEmpty()
                 join st in db.Setting on new { Name = App.SettingName.Status, Value = gp.Status.ToString() } equals new { st.Name, st.Value } into stJoin
@@ -136,6 +138,8 @@ namespace CRMApi.Repository
                     Department = gp.Department,
                     IdentifyMark = gp.IdentifyMark,
                     LocationId = gp.LocationId,
+                    LocationDesc=lo.Name,
+                    CompanyDesc=co.Name,
                     SafetyPassNo = gp.SafetyPassNo,
                     TrainingExpiryOn = gp.TrainingExpiryOn,
                     MedicalExpiryOn = gp.MedicalExpiryOn,
@@ -161,8 +165,6 @@ namespace CRMApi.Repository
 
             return GatePassList;
         }
-
-
         public async Task<Message> GetAsync(GatePass obj, User User)
         {
             Message objMsg = new Message();
@@ -286,67 +288,305 @@ namespace CRMApi.Repository
 
         //    return objMsg;
         //}
+        //public async Task<Message> ExportAsync(GatePass obj, User User)
+        //{
+        //    Message objMsg = new Message();
+        //    try
+        //    {
+        //        // Get filtered GatePass list
+        //        var dbGatePass = await ListAsync(obj, User);
+
+        //        // Select ONLY required columns for export
+        //        var gatePassExport = dbGatePass.Select(gp => new
+        //        {
+        //            Employee = gp.EmployeeDesc,
+        //            PassType = gp.TypeDesc,
+        //            PassNo = gp.GatePassNo,
+        //            IdentifyMark = gp.IdentifyMark,
+        //            WorkOrderNo = gp.WorkOrderNo,
+        //            Company = gp.CompanyId,
+        //            Location = gp.LocationId,
+        //            Department = gp.Department,
+        //            SafetyPassNo = gp.SafetyPassNo,
+        //            IssuedOn = gp.IssuedOn.ToString("dd-MMM-yyyy"),
+        //            ExpiryOn = gp.ExpiryOn.ToString("dd-MMM-yyyy"),
+        //            MedicalExpiryOn = gp.MedicalExpiryOn.ToString("dd-MMM-yyyy"),
+        //            LabourLicenceExpiryOn = gp.LabourLicenseExpiryOn.ToString("dd-MMM-yyyy"),
+        //            TranningExpiryOn = gp.TrainingExpiryOn.ToString("dd-MMM-yyyy")
+        //        }).ToList();
 
 
+        //        DataTable objDataTable = Util.ListToDataTable(gatePassExport);
+
+        //        var objCompany = await db.Company
+        //            .FirstOrDefaultAsync(pt => App.ActiveStatus.Contains(pt.Status));
+
+        //        if (objCompany == null)
+        //        {
+        //            Message.Error(ref objMsg, "Company Info not found");
+        //            return objMsg;
+        //        }
+
+        //        objCompany.SheetName = "Gate Pass List";
+        //        objCompany.ReportDesc =
+        //            $"Gate Pass List Generated On - {DateTime.Now:dd-MMM-yyyy HH:mm}";
+
+        //        objMsg.base64 = Util.DataTableToBase64(objDataTable, objCompany);
+
+        //        if (string.IsNullOrEmpty(objMsg.base64))
+        //            Message.Error(ref objMsg, "Record not found");
+        //        else
+        //            Message.Success(ref objMsg, "Record found");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Message.Exception(ref objMsg, ex);
+        //    }
+        //    return objMsg;
+        //}
 
 
+        //public async Task<Message> ExportAsync(GatePass obj, User User)
+        //{
+        //    Message objMsg = new Message();
+
+        //    try
+        //    {
+        //        var dbGatePass = await ListAsync(obj, User);
+
+        //        if (dbGatePass == null || !dbGatePass.Any())
+        //        {
+        //            Message.Error(ref objMsg, "Record not found");
+        //            return objMsg;
+        //        }
+
+        //        var exportData = dbGatePass.Select(gp => new
+        //        {
+        //            Employee = gp.EmployeeDesc ?? "",
+        //            PassType = gp.TypeDesc ?? "",
+        //            PassNo = gp.GatePassNo ?? "",
+        //            Location = gp.LocationDesc ?? "",
+        //            Department = gp.Department?? "",
+        //            IssuedOn = gp.IssuedOn.ToString("dd-MMM-yyyy"),
+        //            ExpiryOn = gp.ExpiryOn.ToString("dd-MMM-yyyy"),
+        //            SafetyPassNo = gp.SafetyPassNo ?? ""
+        //        }).ToList();
+
+        //        DataTable dt = Util.ListToDataTable(exportData);
+
+        //        var company = await db.Company
+        //            .FirstOrDefaultAsync(x => App.ActiveStatus.Contains(x.Status));
+
+        //        using (var wb = new ClosedXML.Excel.XLWorkbook())
+        //        {
+        //            var ws = wb.Worksheets.Add("Gate Pass List");
+
+        //            // ===== Header =====
+        //            ws.Cell("A1").Value = company?.Description ?? "Gate Pass Report";
+        //            ws.Range(1, 1, 1, dt.Columns.Count).Merge();
+        //            ws.Row(1).Style.Font.Bold = true;
+        //            ws.Row(1).Style.Font.FontSize = 18;
+        //            ws.Row(1).Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+
+        //            ws.Cell("A2").Value = $"Generated On - {DateTime.Now:dd-MMM-yyyy HH:mm}";
+        //            ws.Range(2, 1, 2, dt.Columns.Count).Merge();
+        //            ws.Row(2).Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+
+        //            // ===== Insert Data =====
+        //            ws.Cell("A3").InsertTable(dt);
+
+        //            var tableRange = ws.Range(3, 1, 3 + dt.Rows.Count, dt.Columns.Count);
+
+        //            // ===== Header Color =====
+        //            ws.Range(3, 1, 3, dt.Columns.Count)
+        //              .Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightGray;
+
+        //            // ===== Column-wise Colors =====
+        //            for (int col = 1; col <= dt.Columns.Count; col++)
+        //            {
+        //                string colName = dt.Columns[col - 1].ColumnName;
+
+        //                if (colName == "Employee")
+        //                    ws.Column(col).Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightCyan;
+
+        //                if (colName == "PassType")
+        //                    ws.Column(col).Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.AliceBlue;
+
+        //                if (colName.Contains("Expiry"))
+        //                    ws.Column(col).Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.MistyRose;
+
+        //                if (colName == "SafetyPassNo")
+        //                    ws.Column(col).Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightYellow;
+        //            }
+
+        //            // ===== Conditional Coloring =====
+        //            for (int r = 4; r <= dt.Rows.Count + 3; r++)
+        //            {
+        //                DateTime expiry;
+        //                if (DateTime.TryParse(ws.Cell(r, "G").GetString(), out expiry))
+        //                {
+        //                    if (expiry < DateTime.Today)
+        //                        ws.Cell(r, "G").Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightPink;
+        //                    else if (expiry <= DateTime.Today.AddDays(7))
+        //                        ws.Cell(r, "G").Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightSalmon;
+        //                }
+        //            }
+
+        //            ws.Columns().AdjustToContents();
+
+        //            using (var stream = new MemoryStream())
+        //            {
+        //                wb.SaveAs(stream);
+        //                objMsg.base64 = Convert.ToBase64String(stream.ToArray());
+        //            }
+        //        }
+
+        //        Message.Success(ref objMsg, "Record found");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Message.Exception(ref objMsg, ex);
+        //    }
+
+        //    return objMsg;
+        //}
 
         public async Task<Message> ExportAsync(GatePass obj, User User)
         {
             Message objMsg = new Message();
+
             try
             {
-                // Get filtered GatePass list
                 var dbGatePass = await ListAsync(obj, User);
 
-                // Select ONLY required columns for export
-                var gatePassExport = dbGatePass.Select(gp => new
+                if (dbGatePass == null || !dbGatePass.Any())
                 {
-                    Employee = gp.EmployeeDesc,
-                    PassType = gp.TypeDesc,
-                    PassNo = gp.GatePassNo,
-                    IdentifyMark = gp.IdentifyMark,
-                    WorkOrderNo = gp.WorkOrderNo,
-                    Company = gp.CompanyId,
-                    Location = gp.LocationId,
-                    Department = gp.Department,
-                    SafetyPassNo = gp.SafetyPassNo,
-                    IssuedOn = gp.IssuedOn.ToString("dd-MMM-yyyy"),
-                    ExpiryOn = gp.ExpiryOn.ToString("dd-MMM-yyyy"),
-                    MedicalExpiryOn = gp.MedicalExpiryOn.ToString("dd-MMM-yyyy"),
-                    LabourLicenceExpiryOn = gp.LabourLicenseExpiryOn.ToString("dd-MMM-yyyy"),
-                    TranningExpiryOn = gp.TrainingExpiryOn.ToString("dd-MMM-yyyy")
-                }).ToList();
-
-
-                DataTable objDataTable = Util.ListToDataTable(gatePassExport);
-
-                var objCompany = await db.Company
-                    .FirstOrDefaultAsync(pt => App.ActiveStatus.Contains(pt.Status));
-
-                if (objCompany == null)
-                {
-                    Message.Error(ref objMsg, "Company Info not found");
+                    Message.Error(ref objMsg, "Record not found");
                     return objMsg;
                 }
 
-                objCompany.SheetName = "Gate Pass List";
-                objCompany.ReportDesc =
-                    $"Gate Pass List Generated On - {DateTime.Now:dd-MMM-yyyy HH:mm}";
+                var exportData = dbGatePass.Select(gp => new
+                {
+                    Employee = gp.EmployeeDesc ?? "",
+                    PassType = gp.TypeDesc ?? "",
+                    PassNo = gp.GatePassNo ?? "",
+                    Location = gp.LocationDesc ?? "",
+                    Department = gp.Department ?? "",
+                    Company = gp.CompanyDesc ?? "",
+                    SafetyPassNo = gp.SafetyPassNo ?? "",
+                    WorkOrderNo=gp.WorkOrderNo ?? "",
+                    IssuedOn = gp.IssuedOn.ToString("dd-MMM-yyyy"),
+                    ExpiryOn = gp.ExpiryOn.ToString("dd-MMM-yyyy"),
+                    LabourLicenseExpiry = gp.LabourLicenseExpiryOn.ToString("dd-MMM-yyyy"),
+                    MedicalExpiry = gp.MedicalExpiryOn.ToString("dd-MMM-yyyy"),
+                    TrainingExpiry = gp.TrainingExpiryOn.ToString("dd-MMM-yyyy"),
 
-                objMsg.base64 = Util.DataTableToBase64(objDataTable, objCompany);
+                  
+                }).ToList();
 
-                if (string.IsNullOrEmpty(objMsg.base64))
-                    Message.Error(ref objMsg, "Record not found");
-                else
-                    Message.Success(ref objMsg, "Record found");
+                DataTable dt = Util.ListToDataTable(exportData);
+
+                var company = await db.Company
+                    .FirstOrDefaultAsync(x => App.ActiveStatus.Contains(x.Status));
+
+                using (var wb = new ClosedXML.Excel.XLWorkbook())
+                {
+                    var ws = wb.Worksheets.Add("Gate Pass List");
+                    int totalCols = dt.Columns.Count;
+
+                    // ===== TITLE =====
+                    ws.Cell("A1").Value = company?.Description ?? "Gate Pass Report";
+                    ws.Range(1, 1, 1, totalCols).Merge();
+                    ws.Row(1).Style.Font.Bold = true;
+                    ws.Row(1).Style.Font.FontSize = 18;
+                    ws.Row(1).Style.Alignment.Horizontal =
+                        ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+
+                    ws.Cell("A2").Value = $"Pass Timeline Generated On - {DateTime.Now:dd-MMM-yyyy HH:mm}";
+                    ws.Range(2, 1, 2, totalCols).Merge();
+                    ws.Row(2).Style.Alignment.Horizontal =
+                        ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+
+                    // ===== DATA =====
+                    ws.Cell("A3").InsertTable(dt);
+
+                    // Header styling
+                    ws.Range(3, 1, 3, totalCols)
+                      .Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.BlueBell;
+
+                    ws.Range(3, 1, 3, totalCols)
+                      .Style.Font.SetBold();
+
+
+                    int headerRow = 3;
+                    int dataStartRow = headerRow + 1;
+                    int dataEndRow = dataStartRow + dt.Rows.Count - 1;
+
+                    var fullRange = ws.Range(headerRow, 1, dataEndRow, totalCols);
+
+                    fullRange.Style.Border.TopBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
+                    fullRange.Style.Border.BottomBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
+                    fullRange.Style.Border.LeftBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
+                    fullRange.Style.Border.RightBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
+
+                    fullRange.Style.Border.InsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
+              
+                    // ===== EXPIRY COLOR LOGIC =====
+                    string[] expiryColumns =
+                    {
+                "ExpiryOn",
+                "LabourLicenseExpiry",
+                "MedicalExpiry",
+                "TrainingExpiry"
+            };
+
+                    int startRow = 4;
+                    int endRow = startRow + dt.Rows.Count - 1;
+
+                    foreach (string colName in expiryColumns)
+                    {
+                        int colIndex = dt.Columns.IndexOf(colName) + 1;
+
+                        for (int r = startRow; r <= endRow; r++)
+                        {
+                            var cell = ws.Cell(r, colIndex);
+
+                            if (DateTime.TryParse(cell.GetString(), out DateTime expiryDate))
+                            {
+                                int dayGap = (expiryDate.Date - DateTime.Today).Days;
+
+                                if (dayGap > 15)
+                                    cell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.Green;
+                                else if (dayGap > 1)
+                                    cell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.Orange;
+                                else
+                                    cell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.Red;
+                            }
+                        }
+                    }
+
+                    ws.Columns().AdjustToContents();
+                    ws.SheetView.FreezeRows(3);
+
+                    using (var stream = new MemoryStream())
+                    {
+                        wb.SaveAs(stream);
+                        objMsg.base64 = Convert.ToBase64String(stream.ToArray());
+                    }
+                }
+
+                Message.Success(ref objMsg, "Record found");
             }
             catch (Exception ex)
             {
                 Message.Exception(ref objMsg, ex);
             }
+
             return objMsg;
         }
+
+
+
         public async Task<Message> AddAsync(GatePass obj, User User)
         {
             Message objMsg = new Message();
