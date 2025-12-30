@@ -450,7 +450,6 @@ namespace CRMApi.Repository
 
         //    return objMsg;
         //}
-
         public async Task<Message> ExportAsync(GatePass obj, User User)
         {
             Message objMsg = new Message();
@@ -494,7 +493,7 @@ namespace CRMApi.Repository
                     var ws = wb.Worksheets.Add("Gate Pass List");
                     int totalCols = dt.Columns.Count;
 
-                    // ===== TITLE =====
+                    //TITLE
                     ws.Cell("A1").Value = company?.Description ?? "Gate Pass Report";
                     ws.Range(1, 1, 1, totalCols).Merge();
                     ws.Row(1).Style.Font.Bold = true;
@@ -507,12 +506,12 @@ namespace CRMApi.Repository
                     ws.Row(2).Style.Alignment.Horizontal =
                         ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
 
-                    // ===== DATA =====
+                    //DATA 
                     ws.Cell("A3").InsertTable(dt);
 
                     // Header styling
                     ws.Range(3, 1, 3, totalCols)
-                      .Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.BlueBell;
+                      .Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.YaleBlue;
 
                     ws.Range(3, 1, 3, totalCols)
                       .Style.Font.SetBold();
@@ -530,8 +529,7 @@ namespace CRMApi.Repository
                     fullRange.Style.Border.RightBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
 
                     fullRange.Style.Border.InsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
-              
-                    // ===== EXPIRY COLOR LOGIC =====
+
                     string[] expiryColumns =
                     {
                 "ExpiryOn",
