@@ -1,0 +1,145 @@
+﻿@{
+    ViewData["Title"] = "TaskAction";
+}
+
+<div class="card shadow">
+    <div class="card-header">
+        <span class="card-title">TaskAction / View</span>
+    </div>
+    <div class="card-body">
+        <form autocomplete="false">
+            <div class="row">
+                
+                <div class="col-md-2">
+                    <label>Status</label>
+                    <select id="ListStatus" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <div class="btn-group">
+                        <button type="button" id="btnSearch" class="btn btn-sm btn-filter btn-outline-success" data-action="View" title="Search">
+                            <span class="fa fa-search"></span>
+                        </button>                      
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-md-12">
+                    <table id="tableTask" class="table table-bordered table-hover table-default" data-search="true" border="1" data-sort-name="Id" data-unique-id="Id">
+                        <thead>
+                            <tr>
+                                <th data-sortable="false" data-formatter="tableTaskSlNo" class="text-center">#</th>
+                                <th data-sortable="true" data-formatter="tableTaskInfo">Task Info</th>
+                                <th data-formatter="tableTaskStatus" class="text-nowrap text-center">Status</th>
+                                <th data-formatter="tableTask" data-events="tableTaskEvent" class="not-print text-center">
+                                    <i class="fa-solid fa-list-check"></i>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="modalTaskAction" class="modal fade modal-draggable" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title"></span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body" style="min-height:75vh;">
+                <form id="formTaskAction">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label>TaskId<span class="text-mandatory">*</span></label>
+                            <input type="hidden" id="TaskId" name="TaskId" />
+                            <input id="TaskId" name="TaskId" class="form-control form-control-sm required" readonly />
+                        </div>
+                        <div class="col-md-4">
+                            <label>Your Task<span class="text-mandatory">*</span></label>
+                            <select id="TaskAction_TaskItemId" name="TaskItemId" class="select-pick required" data-search="true" data-size="4"></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Status<span class="text-mandatory">*</span></label>
+                            <select id="Status" name="Status" class="select-pick required" data-search="true" data-size="4"></select>
+                        </div>
+                        <div class="col-md-12">
+                            <label>Remarks<span class="text-mandatory">*</span></label>
+                            <textarea type="text" id="Remarks" name="Remarks" class="form-control form-control-sm required" rows="4" cols="20"></textarea>
+                        </div>
+                        <div class="col-md-3">
+                            <label>NotifyToOwner<span class="text-mandatory">*</span></label>
+                            <select id="TaskAction_NotifyToOwner" name="NotifyToOwner" class="form-control form-control-sm select-pick required Employee-required" data-search='true'>
+                                <option value=1>Yes</option>
+                                <option value=0>No</option>
+                                
+                            </select>
+
+                        </div>
+                        <div class="col-md-4 send-otp hide">
+                            <label>OTP<span class="text-mandatory">*</span></label>
+                            <div class="input-group input-group-sm">
+                                <input id="OtpNo" name="OtpNo" class="form-control" autocomplete="off" data-num="true" maxlength="6" />
+                                <button type="button" id="btnSendOtp" class="input-group-text btn btn-sm btn-outline-success pt-1 pb-2" title="Search">
+                                    Send OTP
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-8 send-otp hide mt-4">
+                            <span id="OtpTimer" style="font-size:16px;"></span>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table id="tableTaskAction" class="table table-border table-default">
+                                <thead>
+                                    <tr>
+                                        <th data-formatter="tableTaskActionSlNo" class="text-center">#</th>
+                                        <th data-field="TaskItemId">TaskItem No.</th>
+                                        <th data-field="Remarks">Remarks</th>
+                                        <th data-formatter="tableTaskActionStatus">Status</th>
+                                        <th data-formatter="tableTaskActionLogByAndAt">Log By & At</th>
+                                        <th data-formatter="tableTaskAction" data-events="tableTaskActionEvents" class="text-center">
+                                            <i class="fa-solid fa-list-check"></i>
+                                        </th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnSave" class="btn btn-sm btn-success rounded-5">
+                    <span class="fa fa-save"></span>&nbsp;&nbsp;Submit
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script src="~/script/TaskAction.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        $(function () {
+            TaskAction.init();
+        });
+    </script>
+}
+
+
