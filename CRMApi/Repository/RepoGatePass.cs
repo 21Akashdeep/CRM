@@ -107,7 +107,7 @@ namespace CRMApi.Repository
             var dbGatePassQuery = db.GatePass.Where(co => obj.ListStatus.Contains(co.Status)).AsQueryable();
 
             if (obj.ListId.Any()) dbGatePassQuery = dbGatePassQuery.Where(co => obj.ListId.Contains(co.Id));
-            dbGatePassQuery = obj.ListLocation.Any() ? dbGatePassQuery.Where(gt => obj.ListLocation.Contains(gt.Id)) : dbGatePassQuery;
+            dbGatePassQuery = obj.ListLocation.Any() ? dbGatePassQuery.Where(gt => obj.ListLocation.Contains(gt.LocationId)) : dbGatePassQuery;
             dbGatePassQuery = obj.ListDepartment.Any() ? dbGatePassQuery.Where(gt => obj.ListDepartment.Contains(gt.Id)) : dbGatePassQuery;
             if (obj.ListPassType.Any()) dbGatePassQuery = dbGatePassQuery.Where(co => obj.ListPassType.Contains(co.Type));
 
@@ -701,7 +701,7 @@ namespace CRMApi.Repository
                 {
                     obj.ListId.Add(obj.Id);
                     objMsg.obj =await ListAsync(obj, User);
-                    objMsg.data = GetViewOptionAsync();
+                    objMsg.data = await GetViewOptionAsync();
                 }
             }
             catch (Exception ex)
