@@ -20,11 +20,11 @@ namespace CRMApi.Models
         [NotMapped] public string LocationDesc { get; set; } = string.Empty;
         [MaxLength(100)] public string Department { get; set; } = string.Empty;
         public DateTime IssuedOn { get; set; }
-        public DateTime ExpiryOn { get; set; }
+        public DateTime? ExpiryOn { get; set; }
         [MaxLength(100)] public string SafetyPassNo { get; set; } = string.Empty;
-        public DateTime TrainingExpiryOn { get; set; }
-        public DateTime MedicalExpiryOn { get; set; }
-        public DateTime LabourLicenseExpiryOn { get; set; }
+        public DateTime? TrainingExpiryOn { get; set; }
+        public DateTime? MedicalExpiryOn { get; set; }
+        public DateTime? LabourLicenseExpiryOn { get; set; }
 
 
         public int Status { get; set; } = 1;

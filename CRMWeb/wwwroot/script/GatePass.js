@@ -339,8 +339,6 @@
 
 
 // New --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
 class GatePass {
     //GatePass List
     static init() {
@@ -388,57 +386,6 @@ class GatePass {
         });
     }
 
-//  static print() {
-//    var obj = {
-//        ListRecordStatus: $('#ListRecordStatus').val(),
-//        ListId: $('#ListId').val()
-//    }
-//    Data.post({
-//        url: 'GatePass/Print',
-//        data: obj,
-//        onSuccess: (response) => {
-//            Table.add({ id: '#tableGatePass', data: response.data, isPrint: true });
-
-//            const style = document.createElement('style');
-//            style.innerHTML = `
-//                @media print {
-//                    body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-//                    .btn, .btn-group, .navbar, .modal-footer, #btnSearch, .dropdown-menu { display: none !important; }
-
-//                    table { width: 100%; border-collapse: collapse !important; border-spacing: 0 !important; }
-
-//                    /* Force the TD to allow the child to fill 100% height */
-//                    td {
-//                        border: 1px solid #000 !important;
-//                        padding: 0 !important;
-//                        height: 1px;
-//                    }
-
-//                    .text-cell { padding: 4px !important; font-size: 8pt; }
-
-//                    .full-fill {
-//                        display: flex;
-//                        align-items: center;
-//                        justify-content: center;
-//                        width: 100%;
-//                        height: 100%;
-//                        min-height: 35px;
-//                        padding: 4px; /* Padding inside the color */
-//                        box-sizing: border-box;
-//                        text-align: center;
-//                    }
-//                }
-//            `;
-//            document.head.appendChild(style);
-
-//            setTimeout(() => {
-//                window.print();
-//                document.head.removeChild(style);
-//            }, 10000); // Increased timeout slightly for rendering
-//        }
-//    });
-    //}
-
     static print() {
     var obj = {
         ListRecordStatus: $('#ListRecordStatus').val(),
@@ -448,62 +395,10 @@ class GatePass {
         url: 'GatePass/Print',
         data: obj,
         onSuccess: (response) => {
-            Table.add({ id: '#tableGatePass', data: response.data, isPrint: true });
+            Table.add({ id: '#tableGatePass', data: response.data, isPrint: true, printTitle: "Gate & Height Pass", reportDesc:"Gate Pass" });
 
-            const style = document.createElement('style');
-            style.innerHTML = `
-                @media print {
-                    body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-                    .btn, .btn-group, .navbar, .modal-footer, #btnSearch, .dropdown-menu { display: none !important; }
-                    
-                    table { 
-                        width: 100%; 
-                        border-collapse: collapse !important; 
-                        border-spacing: 0 !important; 
-                    }
-                    
-                    tr { 
-                        height: 35px; 
-                    }
-                    
-                    /* Force the TD to allow the child to fill 100% height */
-                    td { 
-                        border: 1px solid #000 !important; 
-                        padding: 0 !important; 
-                        margin: 0 !important;
-                        height: 35px;
-                        position: relative;
-                    }
 
-                    .text-cell { 
-                        padding: 4px !important; 
-                        font-size: 8pt; 
-                        height: 100%;
-                        display: flex;
-                        align-items: center;
-                    }
-
-                    .full-fill { 
-                        display: flex !important; 
-                        align-items: center; 
-                        justify-content: center; 
-                        width: 100%; 
-                        height: 100%;
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        padding: 4px;
-                        box-sizing: border-box;
-                        text-align: center;
-                    }
-                }
-            `;
-            document.head.appendChild(style);
-
-            setTimeout(() => {
-                window.print();
-                document.head.removeChild(style);
-            }, 100000);
+          
         }
     });
 }
@@ -604,6 +499,7 @@ class GatePass {
     }
 }
 window.getExpiryColorStyle = (dateValue) => {
+    
     if (!dateValue) return "background-color: #f8fafc;";
     let expiry = moment(dateValue).startOf('day');
     let today = moment().startOf('day');
@@ -611,9 +507,9 @@ window.getExpiryColorStyle = (dateValue) => {
 
     let bgColor = "#dc3545"; // Red
     if (dayGap > 15) bgColor = "#28a745"; // Green
-    else if (dayGap > 1) bgColor = "#fbbf24"; // Yellow/Orange
+    else if (dayGap > 1) bgColor = "#fbbf24"; // Yellow
 
-    return `background-color: ${bgColor} !important; color: white !important; font-weight: bold;`;
+    return `background-color: ${bgColor} !important; color: white !important; font-weight: bold; padding-left: 10px; padding-right: 5px; border-radius: 10px`;
 };
 window.tableGatePassSLNo = (value, obj, index) => {
     return `<div class="text-cell" style="text-align:center;">${index + 1}</div>`;
