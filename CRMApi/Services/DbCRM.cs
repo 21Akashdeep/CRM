@@ -70,6 +70,7 @@ namespace CRMApi.Services
         public DbSet<ProjectModule> ProjectModule { get; set; }
         public DbSet<Task> Task { get; set; }
         public DbSet<TaskItem> TaskItem { get; set; }
+        public DbSet<TaskAction> TaskAction { get; set; }
 
 
 

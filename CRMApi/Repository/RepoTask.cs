@@ -21,7 +21,6 @@ namespace CRMApi.Repository
     {
         private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
-
         public (string Name, string MimeType, string Base64, Message Message) DtoDocAdd { get; private set; }
         public RepoTask(DBCRM db)
         {
@@ -45,7 +44,7 @@ namespace CRMApi.Repository
                 ).ToList();
 
                 option.ListId = db.Task
-               .Where(x => App.ActiveStatus.Contains(x.Status))
+               .Where(x => App.AllActiveStatus.Contains(x.Status))
                .Select(x => new
                {
                  x.Id,
@@ -145,11 +144,8 @@ namespace CRMApi.Repository
         public async Task<List<DtoTaskList>> ListAsync(DtoTaskFltr? obj, User User)
         {
 
-            
-
-
             obj ??= new DtoTaskFltr();
-            obj.ListStatus = obj.ListStatus.Count == 0 ? App.ActiveStatus : obj.ListStatus;
+            obj.ListStatus = obj.ListStatus.Count == 0 ? App.AllActiveStatus : obj.ListStatus;
             Console.WriteLine("p");
             var taskList = await (
                 from dpt in db.Task
@@ -191,6 +187,7 @@ namespace CRMApi.Repository
                     IsDuplicate = true,
                     IsDelete = dpt.Status == App.Status.Enable ? true : false,
                     IsEnable = dpt.Status == App.Status.Delete ? true : false,
+                    IsAddStatus = dpt.Status == App.Status.Pending || dpt.Status == App.Status.Processing ? true : false,
                 }
             ).ToListAsync();
             return taskList;
@@ -595,7 +592,6 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-
         public async Task<Message> NotifyComplaintLogByEmail(TaskItem obj, List<DtoTaskList> tskobj,bool IsReg)
         {
             Message objMsg = new Message();

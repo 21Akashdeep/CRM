@@ -72,6 +72,7 @@ namespace CRMApi.Dto
             public List<DtoTaskItemList> TaskItem { get; set; } = new List<DtoTaskItemList>();
             public List<int> ListTaskId { get; set; } = new List<int>();
 
+            public bool IsAddStatus { get; set; } = false;
             public List<int> ListStatus { get; set; } = new List<int>();
         }
         public class DtoTaskItemList
@@ -112,6 +113,12 @@ namespace CRMApi.Dto
             public DateTime FromDate { get; set; }
             public DateTime ToDate { get; set; }
 
+        }
+        public class DtoTaskActionFilter
+        {
+            public List<int> ListStatus { get; set; } = new();
+            public List<int> ListTaskId { get; set; } = new();
+            public List<int> ListTaskItemId { get; set; } = new();
         }
     }
 }
