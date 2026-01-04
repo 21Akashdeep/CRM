@@ -2,155 +2,410 @@
     ViewData["Title"] = "Dashboard";
 }
 
+@* <style> *@
+@*     .dashboard-top { *@
+@*         width: 100%; *@
+@*         height: 30vh;  *@
+@*         padding: 10px 20px; *@
+@*         box-sizing: border-box; *@
+@*     } *@
+
+@*     .dashboard-title { *@
+@*         text-align: center; *@
+@*         font-weight: bold; *@
+@*         margin-bottom: 10px; *@
+@*     } *@
+
+@*     .overview-table { *@
+@*         width: 100%; *@
+@*         height: calc(100% - 40px); *@
+@*         border-collapse: collapse; *@
+@*     } *@
+
+@*     .overview-table td { *@
+@*         width: 25%; *@
+@*         padding: 5px; *@
+@*         vertical-align: top; *@
+@*     } *@
+
+@*     .inner-table { *@
+@*         width: 100%; *@
+@*         border-collapse: collapse; *@
+@*         font-size: 16px; *@
+@*         font-weight: bold; *@
+@*     } *@
+
+@*     .inner-table td { *@
+@*         padding: 8px 10px; *@
+@*         color: #fff; *@
+@*     } *@
+
+@*     .value { *@
+@*         text-align: right; *@
+@*     } *@
+
+@*     .inner-table th { *@
+@*         padding: 8px 10px; *@
+@*         text-align: center; *@
+@*         background-color: #2f5597; *@
+@*         color: #fff; *@
+@*         font-size: 15px; *@
+@*     } *@
+@*     /* Colors */ *@
+@*     .blue { *@
+@*         background-color: #4f81bd; *@
+@*     } *@
+
+@*     .orange { *@
+@*         background-color: #f79646; *@
+@*     } *@
+
+@*     .red { *@
+@*         background-color: #ff0000; *@
+@*     } *@
+@* </style> *@
+
+@* <div class="dashboard-top"> *@
+@*     <h3 class="dashboard-title">Gate Pass Overview</h3> *@
+
+@*     <table class="overview-table" onclick="location.href='@Url.Action("Index", "GatePass")'" *@
+@*            style="cursor:pointer;"> *@
+@*         <tr> *@
+@*             <td> *@
+@*                 <table class="inner-table"> *@
+@*                     <tr> *@
+@*                         <th colspan="2">Gate & Height</th> *@
+@*                     </tr> *@
+
+@*                     <tr class="blue"> *@
+@*                         <td>Total Gate & Height Passes</td> *@
+@*                         <td class="value" id="passTotal">0</td> *@
+@*                     </tr> *@
+@*                     <tr class="orange"> *@
+@*                         <td>Expiry Soon</td> *@
+@*                         <td class="value" id="passExpirySoon">0</td> *@
+@*                     </tr> *@
+@*                     <tr class="red"> *@
+@*                         <td>Expired</td> *@
+@*                         <td class="value" id="passExpired">0</td> *@
+@*                     </tr> *@
+@*                 </table> *@
+@*             </td> *@
+@*             <td> *@
+@*                 <table class="inner-table"> *@
+@*                     <tr> *@
+@*                         <th colspan="2">Medical</th> *@
+@*                     </tr> *@
+@*                     <tr class="blue"> *@
+@*                         <td>Total Medical Passes</td> *@
+@*                         <td class="value" id="medicalTotal">0</td> *@
+@*                     </tr> *@
+@*                     <tr class="orange"> *@
+@*                         <td>Expiry Soon</td> *@
+@*                         <td class="value" id="medicalExpirySoon">0</td> *@
+@*                     </tr> *@
+@*                     <tr class="red"> *@
+@*                         <td>Expired</td> *@
+@*                         <td class="value" id="medicalExpired">0</td> *@
+@*                     </tr> *@
+@*                 </table> *@
+@*             </td> *@
+@*             <td> *@
+@*                 <table class="inner-table"> *@
+@*                     <tr> *@
+@*                         <th colspan="2">Training</th> *@
+@*                     </tr> *@
+@*                     <tr class="blue"> *@
+@*                         <td>Total Training</td> *@
+@*                         <td class="value" id="trainingTotal">0</td> *@
+@*                     </tr> *@
+@*                     <tr class="orange"> *@
+@*                         <td>Expiry Soon</td> *@
+@*                         <td class="value" id="trainingExpirySoon">0</td> *@
+@*                     </tr> *@
+@*                     <tr class="red"> *@
+@*                         <td>Expired</td> *@
+@*                         <td class="value" id="trainingExpired">0</td> *@
+@*                     </tr> *@
+@*                 </table> *@
+@*             </td> *@
+@*             <td> *@
+@*                 <table class="inner-table"> *@
+@*                     <tr> *@
+@*                         <th colspan="2">Labour Licence</th> *@
+@*                     </tr> *@
+@*                     <tr class="blue"> *@
+@*                         <td>Total Labour Licence</td> *@
+@*                         <td class="value" id="labourTotal">0</td> *@
+@*                     </tr> *@
+@*                     <tr class="orange"> *@
+@*                         <td>Expiry Soon</td> *@
+@*                         <td class="value" id="labourExpirySoon">0</td> *@
+@*                     </tr> *@
+@*                     <tr class="red"> *@
+@*                         <td>Expired</td> *@
+@*                         <td class="value" id="labourExpired">0</td> *@
+@*                     </tr> *@
+@*                 </table> *@
+@*             </td> *@
+@*         </tr> *@
+@*     </table> *@
+@* </div> *@
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
 <style>
-    .dashboard-top {
-        width: 100%;
-        height: 30vh; 
-        padding: 10px 20px;
-        box-sizing: border-box;
+    :root {
+        --card-bg: #ffffff;
+        --header-blue: #2f5597;
+        --text-label: #555555;
+        --color-total: #2f5597; /* Blue */
+        --color-soon: #f1c40f; /* Yellow/Orange */
+        --color-expired: #e74c3c; /* Red */
+    }
+    
+    .dashboard-container {
+        padding: 20px;
+        background-color: var(--bg-color);
+        font-family: 'Segoe UI', sans-serif;
+        background-color:whitesmoke;
     }
 
-    .dashboard-title {
-        text-align: center;
-        font-weight: bold;
-        margin-bottom: 10px;
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
     }
+
+    .stat-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        overflow: hidden;
+        border: 1px solid #e0e0e0;
+        transition: transform 0.2s;
+        cursor: pointer;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
 
     .overview-table {
         width: 100%;
-        height: calc(100% - 40px);
         border-collapse: collapse;
+    }
+
+        .overview-table th {
+            background-color: var(--header-blue);
+            color: #ffffff;
+            padding: 15px;
+            font-size: 1.1rem;
+            text-align: center;
+            width: 100%;
+            display: table-cell;
+            box-sizing: border-box;
+        }
+
+            .overview-table th i {
+                margin-right: 10px;
+                font-size: 0.9em;
+            }
+
+        .overview-table td {
+            padding: 10px 10px;
+            border-bottom: 1px solid #f0f0f0;
+            font-weight: bold;
+        }
+
+    .label-cell {
+        color: var(--text-label);
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .value-cell {
+        text-align: right;
+        font-size: 1.4rem;
+    }
+
+    /* Color Classes */
+    .blue-text {
+        color: var(--color-total);
+    }
+
+    .yellow-text {
+        color: var(--color-soon);
+    }
+
+    .red-text {
+        color: var(--color-expired);
+    }
+
+    .dashboard-header-container {
+        display: flex;
+        align-items: flex-start; 
+        margin-bottom: 12px;
+        padding-top: 5px;
+    }
+
+    .blue-accent-bar {
+        width: 6px;
+        height: 45px;
+        background-color: #2f5597; 
+        margin-right: 15px;
+        border-radius: 2px;
+    }
+
+    .header-text-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .main-title {
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 2rem;
+        font-weight: 800; 
+        color: #1a2b4e; 
+        line-height: 1.1;
+    }
+
+    .sub-title {
+        margin: 3px 0 0 0;
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 1rem;
+        color: #666666; /* Muted gray for the description */
+        font-weight: 400;
+    }
+   
+    @@media (max-width: 992px) {
+        .dashboard-grid
+    {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .main-title {
+        font-size: 1.8rem;
+    }
+    .value-cell {
+        font-size: 1.2rem;
+    }
+    }
+    @@media (max-width: 576px) {
+        .dashboard-container
+    {
+        padding: 12px;
+    }
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    .dashboard-header-container {
+        flex-direction: row;
+        align-items: center;
+    }
+    .blue-accent-bar {
+        height: 35px;
+    }
+    .main-title {
+        font-size: 1.5rem;
+    }
+    .overview-table th {
+        font-size: 1rem;
+        padding: 12px;
     }
 
     .overview-table td {
-        width: 25%;
-        padding: 5px;
-        vertical-align: top;
+        padding: 8px;
     }
 
-    .inner-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 16px;
-        font-weight: bold;
+    .label-cell {
+        font-size: 0.9rem;
     }
 
-    .inner-table td {
-        padding: 8px 10px;
-        color: #fff;
+    .value-cell {
+        font-size: 1.1rem;
     }
 
-    .value {
-        text-align: right;
-    }
-
-    .inner-table th {
-        padding: 8px 10px;
-        text-align: center;
-        background-color: #2f5597;
-        color: #fff;
-        font-size: 15px;
-    }
-    /* Colors */
-    .blue {
-        background-color: #4f81bd;
-    }
-
-    .orange {
-        background-color: #f79646;
-    }
-
-    .red {
-        background-color: #ff0000;
     }
 </style>
 
-<div class="dashboard-top">
-    <h3 class="dashboard-title">Gate Pass Overview</h3>
+<div class="dashboard-container">
 
-    <table class="overview-table" onclick="location.href='@Url.Action("Index", "GatePass")'"
-           style="cursor:pointer;">
-        <tr>
-            <td>
-                <table class="inner-table">
+    <div class="dashboard-header-container">
+        <div class="blue-accent-bar"></div>
+        <div class="header-text-content">
+            <h1 class="main-title">Gate/Height Pass Overview</h1>
+        </div>
+    </div>
+    <div class="dashboard-grid">
+        <div class="stat-card" onclick="location.href='@Url.Action("Index", "GatePass")'">
+            <table class="overview-table">
+                <thead>
                     <tr>
-                        <th colspan="2">Gate & Height</th>
+                        <th colspan="2"><i class="fa-solid fa-credit-card"></i> Gate & Height</th>
                     </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="label-cell  blue-text">Total Passes</td><td class="value-cell blue-text" id="passTotal">0</td></tr>
+                    <tr><td class="label-cell yellow-text">Expiry Soon</td><td class="value-cell yellow-text" id="passExpirySoon">0</td></tr>
+                    <tr><td class="label-cell  red-text">Expired</td><td class="value-cell red-text" id="passExpired">0</td></tr>
+                </tbody>
+            </table>
+        </div>
 
-                    <tr class="blue">
-                        <td>Total Gate & Height Passes</td>
-                        <td class="value" id="passTotal">0</td>
-                    </tr>
-                    <tr class="orange">
-                        <td>Expiry Soon</td>
-                        <td class="value" id="passExpirySoon">0</td>
-                    </tr>
-                    <tr class="red">
-                        <td>Expired</td>
-                        <td class="value" id="passExpired">0</td>
-                    </tr>
-                </table>
-            </td>
-            <td>
-                <table class="inner-table">
+        <div class="stat-card" onclick="location.href='@Url.Action("Index", "GatePass")'">
+            <table class="overview-table">
+                <thead>
                     <tr>
-                        <th colspan="2">Medical</th>
+                        <th colspan="2"><i class="fa-solid fa-heart-pulse"></i> Medical</th>
                     </tr>
-                    <tr class="blue">
-                        <td>Total Medical Passes</td>
-                        <td class="value" id="medicalTotal">0</td>
-                    </tr>
-                    <tr class="orange">
-                        <td>Expiry Soon</td>
-                        <td class="value" id="medicalExpirySoon">0</td>
-                    </tr>
-                    <tr class="red">
-                        <td>Expired</td>
-                        <td class="value" id="medicalExpired">0</td>
-                    </tr>
-                </table>
-            </td>
-            <td>
-                <table class="inner-table">
+                </thead>
+                <tbody>
+                    <tr><td class="label-cell blue-text ">Total Medical</td><td class="value-cell blue-text" id="medicalTotal">0</td></tr>
+                    <tr><td class="label-cell yellow-text">Expiry Soon</td><td class="value-cell yellow-text" id="medicalExpirySoon">0</td></tr>
+                    <tr><td class="label-cell red-text">Expired</td><td class="value-cell red-text" id="medicalExpired">0</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="stat-card" onclick="location.href='@Url.Action("Index", "GatePass")'">
+            <table class="overview-table">
+                <thead>
                     <tr>
-                        <th colspan="2">Training</th>
+                        <th colspan="2"><i class="fa-solid fa-user-graduate"></i> Training</th>
                     </tr>
-                    <tr class="blue">
-                        <td>Total Training</td>
-                        <td class="value" id="trainingTotal">0</td>
-                    </tr>
-                    <tr class="orange">
-                        <td>Expiry Soon</td>
-                        <td class="value" id="trainingExpirySoon">0</td>
-                    </tr>
-                    <tr class="red">
-                        <td>Expired</td>
-                        <td class="value" id="trainingExpired">0</td>
-                    </tr>
-                </table>
-            </td>
-            <td>
-                <table class="inner-table">
+                </thead>
+                <tbody>
+                    <tr><td class="label-cell  blue-text">Total Training</td><td class="value-cell blue-text" id="trainingTotal">0</td></tr>
+                    <tr><td class="label-cell yellow-text">Expiry Soon</td><td class="value-cell yellow-text" id="trainingExpirySoon">0</td></tr>
+                    <tr><td class="label-cell  red-text">Expired</td><td class="value-cell red-text" id="trainingExpired">0</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="stat-card" onclick="location.href='@Url.Action("Index", "GatePass")'">
+            <table class="overview-table">
+                <thead>
                     <tr>
-                        <th colspan="2">Labour Licence</th>
+                        <th colspan="2"><i class="fa-solid fa-address-card"></i> Labour Licence</th>
                     </tr>
-                    <tr class="blue">
-                        <td>Total Labour Licence</td>
-                        <td class="value" id="labourTotal">0</td>
-                    </tr>
-                    <tr class="orange">
-                        <td>Expiry Soon</td>
-                        <td class="value" id="labourExpirySoon">0</td>
-                    </tr>
-                    <tr class="red">
-                        <td>Expired</td>
-                        <td class="value" id="labourExpired">0</td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+                </thead>
+                <tbody>
+                    <tr><td class="label-cell  blue-text">Total Licences</td><td class="value-cell blue-text" id="labourTotal">0</td></tr>
+                    <tr><td class="label-cell yellow-text">Expiry Soon</td><td class="value-cell yellow-text" id="labourExpirySoon">0</td></tr>
+                    <tr><td class="label-cell  red-text">Expired</td><td class="value-cell red-text" id="labourExpired">0</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
+
+
 
 @section Scripts {
 
