@@ -18,13 +18,47 @@ namespace CRMApi.Repository
             Message objMsg = new Message();
             try
             {
-                dynamic option = new ExpandoObject();
+                dynamic Option = new ExpandoObject();
 
-                option.ExpiryCount = db.GatePass.Count();
-                option.MedicalExpiryCount = db.GatePass.Count(gp => gp.MedicalExpiryOn != null);
-                option.TrainingExpiryCount = db.GatePass.Count(gp => gp.TrainingExpiryOn != null);
-                option.LabourExpiryCount = db.GatePass.Count(gp => gp.LabourLicenseExpiryOn != null);
+                DateTime today = DateTime.Today;
+                DateTime limitDate = today.AddDays(15);
 
+                Option.PassTotal = db.GatePass.Count();
+                Option.MedicalTotal = db.GatePass.Count(gp => gp.MedicalExpiryOn != null);
+                Option.TrainingTotal = db.GatePass.Count(gp => gp.TrainingExpiryOn != null);
+                Option.LabourTotal = db.GatePass.Count(gp => gp.LabourLicenseExpiryOn != null);
+
+                Option.PassExpirySoon = db.GatePass.Count(gp =>
+                gp.ExpiryOn.Date >= today && gp.ExpiryOn.Date <= limitDate
+                );
+                Option.MedicalExpirySoon = db.GatePass.Count(gp =>
+                gp.MedicalExpiryOn.Date >= today && gp.MedicalExpiryOn.Date <= limitDate
+                );
+                Option.TrainingExpirySoon = db.GatePass.Count(gp =>
+                gp.TrainingExpiryOn.Date >= today && gp.TrainingExpiryOn.Date <= limitDate
+                );
+                Option.LabourExpirySoon = db.GatePass.Count(gp =>
+                gp.LabourLicenseExpiryOn.Date >= today && gp.LabourLicenseExpiryOn.Date <= limitDate
+                );
+
+                Option.PassExpired = db.GatePass.Count(gp =>
+                gp.ExpiryOn.Date <= today
+                );
+                Option.MedicalExpired = db.GatePass.Count(gp =>
+                gp.MedicalExpiryOn.Date <= today
+                );
+
+                Option.TrainingExpired = db.GatePass.Count(gp =>
+                gp.TrainingExpiryOn.Date <= today
+                );
+
+                Option.LabourExpired = db.GatePass.Count(gp =>
+                gp.LabourLicenseExpiryOn.Date <= today
+                );
+
+
+
+                objMsg.data = Option;
 
                 Message.Success(ref objMsg, "Record found");
             }

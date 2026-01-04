@@ -1,11 +1,163 @@
 ﻿@{
     ViewData["Title"] = "Dashboard";
 }
-@* <div class="card">
-    <div class="card-header">
-        <span class="card-title">Dashboard</span>
-    </div>
-    <div class="card-body" style="min-height:87vh;">
-        
-    </div>    
-</div> *@
+
+<style>
+    .dashboard-top {
+        width: 100%;
+        height: 30vh; 
+        padding: 10px 20px;
+        box-sizing: border-box;
+    }
+
+    .dashboard-title {
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .overview-table {
+        width: 100%;
+        height: calc(100% - 40px);
+        border-collapse: collapse;
+    }
+
+    .overview-table td {
+        width: 25%;
+        padding: 5px;
+        vertical-align: top;
+    }
+
+    .inner-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .inner-table td {
+        padding: 8px 10px;
+        color: #fff;
+    }
+
+    .value {
+        text-align: right;
+    }
+
+    .inner-table th {
+        padding: 8px 10px;
+        text-align: center;
+        background-color: #2f5597;
+        color: #fff;
+        font-size: 15px;
+    }
+    /* Colors */
+    .blue {
+        background-color: #4f81bd;
+    }
+
+    .orange {
+        background-color: #f79646;
+    }
+
+    .red {
+        background-color: #ff0000;
+    }
+</style>
+
+<div class="dashboard-top">
+    <h3 class="dashboard-title">Gate Pass Overview</h3>
+
+    <table class="overview-table" onclick="location.href='@Url.Action("Index", "GatePass")'"
+           style="cursor:pointer;">
+        <tr>
+            <td>
+                <table class="inner-table">
+                    <tr>
+                        <th colspan="2">Gate & Height</th>
+                    </tr>
+
+                    <tr class="blue">
+                        <td>Total Gate & Height Passes</td>
+                        <td class="value" id="passTotal">0</td>
+                    </tr>
+                    <tr class="orange">
+                        <td>Expiry Soon</td>
+                        <td class="value" id="passExpirySoon">0</td>
+                    </tr>
+                    <tr class="red">
+                        <td>Expired</td>
+                        <td class="value" id="passExpired">0</td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <table class="inner-table">
+                    <tr>
+                        <th colspan="2">Medical</th>
+                    </tr>
+                    <tr class="blue">
+                        <td>Total Medical Passes</td>
+                        <td class="value" id="medicalTotal">0</td>
+                    </tr>
+                    <tr class="orange">
+                        <td>Expiry Soon</td>
+                        <td class="value" id="medicalExpirySoon">0</td>
+                    </tr>
+                    <tr class="red">
+                        <td>Expired</td>
+                        <td class="value" id="medicalExpired">0</td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <table class="inner-table">
+                    <tr>
+                        <th colspan="2">Training</th>
+                    </tr>
+                    <tr class="blue">
+                        <td>Total Training</td>
+                        <td class="value" id="trainingTotal">0</td>
+                    </tr>
+                    <tr class="orange">
+                        <td>Expiry Soon</td>
+                        <td class="value" id="trainingExpirySoon">0</td>
+                    </tr>
+                    <tr class="red">
+                        <td>Expired</td>
+                        <td class="value" id="trainingExpired">0</td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <table class="inner-table">
+                    <tr>
+                        <th colspan="2">Labour Licence</th>
+                    </tr>
+                    <tr class="blue">
+                        <td>Total Labour Licence</td>
+                        <td class="value" id="labourTotal">0</td>
+                    </tr>
+                    <tr class="orange">
+                        <td>Expiry Soon</td>
+                        <td class="value" id="labourExpirySoon">0</td>
+                    </tr>
+                    <tr class="red">
+                        <td>Expired</td>
+                        <td class="value" id="labourExpired">0</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</div>
+
+@section Scripts {
+
+    <script src="~/script/Dashboard.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        $(function () {
+            Dashboard.init();
+        });
+    </script>
+}
