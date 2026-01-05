@@ -25,8 +25,6 @@ namespace CRMApi.Models
         public DateTime TrainingExpiryOn { get; set; }
         public DateTime MedicalExpiryOn { get; set; }
         public DateTime LabourLicenseExpiryOn { get; set; }
-
-
         public int Status { get; set; } = 1;
         [NotMapped] public string StatusDesc { get; set; } = string.Empty;
         [NotMapped] public string? StatusCss { get; set; }
