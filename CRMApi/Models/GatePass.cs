@@ -15,7 +15,9 @@ namespace CRMApi.Models
         [MaxLength(200)] public string IdentifyMark { get; set; } = string.Empty;
         [MaxLength(20)] public string WorkOrderNo { get; set; } = string.Empty;
         public int CompanyId { get; set; }
-        [MaxLength(100)] public string Location { get; set; } = string.Empty;
+        [NotMapped] public string CompanyDesc { get; set; } = string.Empty;
+        public int LocationId { get; set; }
+        [NotMapped] public string LocationDesc { get; set; } = string.Empty;
         [MaxLength(100)] public string Department { get; set; } = string.Empty;
         public DateTime IssuedOn { get; set; }
         public DateTime ExpiryOn { get; set; }
@@ -23,8 +25,6 @@ namespace CRMApi.Models
         public DateTime TrainingExpiryOn { get; set; }
         public DateTime MedicalExpiryOn { get; set; }
         public DateTime LabourLicenseExpiryOn { get; set; }
-
-
         public int Status { get; set; } = 1;
         [NotMapped] public string StatusDesc { get; set; } = string.Empty;
         [NotMapped] public string? StatusCss { get; set; }

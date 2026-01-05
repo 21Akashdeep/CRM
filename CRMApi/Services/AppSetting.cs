@@ -27,6 +27,10 @@
         public Regexp Regexp { get; set; } = new Regexp();
         public RefType RefType { get; set; } = new RefType();
 
+        
+
+
+
     }
     public class ConnectionStrings
     {
@@ -53,6 +57,7 @@
         public string SupportMode { get; set; } = string.Empty;
         public string Priority { get; set; } = string.Empty;
         public string Returnable { get; set; } = string.Empty;
+        public string TaskCategory { get; set; } = string.Empty;
         public string JntvtiCateGory {  get; set; } = string.Empty;
         public string PassType { get; set; } = string.Empty;
 
@@ -162,6 +167,25 @@
 
         public string ProjTechDoc { get; set; } = string.Empty;
         public string ProjTechDocSufix { get; set; } = string.Empty;
+
+        public string ProjModTechDoc { get; set; } = string.Empty;
+
+        public string ProjModTechDocSufix { get; set; } = string.Empty;
+
+        public string TaskTechDoc { get; set; } = string.Empty;
+
+        public string TaskTechDocSufix { get; set; } = string.Empty;
+
+
+    }
+
+    public class TaskCategory
+    {
+
+        public string  NewTask { get; set; } = null!;
+        public string Complete { get; set; } = null!;
+        public string Service { get; set; } = null!;
+
     }
 
 

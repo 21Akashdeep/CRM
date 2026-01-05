@@ -1,0 +1,173 @@
+﻿<div id="modalTask" class="modal fade" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog modal-fullscreen modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Task / Add</span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body" style="min-height:75vh;">
+                <form id="formTask">
+                    <div class="row">
+                        <input type="hidden" id="Task_Id" name="Id" />
+                        <div class="col-md-2">
+                            <label>Name<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Name" name="Name" autocomplete="off" class="form-control form-control-sm Task-required" maxlength="50" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>Description<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Description" name="Description" autocomplete="off" class="form-control form-control-sm Task-required" maxlength="50" />
+                        </div>                       
+                        <div class="col-md-4">
+                            <label>Customer<span class="text-mandatory">*</span></label>
+                            <select id="Task-CustomerDesc" name="CustomerId" class="select-pick Task-required" data-search="true" data-size="4"></select>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Category<span class="text-mandatory">*</span></label>
+                            <select id="Task-Category" name="Category" class="form-control form-control-sm select-pick Task-required" data-search="true" data-size="4">
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label>PoNo<span></span></label>
+                            <input type="text" id="PoNo" name="PoNo" autocomplete="off" class="form-control form-control-sm " maxlength="100" />
+                        </div>
+                        <div class="col-md-2">
+                            <label>Po Date</label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" id="PoDate" name="PoDate" autocomplete="off" class="form-control form-control-sm" maxlength="100" readonly />
+                                <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Date Start</label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" id="StartDate" name="StartDate" autocomplete="off" class="form-control form-control-sm" maxlength="100" readonly />
+                                <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Date End</label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" id="EndDate" name="EndDate" autocomplete="off" class="form-control form-control-sm" maxlength="100" readonly />
+                                <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Attach Technical Document (<a id="ViewTechDocument" href="#" target="_blank">View</a>)</label>
+                            <input type="file" id="TechDocument" class="form-control form-control-sm" data-base64="" data-mimetype="" />
+                           
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table id="tableTaskItem" class="table table-bordered table-hover table-default line-item" data-search="false">
+                                <thead>
+                                    <tr>
+                                        <th colspan="7">
+                                            Task Item
+                                            <button type="button" class="btn btn-sm btn-primary float-end rounded-5 btn-add-item" onclick="Task.addTaskItem()">
+                                                <span class="fa fa-plus"></span>
+                                            </button>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th data-formatter="tableTaskItemSlNo" class="text-center">#</th>
+                                        <th class="desc" data-formatter="tableTaskItemDesc" data-events="tableTaskItemEvent">Task</th>
+                                        <th data-formatter="tableTaskItemEstimetedDays" data-events="tableTaskItemEvent">EstimetedDays</th>
+                                        <th data-formatter="tableTaskItemStartDateTime" data-events="tableTaskItemEvent">StartTime</th>
+                                        <th data-formatter="tableTaskItemEndDateTime" data-events="tableTaskItemEvent">EndTime</th>
+                                        <th data-formatter="tableTaskItemTechnicalDoc" data-events="tableTaskItemEvent">Doc</th>                   
+                                        <th data-formatter="tableTaskItemAssignTo" data-events="tableTaskItemEvent">Assign To</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <hr />                    
+                    <div class="row">                        
+                        <div class="col-md-4">
+                            <label>Remarks</label>
+                            <textarea type="text" id="Remarks" name="Remarks" class="form-control form-control-sm"></textarea>
+                        </div>                        
+                    </div>
+                    @* <div class="row">
+                        <div class="col-md-6" >
+                            <table id="tableTaskAssignTo" class="table table-bordered table-hover table-default" data-search="false" data-checkbox-header="false">
+                                <thead>
+                                    <tr>
+                                        <th colspan="3">Task Assing To</th>
+                                    </tr>
+                                    <tr>
+                                        <th data-formatter="tableTaskAssignTo"
+                                            data-events="tableTaskAssignToEvent"
+                                            class="text-center"></th>
+
+                                        <th data-field="UserName">User Name</th>
+                                        <th data-field="LocationDesc">Location</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div> *@
+                </form>
+                <div id="modalTaskAssignTo" class="modal fade" tabindex="-1">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"> Assign Employee</h5>
+                               <div class="btn-group">
+                                <button type="button"
+                                 class="btn btn-danger rounded-5 me-2"
+                                 data-bs-dismiss="modal">
+                                  <span class="fa fa-remove"></span>
+                                </button>
+                                 </div>
+                            </div>
+                            <div class="modal-body">
+                                <table id="tableTaskAssignTo"
+                                       class="table table-bordered table-hover table-default"
+                                       data-search="false"
+                                       data-checkbox-header="false">
+                                    <thead>
+                                        <tr>
+                                            <th data-formatter="tableTaskAssignTo"
+                                                data-events="tableTaskAssignToEvent"
+                                                class="text-center"></th>
+                                            <th data-field="UserName">User Name</th>
+                                           
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+
+                            <div class="modal-footer justify-content-end">
+                                <button type="button"
+                                        class="btn btn-success rounded-5"
+                                        id="btnAssignToOk">
+                                    <span class="fa fa-add"></span>&nbsp;Add
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="Task_btnSave" class="btn btn-sm btn-success rounded-5">
+                    <span class="fa fa-save"></span>&nbsp;&nbsp;Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -190,45 +190,100 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
+        //public async Task<Message> ExportAsync(Employee obj, User User)
+        //{
+        //    Message objMsg = new Message();
+        //    try
+        //    {
+        //        var dbEmployee = await ListAsync(obj, User);
+        //        var Employee = db.Employee.Select(em => new
+        //        {
+        //            em.Name,
+        //            Gender = em.Gender,
+        //            em.DOB,
+        //            Qualification = em.QualificationDesc,
+
+        //            Status = em.StatusDesc,
+
+
+        //        }).ToList();
+
+        //        DataTable objDataTable = Util.ListToDataTable(Employee);
+
+        //        var objCompany = await db.Company.FirstOrDefaultAsync(pt => App.ActiveStatus.Contains(pt.Status));
+        //        if (objCompany == null)
+        //        {
+        //            Message.Error(ref objMsg, "Company Info did found");
+        //            return objMsg;
+        //        }
+
+        //        objCompany.SheetName = "Employee Item Wise List";
+        //        objCompany.ReportDesc = $"Employee Item Wise List Generated On - {DateTime.Now.ToString("dd-MMM-yyyy HH:mm")}";
+        //        objMsg.base64 = Util.DataTableToBase64(objDataTable, objCompany);
+
+        //        if (String.IsNullOrEmpty(objMsg.base64))
+        //        {
+        //            Message.Error(ref objMsg, "Record did not find");
+        //        }
+        //        else
+        //        {
+        //            Message.Success(ref objMsg, "Record found");
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Message.Exception(ref objMsg, ex);
+        //    }
+        //    return objMsg;
+        //}
+
         public async Task<Message> ExportAsync(Employee obj, User User)
         {
             Message objMsg = new Message();
             try
             {
+                // Get filtered employee list
                 var dbEmployee = await ListAsync(obj, User);
-                var Employee = db.Employee.Select(em => new
+
+                // Select ONLY required columns for export
+                var employeeExport = dbEmployee.Select(em => new
                 {
                     em.Name,
-                    Gender = em.Gender,
-                    em.DOB,
+                    Gender = em.Gender == "M" ? "Male" :
+                             em.Gender == "F" ? "Female" : "Transgender",
+                    DOB = em.DOB.ToString("dd-MMM-yyyy"),
+                    GuardianName=em.GuardianName,
+                    GuardianRelation = em.GuardianRelation=="F" ? "Father"  : "Husband",                                
                     Qualification = em.QualificationDesc,
-                   
-                    Status = em.StatusDesc,
-               
-                   
+                    Grade =em.JntvtiCategoryDesc,
+                    Contact=em.ContactNo,
+                    Email =em.Email,
+                    UanNo=em.UanNo,
+                    EsiNo=em.EsiNo,
+                    Status = em.StatusDesc
                 }).ToList();
 
-                DataTable objDataTable = Util.ListToDataTable(Employee);
+                DataTable objDataTable = Util.ListToDataTable(employeeExport);
 
-                var objCompany = await db.Company.FirstOrDefaultAsync(pt => App.ActiveStatus.Contains(pt.Status));
+                var objCompany = await db.Company
+                    .FirstOrDefaultAsync(pt => App.ActiveStatus.Contains(pt.Status));
+
                 if (objCompany == null)
                 {
-                    Message.Error(ref objMsg, "Company Info did found");
+                    Message.Error(ref objMsg, "Company Info not found");
                     return objMsg;
                 }
 
-                objCompany.SheetName = "Employee Item Wise List";
-                objCompany.ReportDesc = $"Employee Item Wise List Generated On - {DateTime.Now.ToString("dd-MMM-yyyy HH:mm")}";
+                objCompany.SheetName = "Employee List";
+                objCompany.ReportDesc =
+                    $"Employee List Generated On - {DateTime.Now:dd-MMM-yyyy HH:mm}";
+
                 objMsg.base64 = Util.DataTableToBase64(objDataTable, objCompany);
 
                 if (String.IsNullOrEmpty(objMsg.base64))
-                {
-                    Message.Error(ref objMsg, "Record did not find");
-                }
+                    Message.Error(ref objMsg, "Record not found");
                 else
-                {
                     Message.Success(ref objMsg, "Record found");
-                }
             }
             catch (Exception ex)
             {
@@ -236,6 +291,8 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
+
+
         public async Task<Message> AddAsync(Employee obj, User User)
         {
             Message objMsg = new Message();
@@ -299,7 +356,6 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-
         public async Task<Message> EditAsync(int Id, User User)
         {
             Message objMsg = new Message();
@@ -325,12 +381,6 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-
-        //private async Task GetAddOptionAsync(Employee obj, User user)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
         public async Task<Message> UpdateAsync(Employee obj, User User)
         {
             Message objMsg = new Message();
@@ -404,10 +454,6 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-
-
-
-
         public async Task<Message> DeleteAsync(int Id, User User)
         {
             Message objMsg = new Message();

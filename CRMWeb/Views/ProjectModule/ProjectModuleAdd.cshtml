@@ -1,0 +1,77 @@
+﻿<div id="modalProjectModule" class="modal fade modal-draggable" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">ProjectModule / Add</span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body" style="min-height:75vh;">
+                <form id="formProjectModule">
+                    <div class="row">
+                        <input type="hidden" id="ProjectModule_Id" name="Id" />
+                        <div class="col-md-12">
+                            <label>Name<span class="text-mandatory">*</span></label>
+                            
+                            <input type="text" id="Name" name="Name" autocomplete="off"
+                                   class="form-control form-control-sm ProjectModule-required" maxlength="50" />
+                        </div>
+
+                        <div class="col-md-12">
+                            <label>Description<span class="text-mandatory">*</span></label>
+                            <textarea type="text" id="Description" name="Description" rows="4" cols="20" class="form-control form-control-sm"></textarea>
+                        </div>
+
+
+                        @* <div class="col-md-12">
+                            <label>Project</label>
+                            <select id="ProjectModule-ProjectDesc" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                            </select>
+                        </div> *@
+                        <div class="col-md-12">
+                            <label>Project<span class="text-mandatory">*</span></label>
+                            <select id="ProjectModule-ProjectDesc" name="ProjectId" class="select-pick party-required" data-search="true" data-size="4"></select>
+                        </div>
+
+                        
+                        <div class="col-md-12">
+                            <label>EstimetedDays<span class="text-mandatory">*</span></label>
+                            <input type="text" id="ProjectModule-EstimatedDays" name="EstimatedDays" autocomplete="off"
+                                   class="form-control form-control-sm unit-required" maxlength="100" />
+                        </div>
+                        @* <div class="col-md-12">
+                            <label>TechnicalDoc<span class="text-mandatory">*</span></label>
+                            <input type="text" id="TechnicalDoc" name="TechnicalDoc" autocomplete="off"
+                                   class="form-control form-control-sm ProjectModule-required" maxlength="50" />
+                        </div> *@
+                        <div class="col-md-12">
+                            <label>Technical Document</label>
+                            <div class="file-upload">
+                                <div class="file-attach">
+                                    <input type="file" id="TechnicalDoc" accept=".png, .jpg, .jpeg, .pdf" class="form-control form-control-sm" />
+                                    <label for="TechnicalDoc" class="btn btn-sm btn-primary"><span class="fa fa-edit"></span></label>
+                                </div>
+                                <div class="file-preview">
+                                    <iframe id="TechDocPreview" src="/image/upload.png" height="550"></iframe>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="ProjectModule_btnSave" class="btn btn-sm btn-success rounded-5">
+                    <span class="fa fa-save"></span>&nbsp;&nbsp;Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

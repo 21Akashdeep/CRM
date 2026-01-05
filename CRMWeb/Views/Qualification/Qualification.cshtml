@@ -6,16 +6,13 @@
     <div class="card-header">
         <span class="card-title">Qualification / View</span>
         <button type="button"
-                class="btn btn-sm btn-primary float-end rounded-5"
-                data-action="Add"
-                id="btnAdd">
-            <span class="fa fa-plus"></span>&nbsp;&nbsp;Add
+                class="btn btn-sm btn-primary float-end rounded-5"data-action="Add" id="btnAdd"><span class="fa fa-plus"></span>&nbsp;&nbsp;Add
         </button>
     </div>
 
     <div class="card-body">
         <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <label>Status</label>
                 <select id="ListStatus"
                         class="form-control form-control-sm select-pick"
@@ -27,7 +24,7 @@
                 </select>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <label>Qualification</label>
                 <select id="ListId"
                         class="form-control form-control-sm select-pick"
@@ -40,36 +37,20 @@
             </div>
 
             <div class="col-md-4">
-                <div class="btn-group mt-4">
-                    <button type="button"
-                            id="btnSearch"
-                            class="btn btn-sm btn-filter btn-outline-success"
-                            data-action="View"
-                            title="Search">
+                <div class="btn-group">
+                    <button type="button" id="btnSearch" class="btn btn-sm btn-filter btn-outline-success" data-action="View" title="Search">
                         <span class="fa fa-search"></span>
                     </button>
-
-                    <button type="button"
-                            id="btnPrint"
-                            class="btn btn-sm btn-filter btn-outline-secondary"
-                            data-action="Print"
-                            title="Print">
+                    <button type="button" id="btnPrint" class="btn btn-sm btn-filter btn-outline-secondary" data-action="Print" title="Print">
                         <span class="fa fa-print"></span>
                     </button>
-
-                    <button type="button"
-                            id="btnExport"
-                            class="btn btn-sm btn-filter btn-outline-primary"
-                            data-action="Export"
-                            title="Export To Excel">
+                    <button type="button" id="btnExport" class="btn btn-sm btn-filter btn-outline-primary" data-action="Export" title="Export To Excel">
                         <span class="fa fa-file-excel"></span>
                     </button>
                 </div>
             </div>
         </div>
-
-        <hr />
-
+        <hr/>
         <div class="row">
             <div class="col-md-12">
                 <table id="tableQualification"

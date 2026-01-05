@@ -3,30 +3,33 @@ using CRMApi.Repository;
 using CRMApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using static CRMApi.Dto.DtoTask;
+using Task = CRMApi.Models.Task;
 
 namespace CRMApi.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
     [Authorize]
-    public class GatePassController : ControllerBase
+    public class TaskController : ControllerBase
     {
         private readonly DBCRM db;
-        private readonly RepoGatePass RepoGatePass;
-        public GatePassController(DBCRM _db)
+        private readonly RepoTask RepoTask;
+        public TaskController(DBCRM _db)
         {
             db = _db;
-            RepoGatePass = new RepoGatePass(db);
+            RepoTask = new RepoTask(db);
         }
         [HttpGet]
-        public async Task<IActionResult> GetViewOption()
+        public IActionResult GetViewOption()
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoGatePass.GetViewOptionAsync();
+                objMsg =  RepoTask.GetViewOption();
             }
             catch (Exception ex)
             {
@@ -35,14 +38,14 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpGet]
-        public async Task<IActionResult> GetAddOption()
+        public IActionResult GetAddOption()
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoGatePass.GetAddOptionAsync();
+                objMsg =  RepoTask.GetAddOption();
             }
             catch (Exception ex)
             {
@@ -51,14 +54,15 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPost]
-        public async Task<IActionResult> Get(GatePass obj)
+        public async Task<IActionResult> GetAsync(DtoTaskFltr obj)
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoGatePass.GetAsync(obj, User);
+                objMsg.data =  await RepoTask.ListAsync(obj, User);
+                Message.Get(ref objMsg, "");
             }
             catch (Exception ex)
             {
@@ -67,14 +71,14 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPost]
-        public async Task<IActionResult> Print(GatePass obj)
+        public async Task<IActionResult> Print(DtoTaskFltr obj)
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Print }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoGatePass.PrintAsync(obj, User);
+                objMsg = await RepoTask.Print(obj, User);
             }
             catch (Exception ex)
             {
@@ -83,14 +87,14 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPost]
-        public async Task<IActionResult> Export(GatePass obj)
+        public async Task<IActionResult> Export(DtoTaskFltr obj)
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoGatePass.ExportAsync(obj, User);
+                objMsg = await RepoTask.Export(obj, User);
             }
             catch (Exception ex)
             {
@@ -99,18 +103,20 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
 
+
         [HttpPost]
-        public async Task<IActionResult> Add(GatePass obj)
+        public async Task<IActionResult> Add(DtoTaskAdd obj)
         {
             Message objMsg = new Message();
             try
-            {
-                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
+            {              
+                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Add }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoGatePass.AddAsync(obj, User);
+                objMsg = await RepoTask.Add(obj, User);
             }
             catch (Exception ex)
             {
+               
                 Message.Exception(ref objMsg, ex);
             }
             return Ok(objMsg);
@@ -123,7 +129,8 @@ namespace CRMApi.Controllers
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoGatePass.EditAsync(Id, User);
+               
+                objMsg = await RepoTask.Edit(Id, User);
             }
             catch (Exception ex)
             {
@@ -132,14 +139,14 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPatch]
-        public async Task<IActionResult> Update(GatePass obj)
+        public async Task<IActionResult> Update(DtoTaskAdd obj)
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoGatePass.UpdateAsync(obj, User);
+                objMsg = await RepoTask.Update(obj, User);
             }
             catch (Exception ex)
             {
@@ -155,7 +162,9 @@ namespace CRMApi.Controllers
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoGatePass.DeleteAsync(Id, User);
+                DtoTaskFltr obj = new DtoTaskFltr();
+                obj.ListId.Add(Id);
+                objMsg = await  RepoTask.Delete(obj, User);
             }
             catch (Exception ex)
             {
@@ -164,14 +173,16 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPatch]
-        public IActionResult Enable(int Id)
+        public async Task<IActionResult> Enable(int Id)
         {
             Message objMsg = new Message();
             try
             {
-                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Enable }, db, ref objMsg);
+                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = RepoGatePass.Enable(Id, User);
+                DtoTaskFltr obj = new DtoTaskFltr();
+                obj.ListId.Add(Id);
+                objMsg = await RepoTask.Enable(obj, User);
             }
             catch (Exception ex)
             {
@@ -179,7 +190,5 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
-
     }
-
 }

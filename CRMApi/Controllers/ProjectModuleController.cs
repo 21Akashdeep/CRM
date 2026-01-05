@@ -9,24 +9,24 @@ namespace CRMApi.Controllers
     [Route("api/[controller]/[action]")]
     [ApiController]
     [Authorize]
-    public class GatePassController : ControllerBase
+    public class ProjectModuleController : ControllerBase
     {
         private readonly DBCRM db;
-        private readonly RepoGatePass RepoGatePass;
-        public GatePassController(DBCRM _db)
+        private readonly RepoProjectModule RepoProjectModule;
+        public ProjectModuleController(DBCRM _db)
         {
             db = _db;
-            RepoGatePass = new RepoGatePass(db);
+            RepoProjectModule = new RepoProjectModule(db);
         }
         [HttpGet]
-        public async Task<IActionResult> GetViewOption()
+        public IActionResult GetViewOption()
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoGatePass.GetViewOptionAsync();
+                objMsg = RepoProjectModule.GetViewOption();
             }
             catch (Exception ex)
             {
@@ -35,14 +35,14 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpGet]
-        public async Task<IActionResult> GetAddOption()
+        public IActionResult GetAddOption()
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoGatePass.GetAddOptionAsync();
+                objMsg = RepoProjectModule.GetAddOption();
             }
             catch (Exception ex)
             {
@@ -51,14 +51,15 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPost]
-        public async Task<IActionResult> Get(GatePass obj)
+        public IActionResult Get(ProjectModule obj)
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoGatePass.GetAsync(obj, User);
+                objMsg.data = RepoProjectModule.List(obj, User);
+                Message.Get(ref objMsg, "");
             }
             catch (Exception ex)
             {
@@ -67,14 +68,14 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPost]
-        public async Task<IActionResult> Print(GatePass obj)
+        public IActionResult Print(ProjectModule obj)
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Print }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoGatePass.PrintAsync(obj, User);
+                objMsg = RepoProjectModule.Print(obj, User);
             }
             catch (Exception ex)
             {
@@ -83,14 +84,14 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPost]
-        public async Task<IActionResult> Export(GatePass obj)
+        public IActionResult Export(ProjectModule obj)
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoGatePass.ExportAsync(obj, User);
+                objMsg = RepoProjectModule.Export(obj, User);
             }
             catch (Exception ex)
             {
@@ -100,30 +101,34 @@ namespace CRMApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add(GatePass obj)
+        public IActionResult Add(ProjectModule obj)
         {
             Message objMsg = new Message();
             try
             {
+                Console.WriteLine($"Received ProjectId: {obj.ProjectId}");
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoGatePass.AddAsync(obj, User);
+                objMsg = RepoProjectModule.Add(obj, User);
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Received ProjectId: {obj.ProjectId}");
                 Message.Exception(ref objMsg, ex);
             }
             return Ok(objMsg);
         }
         [HttpGet]
-        public async Task<IActionResult> Edit(int Id)
+        public IActionResult Edit(int Id)
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoGatePass.EditAsync(Id, User);
+                ProjectModule obj = new ProjectModule();
+                obj.ListId.Add(Id);
+                objMsg = RepoProjectModule.Edit(Id, User);
             }
             catch (Exception ex)
             {
@@ -132,14 +137,14 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPatch]
-        public async Task<IActionResult> Update(GatePass obj)
+        public IActionResult Update(ProjectModule obj)
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoGatePass.UpdateAsync(obj, User);
+                objMsg = RepoProjectModule.Update(obj, User);
             }
             catch (Exception ex)
             {
@@ -148,14 +153,16 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpDelete]
-        public async Task<IActionResult> Delete(int Id)
+        public IActionResult Delete(int Id)
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoGatePass.DeleteAsync(Id, User);
+                ProjectModule obj = new ProjectModule();
+                obj.Id = Id;
+                objMsg = RepoProjectModule.Delete(obj, User);
             }
             catch (Exception ex)
             {
@@ -169,9 +176,11 @@ namespace CRMApi.Controllers
             Message objMsg = new Message();
             try
             {
-                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Enable }, db, ref objMsg);
+                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = RepoGatePass.Enable(Id, User);
+                ProjectModule obj = new ProjectModule();
+                obj.Id = Id;
+                objMsg = RepoProjectModule.Enable(obj, User);
             }
             catch (Exception ex)
             {
@@ -179,7 +188,5 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
-
     }
-
 }
