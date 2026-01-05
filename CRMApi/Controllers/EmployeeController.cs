@@ -163,6 +163,7 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
+        [HttpPatch]
         public IActionResult Enable(int Id)
         {
             Message objMsg = new Message();

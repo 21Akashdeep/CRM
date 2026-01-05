@@ -59,6 +59,8 @@ namespace CRMApi.Services
         public DbSet<Qualification> Qualification { get; set; }
         public DbSet<Employee> Employee { get; set; }
         public DbSet<GatePass> GatePass { get; set; }
+        public DbSet<Grn> Voucher { get; set; }
+        //public DbSet<Store> Store { get; set; }
 
     }
 }

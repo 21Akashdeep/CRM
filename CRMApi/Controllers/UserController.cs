@@ -194,7 +194,7 @@ namespace CRMApi.Controllers
             Message objMsg = new Message();
             try
             {
-                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Update }, db, ref objMsg);
+                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.UnAuthorised }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
                 obj.Id = User.Id;
                 objMsg = await RepoUser.UpdatePassword(obj);
