@@ -59,16 +59,15 @@ namespace CRMApi.Repository
 
                 }).ToList();
 
+                var debugTaskCategory = App.SettingName.TaskCategory;
+                option.Category = db.Setting.Where(x => App.ActiveStatus.Contains(x.Status) &&
+                  x.Category == App.SettingName.TaskCategory
+                 ).Select(x => new
+                 {
+                     x.Value,
+                     x.Description
 
-                //var debugTaskCategory = App.SettingName.TaskCategory;
-
-                //option.Category = db.Setting.Where(x =>App.ActiveStatus.Contains(x.Status) &&
-                //  x.Category == App.SettingName.TaskCategory
-                // ).Select(x => new
-                //{
-                // x.Value,
-                //  x.Description
-                //}).ToList();
+                 }).ToList();
 
 
                 objMsg.data = option;
@@ -113,6 +112,13 @@ namespace CRMApi.Repository
 
                 }).ToList();
 
+                Option.Employee = db.Employee.Where(em => App.ActiveStatus.Contains(em.Status)).Select(em => new
+                {
+                    em.Id,
+                    EmployeeName = em.Name
+
+                }).ToList();
+
                 Option.User = (
                      from usr in db.User
                      join ulo in db.UserLocation on usr.Id equals ulo.UserId
@@ -127,9 +133,6 @@ namespace CRMApi.Repository
 
                      }
                  ).ToList();
-
-
-
 
                 objMsg.data = Option;
 
@@ -354,8 +357,7 @@ namespace CRMApi.Repository
                     return objMsg;
                 // Insert Task                
                 var task = new Models.Task
-                {
-                    
+                {                   
                     Name = obj.Name,
                     Description = obj.Description,
                     CustomerId = obj.CustomerId,
@@ -388,7 +390,6 @@ namespace CRMApi.Repository
                     }).ToList()
                 };
                 db.Add(task);
-
 
                 Message.Add(ref objMsg, (await db.SaveChangesAsync()), "");
                 var DtoTaskList = await ListAsync(new DtoTaskFltr { ListId = new List<int> { task.Id } }, User);
@@ -442,27 +443,7 @@ namespace CRMApi.Repository
                 objMsg.obj = dtoTaskLists;
                 objMsg.data = GetAddOption().data;
 
-                //if (!string.IsNullOrWhiteSpace(objMsg.obj[0].TechnicalDoc))
-                //{
-                //    dynamic Obj = Util.GetFile(objMsg.obj[0].TechnicalDoc).obj;
-                //    //objMsg.obj[0].file =   Util.GetFile(objMsg.obj[0].TechnicalDoc).obj;
-                //    objMsg.obj[0].file.Base64 = Obj.Base64;
-                //    objMsg.obj[0].file.MimeType = Obj.MimeType;
-                //}
-
-                //foreach (var item in objMsg.obj[0].DtoTaskItemAdd)
-                //{
-                //    if (!string.IsNullOrWhiteSpace(item.TechnicalDoc))
-                //    {
-
-                //        dynamic Obj = Util.GetFile(item.TechnicalDoc).obj;
-
-                //        //item.file   Util.GetFile(item.TechnicalDoc).obj;
-                //        item.file.Base64 = Obj.Base64;
-                //        item.file.MimeType = Obj.MimeType;
-
-                //    }
-                //}
+                
 
                 Message.Success(ref objMsg, "Task found.");
             }
@@ -598,8 +579,8 @@ namespace CRMApi.Repository
             try
             {               
                 var ListId = obj.AssignToList.Select(ca => ca.Id).ToList();
-                var ListUserEmail = await db.User.Where(x => App.ActiveStatus.Contains(x.Status) && ListId.Contains(x.Id)).Select(x => x.Email).ToListAsync();
-                var AssignedPer = await db.User .Where(x =>App.ActiveStatus.Contains(x.Status) && x.Id == obj.UpdatedBy)
+                var ListUserEmail = await db.Employee.Where(x => App.ActiveStatus.Contains(x.Status) && ListId.Contains(x.Id)).Select(x => x.Email).ToListAsync();
+                var AssignedPer = await db.Employee.Where(x =>App.ActiveStatus.Contains(x.Status) && x.Id == obj.UpdatedBy)
                .Select(x => new
                  {
                    x.Id,

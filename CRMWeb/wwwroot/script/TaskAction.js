@@ -2,8 +2,7 @@
     static init() {
         TaskAction.getViewOption({
             onSuccess: (response) => {
-                Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description', });
-               
+                Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description', });              
             }
         });
 
@@ -14,6 +13,7 @@
                 }
             });
         });
+
         $('#Status').on('change', () => {
             if ($('#Status').val() == 4) {
                 $('.send-otp').removeClass('hide');
@@ -77,17 +77,13 @@
             });
 
         });
-
-    }
-    
+    }    
     static getViewOption({ onSuccess }) {
+
         Data.get({ url: 'TaskAction/GetViewOption', onSuccess: onSuccess });
     }
     static getTask({ onSuccess }) {
-        let obj = {
-            //FromDate: DateTime.json($('#DateRange').val().split('|')[0]),
-            //ToDate: DateTime.json($('#DateRange').val().split('|')[1]),
-            
+        let obj = {          
             ListStatus: $('#ListStatus').val(),           
         };
         Data.post({ url: 'TaskAction/GetTask', data: obj, onSuccess: onSuccess });
@@ -171,18 +167,23 @@ window.tableTaskInfo = (value, data, index) => {
     let labelStyle = "width:100px; font-weight: bold;";
     return `
         <div><label style="${labelStyle}">Date</label> <b>:</b> ${moment(data.Date).format('DD-MMM-YYYY')}</div>
-        <div><label style="${labelStyle}">Ticket No.</label> <b>:</b> ${data.Code}</div>
-        <div><label style="${labelStyle}">Customer</label> <b>:</b> ${data.CustomerDesc.match(/.{1,50}/g).join('<br>')}</div>
-        <div><label style="${labelStyle}">Department</label> <b>:</b> ${data.PoNo}</div>
-        <div><label style="${labelStyle}">Location</label> <b>:</b> ${data.PoDate}</div>
+        <div><label style="${labelStyle}">Task Name</label> <b>:</b> ${data.Description}</div>
+        <div><label style="${labelStyle}">Task Code</label> <b>:</b> ${data.Code}</div>
+        <div><label style="${labelStyle}">Party</label> <b>:</b> ${data.CustomerDesc.match(/.{1,50}/g).join('<br>')}</div>
+        <div><label style="${labelStyle}">Po.No</label> <b>:</b> ${data.PoNo}</div>
+        <div>
+       <label style="${labelStyle}">PoDate</label> <b>:</b>
+       ${data.PoDate ? moment(data.PoDate).format('DD-MMM-YYYY') : ''}
+       </div>
         <div><label style="${labelStyle}">Contact Person</label> <b>:</b> ${data.CreatedByName}</div>     
-        <div><label style="${labelStyle}">Contact Person</label> <b>:</b> ${data.Description}</div>
         
     `;
 }
+
 window.tableTaskAction = (value, obj, index) => {
     return `<div class="${obj.StatusCss}">${obj.StatusDesc}</div>`;
 }
+
 window.tableTask = (value, obj, index) => {
     let actionBtn = [];
     if (obj.IsAddStatus) {
@@ -205,6 +206,7 @@ window.tableTask = (value, obj, index) => {
         </div>
     `;
 }
+
 window.tableTaskEvent = {
     'click .btn-new-entry': (e, value, obj, row) => {
         obj.TaskId = obj.Id;
@@ -212,7 +214,6 @@ window.tableTaskEvent = {
         TaskAction.newEntry({ obj: obj });
     }
 }
-
 window.tableTaskActionSlNo = (value, obj, index) => {
     return index + 1; 
 }

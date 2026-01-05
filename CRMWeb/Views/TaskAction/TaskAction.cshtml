@@ -61,16 +61,16 @@
             <div class="modal-body" style="min-height:75vh;">
                 <form id="formTaskAction">
                     <div class="row">
-                        <div class="col-md-4">
-                            <label>TaskId<span class="text-mandatory">*</span></label>
+                        @* <div class="col-md-4"> *@
+                            @* <label>TaskId<span class="text-mandatory">*</span></label> *@
                             <input type="hidden" id="TaskId" name="TaskId" />
-                            <input id="TaskId" name="TaskId" class="form-control form-control-sm required" readonly />
-                        </div>
-                        <div class="col-md-4">
+                            @* <input id="TaskId" name="TaskId" class="form-control form-control-sm required" readonly /> *@
+                        @* </div> *@
+                        <div class="col-md-6">
                             <label>Your Task<span class="text-mandatory">*</span></label>
                             <select id="TaskAction_TaskItemId" name="TaskItemId" class="select-pick required" data-search="true" data-size="4"></select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label>Status<span class="text-mandatory">*</span></label>
                             <select id="Status" name="Status" class="select-pick required" data-search="true" data-size="4"></select>
                         </div>
