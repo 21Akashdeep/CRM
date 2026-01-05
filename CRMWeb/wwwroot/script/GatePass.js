@@ -25,6 +25,9 @@ class GatePass {
                 GatePass.newEntry();
             });
             GatePass.initAdd();
+
+            $('#GatePass_PassType').on('change', toggleHeightPass);
+
         }
         static getViewOption(onSuccess = () => { }) {
             Data.get({ url: 'GatePass/GetViewOption', onSuccess: onSuccess });
@@ -96,7 +99,12 @@ class GatePass {
             Dropdown.bind({ id: '#GatePass_PassType', data: response.data.PassType, value: 'Value', text: 'Description' });
             Dropdown.bind({ id: '#GatePass_Location', data: response.data.Location, value: 'Id', text: 'Description' });
             Dropdown.bind({ id: '#GatePass_Company', data: response.data.Company, value: 'Id', text: 'Description' });
+
+            //$("#GatePass_TrainingExpiryOn").val("");
+            //$("#GatePass_MedicalExpiryOn").val("");
+            //$("#GatePass_LabourLicenseExpiryOn").val("");
         });
+
     }
 
     static add(obj) { Data.post({ url: 'GatePass/Add', data: obj, onSuccess: GatePass.addOnSuccess }); }
@@ -120,6 +128,7 @@ class GatePass {
                     Dropdown.bind({ id: '#GatePass_PassType', data: response.data.PassType, value: 'Value', text: 'Description' });
                     Dropdown.bind({ id: '#GatePass_Company', data: response.data.Company, value: 'Id', text: 'Description' });
                     Dropdown.bind({ id: '#GatePass_Location', data: response.data.Location, value: 'Id', text: 'Description' });
+                    toggleHeightPass();
                     Modal.open({ id: '#modalGatePass', title: title, action: action, obj: obj });
                 } else { Message.show(response); }
             }
@@ -197,6 +206,9 @@ window.tableGatePassIssueOn = (value, obj, index) => {
 window.tableGatePassExpiryOn = (value, obj, index) => {
     return `<div class="full-fill" style="${window.getExpiryColorStyle(obj.ExpiryOn)}">${moment(obj.ExpiryOn).format('DD-MMM-YYYY')}</div>`;
 }
+
+
+
 window.tableGatePassMedicalExpiryOn = (value, obj, index) => {
     return `<div class="full-fill" style="${window.getExpiryColorStyle(obj.MedicalExpiryOn)}">${moment(obj.MedicalExpiryOn).format('DD-MMM-YYYY')}</div>`;
 }
@@ -206,6 +218,45 @@ window.tableGatePassTrainingExpiryOn = (value, obj, index) => {
 window.tableGatePassLabourLicenseExpiryOn = (value, obj, index) => {
     return `<div class="full-fill" style="${window.getExpiryColorStyle(obj.LabourLicenseExpiryOn)}">${moment(obj.LabourLicenseExpiryOn).format('DD-MMM-YYYY')}</div>`;
 }
+window.formatExpiryDate = function (date) {
+    if (!date) return "";
+
+    // block .NET MinValue
+    if (date === "0001-01-01T00:00:00" || date.startsWith("0001-01-01"))
+        return "";
+
+    return moment(date).format("DD-MMM-YYYY");
+};
+
+
+
+window.tableGatePassMedicalExpiryOn = (value, obj, index) => {
+    const dateText = window.formatExpiryDate(obj.MedicalExpiryOn);
+    return dateText
+        ? `<div class="full-fill" style="${window.getExpiryColorStyle(obj.MedicalExpiryOn)}">${dateText}</div>`
+        : `<div class="full-fill"></div>`;
+};
+
+window.tableGatePassTrainingExpiryOn = (value, obj, index) => {
+    const dateText = window.formatExpiryDate(obj.TrainingExpiryOn);
+    return dateText
+        ? `<div class="full-fill" style="${window.getExpiryColorStyle(obj.TrainingExpiryOn)}">${dateText}</div>`
+        : `<div class="full-fill"></div>`;
+};
+
+window.tableGatePassLabourLicenseExpiryOn = (value, obj, index) => {
+    const dateText = window.formatExpiryDate(obj.LabourLicenseExpiryOn);
+    return dateText
+        ? `<div class="full-fill" style="${window.getExpiryColorStyle(obj.LabourLicenseExpiryOn)}">${dateText}</div>`
+        : `<div class="full-fill"></div>`;
+};
+
+
+
+
+
+
+
 window.tableGatePassCreatedByAndAt = (value, obj, index) => {
     return `<div class="text-cell" style="font-size: 7pt;"><b>${obj.CreatedByName}</b><br>${moment(obj.CreatedAt).format('DD-MMM-YYYY HH:mm')}</div>`;
 }
@@ -268,7 +319,68 @@ window.tableGatePassActionEvent = {
     },
 }
 
+function disableDatePicker(inputId) {
+    $(inputId).val('').prop('disabled', true);
 
+    $(inputId).closest('.input-group')
+        .find('.date-picker')
+        .css('pointer-events', 'none')
+        .addClass('disabled');
+
+    try { $(inputId).datepicker('destroy'); } catch (e) { }
+}
+
+function enableDatePicker(inputId) {
+    $(inputId).prop('disabled', false);
+
+    $(inputId).closest('.input-group')
+        .find('.date-picker')
+        .css('pointer-events', 'auto')
+        .removeClass('disabled');
+
+    try {
+        $(inputId).datepicker({
+            autoclose: true,
+            format: 'dd-M-yyyy'
+        });
+    } catch (e) { }
+}
+
+function toggleHeightPass() {
+
+    var passType = $('#GatePass_PassType option:selected').text().toLowerCase();
+
+    if (passType === 'height pass') {
+
+        // Disable date fields
+        disableDatePicker('#GatePass_TrainingExpiryOn');
+        disableDatePicker('#GatePass_MedicalExpiryOn');
+        disableDatePicker('#GatePass_LabourLicenseExpiryOn');
+
+        // Disable Work Order
+        $('#GatePass_WorkOrderNo')
+            .val('')
+            .prop('disabled', true);
+
+        // Disable Department
+        $('#GatePass_Department')
+            .val('')
+            .prop('disabled', true);
+
+        $('#GatePass_SafetyPassNo')
+            .val('')
+            .prop('disabled', true);
+
+    } else {
+        enableDatePicker('#GatePass_TrainingExpiryOn');
+        enableDatePicker('#GatePass_MedicalExpiryOn');
+        enableDatePicker('#GatePass_LabourLicenseExpiryOn');
+
+        $('#GatePass_WorkOrderNo').prop('disabled', false);
+        $('#GatePass_Department').prop('disabled', false);
+        $('#GatePass_SafetyPassNo').prop('disabled', false);
+    }
+}
 
 
 

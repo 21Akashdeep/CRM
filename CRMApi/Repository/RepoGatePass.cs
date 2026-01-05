@@ -463,7 +463,10 @@ namespace CRMApi.Repository
                     Message.Error(ref objMsg, "Record not found");
                     return objMsg;
                 }
-
+                string FormatDate(DateTime date)
+                {
+                    return date == DateTime.MinValue ? "" : date.ToString("dd-MMM-yyyy");
+                }
                 var exportData = dbGatePass.Select(gp => new
                 {
                     Employee = gp.EmployeeDesc ?? "",
@@ -474,11 +477,18 @@ namespace CRMApi.Repository
                     Company = gp.CompanyDesc ?? "",
                     SafetyPassNo = gp.SafetyPassNo ?? "",
                     WorkOrderNo=gp.WorkOrderNo ?? "",
+
                     IssuedOn = gp.IssuedOn.ToString("dd-MMM-yyyy"),
-                    ExpiryOn = gp.ExpiryOn.ToString("dd-MMM-yyyy"),
-                    LabourLicenseExpiry = gp.LabourLicenseExpiryOn.ToString("dd-MMM-yyyy"),
-                    MedicalExpiry = gp.MedicalExpiryOn.ToString("dd-MMM-yyyy"),
-                    TrainingExpiry = gp.TrainingExpiryOn.ToString("dd-MMM-yyyy"),
+                    ExpiryOn = FormatDate(gp.ExpiryOn),
+                    LabourLicenseExpiry = FormatDate(gp.LabourLicenseExpiryOn),
+                    MedicalExpiry = FormatDate(gp.MedicalExpiryOn),
+                    TrainingExpiry = FormatDate(gp.TrainingExpiryOn),
+
+
+                    //ExpiryOn = gp.ExpiryOn.ToString("dd-MMM-yyyy"),
+                    //LabourLicenseExpiry = gp.LabourLicenseExpiryOn.ToString("dd-MMM-yyyy"),
+                    //MedicalExpiry = gp.MedicalExpiryOn.ToString("dd-MMM-yyyy"),
+                    //TrainingExpiry = gp.TrainingExpiryOn.ToString("dd-MMM-yyyy"),
 
                   
                 }).ToList();
@@ -582,9 +592,6 @@ namespace CRMApi.Repository
 
             return objMsg;
         }
-
-
-
         public async Task<Message> AddAsync(GatePass obj, User User)
         {
             Message objMsg = new Message();
@@ -596,7 +603,7 @@ namespace CRMApi.Repository
                 obj.Department = Util.SanitizeInput(obj.Department, null) ?? "";
                 obj.SafetyPassNo = Util.SanitizeInput(obj.SafetyPassNo, null) ?? "";
 
-             
+
                 obj.CreatedBy = User.Id;
                 obj.UpdatedBy = User.Id;
                 obj.CreatedAt = DateTime.Now;
