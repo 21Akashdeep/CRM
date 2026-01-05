@@ -663,17 +663,17 @@ namespace CRMApi.Repository
             {
                 var dbGatePass = db.GatePass.ToList();
 
-                if (dbGatePass.Any(x => x.EmployeeId == obj.EmployeeId && x.Id != obj.Id))
-                {
-                    Message.Duplicate(ref objMsg, $"GatePass Name {obj.EmployeeDesc}");
-                    return objMsg;
-                }
-                if (!string.IsNullOrEmpty(obj.GatePassNo) &&
-                    dbGatePass.Any(x => x.GatePassNo == obj.GatePassNo && x.Id != obj.Id))
-                {
-                    Message.Duplicate(ref objMsg, $"Contact No {obj.GatePassNo}");
-                    return objMsg;
-                }
+                //if (dbGatePass.Any(x => x.EmployeeId == obj.EmployeeId && x.Id != obj.Id))
+                //{
+                //    Message.Duplicate(ref objMsg, $"GatePass Name {obj.EmployeeDesc}");
+                //    return objMsg;
+                //}
+                //if (!string.IsNullOrEmpty(obj.GatePassNo) &&
+                //    dbGatePass.Any(x => x.GatePassNo == obj.GatePassNo && x.Id != obj.Id))
+                //{
+                //    Message.Duplicate(ref objMsg, $"Contact No {obj.GatePassNo}");
+                //    return objMsg;
+                //}
 
                 var UpdateGatePass = dbGatePass.FirstOrDefault(x => x.Id == obj.Id);
                 if (UpdateGatePass == null)

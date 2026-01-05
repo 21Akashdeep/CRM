@@ -2,7 +2,7 @@
 // New --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 class GatePass {
    
-        static init() {
+    static init() {
             GatePass.getViewOption((response) => {
                 Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
                 Dropdown.bind({ id: '#ListLocation', data: response.data.Location, value: 'Id', text: 'Name' });
@@ -25,14 +25,12 @@ class GatePass {
                 GatePass.newEntry();
             });
             GatePass.initAdd();
-
             $('#GatePass_PassType').on('change', toggleHeightPass);
-
         }
-        static getViewOption(onSuccess = () => { }) {
+    static getViewOption(onSuccess = () => { }) {
             Data.get({ url: 'GatePass/GetViewOption', onSuccess: onSuccess });
         }
-        static get() {
+    static get() {
             var obj = {
 
                 ListStatus: $('#ListStatus').val(),
@@ -50,9 +48,6 @@ class GatePass {
                 }
             );
         }
-
-
-
     static print() {
     var obj = {
         ListRecordStatus: $('#ListRecordStatus').val(),
@@ -69,7 +64,6 @@ class GatePass {
         }
     });
 }
-
     static export() {
         var obj = { ListRecordStatus: $('#ListRecordStatus').val(), ListId: $('#ListId').val() }
         Data.post({
@@ -80,8 +74,6 @@ class GatePass {
             }
         });
     }
-
-    //GatePass Add
     static initAdd() {
         $('#GatePass_btnSave').on('click', () => {
             if (!Field.isMandatory({ class: ".GatePass-required" })) return;
@@ -89,9 +81,7 @@ class GatePass {
             if (!obj.Id) GatePass.add(obj); else GatePass.update(obj);
         });
     }
-
     static getAddOption(onSuccess) { Data.get({ url: 'GatePass/GetAddOption', onSuccess: onSuccess }); }
-
     static newEntry() {
         GatePass.getAddOption((response) => {
             Modal.open({ id: '#modalGatePass', title: 'GatePass / Add', action: 'Add' });
@@ -99,14 +89,8 @@ class GatePass {
             Dropdown.bind({ id: '#GatePass_PassType', data: response.data.PassType, value: 'Value', text: 'Description' });
             Dropdown.bind({ id: '#GatePass_Location', data: response.data.Location, value: 'Id', text: 'Description' });
             Dropdown.bind({ id: '#GatePass_Company', data: response.data.Company, value: 'Id', text: 'Description' });
-
-            //$("#GatePass_TrainingExpiryOn").val("");
-            //$("#GatePass_MedicalExpiryOn").val("");
-            //$("#GatePass_LabourLicenseExpiryOn").val("");
         });
-
     }
-
     static add(obj) { Data.post({ url: 'GatePass/Add', data: obj, onSuccess: GatePass.addOnSuccess }); }
     static addOnSuccess = (response) => {
         Message.show(response);
@@ -128,8 +112,8 @@ class GatePass {
                     Dropdown.bind({ id: '#GatePass_PassType', data: response.data.PassType, value: 'Value', text: 'Description' });
                     Dropdown.bind({ id: '#GatePass_Company', data: response.data.Company, value: 'Id', text: 'Description' });
                     Dropdown.bind({ id: '#GatePass_Location', data: response.data.Location, value: 'Id', text: 'Description' });
-                    toggleHeightPass();
                     Modal.open({ id: '#modalGatePass', title: title, action: action, obj: obj });
+                    toggleHeightPass();
                 } else { Message.show(response); }
             }
         });
@@ -206,9 +190,6 @@ window.tableGatePassIssueOn = (value, obj, index) => {
 window.tableGatePassExpiryOn = (value, obj, index) => {
     return `<div class="full-fill" style="${window.getExpiryColorStyle(obj.ExpiryOn)}">${moment(obj.ExpiryOn).format('DD-MMM-YYYY')}</div>`;
 }
-
-
-
 window.tableGatePassMedicalExpiryOn = (value, obj, index) => {
     return `<div class="full-fill" style="${window.getExpiryColorStyle(obj.MedicalExpiryOn)}">${moment(obj.MedicalExpiryOn).format('DD-MMM-YYYY')}</div>`;
 }
