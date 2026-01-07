@@ -46,19 +46,19 @@
 
             if (Task.currentAssignIndex === null) return;
 
-            let selectedEmployees =
+            let selectedUsers =
                 $('#tableTaskAssignTo')
                     .bootstrapTable('getData')
                     .filter(x => x.IsAdded)
                     .map(x => ({
                         Id: x.Id,
-                        Name: x.EmployeeName ?? ''
+                        Name: x.UserName ?? ''
                         
                     }));
 
             let taskItems = $('#tableTaskItem').bootstrapTable('getData');
 
-            taskItems[Task.currentAssignIndex].AssignToList = selectedEmployees;
+            taskItems[Task.currentAssignIndex].AssignToList = selectedUsers;
 
             Table.updateByIndex({
                 id: '#tableTaskItem',
@@ -556,7 +556,7 @@ window.tableTaskItemEvent = {
         Table.add({
             id: '#tableTaskAssignTo',
             data: Task.mergeAssign(
-                Task.Employee,
+                Task.User,
                 obj.AssignToList,
                 'Id'
             )
@@ -598,7 +598,7 @@ window.tableTaskAssignToEvent = {
                 .filter(x => x.IsAdded)
                 .map(x => ({
                     Id: x.Id,
-                    Name: x.EmployeeName ?? x.Description ?? '',
+                    Name: x.UserName ?? x.Description ?? '',
                     Location: x.LocationDesc ?? ''
                 }));
 
