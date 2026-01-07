@@ -15,7 +15,6 @@ namespace CRMApi.Models
         public DateTime? PoDate { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-
         [NotMapped] public bool IsClose { get; set; } = false;
         [NotMapped] public bool IsAddStatus { get; set; } = false;
         [MaxLength(200)] public string? TechnicalDoc { get; set; }

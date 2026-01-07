@@ -24,36 +24,88 @@ namespace CRMApi.Repository
                 DateTime limitDate = today.AddDays(15);
 
                 Option.PassTotal = db.GatePass.Count();
-                Option.MedicalTotal = db.GatePass.Count(gp => gp.MedicalExpiryOn != null);
-                Option.TrainingTotal = db.GatePass.Count(gp => gp.TrainingExpiryOn != null);
-                Option.LabourTotal = db.GatePass.Count(gp => gp.LabourLicenseExpiryOn != null);
+                //Option.MedicalTotal = db.GatePass.Count(gp => gp.MedicalExpiryOn != null);
+                //Option.TrainingTotal = db.GatePass.Count(gp => gp.TrainingExpiryOn != null);
+                //Option.LabourTotal = db.GatePass.Count(gp => gp.LabourLicenseExpiryOn != null);
 
-                Option.PassExpirySoon = db.GatePass.Count(gp =>
-                gp.ExpiryOn.Date >= today && gp.ExpiryOn.Date <= limitDate
-                );
+
+                Option.MedicalTotal = db.GatePass.Count(gp =>
+                gp.MedicalExpiryOn != null && gp.MedicalExpiryOn != DateTime.MinValue);
+
+                Option.TrainingTotal = db.GatePass.Count(gp =>
+                gp.TrainingExpiryOn != null && gp.TrainingExpiryOn != DateTime.MinValue);
+
+                Option.LabourTotal = db.GatePass.Count(gp =>
+                gp.LabourLicenseExpiryOn != null && gp.LabourLicenseExpiryOn != DateTime.MinValue);
+
+
+
+                //Option.PassExpirySoon = db.GatePass.Count(gp =>
+                //gp.ExpiryOn.Date >= today && gp.ExpiryOn.Date <= limitDate
+                //);
+                //Option.MedicalExpirySoon = db.GatePass.Count(gp =>
+                //gp.MedicalExpiryOn.Date >= today && gp.MedicalExpiryOn.Date <= limitDate
+                //);
+                //Option.TrainingExpirySoon = db.GatePass.Count(gp =>
+                //gp.TrainingExpiryOn.Date >= today && gp.TrainingExpiryOn.Date <= limitDate
+                //);
+                //Option.LabourExpirySoon = db.GatePass.Count(gp =>
+                //gp.LabourLicenseExpiryOn.Date >= today && gp.LabourLicenseExpiryOn.Date <= limitDate
+                //);
+
                 Option.MedicalExpirySoon = db.GatePass.Count(gp =>
-                gp.MedicalExpiryOn.Date >= today && gp.MedicalExpiryOn.Date <= limitDate
-                );
+                 gp.MedicalExpiryOn != DateTime.MinValue &&
+                 gp.MedicalExpiryOn.Date >= today &&
+                 gp.MedicalExpiryOn.Date <= limitDate
+                    );
+
                 Option.TrainingExpirySoon = db.GatePass.Count(gp =>
-                gp.TrainingExpiryOn.Date >= today && gp.TrainingExpiryOn.Date <= limitDate
+                    gp.TrainingExpiryOn != DateTime.MinValue &&
+                    gp.TrainingExpiryOn.Date >= today &&
+                    gp.TrainingExpiryOn.Date <= limitDate
                 );
+
                 Option.LabourExpirySoon = db.GatePass.Count(gp =>
-                gp.LabourLicenseExpiryOn.Date >= today && gp.LabourLicenseExpiryOn.Date <= limitDate
+                    gp.LabourLicenseExpiryOn != DateTime.MinValue &&
+                    gp.LabourLicenseExpiryOn.Date >= today &&
+                    gp.LabourLicenseExpiryOn.Date <= limitDate
                 );
+
+
+                //Option.PassExpired = db.GatePass.Count(gp =>
+                //gp.ExpiryOn.Date <= today
+                //);
+                //Option.MedicalExpired = db.GatePass.Count(gp =>
+                //gp.MedicalExpiryOn.Date <= today
+                //);
+
+                //Option.TrainingExpired = db.GatePass.Count(gp =>
+                //gp.TrainingExpiryOn.Date <= today
+                //);
+
+                //Option.LabourExpired = db.GatePass.Count(gp =>
+                //gp.LabourLicenseExpiryOn.Date <= today
+                //);
+
 
                 Option.PassExpired = db.GatePass.Count(gp =>
-                gp.ExpiryOn.Date <= today
+                gp.ExpiryOn != DateTime.MinValue &&
+                gp.ExpiryOn.Date < today
                 );
+
                 Option.MedicalExpired = db.GatePass.Count(gp =>
-                gp.MedicalExpiryOn.Date <= today
+                    gp.MedicalExpiryOn != DateTime.MinValue &&
+                    gp.MedicalExpiryOn.Date < today
                 );
 
                 Option.TrainingExpired = db.GatePass.Count(gp =>
-                gp.TrainingExpiryOn.Date <= today
+                    gp.TrainingExpiryOn != DateTime.MinValue &&
+                    gp.TrainingExpiryOn.Date < today
                 );
 
                 Option.LabourExpired = db.GatePass.Count(gp =>
-                gp.LabourLicenseExpiryOn.Date <= today
+                    gp.LabourLicenseExpiryOn != DateTime.MinValue &&
+                    gp.LabourLicenseExpiryOn.Date < today
                 );
 
 

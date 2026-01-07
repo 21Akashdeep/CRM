@@ -1,48 +1,49 @@
 ﻿class TaskAction {
+
     static init() {
         TaskAction.getViewOption({
             onSuccess: (response) => {
-                Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description', });
-               
+                Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description', });              
             }
         });
 
         $('#btnSearch').on('click', () => {
-            TaskAction.getTask({
+            TaskAction.getTaskItem({
                 onSuccess: (response) => {
                     Table.add({ id: '#tableTask', data: response.data });
                 }
             });
         });
-        $('#Status').on('change', () => {
-            if ($('#Status').val() == 4) {
-                $('.send-otp').removeClass('hide');
-                $('#OTP').addClass('required');
-            }
-            else {
-                $('.send-otp').addClass('hide');
-                $('#OTP').removeClass('required');
-            }
-        });
 
-        $('#btnSendOtp').on('click', () => {
-            if (Field.isNullOrEmpty($('#TaskId').val())) {
-                Message.error({ statusText: "Task No. empty" });
-                return;
-            }
-            let obj = Data.serializeToObject({ formId: "#formTaskAction" });
-            Data.post({
-                url: 'TaskAction/SendOtp',
-                data: obj,
-                onSuccess: (response) => {
-                    Message.show(response);
-                    if (response.status == Message.Type.success) {
-                        TaskAction.startOtpTimer({ durationInSeconds: 30, elementId: "#OtpTimer" });
+        //$('#Status').on('change', () => {
+        //    if ($('#Status').val() == 4) {
+        //        $('.send-otp').removeClass('hide');
+        //        $('#OTP').addClass('required');
+        //    }
+        //    else {
+        //        $('.send-otp').addClass('hide');
+        //        $('#OTP').removeClass('required');
+        //    }
+        //});
 
-                    }
-                }
-            });
-        });
+        //$('#btnSendOtp').on('click', () => {
+        //    if (Field.isNullOrEmpty($('#TaskId').val())) {
+        //        Message.error({ statusText: "Task No. empty" });
+        //        return;
+        //    }
+        //    let obj = Data.serializeToObject({ formId: "#formTaskAction" });
+        //    Data.post({
+        //        url: 'TaskAction/SendOtp',
+        //        data: obj,
+        //        onSuccess: (response) => {
+        //            Message.show(response);
+        //            if (response.status == Message.Type.success) {
+        //                TaskAction.startOtpTimer({ durationInSeconds: 30, elementId: "#OtpTimer" });
+
+        //            }
+        //        }
+        //    });
+        //});
 
         $('#btnSave').on('click', () => {
             if (!Field.isMandatory({ class: '.required' })) {
@@ -75,22 +76,17 @@
                     });
                 }
             });
-
         });
-
-    }
-    
+    }    
     static getViewOption({ onSuccess }) {
+
         Data.get({ url: 'TaskAction/GetViewOption', onSuccess: onSuccess });
     }
-    static getTask({ onSuccess }) {
-        let obj = {
-            //FromDate: DateTime.json($('#DateRange').val().split('|')[0]),
-            //ToDate: DateTime.json($('#DateRange').val().split('|')[1]),
-            
+    static getTaskItem({ onSuccess }) {
+        let obj = {          
             ListStatus: $('#ListStatus').val(),           
         };
-        Data.post({ url: 'TaskAction/GetTask', data: obj, onSuccess: onSuccess });
+        Data.post({ url: 'TaskAction/GetTaskItem', data: obj, onSuccess: onSuccess });
     }
     static newEntry({ obj }) {
         Data.post({
@@ -98,12 +94,12 @@
             data: obj,
             onSuccess: (response) => {
                 Dropdown.bind({ id: '#Status', data: response.data.Status, value: 'Value', text: 'Description' });
-                Dropdown.bind({ id: '#TaskAction_TaskItemId', data: response.data.TaskItem, value: 'Id', text: 'Description' });
+                //Dropdown.bind({ id: '#TaskAction_TaskItemId', data: response.data.TaskItem, value: 'Id', text: 'Description' });
                 Modal.open({ id: '#modalTaskAction', title: 'Task Status / Add', action: 'Add', obj: obj });
-                $('.send-otp').addClass('hide');
-                TaskAction.stopOtpTimer({ elementId: "#OtpTimer" });
-                Table.add({ id: '#tableTaskAction', data: response.data.TaskAction });
-                $('#Remarks').val('')
+                //$('.send-otp').addClass('hide');
+                //TaskAction.stopOtpTimer({ elementId: "#OtpTimer" });
+                Table.add({ id: '#tableTaskAction', data: response.data.TaskAction, selectPick: true });
+                $('#Remark').val('');
             }
         });
     }
@@ -170,19 +166,22 @@ window.tableTaskSlNo = (value, obj, index) => {
 window.tableTaskInfo = (value, data, index) => {
     let labelStyle = "width:100px; font-weight: bold;";
     return `
-        <div><label style="${labelStyle}">Date</label> <b>:</b> ${moment(data.Date).format('DD-MMM-YYYY')}</div>
-        <div><label style="${labelStyle}">Ticket No.</label> <b>:</b> ${data.Code}</div>
-        <div><label style="${labelStyle}">Customer</label> <b>:</b> ${data.CustomerDesc.match(/.{1,50}/g).join('<br>')}</div>
-        <div><label style="${labelStyle}">Department</label> <b>:</b> ${data.PoNo}</div>
-        <div><label style="${labelStyle}">Location</label> <b>:</b> ${data.PoDate}</div>
+        <div><label style="${labelStyle}">Task Name</label> <b>:</b> ${data.Description}</div>
+        <div><label style="${labelStyle}">Start Date</label> <b>:</b> ${moment(data.StartDateTime).format('DD-MMM-YYYY')}</div>
+        <div><label style="${labelStyle}">End Date</label> <b>:</b> ${moment(data.EndDateTime).format('DD-MMM-YYYY')}</div>
+        <div><label style="${labelStyle}">Task Id</label> <b>:</b> ${data.Id}</div>
+       
+        <div><label style="${labelStyle}">Estimated Days</label> <b>:</b> ${data.EstimatedDays}</div>
+     
         <div><label style="${labelStyle}">Contact Person</label> <b>:</b> ${data.CreatedByName}</div>     
-        <div><label style="${labelStyle}">Contact Person</label> <b>:</b> ${data.Description}</div>
         
     `;
 }
+
 window.tableTaskAction = (value, obj, index) => {
     return `<div class="${obj.StatusCss}">${obj.StatusDesc}</div>`;
 }
+
 window.tableTask = (value, obj, index) => {
     let actionBtn = [];
     if (obj.IsAddStatus) {
@@ -205,14 +204,14 @@ window.tableTask = (value, obj, index) => {
         </div>
     `;
 }
+
 window.tableTaskEvent = {
     'click .btn-new-entry': (e, value, obj, row) => {
-        obj.TaskId = obj.Id;
-        obj.Ta = obj.Code;
+        obj.TaskItemId = obj.Id;
+        obj.TaskId = obj.TaskId;
         TaskAction.newEntry({ obj: obj });
     }
 }
-
 window.tableTaskActionSlNo = (value, obj, index) => {
     return index + 1; 
 }

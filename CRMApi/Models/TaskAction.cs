@@ -5,7 +5,6 @@ namespace CRMApi.Models
 {
     public class TaskAction
     {
-
         public int Id { get; set; }
         public int TaskId { get; set; }
         public int TaskItemId { get; set; }

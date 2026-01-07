@@ -1,6 +1,7 @@
 ﻿class Task {
     static task = [];
     static User = [];
+    static Emplpoyee = [];
     static currentAssignIndex = null;
    
     static init() {
@@ -72,8 +73,7 @@
         });
 
         Task.initAdd();
-    
-    
+       
     }
     static mergeAssign(allList, assignedList, key = 'Id') {
 
@@ -93,7 +93,6 @@
                     return [];
                 }
             }
-
             // object with Id
             if (typeof input === 'object' && input[key] != null) {
                 return [String(input[key])];
@@ -101,7 +100,6 @@
 
             return [];
         };
-
         const ids = extractIds(assignedList);
 
         return (allList || []).map(x => ({
@@ -109,7 +107,6 @@
             IsAdded: ids.includes(String(x[key]))
         }));
     }
-
 
     //Task View
     static getViewOption(onSuccess = () => { }) {
@@ -121,7 +118,6 @@
             ListId: $('#ListId').val(),
             ListPartyId: $('#CustomerDesc').val()
            
-
         }
         Data.post({ url: `Task/${action}`, data: obj, onSuccess: onSuccess });
     }
@@ -157,8 +153,6 @@
             obj.DocName = doc?.Name ?? null;
             obj.DocMimeType = doc?.MimeType ?? null;
             obj.DocBase64 = doc?.Base64 ?? null;
-
-
             if (!obj.Id) {
                 Task.add(obj);
             } else {
@@ -175,6 +169,7 @@
             onSuccess: (response) => {
                 Task.task = response.data.Task;
                 Task.User = response.data.User;
+                Task.Employee = response.data.Employee;
                 Modal.open({ id: '#modalTask', title: 'Task / Add', action: 'add' });
                 Dropdown.bind({ id: '#Task-CustomerDesc', data: response.data.Customer, value: 'Id', text: 'Description', subText: 'SubText' });
                 Dropdown.bind({ id: '#Task-Category', data: response.data.Category, value: 'Value', text: 'Description', subText: 'SubText' });
@@ -223,6 +218,7 @@
                         let obj = Array.isArray(response.obj) ? response.obj[0] : response.obj;
                         let TaskItemList = Array.isArray(response.obj) ? response.obj[0].TaskItem : response.obj.TaskItem;
                         Task.User = response.data.User;
+                        Task.Employee = response.data.Employee;
 
                         if (TaskItemList[0]) {
                             if (typeof TaskItemList[0].AssignToList === "string") {
@@ -253,7 +249,7 @@
                             $('#TechDocumentName').text(obj.DocName ?? '');
                             $('#ViewTechDocument').attr('href', blobUrl);
 
-                            _File.setIframe({
+                         _File.setIframe({
                                 iframeId: '#TechDocPreview',
                                 mimeType: obj.DocMimeType,
                                 src: blobUrl
@@ -273,21 +269,12 @@
                             id: '#tableTaskItem',
                             data: TaskItemList,
                             selectPick: true
-                        });
-
-                        
-                       
-
-                                        
-                        
-                        
+                        });                       
                         if (action == "Edit") {
                             let TechDoc = obj.file;
                             let blobUrl = _File.blobUrl({ base64: TechDoc.Base64, mimeType: TechDoc.MimeType });
                             _File.setIframe({ iframeId: '#TechDocPreview', mimeType: TechDoc.MimeType, src: blobUrl });
-                        }
-
-                        
+                        }                       
                     }
                     else {
                         Message.show(response);
@@ -393,7 +380,7 @@ window.tableTaskStatus = (value, obj, index) => {
     return `<div class="${obj.StatusCss}">${obj.StatusDesc}</div>`;
 }
 window.tablePoDate = (value, obj, index) => {
-    return `<div>${moment(obj.PoDate).format('DD-MMM-YYYY')}</div>`;
+    return `<div> ${obj.PoDate ? moment(obj.PoDate).format('DD-MMM-YYYY') : ''}</div>`;
 }
 window.tableStartDateTime = (value, obj, index) => {
     return `<div>${moment(obj.StartDateTime).format('DD-MMM-YYYY HH:mm:ss')}</div>`;
@@ -549,9 +536,7 @@ window.tableTaskItemEvent = {
                 obj.DocBlobUrl = file.BlobUrl;
                 Table.updateByIndex({ id: '#tableTaskItem', index: index, obj: obj, value: obj.TechDocName });
             }
-        });
-        
-        
+        });       
     },
     'click .btn-assign-to': (e, value, obj, index) => {
 
@@ -578,8 +563,6 @@ window.tableTaskItemEvent = {
         });
 
     }
-
-
 }
 
 window.tableTaskAssignTo = (value, obj, index) => {
@@ -591,8 +574,6 @@ window.tableTaskAssignTo = (value, obj, index) => {
         </div>
     `;
 };
-
-
 window.tableTaskAssignToEvent = {
     'change .is-location-checked': (e, value, obj, index) => {
 

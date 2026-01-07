@@ -3,6 +3,7 @@ using CRMApi.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Dynamic;
 using System.Net.Mail;
+using static CRMApi.Dto.DtoTask;
 
 namespace CRMApi.Repository
 {
@@ -44,7 +45,7 @@ namespace CRMApi.Repository
             try
             {
                 dynamic Option = new ExpandoObject();
-                var ListStatus = new List<int>() { App.Status.Processing, App.Status.RequestForClose, App.Status.Completed };
+                var ListStatus = new List<int>() { App.Status.Processing, App.Status.RequestForClose, App.Status.Completed,App.Status.Pending };
                 Option.Status = await db.Setting.Where(x => x.Name == App.SettingName.Status && ListStatus.Select(value => value.ToString()).Contains(x.Value)).Select(x => new
                 {
                     x.Value,
@@ -58,7 +59,8 @@ namespace CRMApi.Repository
                     x.Id,
                     x.Description
 
-                }).ToListAsync();               
+                }).ToListAsync();
+                Option.TaskAction = await ListAsync(obj, User);
                 objMsg.data = Option;
                 Message.Success(ref objMsg, "record found");
             }
@@ -71,7 +73,7 @@ namespace CRMApi.Repository
         public async Task<List<TaskAction>> ListAsync(TaskAction? obj, User User)
         {
             obj ??= new TaskAction();
-            obj.ListStatus = obj.ListStatus.Any() ? obj.ListStatus : new List<int> { App.Status.Processing, App.Status.Completed };
+            obj.ListStatus = obj.ListStatus.Any() ? obj.ListStatus : new List<int> { App.Status.Processing, App.Status.Completed,App.Status.Pending };
             var dbTaskActionQuery = db.TaskAction.Where(x => obj.ListStatus.Contains(x.Status)).AsQueryable();
             
 
@@ -82,7 +84,7 @@ namespace CRMApi.Repository
                 join st in db.Setting on new { Name = App.SettingName.Status, Value = cs.Status.ToString() } equals new { st.Name, st.Value }
                 join cb in db.User on cs.CreatedBy equals cb.Id
                 join ub in db.User on cs.UpdatedBy equals ub.Id
-                where cs.TaskItemId == obj.TaskItemId
+                where cs.TaskItemId == obj.Id
                 
                
                 select new TaskAction
@@ -105,18 +107,36 @@ namespace CRMApi.Repository
             ).ToListAsync();
             return dbTaskAction;
         }
-        public async Task<Message> GetTaskAsync(TaskAction obj, User User)
+        //public async Task<Message> GetTaskAsync(TaskAction obj, User User)
+        //{
+        //    Message objMsg = new Message();
+        //    try
+        //    {
+        //        var task = await repoTask.ListAsync(new Dto.DtoTask.DtoTaskFltr
+        //        {
+        //            ListId = obj.ListTaskId,
+        //            ListStatus = obj.ListStatus.Any() ? obj.ListStatus : new List<int> { App.Status.Pending, App.Status.Processing, App.Status.RequestForClose }
+
+        //        }, User);
+        //        objMsg.data = task;
+        //        Message.Get(ref objMsg, "");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Message.Exception(ref objMsg, ex);
+        //    }
+        //    return objMsg;
+        //}
+        public async Task<Message> GetTaskItemAsync(TaskAction obj, User User)
         {
             Message objMsg = new Message();
             try
             {
-                var task = await repoTask.ListAsync(new Dto.DtoTask.DtoTaskFltr
+                var taskItem = await repoTask.ListItemAsync(new Dto.DtoTask.DtoTaskItemFltr
                 {
-                    ListId = obj.ListTaskId,                    
-                    ListStatus = obj.ListStatus.Any() ? obj.ListStatus : new List<int> { App.Status.Pending, App.Status.Processing, App.Status.RequestForClose }
-                   
-                }, User);
-                objMsg.data = task;
+                    ListStatus = obj.ListStatus.Any()? obj.ListStatus: new List<int> { App.Status.Pending, App.Status.Processing, App.Status.RequestForClose }
+                },User);
+                objMsg.data = taskItem;
                 Message.Get(ref objMsg, "");
             }
             catch (Exception ex)
@@ -125,12 +145,14 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
+
         public async Task<Message> AddAsync(TaskAction obj, User User)
         {
             Message objMsg = new Message();
             try
             {
-                var dbTask = await db.Task.FirstOrDefaultAsync(x => App.UnderProcess.Contains(x.Status) && x.Id == obj.TaskId);
+                var dbTaskItem = await db.TaskItem.FirstOrDefaultAsync(x => App.UnderProcess.Contains(x.Status) && x.Id == obj.TaskItemId);
+                var dbtask = await db.Task.FirstOrDefaultAsync(x => App.UnderProcess.Contains(x.Status) && x.Id == obj.TaskId);
                 var dbUser = await db.User.Where(x => App.ActiveStatus.Contains(x.Status) && x.Id ==obj.CreatedBy ).Select(x => new
                 {
                     x.Id,
@@ -139,26 +161,62 @@ namespace CRMApi.Repository
                     x.ContactNo,
 
                 }).FirstOrDefaultAsync();
-                if (dbTask == null)
+                if (dbTaskItem == null && dbtask == null)
                 {
-                    Message.Error(ref objMsg, "Complaint did not find.");
+                    Message.Error(ref objMsg, "TaskItem did not find.");
                     return objMsg;
                 }
 
-               
-                //Update Complaint
-                dbTask.Status = obj.Status;
-                dbTask.UpdatedBy = User.Id;
-                dbTask.UpdatedAt = DateTime.Now;
-                db.Update(dbTask);
+                bool isAssignedUser = dbTaskItem.AssignToList != null
+                && dbTaskItem.AssignToList.Any(u => u.Id == User.Id);
 
-                //Add Complaint Status                
+                if (!isAssignedUser)
+                {
+                    Message.Error(ref objMsg, "You are not authorized to update TaskItem/TaskAction.");
+                    return objMsg;
+                }
+
+
+
+                //Update TaskItem
+                dbTaskItem.Status = obj.Status;
+                dbTaskItem.UpdatedBy = User.Id;
+                dbTaskItem.UpdatedAt = DateTime.Now;
+                db.Update(dbTaskItem);
+
+                //Add TaskAction Status
+                obj.Date = DateOnly.FromDateTime(DateTime.Now);
                 obj.CreatedBy = User.Id;
                 obj.CreatedAt = DateTime.Now;
                 obj.UpdatedBy = User.Id;
                 obj.UpdatedAt = DateTime.Now;
                 obj.Date = DateOnly.MinValue;
                 db.Add(obj);
+
+                db.SaveChanges();
+
+                if (obj.Status == App.Status.Completed)
+                {
+                    // Check if ALL task items are completed
+                    bool allItemsCompleted = !await db.TaskItem
+                        .AnyAsync(x =>
+                            x.TaskId == obj.TaskId &&                          
+                            x.Status != App.Status.Completed);
+
+                    // Assign Task status accordingly
+                    dbtask.Status = allItemsCompleted
+                        ? App.Status.Completed
+                        : App.Status.Processing;
+                }
+
+                //Update Task
+                if (obj.Status != App.Status.Completed)
+                {
+                    dbtask.Status = obj.Status;
+                }
+                dbtask.UpdatedBy = User.Id;
+                dbtask.UpdatedAt = DateTime.Now;
+                db.Update(dbtask);
 
                 Message.Add(ref objMsg, (await db.SaveChangesAsync()), "");
 
@@ -168,7 +226,7 @@ namespace CRMApi.Repository
                     objMsg.data = new
                     {
                         TaskAction = (await ListAsync(obj, User)),
-                        Task = (await GetTaskAsync(obj, User))
+                       // Task = (await GetTaskAsync(obj, User))
                     };
                     obj.StatusDesc = (await db.Setting.FirstOrDefaultAsync(x => App.ActiveStatus.Contains(x.Status) && x.Name == App.SettingName.Status && x.Value == obj.Status.ToString()))?.Description ?? "";
                     Message objEmailMsg = await NotifyStatusViaEmail(obj);
@@ -218,6 +276,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
+
         //public async Task<Message> SendOtpAsync(TaskAction obj, User User)
         //{
         //    Message objMsg = new Message();
