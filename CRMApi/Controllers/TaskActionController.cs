@@ -66,15 +66,31 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
+        //[HttpPost]
+        //public async Task<IActionResult> GetTask(TaskAction obj)
+        //{
+        //    Message objMsg = new Message();
+        //    try
+        //    {
+        //        var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
+        //        if (User == null) return Ok(objMsg);
+        //        //objMsg = await RepoTaskAction.GetTaskAsync(obj, User);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Message.Exception(ref objMsg, ex);
+        //    }
+        //    return Ok(objMsg);
+        //}
         [HttpPost]
-        public async Task<IActionResult> GetTask(TaskAction obj)
+        public async Task<IActionResult> GetTaskItem(TaskAction obj)
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoTaskAction.GetTaskAsync(obj, User);
+                objMsg = await RepoTaskAction.GetTaskItemAsync(obj, User);
             }
             catch (Exception ex)
             {
