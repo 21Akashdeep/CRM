@@ -9,9 +9,9 @@ using Task = CRMApi.Models.Task;
 
 namespace CRMApi.Services
 {
-    public class DBCRM:DbContext
+    public class DBCRM : DbContext
     {
-        public DBCRM(DbContextOptions<DBCRM> options): base(options) 
+        public DBCRM(DbContextOptions<DBCRM> options) : base(options)
         {
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -22,7 +22,7 @@ namespace CRMApi.Services
             var jsonApprovalSeq = new ValueConverter<List<Composite.ApprovalSeq>, string>(
                 v => JsonConvert.SerializeObject(v),//Serialize List<CustomObject> to JSON string
                 v => JsonConvert.DeserializeObject<List<Composite.ApprovalSeq>>(v)! //Deserialize JSON string back to List<CustomObject>
-            );            
+            );
             modelBuilder.Entity<ApprovalConfig>().Property(e => e.ApprovalSeq).HasConversion(jsonApprovalSeq).HasColumnType("json");
             //Task Item Assing To
             var jsonTaskItemAssingTo = new ValueConverter<List<DtoTask.DtoTaskAssingTo>, string>(
@@ -53,7 +53,7 @@ namespace CRMApi.Services
         public DbSet<Approval> Approval { get; set; }
         public DbSet<AccountGroup> AccountGroup { get; set; }
         public DbSet<Godown> Godown { get; set; }
-        public DbSet<Unit> Unit { get; set; }        
+        public DbSet<Unit> Unit { get; set; }
         public DbSet<ItemGroup> ItemGroup { get; set; }
         public DbSet<ItemSubGroup> ItemSubGroup { get; set; }
         public DbSet<Item> Item { get; set; }
@@ -72,6 +72,8 @@ namespace CRMApi.Services
         public DbSet<TaskItem> TaskItem { get; set; }
         public DbSet<TaskAction> TaskAction { get; set; }
 
+        public DbSet<Voucher> Voucher { get; set; }
+    }
 
 
     }
