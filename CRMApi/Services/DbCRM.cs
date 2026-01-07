@@ -73,7 +73,7 @@ namespace CRMApi.Services
         public DbSet<TaskAction> TaskAction { get; set; }
 
 
-        public DbSet<Grn> Voucher { get; set; }
+        public DbSet<Voucher> Voucher { get; set; }
         //public DbSet<Store> Store { get; set; }
 
     }
