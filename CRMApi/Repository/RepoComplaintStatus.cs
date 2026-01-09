@@ -30,7 +30,7 @@ namespace CRMApi.Repository
                 }).ToListAsync();
                 Option.Complaint = await (
                     from com in db.Complaint
-                    join cus in db.Customer on com.CustomerId equals cus.Id
+                    join cus in db.Party on com.PartyId equals cus.Id
                     join loc in db.Location on cus.LocationId equals loc.Id
                     where ListStatus.Contains(com.Status)
                     select new 
@@ -222,7 +222,7 @@ namespace CRMApi.Repository
                 }
                 if (String.IsNullOrEmpty(Complaint.Email)) 
                 {
-                    Message.Error(ref objMsg, "Customer email did not find for notify.");
+                    Message.Error(ref objMsg, "Party email did not find for notify.");
                     return objMsg;
                 }
                 var User = await db.User.FirstOrDefaultAsync(x => x.Id == Complaint.CreatedBy);

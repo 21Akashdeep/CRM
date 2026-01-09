@@ -6,11 +6,11 @@ using System.Dynamic;
 
 namespace CRMApi.Repository
 {
-    public class RepoCustomer
+    public class RepoParty
     {
         private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
-        public RepoCustomer(DBCRM _db) 
+        public RepoParty(DBCRM _db) 
         {
             db = _db;
         }
@@ -21,7 +21,7 @@ namespace CRMApi.Repository
             {
                 dynamic Option = new ExpandoObject();
                 Option.Status = await (
-                    from ac in db.Customer
+                    from ac in db.Party
                     join st in db.Setting on new { Value = ac.Status.ToString(), Name = App.SettingName.Status } equals new { st.Value, st.Name }
                     group st by new { st.Value, st.Description } into st
                     select new
@@ -30,7 +30,7 @@ namespace CRMApi.Repository
                         st.Key.Description
                     }
                 ).ToListAsync();
-                Option.Customer = await db.Customer.Where(ag => App.ActiveStatus.Contains(ag.Status)).Select(ag => new
+                Option.Party = await db.Party.Where(ag => App.ActiveStatus.Contains(ag.Status)).Select(ag => new
                 {
                     ag.Id,
                     ag.Code,
@@ -91,27 +91,27 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public async Task<List<Customer>> ListAsync(Customer? obj, User User) 
+        public async Task<List<Party>> ListAsync(Party? obj, User User) 
         {
-            obj = obj == null ? new Customer() : obj;
+            obj = obj == null ? new Party() : obj;
             obj.ListStatus = obj.ListStatus.Count == 0 ? App.ActiveStatus : obj.ListStatus;
-            //Get Customer List
-            var dbCustomer = db.Customer.Where(x => obj.ListStatus.Contains(x.Status)).AsQueryable();
+            //Get Party List
+            var dbParty = db.Party.Where(x => obj.ListStatus.Contains(x.Status)).AsQueryable();
             if (obj.ListId.Any())
-                dbCustomer = dbCustomer.Where(x => obj.ListId.Contains(x.Id));
+                dbParty = dbParty.Where(x => obj.ListId.Contains(x.Id));
             if (obj.ListLocationId.Any())
-                dbCustomer = dbCustomer.Where(x => obj.ListLocationId.Contains(x.Id));
+                dbParty = dbParty.Where(x => obj.ListLocationId.Contains(x.Id));
 
-            //Customer List
-            var Customer = await (
-                from co in dbCustomer
+            //Party List
+            var Party = await (
+                from co in dbParty
                 join ad in db.AdminDiv on co.AdminDivId equals ad.Id
                 join cn in db.Country on co.CountryId equals cn.Id                             
                 join lo in db.Location on co.LocationId equals lo.Id
                 join st in db.Setting on new { Value = co.Status.ToString(), Name = App.SettingName.Status } equals new { st.Value, st.Name }
                 join cb in db.User on co.CreatedBy equals cb.Id
                 join ub in db.User on co.UpdatedBy equals ub.Id                
-                select new Customer
+                select new Party
                 {
                     Id = co.Id,
                     Code = co.Code,
@@ -152,9 +152,9 @@ namespace CRMApi.Repository
                     IsEnable = co.Status == App.Status.Delete ? true : false,
                 }
             ).ToListAsync();
-            return Customer;
+            return Party;
         }
-        public async Task<Message> PrintAsync(Customer obj, User User) 
+        public async Task<Message> PrintAsync(Party obj, User User) 
         {
             Message objMsg = new Message();
             try 
@@ -168,7 +168,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public async Task<Message> ExportAsync(Customer obj, User User)
+        public async Task<Message> ExportAsync(Party obj, User User)
         {
             Message objMsg = new Message();
             try 
@@ -177,11 +177,11 @@ namespace CRMApi.Repository
                 var objCompany = await db.Company.FirstOrDefaultAsync(pt => App.ActiveStatus.Contains(pt.Status));
                 if (objCompany == null)
                 {
-                    Message.Error(ref objMsg, "Customer Info did found");
+                    Message.Error(ref objMsg, "Party Info did found");
                     return objMsg;
                 }
-                //Get Customer For Export
-                var Customer = (await ListAsync(obj, User)).Select(co => new
+                //Get Party For Export
+                var Party = (await ListAsync(obj, User)).Select(co => new
                 {
                     co.Id,
                     co.Code,
@@ -211,10 +211,10 @@ namespace CRMApi.Repository
                     co.UpdatedAt,                    
                 }).ToList();
                 //Convert List To DataTable
-                DataTable objDataTable = Util.ListToDataTable(Customer);
+                DataTable objDataTable = Util.ListToDataTable(Party);
                 //Convert Datatable to base64
-                objCompany.SheetName = "Customer List";
-                objCompany.ReportDesc = $"Customer - {DateTime.Now.ToString("dd-MMM-yyyy")}";
+                objCompany.SheetName = "Party List";
+                objCompany.ReportDesc = $"Party - {DateTime.Now.ToString("dd-MMM-yyyy")}";
                 objMsg.base64 = Util.DataTableToBase64(objDataTable, objCompany);
                 Message.Get(ref objMsg, "");
             }
@@ -224,7 +224,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public async Task<Message> AddAsync(Customer obj, User User) 
+        public async Task<Message> AddAsync(Party obj, User User) 
         {
             Message objMsg = new Message();
             try 
@@ -234,18 +234,18 @@ namespace CRMApi.Repository
                 obj.Name = Util.SanitizeInput(obj.Name, null) ?? "";
                 obj.Description = Util.SanitizeInput(obj.Description, null) ?? "";
                 //Check duplicate
-                var duplicate = await db.Customer.FirstOrDefaultAsync(ap => App.ActiveStatus.Contains(ap.Status) && (ap.Code == obj.Code || ap.Name == obj.Name || ap.Description == obj.Description));
+                var duplicate = await db.Party.FirstOrDefaultAsync(ap => App.ActiveStatus.Contains(ap.Status) && (ap.Code == obj.Code || ap.Name == obj.Name || ap.Description == obj.Description));
                 if(duplicate != null)
                 {
                     if(duplicate.Code == obj.Code)
-                        Message.Duplicate(ref objMsg, $"Customer Code : {obj.Code} already exists.");
+                        Message.Duplicate(ref objMsg, $"Party Code : {obj.Code} already exists.");
                     if (duplicate.Name == obj.Name)
-                        Message.Duplicate(ref objMsg, $"Customer Name : {obj.Name} already exists.");
+                        Message.Duplicate(ref objMsg, $"Party Name : {obj.Name} already exists.");
                     if (duplicate.Description == obj.Description)
-                        Message.Duplicate(ref objMsg, $"Customer Description : {obj.Description} already exists.");
+                        Message.Duplicate(ref objMsg, $"Party Description : {obj.Description} already exists.");
                     return objMsg;
                 }
-                //Add Customer
+                //Add Party
                 obj.CreatedBy = User.Id;
                 obj.UpdatedBy = User.Id;
                 db.Add(obj);
@@ -264,18 +264,18 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public async Task<Message> EditAsync(Customer obj, User User) 
+        public async Task<Message> EditAsync(Party obj, User User) 
         {
             Message objMsg = new Message();
             try 
             {                                
-                var Customer = (await ListAsync(obj, User)).FirstOrDefault();
-                if (Customer == null) 
+                var Party = (await ListAsync(obj, User)).FirstOrDefault();
+                if (Party == null) 
                 {
-                    Message.Error(ref objMsg, "Customer did not find for edit.");
+                    Message.Error(ref objMsg, "Party did not find for edit.");
                     return objMsg;
                 }
-                objMsg.obj = Customer;                
+                objMsg.obj = Party;                
                 objMsg.data = (await GetAddOptionAsync()).data;
                 Message.Success(ref objMsg, "Record found.");                
             }
@@ -285,7 +285,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public async Task<Message> UpdateAsync(Customer obj, User User) 
+        public async Task<Message> UpdateAsync(Party obj, User User) 
         {
             Message objMsg = new Message();
             try 
@@ -294,55 +294,55 @@ namespace CRMApi.Repository
                 obj.Code = Util.SanitizeInput(obj.Code, null) ?? "";
                 obj.Name = Util.SanitizeInput(obj.Name, null) ?? "";
                 obj.Description = Util.SanitizeInput(obj.Description, null) ?? "";
-                //Get Customer List
-                var dbCustomer = await db.Customer.Where(ap => App.ActiveStatus.Contains(ap.Status)).ToListAsync();
+                //Get Party List
+                var dbParty = await db.Party.Where(ap => App.ActiveStatus.Contains(ap.Status)).ToListAsync();
                 //Check duplicate
-                var duplicate = dbCustomer.FirstOrDefault(ap => App.ActiveStatus.Contains(ap.Status) && (ap.Code == obj.Code || ap.Name == obj.Name || ap.Description == obj.Description) && ap.Id != obj.Id);
+                var duplicate = dbParty.FirstOrDefault(ap => App.ActiveStatus.Contains(ap.Status) && (ap.Code == obj.Code || ap.Name == obj.Name || ap.Description == obj.Description) && ap.Id != obj.Id);
                 if (duplicate != null)
                 {
                     if (duplicate.Code == obj.Code)
-                        Message.Duplicate(ref objMsg, $"Customer Code : {obj.Code} already exists.");
+                        Message.Duplicate(ref objMsg, $"Party Code : {obj.Code} already exists.");
                     if (duplicate.Name == obj.Name)
-                        Message.Duplicate(ref objMsg, $"Customer Name : {obj.Name} already exists.");
+                        Message.Duplicate(ref objMsg, $"Party Name : {obj.Name} already exists.");
                     if (duplicate.Description == obj.Description)
-                        Message.Duplicate(ref objMsg, $"Customer Description : {obj.Description} already exists.");
+                        Message.Duplicate(ref objMsg, $"Party Description : {obj.Description} already exists.");
                     return objMsg;
                 }
 
-                var UpdateCustomer = dbCustomer.FirstOrDefault(fm => fm.Id == obj.Id);
-                if (UpdateCustomer == null)
+                var UpdateParty = dbParty.FirstOrDefault(fm => fm.Id == obj.Id);
+                if (UpdateParty == null)
                 {
-                    Message.Error(ref objMsg, "Customer did not find for update.");
+                    Message.Error(ref objMsg, "Party did not find for update.");
                     return objMsg;
                 }
-                UpdateCustomer.Code = String.IsNullOrEmpty(obj.Code) ? UpdateCustomer.Code : obj.Code;
-                UpdateCustomer.Name = obj.Name;
-                UpdateCustomer.Description = obj.Description;
-                UpdateCustomer.CinNo = obj.CinNo;
-                UpdateCustomer.GstNo = obj.GstNo;
-                UpdateCustomer.PanNo = obj.PanNo;
-                UpdateCustomer.Address1 = obj.Address1;
-                UpdateCustomer.Address2 = obj.Address2;
-                UpdateCustomer.PinCode = obj.PinCode;
-                UpdateCustomer.PostOffice = obj.PostOffice;
-                UpdateCustomer.District = obj.District;
-                UpdateCustomer.AdminDivId = obj.AdminDivId;
-                UpdateCustomer.CountryId = obj.CountryId;
-                UpdateCustomer.ContactNo = obj.ContactNo;
-                UpdateCustomer.Email = obj.Email;
-                UpdateCustomer.AccountNo = obj.AccountNo;
-                UpdateCustomer.IfscCode = obj.IfscCode;
-                UpdateCustomer.BankName = obj.BankName;
-                UpdateCustomer.BankAddress = obj.BankAddress;
-                UpdateCustomer.LocationId = obj.LocationId;
-                UpdateCustomer.CountryId = obj.CountryId;
-                UpdateCustomer.UpdatedBy = User.Id;
-                UpdateCustomer.UpdatedAt = DateTime.Now;
-                db.Update(UpdateCustomer);
+                UpdateParty.Code = String.IsNullOrEmpty(obj.Code) ? UpdateParty.Code : obj.Code;
+                UpdateParty.Name = obj.Name;
+                UpdateParty.Description = obj.Description;
+                UpdateParty.CinNo = obj.CinNo;
+                UpdateParty.GstNo = obj.GstNo;
+                UpdateParty.PanNo = obj.PanNo;
+                UpdateParty.Address1 = obj.Address1;
+                UpdateParty.Address2 = obj.Address2;
+                UpdateParty.PinCode = obj.PinCode;
+                UpdateParty.PostOffice = obj.PostOffice;
+                UpdateParty.District = obj.District;
+                UpdateParty.AdminDivId = obj.AdminDivId;
+                UpdateParty.CountryId = obj.CountryId;
+                UpdateParty.ContactNo = obj.ContactNo;
+                UpdateParty.Email = obj.Email;
+                UpdateParty.AccountNo = obj.AccountNo;
+                UpdateParty.IfscCode = obj.IfscCode;
+                UpdateParty.BankName = obj.BankName;
+                UpdateParty.BankAddress = obj.BankAddress;
+                UpdateParty.LocationId = obj.LocationId;
+                UpdateParty.CountryId = obj.CountryId;
+                UpdateParty.UpdatedBy = User.Id;
+                UpdateParty.UpdatedAt = DateTime.Now;
+                db.Update(UpdateParty);
                 Message.Update(ref objMsg, db.SaveChanges(), "");
                 if (objMsg.status == Message.Type.success) 
                 {
-                    obj.ListId.Add(UpdateCustomer.Id);
+                    obj.ListId.Add(UpdateParty.Id);
                     objMsg.obj = (await ListAsync(obj, User)).FirstOrDefault();
                     objMsg.data = (await GetViewOptionAsync()).data;
                 }                   
@@ -353,21 +353,21 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public async Task<Message> DeleteAsync(Customer obj, User User) 
+        public async Task<Message> DeleteAsync(Party obj, User User) 
         {
             Message objMsg = new Message();
             try 
             {
-                var DeleteCustomer = await db.Customer.FirstOrDefaultAsync(ap => App.ActiveStatus.Contains(ap.Status) && ap.Id == obj.Id);
-                if (DeleteCustomer == null)
+                var DeleteParty = await db.Party.FirstOrDefaultAsync(ap => App.ActiveStatus.Contains(ap.Status) && ap.Id == obj.Id);
+                if (DeleteParty == null)
                 {
-                    Message.Error(ref objMsg, "Customer did not find for delete.");
+                    Message.Error(ref objMsg, "Party did not find for delete.");
                     return objMsg;
                 }
-                DeleteCustomer.Status = App.Status.Delete;
-                DeleteCustomer.UpdatedBy = User.Id;
-                DeleteCustomer.UpdatedAt = DateTime.Now;
-                db.Update(DeleteCustomer);
+                DeleteParty.Status = App.Status.Delete;
+                DeleteParty.UpdatedBy = User.Id;
+                DeleteParty.UpdatedAt = DateTime.Now;
+                db.Update(DeleteParty);
                 Message.Delete(ref objMsg, (await db.SaveChangesAsync()), "");
                 if (objMsg.status == Message.Type.success)
                 {
@@ -383,21 +383,21 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public async Task<Message> EnableAsync(Customer obj, User User)
+        public async Task<Message> EnableAsync(Party obj, User User)
         {
             Message objMsg = new Message();
             try
             {
-                var EnableCustomer = await db.Customer.FirstOrDefaultAsync(ap => App.Status.Delete == ap.Status && ap.Id == obj.Id);
-                if (EnableCustomer == null)
+                var EnableParty = await db.Party.FirstOrDefaultAsync(ap => App.Status.Delete == ap.Status && ap.Id == obj.Id);
+                if (EnableParty == null)
                 {
-                    Message.Error(ref objMsg, "Customer did not find for enable.");
+                    Message.Error(ref objMsg, "Party did not find for enable.");
                     return objMsg;
                 }
-                EnableCustomer.Status = App.Status.Enable;
-                EnableCustomer.UpdatedBy = User.Id;
-                EnableCustomer.UpdatedAt = DateTime.Now;
-                db.Update(EnableCustomer);
+                EnableParty.Status = App.Status.Enable;
+                EnableParty.UpdatedBy = User.Id;
+                EnableParty.UpdatedAt = DateTime.Now;
+                db.Update(EnableParty);
                 Message.Delete(ref objMsg, (await db.SaveChangesAsync()), "");
                 if (objMsg.status == Message.Type.success)
                 {

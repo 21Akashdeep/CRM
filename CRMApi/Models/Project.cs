@@ -11,8 +11,8 @@ namespace CRMApi.Models
         [MaxLength(200)] public string Description { get; set; } = string.Empty;
         [MaxLength(20)] public string PoNo { get; set; } = string.Empty;
         [NotMapped] public Composite.Document? Document { get; set; } = new Composite.Document();
-        public int CustomerId { get; set; } = 1;
-        [NotMapped] public string? CustomerDesc { get; set; }
+        public int PartyId { get; set; } = 1;
+        [NotMapped] public string? PartyDesc { get; set; }
 
         
         public DateTime DeadLineDate { get; set; }

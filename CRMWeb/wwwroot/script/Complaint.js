@@ -3,7 +3,7 @@
         Complaint.getViewOption({
             onSuccess: (response) => {
                 Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
-                Dropdown.bind({ id: '#ListCustomerId', data: response.data.Customer, value: 'Id', text: 'Description' });
+                Dropdown.bind({ id: '#ListPartyId', data: response.data.Party, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#ListId', data: response.data.Complaint, value: 'Id', text: 'Code' });                
             }
         });
@@ -42,7 +42,7 @@
     static get({ method, onSuccess }) {
         let obj = {
             ListId: $('#ListId').val(),
-            ListCustomerId: $('#ListCustomerId').val(),
+            ListPartyId: $('#ListPartyId').val(),
             ListStatus: $('#ListStatus').val(),
             FromDate: DateTime.json($('#DateRange').val().split('|')[0]),
             ToDate: DateTime.json($('#DateRange').val().split('|')[1]),
@@ -54,31 +54,31 @@
         });
     }
     static initAdd() {
-        Customer.initAdd();
-        Customer.addOnSuccess = (response) => {
+        Party.initAdd();
+        Party.addOnSuccess = (response) => {
             let obj = response.obj;
-            Modal.close({ id: '#modalCustomer' });
+            Modal.close({ id: '#modalParty' });
             Complaint.getAddOption({
                 onSuccess: (response) => {
-                    Dropdown.bind({ id: '#Complaint_CustomerId', data: response.data.Customer, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
-                    Field.triggerOnChange('#Complaint_CustomerId');
+                    Dropdown.bind({ id: '#Complaint_PartyId', data: response.data.Party, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
+                    Field.triggerOnChange('#Complaint_PartyId');
                 }
             });
         }
-        Customer.updateOnSuccess = (response) => {
+        Party.updateOnSuccess = (response) => {
             let obj = response.obj;
-            Modal.close({ id: '#modalCustomer' });
+            Modal.close({ id: '#modalParty' });
             setTimeout(() => {
                 Complaint.getAddOption({
                     onSuccess: (response) => {
-                        Dropdown.bind({ id: '#Complaint_CustomerId', data: response.data.Customer, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
-                        Field.triggerOnChange('#Complaint_CustomerId');
+                        Dropdown.bind({ id: '#Complaint_PartyId', data: response.data.Party, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
+                        Field.triggerOnChange('#Complaint_PartyId');
                     }
                 });
             }, 500);            
         }
-        $('#Complaint_CustomerId').on('change', () => {
-            const obj = Dropdown.itemJson({ id: '#Complaint_CustomerId' });
+        $('#Complaint_PartyId').on('change', () => {
+            const obj = Dropdown.itemJson({ id: '#Complaint_PartyId' });
             if (!obj) return;            
             $('#Complaint_Address1').val(obj.Address1);
             $('#Complaint_Address2').val(obj.Address2);            
@@ -100,7 +100,7 @@
             Field.triggerOnInput('#Complaint_Address1, #Complaint_PostOffice, #Complaint_District');
             Field.triggerOnChange('#Complaint_AdminDivId, #Complaint_CountryId');                
             Complaint.getAddOption({
-                obj: { CustomerId: obj.Id },
+                obj: { PartyId: obj.Id },
                 onSuccess: (response) => {
                     Table.add({ id: '#tableComplaintAssign', data: response.data.ComplaintAssing });
                 }
@@ -163,7 +163,7 @@
             onSuccess: (response) => {
                 Modal.open({ id: '#modalComplaint', title: 'Complaint / Add', action: 'Add' });
                 Dropdown.bind({ id: '#Complaint_SupportMode', data: response.data.SupportMode, value: 'Id', text: 'Description' });
-                Dropdown.bind({ id: '#Complaint_CustomerId', data: response.data.Customer, value: 'Id', text: 'Description', json: true });
+                Dropdown.bind({ id: '#Complaint_PartyId', data: response.data.Party, value: 'Id', text: 'Description', json: true });
                 Dropdown.bind({ id: '#Complaint_AdminDivId', data: response.data.AdminDiv, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#Complaint_CountryId', data: response.data.Country, value: 'Id', text: 'Description', initialValue: [App.Info.CountryId] });
                 Dropdown.bind({ id: '#Complaint_Department', data: response.data.Department, value: 'Value', text: 'Description', isEditable: true });
@@ -192,7 +192,7 @@
                 //Bind Option
                 let Option = response.data;
                 Dropdown.bind({ id: '#Complaint_SupportMode', data: Option.SupportMode, value: 'Id', text: 'Description' });
-                Dropdown.bind({ id: '#Complaint_CustomerId', data: Option.Customer, value: 'Id', text: 'Description', json: true });
+                Dropdown.bind({ id: '#Complaint_PartyId', data: Option.Party, value: 'Id', text: 'Description', json: true });
                 Dropdown.bind({ id: '#Complaint_AdminDivId', data: Option.AdminDiv, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#Complaint_CountryId', data: Option.Country, value: 'Id', text: 'Description', initialValue: [App.Info.CountryId] });
                 Dropdown.bind({ id: '#Complaint_Department', data: Option.Department, value: 'Value', text: 'Description', isEditable: true });
@@ -296,12 +296,12 @@ window.tableComplaintSlNo = (value, obj, index) => {
 window.tableComplaintDate = (value, obj, index) => {
     return moment(obj.Date).format('DD-MMM-YYYY');
 }
-window.tableComplaintCustomerDesc = (value, obj, index) => {    
+window.tableComplaintPartyDesc = (value, obj, index) => {    
     return `
-        <div class="fw-bold text-truncate ch-40" title="${obj.CustomerDesc}">${obj.CustomerDesc}</div>
-        <div class="fw-bold text-truncate ch-40" title="Location : ${obj.CustomerLocation}, Contact Person : ${obj.ContactPerson}, Department : ${obj.Department}">
-        ${obj.CustomerLocation}, ${obj.ContactPerson}, ${obj.Department}</div>
-        <div class="text-truncate ch-40" title="${obj.CustomerAddress}">${obj.CustomerAddress.trim()}</div>
+        <div class="fw-bold text-truncate ch-40" title="${obj.PartyDesc}">${obj.PartyDesc}</div>
+        <div class="fw-bold text-truncate ch-40" title="Location : ${obj.PartyLocation}, Contact Person : ${obj.ContactPerson}, Department : ${obj.Department}">
+        ${obj.PartyLocation}, ${obj.ContactPerson}, ${obj.Department}</div>
+        <div class="text-truncate ch-40" title="${obj.PartyAddress}">${obj.PartyAddress.trim()}</div>
     `;
 }
 window.tableComplaintProblem = (value, obj, index) => {    

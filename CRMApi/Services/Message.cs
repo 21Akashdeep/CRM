@@ -53,7 +53,7 @@ namespace CRMApi.Services
                 objMsg.statusText = "Record has not closed.!!!\n" + text;
             }
         }
-        public static void Get(ref Message objMsg, string text ="")
+        public static void Get(ref Message objMsg, string text)
         {
             if (objMsg.data.Count > 0)
             {

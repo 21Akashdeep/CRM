@@ -5,7 +5,7 @@ using System.Dynamic;
 using System.Net.Mail;
 using static CRMApi.Dto.DtoTask;
 
-namespace CRMApi.Repository
+namespace CRMApi.Repository 
 {
     public class RepoTaskAction
     {

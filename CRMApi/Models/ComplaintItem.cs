@@ -9,8 +9,8 @@ namespace CRMApi.Models
         public int ComplaintId { get; set; }
         [NotMapped] public string? ComplaintNo { get; set; }
         [NotMapped] public DateTime ComplaintDate { get; set; }
-        [NotMapped] public string? CustomerDesc { get; set; }
-        [NotMapped] public string? CustomerAddress { get; set; }
+        [NotMapped] public string? PartyDesc { get; set; }
+        [NotMapped] public string? PartyAddress { get; set; }
         [NotMapped] public string? Problem { get; set; }
         public int ItemId { get; set; }
         [NotMapped] public string? ItemDesc { get; set; }
@@ -37,6 +37,6 @@ namespace CRMApi.Models
         [NotMapped] public List<int> ListStatus { get; set; } = new List<int>();
         [NotMapped] public List<int> ListId { get; set; } = new List<int>();
         [NotMapped] public List<int> ListComplaintId { get; set; } = new List<int>();        
-        [NotMapped] public List<int> ListCustomerId { get; set; } = new List<int>();
+        [NotMapped] public List<int> ListPartyId { get; set; } = new List<int>();
     }
 }

@@ -25,8 +25,8 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label>Customer</label>
-                    <select id="ListCustomerId" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                    <label>Party</label>
+                    <select id="ListPartyId" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -58,7 +58,7 @@
                                 <th data-sortable="true" data-field="Date" data-formatter="tableComplaintDate" class="text-nowrap">Date</th>
                                 <th data-sortable="true" data-field="Code" class="left-fix">Complaint No.</th>
                                 <th data-sortable="true" data-field="SupportModeDesc">Support Mode</th>
-                                <th data-sortable="true" data-field="CustomerDesc" data-formatter="tableComplaintCustomerDesc" class="text-nowrap">Customer & Address</th>
+                                <th data-sortable="true" data-field="PartyDesc" data-formatter="tableComplaintPartyDesc" class="text-nowrap">Party & Address</th>
                                 <th data-sortable="true" data-field="Problem" data-formatter="tableComplaintProblem" class="text-nowrap">Problem</th>
                                 <th data-sortable="true" data-field="CreatedAt" data-formatter="tableComplaintCreatedByAndAt" class="text-nowrap">Created By & At</th>
                                 <th data-sortable="true" data-field="UpdatedAt" data-formatter="tableComplaintUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
@@ -113,8 +113,8 @@
                                     <td id="Complaint-SupportModeDesc"></td>
                                 </tr>
                                 <tr>
-                                    <td class="fw-bold">Customer</td>
-                                    <td id="Complaint-CustomerDesc"></td>
+                                    <td class="fw-bold">Party</td>
+                                    <td id="Complaint-PartyDesc"></td>
                                 </tr>
                                 <tr>
                                     <td class="fw-bold">Address1</td>
@@ -214,11 +214,11 @@
 <!-- Complaint Add Modal -->
 <partial name="ComplaintAdd.cshtml" />
 <!-- Complaint Add Modal -->
-<partial name="../Customer/CustomerAdd.cshtml" />
+<partial name="../Party/PartyAdd.cshtml" />
 
 
 @section Scripts {
-    <script src="~/script/Customer.js" asp-append-version="true"></script>
+    <script src="~/script/Party.js" asp-append-version="true"></script>
     <script src="~/script/Complaint.js" asp-append-version="true"></script>
     <script type="text/javascript">
         $(function () {

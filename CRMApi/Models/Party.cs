@@ -2,7 +2,7 @@
 
 namespace CRMApi.Models
 {
-    public class Customer
+    public class Party
     {
         public int Id { get; set; }
         public string Code { get; set; } = string.Empty;
@@ -28,6 +28,8 @@ namespace CRMApi.Models
         public string? BankAddress { get; set; }        
         public int LocationId { get; set; }
         [NotMapped] public string? LocationDesc { get; set; }
+        public int AccountGroupId { get; set; }
+        [NotMapped] public string AccountGroupDesc { get; set; } = string.Empty;
         public int Status { get; set; } = 1;
         [NotMapped] public string StatusDesc { get; set; } = string.Empty;
         [NotMapped] public string StatusCss { get; set; } = string.Empty;

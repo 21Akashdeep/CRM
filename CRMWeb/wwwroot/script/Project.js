@@ -3,7 +3,7 @@
         Project.getViewOption((response) => {
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
             Dropdown.bind({ id: '#ListId', data: response.data.ListId, value: 'Id', text: 'Description', subText: "Code" });
-            Dropdown.bind({ id: '#Project_CustomerId', data: response.data.Customer, value: 'Id', text: 'Description' });
+            Dropdown.bind({ id: '#Project_PartyId', data: response.data.Party, value: 'Id', text: 'Description' });
         });
         $('#btnSearch').on('click', () => {
             Project.get({

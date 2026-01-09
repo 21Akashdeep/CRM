@@ -49,7 +49,7 @@ namespace CRMApi.Services
         public DbSet<ApprovalRole> ApprovalRole { get; set; }
         public DbSet<UserApprovalRole> UserApprovalRole { get; set; }
         public DbSet<ApprovalConfig> ApprovalConfig { get; set; }
-        public DbSet<Customer> Customer { get; set; }
+        public DbSet<Party> Party { get; set; }
         public DbSet<Approval> Approval { get; set; }
         public DbSet<AccountGroup> AccountGroup { get; set; }
         public DbSet<Godown> Godown { get; set; }
@@ -71,8 +71,15 @@ namespace CRMApi.Services
         public DbSet<Task> Task { get; set; }
         public DbSet<TaskItem> TaskItem { get; set; }
         public DbSet<TaskAction> TaskAction { get; set; }
+<<<<<<< HEAD
 
         
+=======
+        public DbSet<Voucher> Voucher { get; set; }
+        public DbSet<VoucherItem> VoucherItem { get; set; }
+        public DbSet<Store> Store { get; set; }
+
+>>>>>>> 4eada9969942e42fb21f482e2f66eac48920b5c1
     }
 
 

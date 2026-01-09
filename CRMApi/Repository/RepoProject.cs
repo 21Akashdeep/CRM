@@ -30,7 +30,7 @@ namespace CRMApi.Repository
                     }
                 ).ToList();
                 option.ListId = db.Project.Select(x => new { x.Id, x.Description }).ToList();
-                option.Customer = db.Customer.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new { 
+                option.Party = db.Party.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new { 
                     x.Id, 
                     x.Name,
                     x.Description,
@@ -59,7 +59,7 @@ namespace CRMApi.Repository
                 Project = (
                     from dpt in dbProject
                     join sts in db.Setting on new { Value = dpt.Status.ToString(), Name = App.SettingName.Status } equals new { sts.Value, sts.Name }
-                    join cust in db.Customer on dpt.CustomerId equals cust.Id
+                    join cust in db.Party on dpt.PartyId equals cust.Id
                     join cus in db.User on dpt.CreatedBy equals cus.Id
                     join uby in db.User on dpt.UpdatedBy equals uby.Id
                     select new Project
@@ -67,8 +67,8 @@ namespace CRMApi.Repository
                         Id = dpt.Id,
                         Code = dpt.Code,
                         Name = dpt.Name,
-                        CustomerId = dpt.CustomerId,
-                        CustomerDesc = cust.Description,
+                        PartyId = dpt.PartyId,
+                        PartyDesc = cust.Description,
                         PoNo = dpt.PoNo,
                         PoDate = dpt.PoDate,
                         StartDate = dpt.StartDate,
@@ -130,7 +130,7 @@ namespace CRMApi.Repository
                     x.Code,
                     x.Name,
                     x.Description,
-                    x.CustomerId,
+                    x.PartyId,
                     x.PoNo,
                     x.PoDate,
                     x.StartDate,
@@ -144,7 +144,7 @@ namespace CRMApi.Repository
                     x.UpdatedBy,
                     x.UpdatedByName,
                     x.UpdatedAt,
-                    Customer = x.CustomerDesc,
+                    Party = x.PartyDesc,
                 }).ToList();
                 //Convert List To DataTable
                 DataTable objDataTable = Util.ListToDataTable(Deparment);
@@ -312,7 +312,7 @@ namespace CRMApi.Repository
                 UpdateDept.Description = obj.Description;
                 UpdateDept.PoDate = obj.PoDate;
                 UpdateDept.PoNo = obj.PoNo;
-                UpdateDept.CustomerId = obj.CustomerId;
+                UpdateDept.PartyId = obj.PartyId;
                 UpdateDept.StartDate = obj.StartDate;
                 UpdateDept.DeadLineDate = obj.DeadLineDate;
                 //UpdateDept.TechnicalDoc = obj.TechnicalDoc;

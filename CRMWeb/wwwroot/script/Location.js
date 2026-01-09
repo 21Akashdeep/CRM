@@ -65,7 +65,7 @@
     }
     static fill() {
         Modal.open({ id: '#modalLocation', title: 'Location / Add', action: 'add' });
-        $('#Customer_SeqNo').val(0);
+        $('#Party_SeqNo').val(0);
     }
     static add(obj) {
         console.log("akash")

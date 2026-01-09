@@ -51,7 +51,7 @@ namespace CRMApi.Repository
                  x.Description
                }).ToList();
 
-                option.Customer = db.Customer.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new {
+                option.Party = db.Party.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new {
                     x.Id,
                     x.Name,
                     x.Description,
@@ -86,7 +86,7 @@ namespace CRMApi.Repository
             {
                 //Expando Object
                 dynamic Option = new ExpandoObject();
-                Option.Customer = db.Customer.Where(ig => App.ActiveStatus.Contains(ig.Status)).Select(ig => new
+                Option.Party = db.Party.Where(ig => App.ActiveStatus.Contains(ig.Status)).Select(ig => new
                 {
                     ig.Id,
                     ig.Code,
@@ -122,7 +122,7 @@ namespace CRMApi.Repository
                 Option.User = (
                      from usr in db.User
                      join ulo in db.UserLocation on usr.Id equals ulo.UserId
-                     join cus in db.Customer on ulo.LocationId equals cus.LocationId
+                     join cus in db.Party on ulo.LocationId equals cus.LocationId
 
                      where App.ActiveStatus.Contains(usr.Status)
                      select new
@@ -152,16 +152,13 @@ namespace CRMApi.Repository
             var taskList = await (
                 from dpt in db.Task
                 join sts in db.Setting on new { Value = dpt.Status.ToString(), Name = App.SettingName.Status } equals new { sts.Value, sts.Name }
-                join st1 in db.Setting on new { Category = App.SettingName.TaskCategory, Value =dpt.Category.
-                Trim()} equals new { Category = st1.Category, Value = st1.Value.Trim() } into stg
-                from st1 in stg.DefaultIfEmpty()
-                join cus in db.Customer on dpt.CustomerId equals cus.Id              
+                join cus in db.Party on dpt.PartyId equals cus.Id              
                 join cby in db.User on dpt.CreatedBy equals cby.Id
                 join uby in db.User on dpt.UpdatedBy equals uby.Id
                 where
                 obj.ListStatus.Contains(dpt.Status) &&
                 (!obj.ListId.Any() || obj.ListId.Contains(dpt.Id)) &&
-                (!obj.ListPartyId.Any() || obj.ListPartyId.Contains(dpt.CustomerId))
+                (!obj.ListPartyId.Any() || obj.ListPartyId.Contains(dpt.PartyId))
                 let file = Util.GetFile(dpt.TechnicalDoc ?? "")
                 select new DtoTaskList
                 {
@@ -169,10 +166,9 @@ namespace CRMApi.Repository
                     Code = dpt.Code,
                     Name = dpt.Name,
                     Description = dpt.Description,
-                    CustomerId = dpt.CustomerId,
-                    CustomerDesc = cus.Description,
-                    Category = dpt.Category,  
-                    CategoryDesc = st1.Name,
+                    PartyId = dpt.PartyId,
+                    PartyDesc = cus.Description,
+                    Category = dpt.Category,                  
                     PoNo = dpt.PoNo,
                     PoDate = dpt.PoDate,
                     StartDate = dpt.StartDate,
@@ -327,7 +323,7 @@ namespace CRMApi.Repository
                     x.StartDate,
                     x.EndDate,
                     x.Remarks,                  
-                    Customer = x.CustomerDesc,                 
+                    Party = x.PartyDesc,                 
                     x.CreatedByName,
                     x.CreatedAt,
                     x.UpdatedBy,
@@ -434,7 +430,7 @@ namespace CRMApi.Repository
                 {                   
                     Name = obj.Name,
                     Description = obj.Description,
-                    CustomerId = obj.CustomerId,
+                    PartyId = obj.PartyId,
                     Category = obj.Category,
                     PoNo = obj.PoNo,
                     TechnicalDoc = obj.DocName,
@@ -575,7 +571,7 @@ namespace CRMApi.Repository
                 
                 UpdateTask.Name = obj.Name;
                 UpdateTask.Description = obj.Description;
-                UpdateTask.CustomerId = obj.CustomerId;
+                UpdateTask.PartyId = obj.PartyId;
                 UpdateTask.Category = obj.Category;
                 UpdateTask.PoNo = obj.PoNo;
                
@@ -732,7 +728,7 @@ namespace CRMApi.Repository
                             <tbody>                              
                                   <tr><th style='text-align:left;'>Task Description</th><td><b>:</b> {obj.Description}</td></tr>
                                  <tr><th style='text-align:left;'>TaskItem Id</th><td><b>:</b> {obj.Id}</td></tr>
-                                <tr><th style='text-align:left;'>Project</th><td><b>:</b> {tskobj[0].CustomerDesc}</td></tr>
+                                <tr><th style='text-align:left;'>Project</th><td><b>:</b> {tskobj[0].PartyDesc}</td></tr>
                                <tr><th style='text-align:left;'>Assigned By</th><td><b>:</b> {assignedName}</td></tr>
                                 <tr><th style='text-align:left;'>Contac No</th><td><b>:</b> {assignedContact}</td></tr>
                                 <tr><th style='text-align:left;'>Start Date</th><td><b>:</b> {obj.StartDateTime}</td></tr>
