@@ -172,7 +172,7 @@ window.tableTaskInfo = (value, data, index) => {
     return `
         <div><label style="${labelStyle}">Date</label> <b>:</b> ${moment(data.Date).format('DD-MMM-YYYY')}</div>
         <div><label style="${labelStyle}">Ticket No.</label> <b>:</b> ${data.Code}</div>
-        <div><label style="${labelStyle}">Customer</label> <b>:</b> ${data.CustomerDesc.match(/.{1,50}/g).join('<br>')}</div>
+        <div><label style="${labelStyle}">Party</label> <b>:</b> ${data.PartyDesc.match(/.{1,50}/g).join('<br>')}</div>
         <div><label style="${labelStyle}">Department</label> <b>:</b> ${data.PoNo}</div>
         <div><label style="${labelStyle}">Location</label> <b>:</b> ${data.PoDate}</div>
         <div><label style="${labelStyle}">Contact Person</label> <b>:</b> ${data.CreatedByName}</div>     

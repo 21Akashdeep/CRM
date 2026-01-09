@@ -49,7 +49,7 @@ namespace CRMApi.Services
         public DbSet<ApprovalRole> ApprovalRole { get; set; }
         public DbSet<UserApprovalRole> UserApprovalRole { get; set; }
         public DbSet<ApprovalConfig> ApprovalConfig { get; set; }
-        public DbSet<Customer> Customer { get; set; }
+        public DbSet<Party> Party { get; set; }
         public DbSet<Approval> Approval { get; set; }
         public DbSet<AccountGroup> AccountGroup { get; set; }
         public DbSet<Godown> Godown { get; set; }

@@ -33,7 +33,7 @@ namespace CRMApi.Repository
                     x.Id,
                     x.No
                 }).ToListAsync();
-                Option.Customer = await db.Customer.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
+                Option.Party = await db.Party.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
                 {
                     x.Id,
                     x.Description,
@@ -59,8 +59,8 @@ namespace CRMApi.Repository
                     Id = x.Value,
                     x.Description
                 }).ToListAsync();
-                var dbCustomer = await new RepoCustomer(db).ListAsync(null, User);
-                Option.Customer = dbCustomer.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
+                var dbParty = await new RepoParty(db).ListAsync(null, User);
+                Option.Party = dbParty.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
                 {
                     x.Id,
                     x.Description,
@@ -101,10 +101,10 @@ namespace CRMApi.Repository
                 //    from usr in db.User
                 //    join ulo in db.UserLocation on usr.Id equals ulo.UserId
                 //    join loc in db.Location on ulo.LocationId equals loc.Id
-                //    join cus in db.Customer on ulo.LocationId equals cus.LocationId
+                //    join cus in db.Party on ulo.LocationId equals cus.LocationId
                 //    join coa in dbGrnAssign on new { UserId = usr.Id, GrnId = obj.Id } equals new { coa.UserId, coa.GrnId } into GrnAssign
                 //    from coa in GrnAssign.DefaultIfEmpty()
-                //    where App.ActiveStatus.Contains(usr.Status) && cus.Id == obj.CustomerId
+                //    where App.ActiveStatus.Contains(usr.Status) && cus.Id == obj.PartyId
                 //    select new
                 //    {
                 //        Id = coa != null ? coa.Id : 0,
@@ -139,8 +139,8 @@ namespace CRMApi.Repository
                 dbGrnQuery = dbGrnQuery.Where(co => obj.ListId.Contains(co.Id));
             if (obj.ListSupportMode.Any())
                 dbGrnQuery = dbGrnQuery.Where(co => obj.ListSupportMode.Contains(co.No));
-            if (obj.ListCustomerId.Any())
-                dbGrnQuery = dbGrnQuery.Where(co => obj.ListCustomerId.Contains(co.CustomerId));
+            if (obj.ListPartyId.Any())
+                dbGrnQuery = dbGrnQuery.Where(co => obj.ListPartyId.Contains(co.PartyId));
             if (obj.ListPriority.Any())
                 dbGrnQuery = dbGrnQuery.Where(co => obj.ListPriority.Contains(co.Priority));
             //if (obj.ListAssignTo.Any())
@@ -153,7 +153,7 @@ namespace CRMApi.Repository
             var Grn = (
                 from co in dbGrn
                 join sm in db.Setting on new { Name = App.SettingName.SupportMode, Value = co.No } equals new { sm.Name, sm.Value }
-                join cu in db.Customer on co.CustomerId equals cu.Id
+                join cu in db.Party on co.PartyId equals cu.Id
                 join lo in db.Location on cu.LocationId equals lo.Id
                 join ad in db.AdminDiv on co.AdminDivId equals ad.Id
                 join cn in db.Country on co.CountryId equals cn.Id
@@ -168,8 +168,8 @@ namespace CRMApi.Repository
                     Date = co.Date,
                     //SupportMode = co.SupportMode,
                     SupportModeDesc = sm.Description,
-                    CustomerId = co.CustomerId,
-                    //CustomerDesc = cu.Description,
+                    PartyId = co.PartyId,
+                    //PartyDesc = cu.Description,
                     Address1 = co.Address1,
                     Address2 = co.Address2,
                     PinCode = co.PinCode,
@@ -179,7 +179,7 @@ namespace CRMApi.Repository
                     AdminDivDesc = ad.Description,
                     CountryId = co.CountryId,
                     CountryDesc = cn.Description,
-                    CustomerAddress = Util.AddressDesc(new Composite.AddressDesc
+                    PartyAddress = Util.AddressDesc(new Composite.AddressDesc
                     {
                         Add1 = co.Address1,
                         Add2 = co.Address2,
@@ -190,7 +190,7 @@ namespace CRMApi.Repository
                         Country = co.CountryDesc,
                         OtherText = ""
                     }),
-                    CustomerLocation = lo.Description,
+                    PartyLocation = lo.Description,
                     ContactPerson = co.ContactPerson,
                     ContactNo = co.ContactNo,
                     Email = co.Email,
@@ -239,8 +239,8 @@ namespace CRMApi.Repository
             if (obj.ListSupportMode.Any())
                 query = query.Where(co => obj.ListSupportMode.Contains(co.No));
 
-            if (obj.ListCustomerId.Any())
-                query = query.Where(co => obj.ListCustomerId.Contains(co.CustomerId));
+            if (obj.ListPartyId.Any())
+                query = query.Where(co => obj.ListPartyId.Contains(co.PartyId));
 
             if (obj.ListPriority.Any())
                 query = query.Where(co => obj.ListPriority.Contains(co.Priority));
@@ -251,7 +251,7 @@ namespace CRMApi.Repository
             var Grn = (
                 from co in dbGrn
                 join sm in db.Setting on new { Name = App.SettingName.SupportMode, Value = co.No.ToString() } equals new { sm.Name, sm.Value }
-                join cu in db.Customer on co.CustomerId equals cu.Id
+                join cu in db.Party on co.PartyId equals cu.Id
                 join ad in db.AdminDiv on co.AdminDivId equals ad.Id
                 join cn in db.Country on co.CountryId equals cn.Id
                 join pr in db.Setting on new { Name = App.SettingName.Priority, Value = co.Priority.ToString() } equals new { pr.Name, pr.Value }
@@ -265,8 +265,8 @@ namespace CRMApi.Repository
                     Date = co.Date,
                     //SupportMode = co.SupportMode,
                     SupportModeDesc = sm.Description,
-                    CustomerId = co.CustomerId,
-                    //CustomerDesc = cu.Description,
+                    PartyId = co.PartyId,
+                    //PartyDesc = cu.Description,
                     Address1 = co.Address1,
                     Address2 = co.Address2,
                     PinCode = co.PinCode,
@@ -343,7 +343,7 @@ namespace CRMApi.Repository
                     co.Date,
                     GrnNo = co.No,
                     SupportMode = co.SupportModeDesc,
-                    //Customer = co.CustomerDesc,
+                    //Party = co.PartyDesc,
                     co.Address1,
                     co.Address2,
                     co.PinCode,
@@ -495,7 +495,7 @@ namespace CRMApi.Repository
                 }
                 UpdateGrn.Date = obj.Date;
                 UpdateGrn.No = obj.No;
-                UpdateGrn.CustomerId = obj.CustomerId;
+                UpdateGrn.PartyId = obj.PartyId;
                 UpdateGrn.Address1 = obj.Address1;
                 UpdateGrn.Address2 = obj.Address2;
                 UpdateGrn.PinCode = obj.PinCode;
@@ -613,14 +613,14 @@ namespace CRMApi.Repository
         //    Message objMsg = new Message();
         //    try
         //    {
-        //        //Sent Email To Customer
+        //        //Sent Email To Party
         //        if (IsReg)
         //        {
-        //            string CustomerMailBody = $"Your Grn No. {obj.Code} has been registered. ";
-        //            var CustomerMail = new MailMessage();
-        //            CustomerMail.To.Add(obj.Email);
-        //            Util.SentMail(db, CustomerMail, $"Grn Registered: {obj.Code}", CustomerMailBody, "info", ref objMsg);
-        //            objMsg.statusText = objMsg.status == Message.Type.success ? "Email has been sent to the customer." : "Failed to send email to the customer.";
+        //            string PartyMailBody = $"Your Grn No. {obj.Code} has been registered. ";
+        //            var PartyMail = new MailMessage();
+        //            PartyMail.To.Add(obj.Email);
+        //            Util.SentMail(db, PartyMail, $"Grn Registered: {obj.Code}", PartyMailBody, "info", ref objMsg);
+        //            objMsg.statusText = objMsg.status == Message.Type.success ? "Email has been sent to the Party." : "Failed to send email to the Party.";
         //        }
         //        else
         //        {
@@ -642,13 +642,13 @@ namespace CRMApi.Repository
         //                <table style='width:90%; border-collapse: collapse;' border='0'>
         //                    <tbody>
         //                        <tr><th colspan='2' style='text-align:left;'>Grn Info :</th></tr>
-        //                        <tr><th style='text-align:left;'>Customer</th><td><b>:</b> {obj.CustomerDesc}</td></tr>
-        //                        <tr><th style='text-align:left;'>Location</th><td><b>:</b> {obj.CustomerLocation}</td></tr>
+        //                        <tr><th style='text-align:left;'>Party</th><td><b>:</b> {obj.PartyDesc}</td></tr>
+        //                        <tr><th style='text-align:left;'>Location</th><td><b>:</b> {obj.PartyLocation}</td></tr>
         //                        <tr><th style='text-align:left;'>Department</th><td><b>:</b> {obj.Department}</td></tr>
         //                        <tr><th style='text-align:left;'>Contact Person</th><td><b>:</b> {obj.ContactPerson}</td></tr>
         //                        <tr><th style='text-align:left;'>Contact No.</th><td><b>:</b> {obj.ContactNo}</td></tr>
         //                        <tr><th style='text-align:left;'>Email</th><td><b>:</b> {obj.Email}</td></tr>
-        //                        <tr><th style='text-align:left;'>Address</th><td><b>:</b> {obj.CustomerAddress}</td></tr>
+        //                        <tr><th style='text-align:left;'>Address</th><td><b>:</b> {obj.PartyAddress}</td></tr>
         //                        <tr><th style='text-align:left;'>priority</th><td><b>:</b> {obj.PriorityDesc}</td></tr>
         //                        <tr><td colspan='2' style='text-align:left;'><b>Problem :</b><div>{obj.Problem.Replace("\r\n", "<br/>")}</div></td></tr>
         //                    </tbody>

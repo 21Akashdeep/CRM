@@ -27,8 +27,8 @@ namespace CRMApi.Repository
                     x.Description
                 }).ToListAsync();
 
-                Option.Customer = await(
-                    from cu in db.Customer
+                Option.Party = await(
+                    from cu in db.Party
                     join ad in db.AdminDiv on cu.AdminDivId equals ad.Id
                     join co in db.Country on cu.CountryId equals co.Id
                     where App.ActiveStatus.Contains(cu.Status)
@@ -55,7 +55,7 @@ namespace CRMApi.Repository
 
                 Option.Complaint = await(
                     from cm in db.Complaint
-                    join cu in db.Customer on cm.CustomerId equals cu.Id                    
+                    join cu in db.Party on cm.PartyId equals cu.Id                    
                     where App.ActiveStatus.Contains(cm.Status)
                     select new
                     {
@@ -82,7 +82,7 @@ namespace CRMApi.Repository
                 var ListStatus = App.ByPassUserType.Contains(User.UserType) ? App.AllActiveStatus : new List<int>() { App.Status.Pending, App.Status.Processing };
                 Option.Complaint = await (
                     from cm in db.Complaint
-                    join cu in db.Customer on cm.CustomerId equals cu.Id
+                    join cu in db.Party on cm.PartyId equals cu.Id
                     join ad in db.AdminDiv on cm.AdminDivId equals ad.Id
                     join co in db.Country on cm.CountryId equals co.Id
                     where ListStatus.Contains(cm.Status)
@@ -92,8 +92,8 @@ namespace CRMApi.Repository
                         cm.Id,
                         cm.Code,
                         cm.Date,
-                        CustomerDesc = cu.Description,
-                        CustomerAddress = Util.AddressDesc(new Composite.AddressDesc
+                        PartyDesc = cu.Description,
+                        PartyAddress = Util.AddressDesc(new Composite.AddressDesc
                         {
                             Add1 = cu.Address1,
                             Add2 = cu.Address2,
@@ -140,7 +140,7 @@ namespace CRMApi.Repository
             var ComplaintItem = await (
                 from ci in dbCompliantItemQuery
                 join co in db.Complaint on ci.ComplaintId equals co.Id
-                join cu in db.Customer on co.CustomerId equals cu.Id
+                join cu in db.Party on co.PartyId equals cu.Id
                 join ad in db.AdminDiv on co.AdminDivId equals ad.Id
                 join ct in db.Country on co.CountryId equals ct.Id
                 join it in db.Item on ci.ItemId equals it.Id
@@ -149,7 +149,7 @@ namespace CRMApi.Repository
                 join cb in db.User on ci.CreatedBy equals cb.Id
                 join ub in db.User on ci.UpdatedBy equals ub.Id
                 where
-                (!obj.ListCustomerId.Any() || obj.ListCustomerId.Contains(co.CustomerId)) &&
+                (!obj.ListPartyId.Any() || obj.ListPartyId.Contains(co.PartyId)) &&
                 (obj.FromDate == DateTime.MinValue || co.Date.Date >= obj.FromDate.Date) &&
                 (obj.ToDate == DateTime.MinValue || co.Date.Date <= obj.ToDate.Date)
                 select new ComplaintItem 
@@ -158,8 +158,8 @@ namespace CRMApi.Repository
                     ComplaintId = ci.ComplaintId,
                     ComplaintNo = co.Code,
                     ComplaintDate = co.Date,
-                    CustomerDesc = cu.Description,
-                    CustomerAddress = Util.AddressDesc(new Composite.AddressDesc
+                    PartyDesc = cu.Description,
+                    PartyAddress = Util.AddressDesc(new Composite.AddressDesc
                     {
                         Add1 = co.Address1,
                         Add2 = co.Address2,

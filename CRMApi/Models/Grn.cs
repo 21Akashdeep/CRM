@@ -10,8 +10,8 @@ namespace CRMApi.Models
         public DateTime Date { get; set; }
         [MaxLength(2)] public string CoName { get; set; } = string.Empty;
         [NotMapped] public string SupportModeDesc { get; set; } = string.Empty;
-        public int CustomerId { get; set; }
-        //[NotMapped] public string? CustomerDesc { get; set; }
+        public int PartyId { get; set; }
+        //[NotMapped] public string? PartyDesc { get; set; }
         public string? Address1 { get; set; }
         public string? Address2 { get; set; }
         public string? PinCode { get; set; }
@@ -21,8 +21,8 @@ namespace CRMApi.Models
         [NotMapped] public string? AdminDivDesc { get; set; }
         public int CountryId { get; set; }
         [NotMapped] public string? CountryDesc { get; set; }
-        [NotMapped] public string? CustomerAddress { get; set; }
-        [NotMapped] public string? CustomerLocation { get; set; }
+        [NotMapped] public string? PartyAddress { get; set; }
+        [NotMapped] public string? PartyLocation { get; set; }
         public string ContactPerson { get; set; } = string.Empty;
         public string ContactNo { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
@@ -54,7 +54,7 @@ namespace CRMApi.Models
         [NotMapped] public DateTime ToDate { get; set; }
         [NotMapped] public List<int> ListId { get; set; } = new List<int>();
         [NotMapped] public List<string> ListSupportMode { get; set; } = new List<string>();
-        [NotMapped] public List<int> ListCustomerId { get; set; } = new List<int>();
+        [NotMapped] public List<int> ListPartyId { get; set; } = new List<int>();
         [NotMapped] public List<int> ListPriority { get; set; } = new List<int>();
         [NotMapped] public List<int> ListStatus { get; set; } = new List<int>();
         [NotMapped] public List<int> ListAssignTo { get; set; } = new List<int>();

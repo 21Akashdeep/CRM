@@ -25,8 +25,8 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label>Customer</label>
-                    <select id="ListCustomerId" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                    <label>Party</label>
+                    <select id="ListPartyId" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -57,11 +57,11 @@
                                 <th data-sortable="false" data-formatter="tableGrnSlNo" class="text-center">#</th>
                                 <th data-sortable="true" data-field="Date" data-formatter="tableGrnDate" class="text-nowrap">Date</th>
                                 <th data-sortable="true" data-field="Code" class="left-fix">Grn No.</th>
-                                <th data-sortable="true" data-field="SupportModeDesc">Customer Name & Address</th>
+                                <th data-sortable="true" data-field="SupportModeDesc">Party Name & Address</th>
                                 <th data-sortable="true" data-field="SupportModeDesc">Ref No.</th>
                                 <th data-sortable="true" data-field="SupportModeDesc">Ref Date</th>
-                                <th data-sortable="true" data-field="CustomerDesc" data-formatter="tableGrnCustomerDesc" class="text-nowrap">Eway No.</th>
-                                <th data-sortable="true" data-field="CustomerDesc" data-formatter="tableGrnCustomerDesc" class="text-nowrap">Eway Date</th>
+                                <th data-sortable="true" data-field="PartyDesc" data-formatter="tableGrnPartyDesc" class="text-nowrap">Eway No.</th>
+                                <th data-sortable="true" data-field="PartyDesc" data-formatter="tableGrnPartyDesc" class="text-nowrap">Eway Date</th>
                                 <th data-sortable="true" data-field="Problem" data-formatter="tableGrnProblem" class="text-nowrap">Remarks</th>
                                 <th data-sortable="true" data-field="CreatedAt" data-formatter="tableGrnCreatedByAndAt" class="text-nowrap">Created By & At</th>
                                 <th data-sortable="true" data-field="UpdatedAt" data-formatter="tableGrnUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
@@ -116,8 +116,8 @@
                                     <td id="Grn-SupportModeDesc"></td>
                                 </tr>
                                 <tr>
-                                    <td class="fw-bold">Customer</td>
-                                    <td id="Grn-CustomerDesc"></td>
+                                    <td class="fw-bold">Party</td>
+                                    <td id="Grn-PartyDesc"></td>
                                 </tr>
                                 <tr>
                                     <td class="fw-bold">Address1</td>
@@ -217,11 +217,11 @@
 <!-- Grn Add Modal -->
 <partial name="GrnAdd.cshtml" />
 <!-- Grn Add Modal -->
-<partial name="../Customer/CustomerAdd.cshtml" />
+<partial name="../Party/PartyAdd.cshtml" />
 
 
 @section Scripts {
-    <script src="~/script/Customer.js" asp-append-version="true"></script>
+    <script src="~/script/Party.js" asp-append-version="true"></script>
     <script src="~/script/Grn.js" asp-append-version="true"></script>
     <script type="text/javascript">
         $(function () {

@@ -9,7 +9,7 @@ namespace CRMApi.Models
         [MaxLength(16)] public string Code { get; set; }= null!;
         [MaxLength(100)] public string Name { get; set; } = null!;
         [MaxLength(200)] public string Description { get; set; } = null!;
-        public int CustomerId { get; set; }
+        public int PartyId { get; set; }
         public string Category { get; set; } = string.Empty;
         [MaxLength(20)] public string? PoNo { get; set; }
         public DateTime? PoDate { get; set; }
