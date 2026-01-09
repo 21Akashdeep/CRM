@@ -65,7 +65,7 @@
     }
     static fill() {
         Modal.open({ id: '#modalDepartment', title: 'Department / Add', action: 'add' });
-        $('#Customer_SeqNo').val(0);
+        $('#Party_SeqNo').val(0);
 }
     static add(obj) {
     Data.post({ url: 'Department/Add', data: obj, onSuccess: Department.addOnSuccess });

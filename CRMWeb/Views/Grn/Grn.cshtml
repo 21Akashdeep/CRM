@@ -34,6 +34,8 @@
                     </select>
                 </div>
                 <div class="col-md-3">
+                    <label>Party</label>
+                    <select id="ListPartyId" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
                     <label>Consignee Name</label>
                     <select id="ListConName" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
                     </select>
@@ -60,6 +62,20 @@
                         <thead>
                             <tr>
                                 <th data-sortable="false" data-formatter="tableGrnSlNo" class="text-center">#</th>
+                                <th data-sortable="true" data-field="Date" data-formatter="tableGrnDate" class="text-nowrap">Date</th>
+                                <th data-sortable="true" data-field="Code" class="left-fix">Grn No.</th>
+                                <th data-sortable="true" data-field="SupportModeDesc">Party Name & Address</th>
+                                <th data-sortable="true" data-field="SupportModeDesc">Ref No.</th>
+                                <th data-sortable="true" data-field="SupportModeDesc">Ref Date</th>
+                                <th data-sortable="true" data-field="PartyDesc" data-formatter="tableGrnPartyDesc" class="text-nowrap">Eway No.</th>
+                                <th data-sortable="true" data-field="PartyDesc" data-formatter="tableGrnPartyDesc" class="text-nowrap">Eway Date</th>
+                                <th data-sortable="true" data-field="Problem" data-formatter="tableGrnProblem" class="text-nowrap">Remarks</th>
+                                <th data-sortable="true" data-field="CreatedAt" data-formatter="tableGrnCreatedByAndAt" class="text-nowrap">Created By & At</th>
+                                <th data-sortable="true" data-field="UpdatedAt" data-formatter="tableGrnUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
+                                <th data-formatter="tableGrnStatus" class="text-nowrap text-center right-fix-2">Status</th>
+                                <th data-formatter="tableGrnAction" data-events="tableGrnActionEvent" class="not-print text-center right-fix">
+                                    <i class="fa-solid fa-list-check"></i>
+                                </th>
                                 <th data-sortable="true" data-field="No">Number</th>
                                 <th data-sortable="true" data-field="CustomerDesc">Customer</th>
                                 <th data-sortable="true" data-field="ConName">Consignee Name </th>
@@ -80,6 +96,146 @@
         </form>
     </div>
 </div>
+<!-- Detailed View -->
+<div id="modalGrnDetailedView" class="modal fade" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Grn / Detailed View</span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body" style="min-height:75vh;">
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <table id="tableGrnDetailedView" class="table table-bordered" data-search="false">
+                            <thead>
+                                <tr>
+                                    <th colspan="2">Grn</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold">Grn No.</td>
+                                    <td id="Grn-Code"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Grn Date</td>
+                                    <td id="Grn-Date"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Support Mode</td>
+                                    <td id="Grn-SupportModeDesc"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Party</td>
+                                    <td id="Grn-PartyDesc"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Address1</td>
+                                    <td id="Grn-Address1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Address2</td>
+                                    <td id="Grn-Address2"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Pin Code</td>
+                                    <td id="Grn-PinCode"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Post Office</td>
+                                    <td id="Grn-PostOffice"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">District</td>
+                                    <td id="Grn-District"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">State</td>
+                                    <td id="Grn-AdminDivDesc"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Country</td>
+                                    <td id="Grn-CountryDesc"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Contact No.</td>
+                                    <td id="Grn-ContactNo"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Email</td>
+                                    <td id="Grn-Email"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Forward To</td>
+                                    <td id="Grn-ForwardToName"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Assign To</td>
+                                    <td id="Grn-AssignTo"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Start Date Time</td>
+                                    <td id="Grn-StartDateTime"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">End Date Time</td>
+                                    <td id="Grn-EndDateTime"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Completed Date Time</td>
+                                    <td id="Grn-CompletedDateTime"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <table id="tableGrnStatus" class="table table-bordered table-default" data-search="false">
+                            <thead>
+                                <tr>
+                                    <th colspan="3">Grn Status</th>
+                                </tr>
+                                <tr>
+                                    <th data-formatter="tableGrnStatusSlNo" class="text-center">#</th>
+                                    <th data-field="Remarks">Remarks</th>
+                                    <th data-formatter="tableGrnStatusLogByAndAt">Log By & At</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <table id="tableGrnItem" class="table table-bordered table-default" data-search="false">
+                            <thead>
+                                <tr>
+                                    <th colspan="6">Grn Item</th>
+                                </tr>
+                                <tr>
+                                    <th data-formatter="tableGrnItemSlNo" class="text-center">#</th>
+                                    <th data-field="ItemDesc">Item Description</th>
+                                    <th data-field="Rate" class="td-num">Rate</th>
+                                    <th data-field="Qty" class="td-num">Qty.</th>
+                                    <th data-field="Amount" class="td-num">Amount</th>
+                                    <th data-formatter="tableGrnItemLogByAndAt">Log By & At</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Grn Add Modal -->
+<partial name="GrnAdd.cshtml" />
+<!-- Grn Add Modal -->
+<partial name="../Party/PartyAdd.cshtml" />
 
 
 @* <div id="modalGrn" class="modal fade" data-bs-backdrop="static" tabindex="-1"> *@
@@ -170,6 +326,7 @@
 
 
 @section Scripts {
+    <script src="~/script/Party.js" asp-append-version="true"></script>
     <script src="~/script/Grn.js" asp-append-version="true"></script>
     <script type="text/javascript">
         $(() => {

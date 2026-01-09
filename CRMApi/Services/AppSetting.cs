@@ -121,7 +121,7 @@
         public string Employee { get; set; } = null!;
         public string ContractWorker { get; set; } = null!;
         public string Vendor { get; set; } = null!;
-        public string Customer { get; set; } = null!;
+        public string Party { get; set; } = null!;
     }
     public class ApiType
     {

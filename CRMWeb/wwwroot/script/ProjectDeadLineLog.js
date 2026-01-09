@@ -67,7 +67,7 @@
     }
     static fill() {
         Modal.open({ id: '#modalProjectDeadLineLog', title: 'ProjectDeadLineLog / Add', action: 'add' });
-        $('#Customer_SeqNo').val(0);
+        $('#Party_SeqNo').val(0);
     }
     static add(obj) {
         console.log("akash")

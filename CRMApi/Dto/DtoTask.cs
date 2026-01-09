@@ -12,7 +12,7 @@ namespace CRMApi.Dto
             [MaxLength(16)] public string? Code { get; set; }
             [MaxLength(100)] public string Name { get; set; } = null!;
             [MaxLength(200)] public string Description { get; set; } = null!;
-            public int CustomerId { get; set; }
+            public int PartyId { get; set; }
             public string Category { get; set; } = null!;
             [MaxLength(20)] public string? PoNo { get; set; }
             public DateTime? PoDate { get; set; }
@@ -44,8 +44,8 @@ namespace CRMApi.Dto
             public string Code { get; set; } = string.Empty;
             public string Name { get; set; } = string.Empty;
             public string Description { get; set; } = string.Empty;
-            public int CustomerId { get; set; } = 1;
-            public string CustomerDesc { get; set; } = string.Empty;
+            public int PartyId { get; set; } = 1;
+            public string PartyDesc { get; set; } = string.Empty;
             public string Category { get; set; } = null!;
            [NotMapped] public string CategoryDesc { get; set; } = null!;
             public string? PoNo { get; set; }

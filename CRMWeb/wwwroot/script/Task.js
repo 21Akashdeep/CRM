@@ -8,7 +8,7 @@
         Task.getViewOption((response) => {
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
             Dropdown.bind({ id: '#ListId', data: response.data.ListId, value: 'Id', text: 'Description', subText: "Code" });
-            Dropdown.bind({ id: '#CustomerDesc', data: response.data.Customer, value: 'Id', text: 'Description' });
+            Dropdown.bind({ id: '#PartyDesc', data: response.data.Party, value: 'Id', text: 'Description' });
            
         });
 
@@ -116,7 +116,7 @@
         var obj = {
             ListStatus: $('#ListStatus').val(),
             ListId: $('#ListId').val(),
-            ListPartyId: $('#CustomerDesc').val()
+            ListPartyId: $('#PartyDesc').val()
            
         }
         Data.post({ url: `Task/${action}`, data: obj, onSuccess: onSuccess });
@@ -171,7 +171,7 @@
                 Task.User = response.data.User;
                 Task.Employee = response.data.Employee;
                 Modal.open({ id: '#modalTask', title: 'Task / Add', action: 'add' });
-                Dropdown.bind({ id: '#Task-CustomerDesc', data: response.data.Customer, value: 'Id', text: 'Description', subText: 'SubText' });
+                Dropdown.bind({ id: '#Task-PartyDesc', data: response.data.Party, value: 'Id', text: 'Description', subText: 'SubText' });
                 Dropdown.bind({ id: '#Task-Category', data: response.data.Category, value: 'Value', text: 'Description', subText: 'SubText' });
 
                 $('#PoDate, #StartDate, #EndDate').val('');
@@ -232,7 +232,7 @@
 
                         obj.Id = action == 'Edit' ? obj.Id : null;
                         let title = action == 'Edit' ? `Task / Edit (Code: ${obj.Code})` : `Task / Add`;
-                        Dropdown.bind({ id: '#Task-CustomerDesc', data: response.data.Customer, value: 'Id', text: 'Description', subText: 'SubText' });
+                        Dropdown.bind({ id: '#Task-PartyDesc', data: response.data.Party, value: 'Id', text: 'Description', subText: 'SubText' });
                         Dropdown.bind({ id: '#Task-Category', data: response.data.Category, value: 'Value', text: 'Description', subText: 'SubText' });
 
 

@@ -139,9 +139,9 @@ window.tableComplaintInfo = (value, obj, index) => {
     return `
         <div><label style="${labelStyle}">Date</label> <b>:</b> ${moment(obj.Date).format('DD-MMM-YYYY')}</div>
         <div><label style="${labelStyle}">Ticket No.</label> <b>:</b> ${obj.Code}</div>
-        <div><label style="${labelStyle}">Customer</label> <b>:</b> ${obj.CustomerDesc.match(/.{1,50}/g).join('<br>')}</div>
+        <div><label style="${labelStyle}">Party</label> <b>:</b> ${obj.PartyDesc.match(/.{1,50}/g).join('<br>')}</div>
         <div><label style="${labelStyle}">Department</label> <b>:</b> ${obj.Department}</div>
-        <div><label style="${labelStyle}">Location</label> <b>:</b> ${obj.CustomerLocation}</div>
+        <div><label style="${labelStyle}">Location</label> <b>:</b> ${obj.PartyLocation}</div>
         <div><label style="${labelStyle}">Contact Person</label> <b>:</b> ${obj.ContactPerson}</div>
         <div><label style="${labelStyle}">Contact No.</label> <b>:</b> ${obj.ContactNo}</div>
         <div><label style="${labelStyle}">Email</label> <b>:</b> ${obj.Email}</div>

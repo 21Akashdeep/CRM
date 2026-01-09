@@ -78,10 +78,10 @@ namespace CRMApi.Repository
                 //    from usr in db.User
                 //    join ulo in db.UserLocation on usr.Id equals ulo.UserId
                 //    join loc in db.Location on ulo.LocationId equals loc.Id
-                //    join cus in db.Customer on ulo.LocationId equals cus.LocationId
+                //    join cus in db.Party on ulo.LocationId equals cus.LocationId
                 //    join coa in dbEmployeeAssign on new { UserId = usr.Id, EmployeeId = obj.Id } equals new { coa.UserId, coa.EmployeeId } into EmployeeAssign
                 //    from coa in EmployeeAssign.DefaultIfEmpty()
-                //    where App.ActiveStatus.Contains(usr.Status) && cus.Id == obj.CustomerId
+                //    where App.ActiveStatus.Contains(usr.Status) && cus.Id == obj.PartyId
                 //    select new
                 //    {
                 //        Id = coa != null ? coa.Id : 0,

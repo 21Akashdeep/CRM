@@ -5,7 +5,7 @@
             onSuccess: (response) => {
                 Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
                 Dropdown.bind({ id: '#ListComplaintId', data: response.data.Complaint, value: 'Id', text: 'Code', subText: "SubText" });
-                Dropdown.bind({ id: '#ListCustomerId', data: response.data.Customer, value: 'Id', text: 'Description', subText: 'Address' });
+                Dropdown.bind({ id: '#ListPartyId', data: response.data.Party, value: 'Id', text: 'Description', subText: 'Address' });
             }
         });
         $('#btnSearch').on('click', () => {
@@ -23,8 +23,8 @@
             let obj = Dropdown.itemJson({ id: '#ComplaintId' });
             Table.empty({ selector: '#tableItem' });
             if (obj) {
-                $('#CustomerDesc').val(obj.CustomerDesc);
-                $('#CustomerAddress').val(obj.CustomerAddress);
+                $('#PartyDesc').val(obj.PartyDesc);
+                $('#PartyAddress').val(obj.PartyAddress);
                 $('#Problem').val(obj.Problem);
                 if (obj.IsItemAdded) {
                     ComplaintItem.get({
@@ -55,7 +55,7 @@
             ToDate: DateTime.json($('#DateRange').val().split('|')[1]),
             ListStatus: $('#ListStatus').val(),
             ListComplaintId: $('#ListComplaintId').val(),
-            ListCustomerId: $('#ListCustomerId').val(),
+            ListPartyId: $('#ListPartyId').val(),
         };
         Data.post({ url: `ComplaintItem/${method}`, data: obj, onSuccess: onSuccess });
     }
@@ -160,10 +160,10 @@ window.tableComplaintItemSlNo = (value, obj, index) => {
 window.tableComplaintItemComplaintDate = (value, obj, index) => {
     return moment(obj.ComplaintDate).format('DD-MMM-YYYY');
 }
-window.tableComplaintItemCustomerDesc = (value, obj, index) => {
+window.tableComplaintItemPartyDesc = (value, obj, index) => {
     return `
-        <div class="fw-bold">${obj.CustomerDesc.match(/.{1,40}/g).join('<br>')}</div>
-        <div>${obj.CustomerAddress.match(/.{1,40}/g).join('<br>')}</div>
+        <div class="fw-bold">${obj.PartyDesc.match(/.{1,40}/g).join('<br>')}</div>
+        <div>${obj.PartyAddress.match(/.{1,40}/g).join('<br>')}</div>
     `;
 }
 window.tableComplaintItemProblem = (value, obj, index) => {
