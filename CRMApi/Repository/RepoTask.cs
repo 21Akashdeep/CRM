@@ -59,16 +59,15 @@ namespace CRMApi.Repository
 
                 }).ToList();
 
+                var debugTaskCategory = App.SettingName.TaskCategory;
+                option.Category = db.Setting.Where(x => App.ActiveStatus.Contains(x.Status) &&
+                  x.Category == App.SettingName.TaskCategory
+                 ).Select(x => new
+                 {
+                     x.Value,
+                     x.Description
 
-                //var debugTaskCategory = App.SettingName.TaskCategory;
-
-                //option.Category = db.Setting.Where(x =>App.ActiveStatus.Contains(x.Status) &&
-                //  x.Category == App.SettingName.TaskCategory
-                // ).Select(x => new
-                //{
-                // x.Value,
-                //  x.Description
-                //}).ToList();
+                 }).ToList();
 
 
                 objMsg.data = option;
@@ -113,6 +112,13 @@ namespace CRMApi.Repository
 
                 }).ToList();
 
+                Option.Employee = db.Employee.Where(em => App.ActiveStatus.Contains(em.Status)).Select(em => new
+                {
+                    em.Id,
+                    EmployeeName = em.Name
+
+                }).ToList();
+
                 Option.User = (
                      from usr in db.User
                      join ulo in db.UserLocation on usr.Id equals ulo.UserId
@@ -128,9 +134,6 @@ namespace CRMApi.Repository
                      }
                  ).ToList();
 
-
-
-
                 objMsg.data = Option;
 
                 Message.Success(ref objMsg, "Record found");
@@ -145,8 +148,7 @@ namespace CRMApi.Repository
         {
 
             obj ??= new DtoTaskFltr();
-            obj.ListStatus = obj.ListStatus.Count == 0 ? App.AllActiveStatus : obj.ListStatus;
-            Console.WriteLine("p");
+            obj.ListStatus = obj.ListStatus.Count == 0 ? App.AllActiveStatus : obj.ListStatus;            
             var taskList = await (
                 from dpt in db.Task
                 join sts in db.Setting on new { Value = dpt.Status.ToString(), Name = App.SettingName.Status } equals new { sts.Value, sts.Name }
@@ -183,9 +185,9 @@ namespace CRMApi.Repository
                     Status = dpt.Status,
                     StatusDesc = sts.Description,
                     StatusCss = sts.CssClass ?? "",
-                    IsEdit = dpt.Status == App.Status.Enable ? true : false,
+                    IsEdit = dpt.Status == App.Status.Enable || dpt.CreatedBy == User.Id || User.UserType == App.UserType.SysAdmin ? true : false,
                     IsDuplicate = true,
-                    IsDelete = dpt.Status == App.Status.Enable ? true : false,
+                    IsDelete = dpt.Status == App.Status.Enable || dpt.CreatedBy == User.Id || User.UserType == App.UserType.SysAdmin ? true : false,
                     IsEnable = dpt.Status == App.Status.Delete ? true : false,
                     IsAddStatus = dpt.Status == App.Status.Pending || dpt.Status == App.Status.Processing ? true : false,
                 }
@@ -226,6 +228,60 @@ namespace CRMApi.Repository
                     StatusCss = sts.CssClass ?? ""
                 }
                 ).ToListAsync();
+            return taskItemList;
+        }
+
+        public async Task<List<DtoTaskItemList>> ListItemAsync(DtoTaskItemFltr? obj, User User)
+        {
+
+            obj ??= new DtoTaskItemFltr();
+            obj.ListStatus = obj.ListStatus.Count == 0 ? App.AllActiveStatus : obj.ListStatus;
+            var taskItemList = await (
+                from dpt in db.TaskItem
+                join sts in db.Setting on new { Value = dpt.Status.ToString(), Name = App.SettingName.Status } equals new { sts.Value, sts.Name }  
+                join ts in db.Task on dpt.TaskId equals ts.Id
+                join cby in db.User on dpt.CreatedBy equals cby.Id
+                join uby in db.User on dpt.UpdatedBy equals uby.Id
+                where
+                obj.ListStatus.Contains(dpt.Status) &&
+                (!obj.ListId.Any() || obj.ListId.Contains(dpt.Id)) &&
+                (!obj.ListTaskId.Any() || obj.ListTaskId.Contains(dpt.TaskId)) &&
+                (
+                User.UserType == App.UserType.SysAdmin
+                || dpt.CreatedBy == User.Id
+                 || EF.Functions.JsonContains(
+                  dpt.AssignToList,
+                  $"{{\"Id\": {User.Id}}}"
+                 ) )
+                let file = Util.GetFile(dpt.TechnicalDoc ?? "")
+                select new DtoTaskItemList
+                {
+                    Id = dpt.Id, 
+                    TaskId = dpt.TaskId,
+                    Description = dpt.Description,                  
+                    EstimatedDays = dpt.EstimatedDays,                
+                    StartDateTime = dpt.StartDateTime,
+                    EndDateTime = dpt.EndDateTime,
+                    AssignToList = dpt.AssignToList,
+                    Remarks = dpt.Remarks,
+                    DocName = file.Name,
+                    DocMimeType = file.MimeType,
+                    DocBase64 = file.Base64,
+                    CreatedByName = cby.Name,
+                    CreatedAt = dpt.CreatedAt,
+                    UpdatedByName = uby.Name,
+                    UpdatedBy = dpt.UpdatedBy,
+                    UpdatedAt = dpt.UpdatedAt,
+                    Status = dpt.Status,
+                    StatusDesc = sts.Description,
+                    StatusCss = sts.CssClass ?? "",
+                    IsEdit = dpt.Status == App.Status.Enable || dpt.CreatedBy == User.Id ? true : false,
+                    IsDuplicate = true,
+                    IsDelete = dpt.Status == App.Status.Enable ? true : false,
+                    IsEnable = dpt.Status == App.Status.Delete ? true : false,
+                    IsAddStatus = dpt.Status == App.Status.Pending || dpt.Status == App.Status.Processing ? true : false,
+                }
+            ).ToListAsync();
             return taskItemList;
         }
         public async  Task<Message> Print(DtoTaskFltr obj, User User)
@@ -301,16 +357,33 @@ namespace CRMApi.Repository
 
                 // Checking Duplicate
                 var duplicate = await db.Task
-                    .Where(ap => ap.Name == obj.Name || ap.Description == obj.Description)
-                    .Select(ap => new { ap.Name, ap.Description })
+                    .Where(ap => ap.Description == obj.Description)
+                    .Select(ap => new { ap.Description })
                     .FirstOrDefaultAsync();
 
                 if (duplicate != null)
                 {
-                    if (duplicate.Name.ToLower() == obj.Name.ToLower())
-                        Message.Duplicate(ref objMsg, $"Task Name : {obj.Name} already exists.");
+                    if (duplicate.Description.ToLower() == obj.Description.ToLower())
+                        Message.Duplicate(ref objMsg, $"Task Description : {obj.Name} already exists.");
                     return objMsg;
                 }
+
+                var duplicateItem = obj.TaskItem
+               .Where(x => !string.IsNullOrWhiteSpace(x.Description))
+               .Select(x => x.Description.Trim().ToLower())
+               .GroupBy(d => d)
+               .FirstOrDefault(g => g.Count() > 1);
+
+                if (duplicateItem != null)
+                {
+                    Message.Duplicate(
+                        ref objMsg,
+                        $"Duplicate TaskItem description not allowed: {duplicateItem.Key}"
+                    );
+                    return objMsg;
+                }
+
+
                 // Add Task Document
                 if (!string.IsNullOrWhiteSpace(obj.DocMimeType) && !string.IsNullOrEmpty(obj.DocBase64))
                 {
@@ -354,8 +427,7 @@ namespace CRMApi.Repository
                     return objMsg;
                 // Insert Task                
                 var task = new Models.Task
-                {
-                    
+                {                   
                     Name = obj.Name,
                     Description = obj.Description,
                     PartyId = obj.PartyId,
@@ -366,7 +438,7 @@ namespace CRMApi.Repository
                     StartDate = obj.StartDate,
                     EndDate = obj.EndDate,
                     Remarks = obj.Remarks,
-                    Status = App.Status.Enable,
+                    Status = App.Status.Pending,
                     CreatedBy = User.Id,
                     UpdatedBy = User.Id,
                     CreatedAt = DateTime.Now,
@@ -380,7 +452,7 @@ namespace CRMApi.Repository
                         EndDateTime = x.EndDateTime,
                         AssignToList = x.AssignToList,                        
                         Remarks = x.Remarks,
-                        Status = App.Status.Enable,
+                        Status = App.Status.Pending,
                         CreatedBy = User.Id,
                         UpdatedBy = User.Id,
                         CreatedAt = DateTime.Now,
@@ -388,7 +460,6 @@ namespace CRMApi.Repository
                     }).ToList()
                 };
                 db.Add(task);
-
 
                 Message.Add(ref objMsg, (await db.SaveChangesAsync()), "");
                 var DtoTaskList = await ListAsync(new DtoTaskFltr { ListId = new List<int> { task.Id } }, User);
@@ -420,49 +491,25 @@ namespace CRMApi.Repository
         {
             Message objMsg = new Message();
             try
-            {
-                
+            {                                
+                var task = (await ListAsync(new DtoTaskFltr
+                {
+                    ListId = new List<int> { Id }
+                }, User)).FirstOrDefault();
 
-                DtoTaskFltr filter = new DtoTaskFltr();
-                filter.ListId.Add(Id);
-
-                var dtoTaskLists = await ListAsync(filter, User);
-                if (dtoTaskLists == null)
+                if (task == null)
                 {
                     Message.Error(ref objMsg, "Task did find for edit.");
                     return objMsg;
-                }
-                var task = dtoTaskLists[0];
+                }                
 
                 task.TaskItem = await ListItem(
                     new List<int> { task.Id },
-                    new List<int> { task.Status }
+                    new List<int> { task.Status,App.Status.Processing}
                 );
 
-                objMsg.obj = dtoTaskLists;
+                objMsg.obj = task;
                 objMsg.data = GetAddOption().data;
-
-                //if (!string.IsNullOrWhiteSpace(objMsg.obj[0].TechnicalDoc))
-                //{
-                //    dynamic Obj = Util.GetFile(objMsg.obj[0].TechnicalDoc).obj;
-                //    //objMsg.obj[0].file =   Util.GetFile(objMsg.obj[0].TechnicalDoc).obj;
-                //    objMsg.obj[0].file.Base64 = Obj.Base64;
-                //    objMsg.obj[0].file.MimeType = Obj.MimeType;
-                //}
-
-                //foreach (var item in objMsg.obj[0].DtoTaskItemAdd)
-                //{
-                //    if (!string.IsNullOrWhiteSpace(item.TechnicalDoc))
-                //    {
-
-                //        dynamic Obj = Util.GetFile(item.TechnicalDoc).obj;
-
-                //        //item.file   Util.GetFile(item.TechnicalDoc).obj;
-                //        item.file.Base64 = Obj.Base64;
-                //        item.file.MimeType = Obj.MimeType;
-
-                //    }
-                //}
 
                 Message.Success(ref objMsg, "Task found.");
             }
@@ -493,11 +540,13 @@ namespace CRMApi.Repository
                     return objMsg;
                 }
 
-                var UpdateTask = await db.Task.FirstOrDefaultAsync(t => t.Id == obj.Id);
+                var UpdateTask = await db.Task.FirstOrDefaultAsync(t => t.Id == obj.Id  && (
+                User.UserType == App.UserType.SysAdmin
+                || t.CreatedBy == User.Id) && t.Status != App.Status.Delete);
 
                 if (UpdateTask == null)
                 {
-                    Message.Error(ref objMsg, "Task not found for update.");
+                    Message.Error(ref objMsg, "Task not found or you are not authorized to update it.");
                     return objMsg;
                 }
 
@@ -542,45 +591,97 @@ namespace CRMApi.Repository
                 var DtoTaskList = await ListAsync(new DtoTaskFltr { ListId = new List<int> { obj.Id } }, User);
                 foreach (var item in obj.TaskItem)
                 {
-                    var taskItem = await db.TaskItem
-                        .FirstOrDefaultAsync(ti => ti.Id == item.Id && ti.TaskId == obj.Id);
+                    TaskItem taskitem;
 
-                    if (taskItem == null) continue;
-
-                    if (!string.IsNullOrWhiteSpace(item.DocBase64) &&
-                          !string.IsNullOrWhiteSpace(item.DocMimeType))
+                    if (item.Id == 0)
                     {
-                        var uniqueFileName =
-                            $"TaskItem_{taskItem.Id}_{Path.GetFileNameWithoutExtension(item.DocName)}";
 
-                        var addDoc = Util.AddFile(new DtoDocument.DtoDocAdd
-                        {
-                            Base64 = Convert.FromBase64String(item.DocBase64),
-                            MimeType = item.DocMimeType,
-                            FileName = uniqueFileName,
-                            FilePath = App.DocPath.TaskTechDoc 
-                        });
 
-                        if (addDoc.Message.status == Message.Type.success)
+                        taskitem = new TaskItem
                         {
-                            taskItem.TechnicalDoc = addDoc.FilePath; 
+                            TaskId = obj.Id,
+                            Description = item.Description,
+                            EstimatedDays = item.EstimatedDays,
+                            StartDateTime = item.StartDateTime,
+                            EndDateTime = item.EndDateTime,
+                            Remarks = item.Remarks,
+                            AssignToList = item.AssignToList,
+                            Status = App.Status.Pending,
+
+                            CreatedBy = User.Id,
+                            CreatedAt = DateTime.Now,
+
+                            UpdatedBy = User.Id,          
+                            UpdatedAt = DateTime.Now      
+                        };
+                        if (!string.IsNullOrWhiteSpace(item.DocMimeType) && !string.IsNullOrEmpty(item.DocBase64))
+                        {
+                            var addDoc = Util.AddFile(new DtoDocument.DtoDocAdd
+                            {
+                                Base64 = Convert.FromBase64String(item.DocBase64 ?? ""),
+                                MimeType = item.DocMimeType,
+                                FileName = null,
+                                FilePath = $"{App.DocPath.TaskTechDoc}"
+                            });
+                            if (addDoc.Message.status == Message.Type.success)
+                            {
+                                item.DocName = addDoc.FilePath;
+                            }
+                            else
+                            {
+                                objMsg.status = Message.Type.error;
+                                objMsg.statusText += $"<br>Task Item Document '{item.DocName}' upload failed: {addDoc.Message.statusText}";
+                                break;
+                            }
                         }
+
+                        db.TaskItem.Add(taskitem);
+                        UpdateTask.Status = App.Status.Pending;
+                        db.Update(UpdateTask);
                     }
-                    taskItem.Description = item.Description;
-                    taskItem.EstimatedDays = item.EstimatedDays;
-                    taskItem.StartDateTime = item.StartDateTime;
-                    taskItem.EndDateTime = item.EndDateTime;
-                    taskItem.Remarks = item.Remarks;
-                    taskItem.AssignToList = item.AssignToList;                  
-                    taskItem.UpdatedBy = User.Id;
-                    taskItem.UpdatedAt = DateTime.Now;
+                    else
+                    {
+                        var taskItem = await db.TaskItem
+                            .FirstOrDefaultAsync(ti => ti.Id == item.Id && ti.TaskId == obj.Id && ti.Status == App.Status.Pending);
 
-                    db.Update(taskItem);
+                        if (taskItem == null) continue;
 
-                    Message msg = await NotifyComplaintLogByEmail(taskItem, DtoTaskList, true);
-                    objMsg.status = msg.status != Message.Type.success ? msg.status : objMsg.status;
-                    objMsg.statusText += msg.statusText;
+                        if (!string.IsNullOrWhiteSpace(item.DocBase64) &&
+                              !string.IsNullOrWhiteSpace(item.DocMimeType))
+                        {
+                            var uniqueFileName =
+                                $"TaskItem_{taskItem.Id}_{Path.GetFileNameWithoutExtension(item.DocName)}";
 
+                            var addDoc = Util.AddFile(new DtoDocument.DtoDocAdd
+                            {
+                                Base64 = Convert.FromBase64String(item.DocBase64),
+                                MimeType = item.DocMimeType,
+                                FileName = uniqueFileName,
+                                FilePath = App.DocPath.TaskTechDoc
+                            });
+
+                            if (addDoc.Message.status == Message.Type.success)
+                            {
+                                taskItem.TechnicalDoc = addDoc.FilePath;
+                            }
+                        }
+
+                        taskItem.Description = item.Description;
+                        taskItem.EstimatedDays = item.EstimatedDays;
+                        taskItem.StartDateTime = item.StartDateTime;
+                        taskItem.EndDateTime = item.EndDateTime;
+                        taskItem.Remarks = item.Remarks;
+                        taskItem.AssignToList = item.AssignToList;
+                        taskItem.UpdatedBy = User.Id;
+                        taskItem.UpdatedAt = DateTime.Now;
+
+                        db.Update(taskItem);
+
+                        Message msg = await NotifyComplaintLogByEmail(taskItem, DtoTaskList, true);
+                        objMsg.status = msg.status != Message.Type.success ? msg.status : objMsg.status;
+                        objMsg.statusText += msg.statusText;
+
+                    }
                 }
                 Message.Update(ref objMsg, await db.SaveChangesAsync(), "");
 
@@ -599,7 +700,7 @@ namespace CRMApi.Repository
             {               
                 var ListId = obj.AssignToList.Select(ca => ca.Id).ToList();
                 var ListUserEmail = await db.User.Where(x => App.ActiveStatus.Contains(x.Status) && ListId.Contains(x.Id)).Select(x => x.Email).ToListAsync();
-                var AssignedPer = await db.User .Where(x =>App.ActiveStatus.Contains(x.Status) && x.Id == obj.UpdatedBy)
+                var AssignedPer = await db.User.Where(x =>App.ActiveStatus.Contains(x.Status) && x.Id == obj.UpdatedBy)
                .Select(x => new
                  {
                    x.Id,
@@ -661,22 +762,32 @@ namespace CRMApi.Repository
             try
             {
                 var task = await db.Task
-                    .FirstOrDefaultAsync(t =>
-                        App.ActiveStatus.Contains(t.Status) &&
-                        t.Id == obj.ListId.First());
+                    .FirstOrDefaultAsync(t =>                      
+                        t.Id == obj.ListId.First() && t.Status
+                        == App.Status.Pending);
 
                 if (task == null)
                 {
                     Message.Error(ref objMsg, "Task not found for delete.");
                     return objMsg;
                 }
+
+                bool isCreator = task.CreatedBy == User.Id;
+                bool isSysAdmin = User.Name.ToLower() == "sysadmin";
+
+                if (!isCreator && !isSysAdmin)
+                {
+                    Message.Error(ref objMsg, "You are not authorized to delete this task.");
+                    return objMsg;
+                }
+
                 Util.DeleteFile(task.TechnicalDoc ?? "");
                 task.Status = App.Status.Delete;
                 task.UpdatedBy = User.Id;
                 task.UpdatedAt = DateTime.Now;
 
                 var taskItems = await db.TaskItem
-                    .Where(ti => ti.TaskId == task.Id && App.ActiveStatus.Contains(ti.Status))
+                    .Where(ti => ti.TaskId == task.Id && App.AllActiveStatus.Contains(ti.Status) && ti.Status == App.Status.Pending)
                     .ToListAsync();
 
                 foreach (var item in taskItems)

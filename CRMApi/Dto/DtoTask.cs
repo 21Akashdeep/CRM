@@ -98,6 +98,11 @@ namespace CRMApi.Dto
             public int UpdatedBy { get; set; }
             public string UpdatedByName { get; set; } = null!;
             public DateTime UpdatedAt { get; set; }
+            public bool IsEdit { get; set; } = false;
+            public bool IsDuplicate { get; set; } = true;
+            public bool IsDelete { get; set; } = false;
+            public bool IsEnable { get; set; } = false;
+            public bool IsAddStatus { get; set; } = false;
         }
         public class DtoTaskAssingTo 
         {
@@ -114,6 +119,17 @@ namespace CRMApi.Dto
             public DateTime ToDate { get; set; }
 
         }
+        public class DtoTaskItemFltr
+        {
+            public int Id { get; set; }
+            public List<int> ListId { get; set; } = new List<int>();
+            public List<int> ListStatus { get; set; } = new List<int>();
+            public List<int> ListTaskId { get; set; } = new List<int>();
+            public DateTime FromDate { get; set; }
+            public DateTime ToDate { get; set; }
+
+        }
+
         public class DtoTaskActionFilter
         {
             public List<int> ListStatus { get; set; } = new();

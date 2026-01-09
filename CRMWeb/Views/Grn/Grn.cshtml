@@ -1,10 +1,14 @@
 ﻿@{
-    ViewData["Title"] = "Grn";
+    ViewData["Title"] = "GRN";
 }
+@* @section Style {
+    <style>
 
+    </style>
+} *@
 <div class="card shadow">
     <div class="card-header">
-        <span class="card-title">Grn / View</span>
+        <span class="card-title">GRN / View</span>
         <button type="button" class="btn btn-sm btn-primary float-end rounded-5" id="btnNewEntry">
             <span class="fa fa-plus"></span>&nbsp;&nbsp;Add
         </button>
@@ -12,16 +16,21 @@
     <div class="card-body">
         <form autocomplete="off" onsubmit="return false;">
             <div class="row">
+                <div class="col-md-2">
+                    <label>Status</label>
+                    <select id="ListStatus" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                    </select>
+                </div>
                 <div class="col-md-3">
                     <label>Date Range</label>
                     <div class="input-group input-group-sm">
-                        <input id="DateRange" type="text" class="form-control" readonly>
+                        <input type="text" id="DateRange" class="form-control" readonly />
                         <span class="input-group-text date-range-picker"><i class="fa fa-calendar"></i></span>
                     </div>
                 </div>
                 <div class="col-md-2">
-                    <label>Status</label>
-                    <select id="ListStatus" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                    <label>Grn No.</label>
+                    <select id="ListId" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -30,11 +39,6 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label>Grn No.</label>
-                    <select id="ListId" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
-                    </select>
-                </div>
-                <div class="col-md-1">
                     <div class="btn-group">
                         <button type="button" id="btnSearch" class="btn btn-sm btn-filter btn-outline-success" title="Search">
                             <span class="fa fa-search"></span>
@@ -51,7 +55,8 @@
             <hr />
             <div class="row">
                 <div class="col-md-12">
-                    <table id="tableGrn" class="table table-bordered table-hover table-default" data-search="true" border="1" data-sort-name="Id" data-unique-id="Id">
+                    <table id="tableGrnItem" class="table table-bordered table-hover table-default" border="1" data-sort-name="Code"
+                           data-unique-id="Id">
                         <thead>
                             <tr>
                                 <th data-sortable="false" data-formatter="tableGrnSlNo" class="text-center">#</th>
@@ -220,11 +225,13 @@
 <partial name="../Party/PartyAdd.cshtml" />
 
 
+<!-- Employee Add Modal -->
+<partial name="GrnAdd.cshtml" />
 @section Scripts {
     <script src="~/script/Party.js" asp-append-version="true"></script>
     <script src="~/script/Grn.js" asp-append-version="true"></script>
     <script type="text/javascript">
-        $(function () {
+        $(() => {
             Grn.init();
         });
     </script>
