@@ -72,9 +72,9 @@ namespace CRMApi.Services
         public DbSet<TaskItem> TaskItem { get; set; }
         public DbSet<TaskAction> TaskAction { get; set; }
 
-        public DbSet<Voucher> Voucher { get; set; }
+        
     }
 
 
-    }
+    
 }

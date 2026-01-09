@@ -609,15 +609,5 @@ window.tableTaskAssignToEvent = {
         });
     }
 };
-//window.tableTaskItemAction = (value, obj, index) => {
-//    return `<button type="button" class="btn btn-sm btn-danger rounded-5 btn-delete"><span class="fa fa-trash"></span></button>`;
-//}
-//window.tableTaskItemActionEvents = {
-//    'click .btn-delete': (e, value, obj, index) => {
-//        Task.delete({ id: obj.Id, index: index });
-//    }
-//}
-
-
 window.Task = Task;
 

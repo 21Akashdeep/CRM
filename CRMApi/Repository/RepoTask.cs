@@ -493,6 +493,7 @@ namespace CRMApi.Repository
         }
         public async Task<Message>Edit(int Id, User User)
         {
+
             Message objMsg = new Message();
             try
             {                                
@@ -633,9 +634,11 @@ namespace CRMApi.Repository
                             }
                             else
                             {
+
                                 objMsg.status = Message.Type.error;
                                 objMsg.statusText += $"<br>Task Item Document '{item.DocName}' upload failed: {addDoc.Message.statusText}";
                                 break;
+
                             }
                         }
 
