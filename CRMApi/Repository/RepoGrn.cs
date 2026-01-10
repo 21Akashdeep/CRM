@@ -1,5 +1,6 @@
 ﻿using CRMApi.Models;
 using CRMApi.Services;
+using CRMApi.Repository;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
@@ -129,94 +130,14 @@ namespace CRMApi.Repository
         //}
         public async Task<List<Voucher>> ListAsync(Voucher? obj, User User)
         {
-            obj = obj == null ? new Voucher() : obj;
-            obj.ListStatus = obj.ListStatus.Any() ? obj.ListStatus : App.AllActiveStatus;
-            var dbVoucherQuery = db.Voucher.Where(co => obj.ListStatus.Contains(co.Status)).AsQueryable();
 
-            if (obj.ListId.Any()) dbVoucherQuery = dbVoucherQuery.Where(co => obj.ListId.Contains(co.Id));
-            if (obj.ListCustomerId.Any()) dbVoucherQuery = dbVoucherQuery.Where(co => obj.ListCustomerId.Contains(co.CustomerId));
-            dbVoucherQuery = obj.ListConName.Any() ? dbVoucherQuery.Where(gt => obj.ListConName.Contains(gt.Id)) : dbVoucherQuery;
-            var VoucherList = await (
-                from vo in dbVoucherQuery
-                join cu in db.Party on vo.CustomerId equals cu.Id into cuJoin
-                from cu in cuJoin.DefaultIfEmpty()
-                join st in db.Setting on new { Name = App.SettingName.Status, Value = vo.Status.ToString() } equals new { st.Name, st.Value } into stJoin
-                from st in stJoin.DefaultIfEmpty()
-                join cb in db.User on vo.CreatedBy equals cb.Id
-                join ub in db.User on vo.UpdatedBy equals ub.Id
+            obj ??= new Voucher();
 
-                select new Voucher
-                {
-                    Id = vo.Id,
-                    Type = vo.Type,
-                    No = vo.No,
-                    Date = vo.Date,
-                    CustomerId = vo.CustomerId,
-                    CustomerDesc = cu != null ? cu.Name : "-",
-                    ConName = vo.ConName,
-                    ConAdd1 = vo.ConAdd1,
-                    ConAdd2 = vo.ConAdd2,
-                    ConPincode = vo.ConPincode,
-                    ConPostOffice = vo.ConPostOffice,
-                    ConStateCode = vo.ConStateCode,
-                    ConStateName = vo.ConStateName,
-                    RefDate = vo.RefDate,
-                    RefNo = vo.RefNo,
-                    EwayNo = vo.EwayNo,
-                    EwayDate = vo.EwayDate,
-                    Remarks = vo.Remarks,
-                    Status = vo.Status,
-                    StatusDesc = st != null ? st.Description : "",
-                    StatusCss = st != null ? st.CssClass : "",
-                    CreatedBy = vo.CreatedBy,
-                    CreatedByName = cb.Name,
-                    CreatedAt = vo.CreatedAt,
-                    UpdatedBy = vo.UpdatedBy,
-                    UpdatedByName = ub.Name,
-                    UpdatedAt = vo.UpdatedAt,
-                    IsEdit = vo.Status == App.Status.Enable,
-                    IsDuplicate = true,
-                    IsDelete = vo.Status == App.Status.Enable,
-                    IsEnable = vo.Status == App.Status.Delete
-                }
-            ).ToListAsync();
+            var voucher = await new RepoVoucher(db).ListAsync(obj, User);
 
-            var dbGrnItem = await (
-                from vci in db.VoucherItem
-                join vc in db.Voucher on vci.VoucherId equals vc.Id
-                join itm in db.Item on vci.ItemId equals itm.Id
-                join st in db.Store on vci.StoreId equals st.Id
-                join sts in db.Setting on new { Category = App.SettingName.Status, Value = vc.Status.ToString() } equals new { sts.Category, sts.Value }
-                join cby in db.User on vc.CreatedBy equals cby.Id
-                join uby in db.User on vci.UpdatedBy equals uby.Id
-                where vci.Status == vc.Status
-                select new VoucherItem
-                {
-                    Id = vci.Id,
-                    VoucherId = vci.VoucherId,
-                    StoreId = vci.StoreId,
-                    ItemId = vci.ItemId,
-                    SerialNo = vci.SerialNo,
-                    BatchNo = vci.BatchNo,  
-                    ExpiryOn = vci.ExpiryOn,
-                    Qty = vci.Qty,
-                    Rate = vci.Rate,
-                    Amount = vci.Amount,
-                    DiscountRate = vci.DiscountRate,
-                    DiscountAmount = vci.DiscountAmount,
-                    TaxAmount = vci.TaxAmount,
-                    Remarks = vci.Remarks,
-                    Status = vci.Status,                  
-                    CreatedBy = vci.CreatedBy,
-                    CreatedByName = cby.Name,
-                    CreatedAt = vci.CreatedAt,
-                    UpdatedBy = vci.UpdatedBy,
-                    UpdatedByName = uby.Name,
-                    UpdatedAt = uby.UpdatedAt
-                }
-            ).ToListAsync();
-
-            return VoucherList;
+            return voucher;
+           
+           
         }
         public async Task<Message> PrintAsync(Voucher obj, User User)
         {
@@ -232,68 +153,68 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public async Task<Message> ExportAsync(Voucher obj, User User)
-        {
-            Message objMsg = new Message();
-            try
-            {
-                // Get filtered voucher list
-                var dbVoucher = await ListAsync(obj, User);
+    //    public async Task<Message> ExportAsync(Voucher obj, User User)
+    //    {
+    //        Message objMsg = new Message();
+    //        try
+    //        {
+    //            // Get filtered voucher list
+    //            var dbVoucher = await ListAsync(obj, User);
 
-                if (dbVoucher == null || !dbVoucher.Any())
-                {
-                    Message.Error(ref objMsg, "Record not found");
-                    return objMsg;
-                }
+    //            if (dbVoucher == null || !dbVoucher.Any())
+    //            {
+    //                Message.Error(ref objMsg, "Record not found");
+    //                return objMsg;
+    //            }
 
-                // Select ONLY required columns for export
-                var voucherExport = dbVoucher.Select(vo => new
-                {
-                    VoucherType = vo.Type,
-                    VoucherNo = vo.No,
-                    VoucherDate = vo.Date.ToString("dd-MMM-yyyy"),
-                    Customer = vo.CustomerDesc ?? "-",
-                    ConsigneeName = vo.ConName,
-                    Address = string.Join(", ",
-                                new[] { vo.ConAdd1, vo.ConAdd2, vo.ConPincode, vo.ConPostOffice, vo.ConStateName }
-                                .Where(x => !string.IsNullOrWhiteSpace(x))),
-                    RefNo = vo.RefNo,
-                    RefDate = vo.RefDate.HasValue ? vo.RefDate.Value.ToString("dd-MMM-yyyy") : "",
-                    EwayNo = vo.EwayNo,
-                    EwayDate = vo.EwayDate.HasValue ? vo.EwayDate.Value.ToString("dd-MMM-yyyy") : "",
-                    Remarks = vo.Remarks,
-                    Status = vo.StatusDesc
-                }).ToList();
+    //            // Select ONLY required columns for export
+    //            var voucherExport = dbVoucher.Select(vo => new
+    //            {
+    //                VoucherType = vo.Type,
+    //                VoucherNo = vo.No,
+    //                VoucherDate = vo.Date.ToString("dd-MMM-yyyy"),
+    //                Customer = vo.CustomerDesc ?? "-",
+    //                ConsigneeName = vo.ConName,
+    //                Address = string.Join(", ",
+    //                            new[] { vo.ConAdd1, vo.ConAdd2, vo.ConPincode, vo.ConPostOffice, vo.ConStateName }
+    //                            .Where(x => !string.IsNullOrWhiteSpace(x))),
+    //                RefNo = vo.RefNo,
+    //                RefDate = vo.RefDate.HasValue ? vo.RefDate.Value.ToString("dd-MMM-yyyy") : "",
+    //                EwayNo = vo.EwayNo,
+    //                EwayDate = vo.EwayDate.HasValue ? vo.EwayDate.Value.ToString("dd-MMM-yyyy") : "",
+    //                Remarks = vo.Remarks,
+    //                Status = vo.StatusDesc
+    //            }).ToList();
 
-                DataTable objDataTable = Util.ListToDataTable(voucherExport);
+    //            DataTable objDataTable = Util.ListToDataTable(voucherExport);
 
-                // Company Info
-                var objCompany = await db.Company
-                    .FirstOrDefaultAsync(pt => App.ActiveStatus.Contains(pt.Status));
+    //            // Company Info
+    //            var objCompany = await db.Company
+    //                .FirstOrDefaultAsync(pt => App.ActiveStatus.Contains(pt.Status));
 
-                if (objCompany == null)
-                {
-                    Message.Error(ref objMsg, "Company Info not found");
-                    return objMsg;
-                }
+    //            if (objCompany == null)
+    //            {
+    //                Message.Error(ref objMsg, "Company Info not found");
+    //                return objMsg;
+    //            }
 
-                objCompany.SheetName = "Grn List";
-                objCompany.ReportDesc =
-                    $"Grn List Generated On - {DateTime.Now:dd-MMM-yyyy HH:mm}";
+    //            objCompany.SheetName = "Grn List";
+    //            objCompany.ReportDesc =
+    //                $"Grn List Generated On - {DateTime.Now:dd-MMM-yyyy HH:mm}";
 
-                objMsg.base64 = Util.DataTableToBase64(objDataTable, objCompany);
+    //            objMsg.base64 = Util.DataTableToBase64(objDataTable, objCompany);
 
-                if (string.IsNullOrEmpty(objMsg.base64))
-                    Message.Error(ref objMsg, "Record not found");
-                else
-                    Message.Success(ref objMsg, "Record found");
-            }
-            catch (Exception ex)
-            {
-                Message.Exception(ref objMsg, ex);
-            }
+    //            if (string.IsNullOrEmpty(objMsg.base64))
+    //                Message.Error(ref objMsg, "Record not found");
+    //            else
+    //                Message.Success(ref objMsg, "Record found");
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            Message.Exception(ref objMsg, ex);
+    //        }
 
-            return objMsg;
-        }
+    //        return objMsg;
+    //    }
     }
 }

@@ -71,6 +71,7 @@ namespace CRMApi.Services
         public DbSet<Task> Task { get; set; }
         public DbSet<TaskItem> TaskItem { get; set; }
         public DbSet<TaskAction> TaskAction { get; set; }
+
         public DbSet<Voucher> Voucher { get; set; }
         public DbSet<VoucherItem> VoucherItem { get; set; }
         public DbSet<Store> Store { get; set; }

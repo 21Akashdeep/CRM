@@ -94,7 +94,7 @@ namespace CRMApi.Controllers
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoGrn.ExportAsync(obj, User);
+               // objMsg = await RepoGrn.ExportAsync(obj, User);
             }
             catch (Exception ex)
             {
