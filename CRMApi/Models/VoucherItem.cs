@@ -14,6 +14,9 @@ namespace CRMApi.Models
         public int ItemId { get; set; }
         public int StoreId { get; set; }
 
+        [NotMapped] public string? VoucherDesc { get; set; }
+        
+
         // Item Details
         [MaxLength(50)]
         public string? SerialNo { get; set; }
@@ -82,6 +85,9 @@ namespace CRMApi.Models
         [NotMapped]
         public string? ItemDesc { get; set; }
 
+        [NotMapped] public string StatusDesc { get; set; } = string.Empty;
+        [NotMapped] public string StatusCss { get; set; } = string.Empty;
+
         [NotMapped]
         public string? StoreDesc { get; set; }
 
@@ -100,6 +106,9 @@ namespace CRMApi.Models
         [NotMapped]
         public DateTime FromDate { get; set; }
 
+        [NotMapped] public bool IsEnable { get; set; } = false;
+        [NotMapped] public bool IsDuplicate { get; set; } = false;
+
         [NotMapped]
         public DateTime ToDate { get; set; }
 
@@ -115,7 +124,7 @@ namespace CRMApi.Models
 
         public List<int> ListStoreId { get; set; } = new List<int>();
 
-       
+        
 
 
     }

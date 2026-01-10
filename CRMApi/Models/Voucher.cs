@@ -9,8 +9,9 @@ namespace CRMApi.Models
         [StringLength(50)] public string Type { get; set; } = string.Empty;
         [StringLength(16)] public string No { get; set; } = string.Empty;
         public DateTime Date { get; set; }
-        public int CustomerId { get; set; }
-        [NotMapped] public string? CustomerDesc { get; set; }
+        public int PartyId { get; set; }
+        [NotMapped] public string? PartyDesc { get; set; }
+       
         [StringLength(100)] public string? ConName { get; set; }
         [StringLength(100)] public string? ConAdd1 { get; set; }
         [StringLength(100)] public string? ConAdd2 { get; set; }
@@ -33,8 +34,10 @@ namespace CRMApi.Models
         public int UpdatedBy { get; set; }
         [NotMapped] public string? UpdatedByName { get; set; }
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
+
+        public List<VoucherItem> VoucherItem { get; set; } = new List<VoucherItem>();
         [NotMapped] public List<int> ListId { get; set; } = new List<int>();
-        [NotMapped] public List<int> ListCustomerId { get; set; } = new List<int>();
+        [NotMapped] public List<int> ListPartyId { get; set; } = new List<int>();
         [NotMapped] public List<int> ListConName { get; set; } = new List<int>();
         [NotMapped] public List<int> ListStatus { get; set; } = new List<int>();
         [NotMapped] public bool IsEdit { get; set; } = false;
