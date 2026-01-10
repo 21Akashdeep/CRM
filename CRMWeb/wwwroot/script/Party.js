@@ -5,6 +5,7 @@
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
             Dropdown.bind({ id: '#ListId', data: response.data.Party, value: 'Id', text: 'Description', subText: "Code" });
             Dropdown.bind({ id: '#ListLocationId', data: response.data.Location, value: 'Id', text: 'Description' });
+            Dropdown.bind({ id: '#ListAccountGroupId', data: response.data.AccountGroup, value: 'Id', text: 'Description' });
         });
         $('#btnSearch').on('click', () => {
             Party.get({
@@ -41,7 +42,9 @@
     static get({ action, onSuccess }) {
         var obj = {
             ListStatus: $('#ListStatus').val(),            
-            ListId: $('#ListId').val()
+            ListId: $('#ListId').val(),
+            ListLocationId: $('#ListLocationId').val(),
+            ListAccountGroupId: $('#ListAccountGroupId').val()
         }
         Data.post({ url: `Party/${action}`, data: obj, onSuccess: onSuccess });
     }
@@ -81,6 +84,7 @@
             Dropdown.bind({ id: '#Party_CountryId', data: response.data.Country, value: 'Id', text: 'Description' });
             Dropdown.bind({ id: '#Party_AdminDivId', data: response.data.AdminDiv, value: 'Id', text: 'Description' });
             Dropdown.bind({ id: '#Party_LocationId', data: response.data.Location, value: 'Id', text: 'Description' });
+            Dropdown.bind({ id: '#Party_AccountGroup', data: response.data.AccountGroup, value: 'Id', text: 'Description' });
 
         });
     }
@@ -113,6 +117,7 @@
                         Dropdown.bind({ id: '#Party_CountryId', data: response.data.Country, value: 'Id', text: 'Description', subText: 'SubText' });
                         Dropdown.bind({ id: '#Party_AdminDivId', data: response.data.AdminDiv, value: 'Id', text: 'Description' });
                         Dropdown.bind({ id: '#Party_LocationId', data: response.data.Location, value: 'Id', text: 'Description' });
+                        Dropdown.bind({ id: '#Party_AccountGroup', data: response.data.AccountGroup, value: 'Id', text: 'Description' });
                         Modal.open({ id: '#modalParty', title: title, action: action, obj: obj });
                         OnlineApi.pinCode({
                             pinCode: obj.PinCode,

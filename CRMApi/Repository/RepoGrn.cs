@@ -29,7 +29,7 @@ namespace CRMApi.Repository
                     st.Value,
                     st.Description
                 }).ToListAsync();
-                Option.Customer = await db.Customer.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
+                Option.Customer = await db.Party.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
                 {
                     x.Id,
                     x.Name
@@ -138,7 +138,7 @@ namespace CRMApi.Repository
             dbVoucherQuery = obj.ListConName.Any() ? dbVoucherQuery.Where(gt => obj.ListConName.Contains(gt.Id)) : dbVoucherQuery;
             var VoucherList = await (
                 from vo in dbVoucherQuery
-                join cu in db.Customer on vo.CustomerId equals cu.Id into cuJoin
+                join cu in db.Party on vo.CustomerId equals cu.Id into cuJoin
                 from cu in cuJoin.DefaultIfEmpty()
                 join st in db.Setting on new { Name = App.SettingName.Status, Value = vo.Status.ToString() } equals new { st.Name, st.Value } into stJoin
                 from st in stJoin.DefaultIfEmpty()

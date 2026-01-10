@@ -44,6 +44,14 @@ namespace CRMApi.Repository
                     ag.Name,
                     ag.Description,
                 }).ToListAsync();
+                Option.AccountGroup = await db.AccountGroup.Where(ag => App.ActiveStatus.Contains(ag.Status)
+                 && new[] { 17, 18 }.Contains(ag.Id))
+                .Select(ag => new
+                {
+                    ag.Id,
+                    ag.Description,
+                })
+                  .ToListAsync();
                 objMsg.data = Option;
                 Message.Success(ref objMsg, "Record found");
             }
@@ -82,6 +90,15 @@ namespace CRMApi.Repository
                     ag.Name,
                     ag.Description,
                 }).ToListAsync();
+                Option.AccountGroup = await db.AccountGroup.Where(ag => App.ActiveStatus.Contains(ag.Status)
+                  && new[] { 17, 18 }.Contains(ag.Id))
+                 .Select(ag => new
+                {
+                    ag.Id,
+                    ag.Description,
+                   })
+                   .ToListAsync();
+
                 objMsg.data = Option;
                 Message.Success(ref objMsg, "Record found");
             }
@@ -101,6 +118,8 @@ namespace CRMApi.Repository
                 dbParty = dbParty.Where(x => obj.ListId.Contains(x.Id));
             if (obj.ListLocationId.Any())
                 dbParty = dbParty.Where(x => obj.ListLocationId.Contains(x.Id));
+            if (obj.ListAccountGroupId.Any())
+                dbParty = dbParty.Where(x => obj.ListAccountGroupId.Contains(x.AccountGroupId));
 
             //Party List
             var Party = await (
@@ -108,6 +127,7 @@ namespace CRMApi.Repository
                 join ad in db.AdminDiv on co.AdminDivId equals ad.Id
                 join cn in db.Country on co.CountryId equals cn.Id                             
                 join lo in db.Location on co.LocationId equals lo.Id
+                join ag in db.AccountGroup on co.AccountGroupId equals ag.Id
                 join st in db.Setting on new { Value = co.Status.ToString(), Name = App.SettingName.Status } equals new { st.Value, st.Name }
                 join cb in db.User on co.CreatedBy equals cb.Id
                 join ub in db.User on co.UpdatedBy equals ub.Id                
@@ -117,6 +137,8 @@ namespace CRMApi.Repository
                     Code = co.Code,
                     Name = co.Name,
                     Description = co.Description,
+                    AccountGroupId=co.AccountGroupId,
+                    AccountGroupDesc=ag.Description,
                     CinNo = co.CinNo,
                     GstNo = co.GstNo,
                     PanNo = co.PanNo,
@@ -318,6 +340,7 @@ namespace CRMApi.Repository
                 UpdateParty.Code = String.IsNullOrEmpty(obj.Code) ? UpdateParty.Code : obj.Code;
                 UpdateParty.Name = obj.Name;
                 UpdateParty.Description = obj.Description;
+                UpdateParty.AccountGroupId = obj.AccountGroupId;
                 UpdateParty.CinNo = obj.CinNo;
                 UpdateParty.GstNo = obj.GstNo;
                 UpdateParty.PanNo = obj.PanNo;

@@ -51,7 +51,7 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPost]
-        public async Task<IActionResult> Get(Party obj)
+        public async Task<IActionResult> Get([FromBody] Party obj)
         {
             Message objMsg = new Message();
             try
