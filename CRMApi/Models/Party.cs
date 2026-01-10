@@ -2,6 +2,7 @@
 
 namespace CRMApi.Models
 {
+    
     public class Party
     {
         public int Id { get; set; }
@@ -45,6 +46,7 @@ namespace CRMApi.Models
         [NotMapped] public bool IsDuplicate { get; set; } = false;
         [NotMapped] public List<int> ListId { get; set; } = new List<int>();
         [NotMapped] public List<int> ListLocationId { get; set; } = new List<int>();
+        [NotMapped] public List<int> ListAccountGroupId { get; set; } = new List<int>();
         [NotMapped] public List<int> ListStatus { get; set; } = new List<int>();
     }
 }

@@ -77,6 +77,4 @@ namespace CRMApi.Services
         public DbSet<Store> Store { get; set; }
     }
 
-
-    
 }
