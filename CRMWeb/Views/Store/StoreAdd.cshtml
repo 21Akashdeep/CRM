@@ -1,0 +1,83 @@
+﻿<div id="modalStore"
+     class="modal fade modal-draggable"
+     data-bs-backdrop="static"
+     tabindex="-1">
+
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"
+         role="document">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <span class="modal-title">Store / Add</span>
+
+                <div class="btn-group">
+                    <button type="button"
+                            class="btn btn-primary rounded-5 me-2"
+                            data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-danger rounded-5 me-2"
+                            data-bs-dismiss="modal">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-body" style="min-height:75vh;">
+                <form id="formStore">
+                    <input type="hidden" id="Id" name="Id" />
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label>
+                                Code<span class="text-mandatory">*</span>
+                            </label>
+                            <input type="text"
+                                   id="Store_Code"
+                                   name="Code"
+                                   autocomplete="off"
+                                   class="form-control form-control-sm store-required"
+                                   maxlength="16" />
+                        </div>
+
+                        <div class="col-md-12">
+                            <label>
+                                Name<span class="text-mandatory">*</span>
+                            </label>
+                            <input type="text"
+                                   id="Store_Name"
+                                   name="Name"
+                                   autocomplete="off"
+                                   class="form-control form-control-sm store-required"
+                                   maxlength="100" />
+                        </div>
+
+                        <div class="col-md-12">
+                            <label>
+                                Description<span class="text-mandatory">*</span>
+                            </label>
+                            <input type="text"
+                                   id="Store_Description"
+                                   name="Description"
+                                   autocomplete="off"
+                                   class="form-control form-control-sm store-required"
+                                   maxlength="200" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        id="Store_btnSave"
+                        class="btn btn-sm btn-success rounded-5">
+                    <span class="fa fa-save"></span>&nbsp;&nbsp;Save
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
