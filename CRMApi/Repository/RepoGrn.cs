@@ -36,7 +36,7 @@ namespace CRMApi.Repository
                     x.Id,
                     x.Name
                 }).ToListAsync();
-                Option.ConName = await db.Voucher.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
+                Option.ConName = await db.Voucher.Where(x => App.ActiveStatus.Contains(x.Status) && !string.IsNullOrEmpty(x.ConName)).Select(x => new
                 {
                     x.Id,
                     x.ConName,
@@ -133,7 +133,30 @@ namespace CRMApi.Repository
            
            
         }
-
+        public async Task<Message> EditAsync(int Id, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                objMsg.obj = (await ListAsync(new Voucher
+                {
+                    ListId = new List<int> { Id },
+                    ListStatus = new List<int>(App.ActiveStatus) { App.Status.Delete }
+                }, User)).FirstOrDefault();
+                if (objMsg.obj == null)
+                {
+                    Message.Error(ref objMsg, "Voucher was not found for edit.");
+                    return objMsg;
+                }
+                objMsg.data = (await GetAddOptionAsync()).data;
+                Message.Success(ref objMsg, "Record found");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
         //public async Task<Message> AddAsync(Voucher obj, User User)
         //{
 

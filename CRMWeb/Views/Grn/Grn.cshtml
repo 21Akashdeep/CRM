@@ -15,17 +15,24 @@
                     <label>Status</label>
                     <select id="ListStatus" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
                     </select>
-                </div>               
+                </div>    
+                <div class="col-md-3">
+                    <label>Date Range</label>
+                    <div class="input-group input-group-sm">
+                        <input id="DateRange" type="text" class="form-control" readonly>
+                        <span class="input-group-text date-range-picker"><i class="fa fa-calendar"></i></span>
+                    </div>
+                </div>
                 <div class="col-md-3">
                     <label>Customer</label>
                     <select id="ListCustomerId" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
                     </select>
                 </div>
-                <div class="col-md-3">
+                @* <div class="col-md-3">
                     <label>Consignee Name</label>
                     <select id="ListConName" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
                     </select>
-                </div>
+                </div> *@
                 <div class="col-md-2">
                     <div class="btn-group">
                         <button type="button" id="btnSearch" class="btn btn-sm btn-filter btn-outline-success" title="Search">
@@ -48,11 +55,11 @@
                         <thead>
                             <tr>
                                 <th data-sortable="false" data-formatter="tableGrnSlNo" class="text-center">#</th>
+                                <th data-sortable="true" data-formatter="tableGrnDate">Date</th>
                                 <th data-sortable="true" data-field="No">Number</th>
                                 <th data-sortable="true" data-field="PartyDesc">Party</th>
                                 <th data-sortable="true" data-field="ConName">Consignee Name </th>
                                 <th data-sortable="true" data-formatter="tableGrnConAddress" class="text-nowrap">Consignee Address</th>
-                                <th data-sortable="true" data-formatter="tableGrnDate">Date</th>
                                 <th data-sortable="true" data-formatter="tableGrnRefNoAndDate" class="text-nowrap">Ref No / Date </th>
                                 <th data-sortable="true" data-field="Remarks">Remarks</th>
                                 <th data-sortable="false" data-formatter="tableGrnCreatedByAndAt" class="text-nowrap">Created By & At</th>
@@ -86,6 +93,7 @@
             <div class="modal-body" style="min-height:75vh;">
                 <form id="formGrn" autocomplete="off" onsubmit="return false;">
                     <input type="hidden" id="Id" name="Id" />
+                    <input type="hidden" id="No" name="No" />
                     <div class="row">
                         <div class="col-md-2">
                             <label>Date</label>
@@ -100,19 +108,19 @@
                         </div>
 
                         <div class="col-md-2">
-                            <label>Ref No.</label>
-                            <input type="text" id="Grn-RefNo" name="RefNo" class="form-control form-control-sm" maxlength="10" data-alpha-lg-num="true" />
+                            <label>Ref No.<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Grn-RefNo" name="RefNo" class="form-control form-control-sm required" maxlength="10" data-alpha-lg-num="true" />
                         </div>
                         <div class="col-md-2">
-                            <label>Ref Date</label>
+                            <label>Ref Date<span class="text-mandatory">*</span></label>
                             <div class="input-group input-group-sm">
                                 <input type="text" id="Grn-RefDate" name="RefDate" class="form-control form-control-sm required" readonly />
                                 <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
                             </div>
                         </div>
                         <div class="col-md-2">
-                            <label>EwayNo</label>
-                            <input type="text" id="Grn-EwayNo" name="EwayNo" class="form-control form-control-sm" maxlength="10" data-alpha-lg-num="true" />
+                            <label>EwayNo<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Grn-EwayNo" name="EwayNo" class="form-control form-control-sm required" maxlength="10" data-alpha-lg-num="true" />
                         </div>
 
                         <div class="col-md-2">
@@ -123,14 +131,14 @@
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <label>Conssigne Name</label>
-                            <input type="text" id="Grn-ConName" name="ConName" class="form-control form-control-sm" maxlength="10" data-alpha-lg-num="true" />
+                            <label>Conssigne Name<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Grn-ConName" name="ConName" class="form-control form-control-sm required" maxlength="10" data-alpha-lg-num="true" />
                         </div>
 
 
                         <div class="col-md-6">
-                            <label>Conssigne Address 1</label>
-                            <input type="text" id="Grn-ConAdd1" name="ConAdd1" class="form-control form-control-sm" maxlength="100" data-alpha-lg-num="true" />
+                            <label>Conssigne Address 1<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Grn-ConAdd1" name="ConAdd1" class="form-control form-control-sm required" maxlength="100" data-alpha-lg-num="true" />
                         </div>
                         <div class="col-md-6">
                             <label>Conssigne Address 2</label>
@@ -138,7 +146,7 @@
                         </div>
                         <div class="col-md-2">
                             <label>Con Pin Code</label>
-                            <input type="text" id="Grn-ConPinCode" name="ConPinCode" class="form-control form-control-sm" maxlength="10" data-alpha-lg-num="true" />
+                            <input type="text" id="Grn-ConPinCode" name="ConPincode" class="form-control form-control-sm" maxlength="10" data-alpha-lg-num="true" />
                         </div>
                         <div class="col-md-2">
                             <label>Con Post Office</label>
@@ -157,7 +165,7 @@
 
                         <div class="col-md-2">
                             <label>Store<span class="text-mandatory">*</span></label>
-                            <select id="Grn-Store" name="StoreId" class="select-pick party-required" data-search="true" data-size="4"></select>
+                            <select id="Grn-Store" name="StoreId" class="select-pick required" data-search="true" data-size="4"></select>
                         </div>
                        
 

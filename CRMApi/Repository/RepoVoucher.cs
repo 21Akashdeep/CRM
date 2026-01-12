@@ -20,10 +20,10 @@ namespace CRMApi.Repository
             //Add Filter
             if (obj.ListId.Any())
                 dbVoucherQuery = dbVoucherQuery.Where(grn => obj.ListId.Contains(grn.Id));
-            //if (obj.FromDate != DateTime.MinValue)
-            //    dbVoucherQuery = dbVoucherQuery.Where(grn => grn.Date.Date >= obj.FromDate.Date);
-            //if (obj.ToDate != DateTime.MinValue)
-            //    dbVoucherQuery = dbVoucherQuery.Where(grn => grn.Date.Date <= obj.ToDate.Date);
+            if (obj.FromDate != DateTime.MinValue)
+                dbVoucherQuery = dbVoucherQuery.Where(grn => grn.Date.Date >= obj.FromDate.Date);
+            if (obj.ToDate != DateTime.MinValue)
+                dbVoucherQuery = dbVoucherQuery.Where(grn => grn.Date.Date <= obj.ToDate.Date);
             if (obj.ListPartyId.Any())
                 dbVoucherQuery = dbVoucherQuery.Where(grn => obj.ListPartyId.Contains(grn.PartyId));
             
@@ -246,6 +246,17 @@ namespace CRMApi.Repository
                 voucher.PartyId = obj.PartyId;
                 voucher.Date = obj.Date;
                 voucher.Remarks = obj.Remarks;
+                voucher.ConAdd1 = obj.ConAdd1;
+                voucher.ConAdd2 = obj.ConAdd2;
+                voucher.ConName = obj.ConName;
+                voucher.ConPincode = obj.ConPincode;
+                voucher.ConPostOffice = obj.ConPostOffice;
+                voucher.ConStateCode = obj.ConStateCode;
+                voucher.ConStateName = obj.ConStateName;
+                voucher.RefNo = obj.RefNo;
+                voucher.RefDate = obj.RefDate;
+                voucher.EwayNo = obj.EwayNo;
+                voucher.EwayDate = obj.EwayDate;                
                 voucher.UpdatedBy = User.Id;
                 voucher.UpdatedAt = DateTime.Now;
                 foreach (var vi in voucher.VoucherItem)
@@ -259,6 +270,8 @@ namespace CRMApi.Repository
                     {
                         vi.StoreId = item.StoreId;
                         vi.ItemId = item.ItemId;
+                        vi.SerialNo = item.SerialNo;
+                        vi.BatchNo = item.BatchNo;
                         vi.Qty = item.Qty;
                         vi.Rate = item.Rate;
                         vi.Amount =item.Amount;
@@ -273,7 +286,7 @@ namespace CRMApi.Repository
                 var newItem = obj.VoucherItem.Where(x => x.Id == 0).ToList();
                 foreach (var vi in newItem)
                 {
-                    vi.StoreId = voucher.StateId;
+                    vi.StoreId = voucher.StoreId;
                     vi.VoucherId = voucher.Id;
                     vi.Status = voucher.Status;
                     vi.CreatedBy = User.Id;

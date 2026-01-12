@@ -59,11 +59,11 @@
         }
         let GrnItem = $('#tableGrnItem').bootstrapTable('getData').filter(x => x.ItemId > 0);
 
-        //if (GrnItem.length == 0) {
+        if (GrnItem.length == 0) {
 
-        //    Message.error({ statusText: 'Grn Item not found. Add atleast one Grn Item' });
-        //    return;
-        //}
+            Message.error({ statusText: 'Grn Item not found. Add atleast one Grn Item' });
+            return;
+        }
 
         let obj = Data.serializeToObject({ formId: '#formGrn' });
 
@@ -97,8 +97,8 @@
     static get({ method = 'Get', onSuccess }) {
     let obj = {
         ListStatus: $('#ListStatus').val(),
-        //FromDate: DateTime.json($('#DateRange').val().split('|')[0]),
-        //ToDate: DateTime.json($('#DateRange').val().split('|')[1]),
+        FromDate: DateTime.json($('#DateRange').val().split('|')[0]),
+        ToDate: DateTime.json($('#DateRange').val().split('|')[1]),
         ListCustomerId: $('#ListCustomerId').val(),
         ListConName: $('#ListConName').val()
     };
@@ -187,15 +187,31 @@
                 let option = response.data;
                 Grn.item = option.Item;
                 Grn.reasonCode = response.data.ReasonCode;
-                Grn.store = response.data.Store;
+                let store = response.data.Store;
+                let state = response.data.State;
                 let obj = response.obj;
+                let StoreId = obj.VoucherItem[0].StoreId;
+                obj.StoreId = StoreId;
                 obj.Id = action == 'Edit' ? obj.Id : null;
                 let title = action == 'Edit' ? Grn / `Edit (Code: ${obj.GrnNo})` : `Grn / Add`;
-                Dropdown.bind({ id: '#Grn-PartyId', data: option.Party, value: 'Id', text: 'Description' });
-                Dropdown.bind({ id: '#Grn-ShiftId', data: option.Shift, value: 'Id', text: 'Description' });
+                Dropdown.bind({ id: '#Grn-ConStateCode', data: state, value: 'Code', text: 'Code', initialValue: [Grn.stateList.Code] });
+                Dropdown.bind({ id: '#Grn-ConStateName', data: state, value: 'Name', text: 'Name', initialValue: [state.Name] });
+                Dropdown.bind({ id: '#Grn-PartyId', data: response.data.Party, value: 'Id', text: 'Name' });
+                Dropdown.bind({ id: '#Grn-Type', data: response.data.Type, value: 'Value', text: 'Description' });
+                Dropdown.bind({ id: '#Grn-Store', data: store, value: 'Id', text: 'Description' });
                 Modal.open({ id: '#modalGrn', title: title, action: action, obj: obj });
-                Table.add({ id: '#tableGrnItem', data: obj.GrnItem, selectPick: true });
+                Table.add({ id: '#tableGrnItem', data: obj.VoucherItem, selectPick: true });
                 Grn.sumOfTotalGrnItem();
+                setTimeout(() => {
+                    OnlineApi.pinCode({
+                        
+                        postOfficeId: '#Grn-ConPostOffice',
+                        //stateId: '#Grn-ConStateCode',
+                        stateName: '#Grn-ConStateName'
+
+                    });
+                }, 100);
+
             }
         });
     }
@@ -212,19 +228,48 @@
             }
         });
     }
-    static delete({ id }) {
-        Data.delete({
-            url: `Grn/Delete?Id=${id}`,
-            onSuccess: (response) => {
-                Message.show(response);
-                if (response.status == Message.Type.success) {
-                    Table.updateById({ id: '#tableGrn', objId: response.obj.Id, obj: response.obj });
-                }
-            }
-        });
-    }
-}
 
+    static delete({ id }) {
+        Message.confirm(
+            {
+                msg: "Do you want to delete???",
+                confirmButtonText: "Delete",
+                denyButtonText: "Don't Delete",
+                data: id,
+                onConfirm: (id) => {
+                    Data.delete(
+                        {
+                            url: `Grn/Delete?Id=${id}`,
+                            onSuccess: Grn.deleteOnSuccess
+                        }
+                    );
+                }
+            },
+        );
+    }
+    static deleteOnSuccess = (response) => {
+        Message.show(response);
+        if (response.status == Message.Type.success) {
+            Table.updateById({ id: "#tableTask", objId: response.obj.Id, obj: response.obj });
+            Dropdown.bind({ id: '#ListId', data: response.data.ListId, value: 'Id', text: 'Description', subText: "Code" });
+            Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
+
+        }
+    }
+
+
+    //static delete({ id }) {
+    //    Data.delete({
+    //        url: `Grn/Delete?Id=${id}`,
+    //        onSuccess: (response) => {
+    //            Message.show(response);
+    //            if (response.status == Message.Type.success) {
+    //                Table.updateById({ id: '#tableGrn', objId: response.obj.Id, obj: response.obj });
+    //            }
+    //        }
+    //    });
+    //}
+}
 
 window.tableGrnRefNoAndDate = (value, obj, index) => {
     return `
