@@ -15,14 +15,7 @@
                     <label>Status</label>
                     <select id="ListStatus" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
                     </select>
-                </div>
-                @* <div class="col-md-3"> *@
-                @*     <label>Date Range</label> *@
-                @*     <div class="input-group input-group-sm"> *@
-                @*         <input type="text" id="DateRange" class="form-control" readonly /> *@
-                @*         <span class="input-group-text date-range-picker"><i class="fa fa-calendar"></i></span> *@
-                @*     </div> *@
-                @* </div> *@
+                </div>               
                 <div class="col-md-3">
                     <label>Customer</label>
                     <select id="ListCustomerId" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
@@ -76,91 +69,144 @@
     </div>
 </div>
 
+<div id="modalGrn" class="modal fade" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title"></span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal" aria-label="Close">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body" style="min-height:75vh;">
+                <form id="formGrn" autocomplete="off" onsubmit="return false;">
+                    <input type="hidden" id="Id" name="Id" />
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label>Date</label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" id="Grn-Date" name="Date" class="form-control form-control-sm required" readonly />
+                                <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Party<span class="text-mandatory">*</span></label>
+                            <select id="Grn-PartyId" name="PartyId" class="select-pick required" data-size="4" data-search="true"></select>
+                        </div>
 
-@* <div id="modalGrn" class="modal fade" data-bs-backdrop="static" tabindex="-1"> *@
-@*     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen"> *@
-@*         <div class="modal-content"> *@
-@*             <div class="modal-header"> *@
-@*                 <span class="modal-title"></span> *@
-@*                 <div class="btn-group"> *@
-@*                     <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle"> *@
-@*                         <span class="fa fa-minus"></span> *@
-@*                     </button> *@
-@*                     <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal" aria-label="Close"> *@
-@*                         <span class="fa fa-remove"></span> *@
-@*                     </button> *@
-@*                 </div> *@
-@*             </div> *@
-@*             <div class="modal-body" style="min-height:75vh;"> *@
-@*                 <form id="formGrn" autocomplete="off" onsubmit="return false;"> *@
-@*                     <input type="hidden" id="Id" name="Id" /> *@
-@*                     <div class="row"> *@
-@*                         <div class="col-md-2"> *@
-@*                             <label>Date</label> *@
-@*                             <div class="input-group input-group-sm"> *@
-@*                                 <input type="text" id="Grn-Date" name="Date" class="form-control form-control-sm required" data-date-format="DD-MMM-YYYY" readonly /> *@
-@*                                 <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span> *@
-@*                             </div> *@
-@*                         </div> *@
-@*                         <div class="col-md-4"> *@
-@*                             <label>Party<span class="text-mandatory">*</span></label> *@
-@*                             <select id="Grn-PartyId" name="PartyId" class="select-pick required" data-size="4" data-search="true"></select> *@
-@*                         </div> *@
-@*                         <div class="col-md-2"> *@
-@*                             <label>Shift<span class="text-mandatory">*</span></label> *@
-@*                             <select id="Grn-ShiftId" name="ShiftId" class="select-pick required" data-size="4" data-search="true"></select> *@
-@*                         </div> *@
-@*                         <div class="col-md-2"> *@
-@*                             <label>Vechile No.<span class="text-mandatory">*</span></label> *@
-@*                             <input type="text" id="Grn-VechileNo" name="VechileNo" class="form-control form-control-sm required" maxlength="10" data-alpha-lg-num="true" /> *@
-@*                         </div> *@
+                        <div class="col-md-2">
+                            <label>Ref No.</label>
+                            <input type="text" id="Grn-RefNo" name="RefNo" class="form-control form-control-sm" maxlength="10" data-alpha-lg-num="true" />
+                        </div>
+                        <div class="col-md-2">
+                            <label>Ref Date</label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" id="Grn-RefDate" name="RefDate" class="form-control form-control-sm required" readonly />
+                                <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label>EwayNo</label>
+                            <input type="text" id="Grn-EwayNo" name="EwayNo" class="form-control form-control-sm" maxlength="10" data-alpha-lg-num="true" />
+                        </div>
 
-@*                     </div> *@
-@*                     <hr /> *@
-@*                     <div class="row"> *@
-@*                         <div class="col-md-12 Grn-item-table"> *@
-@*                             <table id="tableGrnItem" class="table table-bordered table-hover table-default line-item" data-search="false"> *@
-@*                                 <thead> *@
-@*                                     <tr> *@
-@*                                         <th colspan="6"> *@
-@*                                             Grn Item *@
-@*                                             <button type="button" class="btn btn-sm btn-primary float-end rounded-5 btn-add-item" onclick="Grn.addGrnItem()"> *@
-@*                                                 <span class="fa fa-plus"></span> *@
-@*                                             </button> *@
-@*                                         </th> *@
-@*                                     </tr> *@
-@*                                     <tr> *@
-@*                                         <th data-formatter="tableGrnItemSlNo" class="text-center">#</th> *@
-@*                                         <th class="desc" data-formatter="tableGrnItemDesc" data-events="tableGrnItemDescEvent">Description</th> *@
-@*                                         <th class="rate" data-formatter="tableGrnItemRate" data-events="tableGrnItemRateEvent">Rate</th> *@
-@*                                         <th class="unit" data-field="UnitDesc">Unit</th> *@
-@*                                         <th class="qty" data-formatter="tableGrnItemQty" data-events="tableGrnItemQtyEvent">Qty</th> *@
-@*                                         <th class="amt" data-formatter="tableGrnItemAmount" data-events="tableGrnItemAmountEvent">Amount</th> *@
-@*                                     </tr> *@
-@*                                 </thead> *@
-@*                                 <tbody> *@
-@*                                 </tbody> *@
-@*                             </table> *@
-@*                         </div> *@
-@*                     </div> *@
-@*                     <hr /> *@
-@*                     <div class="row"> *@
-@*                         <div class="col-md-6"> *@
-@*                             <label>Remarks</label> *@
-@*                             <textarea type="text" id="Grn-Remarks" name="Remarks" style="resize:none;" class="form-control form-control-sm" rows="2" maxlength="100"></textarea> *@
-@*                         </div> *@
-@*                     </div> *@
-@*                 </form> *@
-@*             </div> *@
+                        <div class="col-md-2">
+                            <label>EwayDate</label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" id="Grn-EwayDate" name="EwayDate" class="form-control form-control-sm required" readonly />
+                                <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Conssigne Name</label>
+                            <input type="text" id="Grn-ConName" name="ConName" class="form-control form-control-sm" maxlength="10" data-alpha-lg-num="true" />
+                        </div>
 
-@*             <div class="modal-footer"> *@
-@*                 <button type="button" id="Grn-BtnSave" class="btn btn-sm btn-success rounded-5"> *@
-@*                     <span class="fa fa-save"></span>&nbsp;&nbsp;Save *@
-@*                 </button> *@
-@*             </div> *@
-@*         </div> *@
-@*     </div> *@
-@* </div> *@
+
+                        <div class="col-md-6">
+                            <label>Conssigne Address 1</label>
+                            <input type="text" id="Grn-ConAdd1" name="ConAdd1" class="form-control form-control-sm" maxlength="100" data-alpha-lg-num="true" />
+                        </div>
+                        <div class="col-md-6">
+                            <label>Conssigne Address 2</label>
+                            <input type="text" id="Grn-ConAdd2" name="ConAdd2" class="form-control form-control-sm" maxlength="100" data-alpha-lg-num="true" />
+                        </div>
+                        <div class="col-md-2">
+                            <label>Con Pin Code</label>
+                            <input type="text" id="Grn-ConPinCode" name="ConPinCode" class="form-control form-control-sm" maxlength="10" data-alpha-lg-num="true" />
+                        </div>
+                        <div class="col-md-2">
+                            <label>Con Post Office</label>
+                            <input type="text" id="Grn-ConPostOffice" name="ConPostOffice" class="form-control form-control-sm" maxlength="10" data-alpha-lg-num="true" />
+                        </div>                        
+                        <div class="col-md-2">
+                            <label>Con State Code</label>
+                            <select id="Grn-ConStateCode" name="ConStateCode" class="select-pick party-required" data-search="true" data-size="4" data-parent="#modalParty"></select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>Con State Name<span class="text-mandatory">*</span></label>
+                            <select id="Grn-ConStateName" name="ConStateName" class="select-pick party-required" data-search="true" data-size="4"></select>
+                        </div>
+
+
+                        <div class="col-md-2">
+                            <label>Store<span class="text-mandatory">*</span></label>
+                            <select id="Grn-Store" name="StoreId" class="select-pick party-required" data-search="true" data-size="4"></select>
+                        </div>
+                       
+
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-12 grn-item-table">
+                            <table id="tableGrnItem" class="table table-bordered table-hover table-default line-item" data-search="false">
+                                <thead>
+                                    <tr>
+                                        <th colspan="5">
+                                            Grn Item
+                                            <button type="button" class="btn btn-sm btn-primary float-end rounded-5 btn-add-item" onclick="Grn.addGrnItem()">
+                                                <span class="fa fa-plus"></span>
+                                            </button>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th data-formatter="tableGrnItemSlNo" class="text-center">#</th>
+                                        <th class="desc" data-formatter="tableGrnItemDesc" data-events="tableGrnItemDescEvent">Description</th>
+                                        <th class="qty" data-formatter="tableTaskSerialNo" data-events="tableGrnSerialNoDescEvent">SerialNo</th>
+                                        <th class="qty" data-formatter="tableTaskBatchNo" data-events="tableGrnBatchNoDescEvent">BatchNo</th>
+                                        <th class="qty" data-formatter="tableGrnItemQty" data-events="tableGrnItemQtyEvent">Qty</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Remarks</label>
+                            <textarea type="text" id="Grn-Remarks" name="Remarks" style="resize:none;" class="form-control form-control-sm" rows="2" maxlength="100"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="Grn-BtnSave" class="btn btn-sm btn-success rounded-5">
+                    <span class="fa fa-save"></span>&nbsp;&nbsp;Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 
 

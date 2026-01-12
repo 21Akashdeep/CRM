@@ -308,8 +308,8 @@ nav {
     padding-bottom: 2px !important;
 }
 
-.table.line-item thead th.description,
-.table.line-item tbody td.description {
+.table.line-item thead th.desc,
+.table.line-item tbody td.desc {
     min-width: 630px;
     max-width: 630px;
 }

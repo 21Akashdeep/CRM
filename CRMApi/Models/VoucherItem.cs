@@ -120,8 +120,8 @@ namespace CRMApi.Models
 
         [NotMapped]
         public List<int> ListVoucherId { get; set; } = new List<int>();
-        public List<int> ListItemId { get; set; } = new List<int>();
 
+        [NotMapped]
         public List<int> ListStoreId { get; set; } = new List<int>();
 
         

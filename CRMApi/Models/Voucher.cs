@@ -10,8 +10,9 @@ namespace CRMApi.Models
         [StringLength(16)] public string No { get; set; } = string.Empty;
         public DateTime Date { get; set; }
         public int PartyId { get; set; }
-        [NotMapped] public string? PartyDesc { get; set; }
-       
+        [NotMapped] public int StateId { get; set; }
+        [NotMapped] public int StoreId { get; set; }
+        [NotMapped] public string? PartyDesc { get; set; }       
         [StringLength(100)] public string? ConName { get; set; }
         [StringLength(100)] public string? ConAdd1 { get; set; }
         [StringLength(100)] public string? ConAdd2 { get; set; }
@@ -19,6 +20,7 @@ namespace CRMApi.Models
         [StringLength(100)] public string? ConPostOffice { get; set; }
         [StringLength(3)] public string? ConStateCode { get; set; }
         [StringLength(100)] public string? ConStateName { get; set; }
+
         [StringLength(50)] public string? RefNo { get; set; }
         public DateTime? RefDate { get; set; }
         public string? ListVoucherId { get; set; }
@@ -34,7 +36,6 @@ namespace CRMApi.Models
         public int UpdatedBy { get; set; }
         [NotMapped] public string? UpdatedByName { get; set; }
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
-
         public List<VoucherItem> VoucherItem { get; set; } = new List<VoucherItem>();
         [NotMapped] public List<int> ListId { get; set; } = new List<int>();
         [NotMapped] public List<int> ListPartyId { get; set; } = new List<int>();

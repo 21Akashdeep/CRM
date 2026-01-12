@@ -61,6 +61,10 @@
         public string JntvtiCateGory {  get; set; } = string.Empty;
         public string PassType { get; set; } = string.Empty;
 
+        public string VoucherType { get; set; } = string.Empty;
+
+        public string ReasonCode { get; set; } = string.Empty;
+
     }
     public class Status
     {
@@ -201,5 +205,24 @@
         public string GatePass { get; set; } = string.Empty;
         public string HeightPass { get; set; } = string.Empty;
 
+    }
+
+    public class  VoucherType
+    {
+        public string ReceiptNote { get; set; } = string.Empty;
+        public string StockIn { get; set; } = string.Empty;
+        public string DeliveryNote { get; set; } = string.Empty;
+        public string ReturnNote { get; set; } = string.Empty;
+        public string StockOut { get; set; } = string.Empty;
+        public string StockTransfer { get; set; } = string.Empty;
+        public string StockAdjustment { get; set; } = string.Empty;
+    }
+
+    public class  ReasonCode 
+    {     
+       public string Other { get; set; } = string.Empty;
+        public string Damage { get; set; } = string.Empty;
+        public string Shortage { get; set; } = string.Empty;
+        public string Correction { get; set; } = string.Empty;
     }
 }

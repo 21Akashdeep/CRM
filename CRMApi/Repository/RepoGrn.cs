@@ -1,12 +1,13 @@
 ﻿using CRMApi.Models;
-using CRMApi.Services;
 using CRMApi.Repository;
+using CRMApi.Services;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Dynamic;
 using System.Linq;
 using System.Net.Mail;
+using static CRMApi.Dto.DtoTask;
 
 namespace CRMApi.Repository
 {
@@ -50,84 +51,77 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        //public async Task<Message> GetAddOptionAsync()
-        //{
-        //    Message objMsg = new Message();
-        //    try
-        //    {
+        public async Task<Message> GetAddOptionAsync()
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var Party = await db.Party.Where(par => App.ActiveStatus.Contains(par.Status) ).Select(par => new
+                {
+                    par.Id,
+                    par.Code,
+                    par.Name,
+                    par.Description
+                }).ToListAsync();
+                var Type = await db.Setting.Where(x => App.ActiveStatus.Contains(x.Status) && x.Name == App.SettingName.VoucherType).Select(x => new
+                {
+                    x.Value,
+                    x.Description
+                }).ToListAsync();
 
-        //         dynamic Option = new ExpandoObject();
-        //        //Option.SupportMode = await db.Setting.Where(x => App.ActiveStatus.Contains(x.Status) && x.Name == App.SettingName.SupportMode).Select(x => new
-        //        //{
-        //        //    Id = x.Value,
-        //        //    x.Description
-        //        //}).ToListAsync();
-        //        //var dbCustomer = await new RepoCustomer(db).ListAsync(null, User);
-        //        //Option.Customer = dbCustomer.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
-        //        //{
-        //        //    x.Id,
-        //        //    x.Description,
-        //        //    x.Address1,
-        //        //    x.Address2,
-        //        //    x.PinCode,
-        //        //    x.PostOffice,
-        //        //    x.District,
-        //        //    x.AdminDivId,
-        //        //    x.CountryId,
-        //        //    x.ContactNo,
-        //        //    x.Email,                    
-        //        //    x.LocationDesc,
-        //        //    SubText = Util.AddressDesc(new Composite.AddressDesc { Add1 = x.Address1, Add2 = x.Address2, PinCode = x.PinCode, PostOffice = x.PostOffice, OtherText = x.GstNo })
-        //        //}).ToList();
-        //        //Option.AdminDiv = await db.AdminDiv.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
-        //        //{
-        //        //    x.Id,
-        //        //    x.Description
-        //        //}).ToListAsync();
-        //        //Option.Country = await db.Country.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
-        //        //{
-        //        //    x.Id,
-        //        //    x.Description
-        //        //}).ToListAsync();                
-        //        //Option.Department = await db.Complaint.Where(x => App.AllActiveStatus.Contains(x.Status)).GroupBy(x => new { x.Department }).Select(x => new
-        //        //{
-        //        //    Value = x.Key.Department,
-        //        //    Description = x.Key.Department
-        //        //}).ToListAsync();
-        //        //Option.Priority = await db.Setting.Where(x => App.ActiveStatus.Contains(x.Status) && x.Name == App.SettingName.Priority).Select(x => new
-        //        //{
-        //        //    Id = x.Value,
-        //        //    x.Description
-        //        //}).ToListAsync();
-        //        //var dbComplaintAssign = db.ComplaintAssign.Where(x => App.AllActiveStatus.Contains(x.Status)).AsQueryable();
-        //        //Option.ComplaintAssing = await (
-        //        //    from usr in db.User
-        //        //    join ulo in db.UserLocation on usr.Id equals ulo.UserId
-        //        //    join loc in db.Location on ulo.LocationId equals loc.Id
-        //        //    join cus in db.Customer on ulo.LocationId equals cus.LocationId
-        //        //    join coa in dbComplaintAssign on new {UserId = usr.Id, ComplaintId = obj.Id} equals new { coa.UserId, coa.ComplaintId } into ComplaintAssign
-        //        //    from coa in ComplaintAssign.DefaultIfEmpty()
-        //        //    where App.ActiveStatus.Contains(usr.Status) && cus.Id == obj.CustomerId
-        //        //    select new
-        //        //    {
-        //        //        Id = coa != null ? coa.Id : 0,
-        //        //        ComplaintId = coa != null ? coa.ComplaintId : 0,
-        //        //        UserId = usr.Id,
-        //        //        UserName = usr.Name,
-        //        //        LocationDesc = loc.Description,
-        //        //        IsAdded = coa != null,
-        //        //    }
-        //        //).ToListAsync();                
-        //        objMsg.data = Option;
-        //        Message.Success(ref objMsg, "Record found");
+                var State = await db.AdminDiv.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
+                {
+                    x.Id,
+                    x.Code,
+                    x.Name
 
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Message.Exception(ref objMsg, ex);
-        //    }
-        //    return objMsg;
-        //}
+                }).ToListAsync();
+
+                var ReasonCode = await db.Setting.Where(x => App.ActiveStatus.Contains(x.Status) && x.Name == App.SettingName.ReasonCode).Select(x => new
+                {
+                    x.Value,
+                    x.Description
+
+                }).ToListAsync();
+                var Store = await db.Store.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
+                {
+
+                    x.Id,
+                    x.Description
+
+                }).ToListAsync();
+                var Item = await (
+                    from itm in db.Item
+                    join unt in db.Unit on itm.UnitId equals unt.Id
+                    
+                    select new
+                    {
+                        itm.Id,
+                        itm.Code,
+                        itm.Name,
+                        itm.Description,
+                        itm.UnitId,
+                        UnitDesc = unt.Description,
+                        
+                    }
+                ).ToListAsync();
+                objMsg.data = new
+                {
+                    State,
+                    Party,
+                    Type,
+                    Item,
+                    ReasonCode,
+                    Store,
+                };
+                Message.Success(ref objMsg, "Record found");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
         public async Task<List<Voucher>> ListAsync(Voucher? obj, User User)
         {
 
@@ -139,6 +133,11 @@ namespace CRMApi.Repository
            
            
         }
+
+        //public async Task<Message> AddAsync(Voucher obj, User User)
+        //{
+
+        //}
         public async Task<Message> PrintAsync(Voucher obj, User User)
         {
             Message objMsg = new Message();

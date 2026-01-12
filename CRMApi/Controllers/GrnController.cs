@@ -13,10 +13,12 @@ namespace CRMApi.Controllers
     {
         private readonly DBCRM db;
         private readonly RepoGrn RepoGrn;
+        private readonly RepoVoucher RepoVoucher;
         public GrnController(DBCRM _db)
         {
             db = _db;
             RepoGrn = new RepoGrn(db);
+            RepoVoucher = new RepoVoucher(db);
         }
         [HttpGet]
         public async Task<IActionResult> GetViewOption()
@@ -27,6 +29,22 @@ namespace CRMApi.Controllers
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
                 objMsg = await RepoGrn.GetViewOptionAsync();
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetAddOption()
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
+                if (User == null) return Ok(objMsg);
+                objMsg = await RepoGrn.GetAddOptionAsync();
             }
             catch (Exception ex)
             {
@@ -53,14 +71,15 @@ namespace CRMApi.Controllers
         }
 
         [HttpPost]
-        public IActionResult Add(Location obj)
+        public async Task<IActionResult> Add([FromBody]Voucher obj)
         {
             Message objMsg = new Message();
             try
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                //objMsg = RepoGdn.Add(obj, User);
+                obj.Type = "DeliveryNote";
+                objMsg = await RepoVoucher.AddAsync(obj,User);
             }
             catch (Exception ex)
             {
@@ -86,21 +105,21 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Export(Voucher obj)
-        {
-            Message objMsg = new Message();
-            try
-            {
-                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
-                if (User == null) return Ok(objMsg);
-               // objMsg = await RepoGrn.ExportAsync(obj, User);
-            }
-            catch (Exception ex)
-            {
-                Message.Exception(ref objMsg, ex);
-            }
-            return Ok(objMsg);
-        }
+        //[HttpPost]
+        //public async Task<IActionResult> Export(Voucher obj)
+        //{
+        //    Message objMsg = new Message();
+        //    try
+        //    {
+        //        var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
+        //        if (User == null) return Ok(objMsg);
+        //        // objMsg = await RepoGrn.ExportAsync(obj, User);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Message.Exception(ref objMsg, ex);
+        //    }
+        //    return Ok(objMsg);
+        //}
     }
 }

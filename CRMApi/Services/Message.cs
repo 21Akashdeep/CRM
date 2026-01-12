@@ -14,7 +14,7 @@ namespace CRMApi.Services
         public dynamic company { get; set; } = new { };
         public string? redirectPage { get; set; }
         
-        public static void Add(ref Message objMsg, int status, string text)
+        public static void Add(ref Message objMsg, int status, string text = "")
         {
             if (status > 0)
             {
@@ -27,7 +27,7 @@ namespace CRMApi.Services
                 objMsg.statusText = "Record has not saved.!!!\n" + text;
             }
         }        
-        public static void Update(ref Message objMsg, int status, string text)
+        public static void Update(ref Message objMsg, int status, string text ="")
         {
             if (status > 0)
             {
@@ -66,7 +66,7 @@ namespace CRMApi.Services
                 objMsg.statusText = "Record did not find.!!!\n" + text;
             }
         }
-        public static void Delete(ref Message objMsg, int status, string text)
+        public static void Delete(ref Message objMsg, int status, string text = "")
         {
             if (status > 0)
             {
@@ -79,7 +79,7 @@ namespace CRMApi.Services
                 objMsg.statusText = "Record has not deleted.!!!.\n" + text;
             }
         }
-        public static void Enable(ref Message objMsg, int status, string text)
+        public static void Enable(ref Message objMsg, int status, string text = "")
         {
             if (status > 0)
             {

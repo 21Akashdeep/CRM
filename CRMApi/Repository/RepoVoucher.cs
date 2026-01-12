@@ -186,52 +186,40 @@ namespace CRMApi.Repository
 
             return voucherItem;
         }
-        public async Task<Message> AddAsync (Voucher? obj,User User)
+        public async Task<Message> AddAsync (Voucher obj,User User)
         {
             Message objMsg = new Message();
-
             try
             {
-                
-                    try
-                    {
-                        obj.CreatedBy = User.Id;
-                        obj.CreatedAt = DateTime.Now;
-                        obj.UpdatedBy = User.Id;
-                        obj.UpdatedAt = DateTime.Now;
-                        obj.VoucherItem.ForEach(vi =>
-                        {
-                            vi.CreatedBy = User.Id;
-                            vi.CreatedAt = DateTime.Now;
-                            vi.UpdatedBy = User.Id;
-                            vi.UpdatedAt = DateTime.Now;
-                        });
-                        db.Add(obj);
-                        int isSaved = await db.SaveChangesAsync();
-                        if (isSaved <= 0)
-                        {
-                            Message.Error(ref objMsg, "Voucher was not saved");
+                obj.CreatedBy = User.Id;
+                obj.CreatedAt = DateTime.Now;
+                obj.UpdatedBy = User.Id;
+                obj.UpdatedAt = DateTime.Now;
+                obj.VoucherItem.ForEach(vi =>
+                {
+                    vi.StoreId = obj.StoreId;
+                    vi.CreatedBy = User.Id;
+                    vi.CreatedAt = DateTime.Now;
+                    vi.UpdatedBy = User.Id;
+                    vi.UpdatedAt = DateTime.Now;
+                });
+                db.Add(obj);
+                Message.Add(ref objMsg, (await db.SaveChangesAsync()));
 
-                           return objMsg;
+                db.Entry(obj).Reload();
 
-                        }
-                        db.Entry(obj).Reload();
-                        
-                       
-                    }
-                    catch (Exception ex)
-                    {
-                        Message.Exception(ref objMsg, ex);
-                        
-                    }
-                
+                foreach (var vi in obj.VoucherItem)
+                {
+                    vi.VoucherId = obj.Id;
+                }
+                Message.Add(ref objMsg, (await db.SaveChangesAsync()));
+
                 if (objMsg.status == Message.Type.success)
                 {
                     objMsg.obj = (await ListAsync(new Voucher
                     {
                         ListId = new List<int> { obj.Id }
-                    }, User)).FirstOrDefault();
-                   
+                    }, User)).FirstOrDefault();                   
                 }
             }
             catch (Exception ex)
@@ -246,19 +234,13 @@ namespace CRMApi.Repository
 
             try
             {
-                var voucher = await db.Voucher
-                    .Include(v => v.VoucherItem)
-                    .FirstOrDefaultAsync(x =>
-                        App.ActiveStatus.Contains(x.Status) &&
-                        x.Id == obj.Id);
+                var voucher = await db.Voucher.Include(v => v.VoucherItem).FirstOrDefaultAsync(x => App.ActiveStatus.Contains(x.Status) && x.Id == obj.Id);
 
                 if (voucher == null)
                 {
                     Message.Error(ref objMsg, "Voucher was not found for update");
                     return objMsg;
                 }
-
-               
                 voucher.Type = obj.Type;
                 voucher.No = obj.No;
                 voucher.PartyId = obj.PartyId;
@@ -266,48 +248,49 @@ namespace CRMApi.Repository
                 voucher.Remarks = obj.Remarks;
                 voucher.UpdatedBy = User.Id;
                 voucher.UpdatedAt = DateTime.Now;
-
-                
                 foreach (var vi in voucher.VoucherItem)
                 {
-                    var reqItem = obj.VoucherItem.FirstOrDefault(x => x.Id == vi.Id);
-
-                    if (reqItem == null)
+                    var item = obj.VoucherItem.FirstOrDefault(x => x.Id == vi.Id);
+                    if (item == null)
                     {
                         vi.Status = App.Status.ItemDelete; 
                     }
                     else
                     {
-                        vi.ItemId = reqItem.ItemId;
-                        vi.Qty = reqItem.Qty;
-                        vi.Rate = reqItem.Rate;
-                        vi.Amount = reqItem.Amount;
-                        vi.Remarks = reqItem.Remarks;
+                        vi.StoreId = item.StoreId;
+                        vi.ItemId = item.ItemId;
+                        vi.Qty = item.Qty;
+                        vi.Rate = item.Rate;
+                        vi.Amount =item.Amount;
+                        vi.Remarks = item.Remarks;
+                        vi.Status = voucher.Status;
                     }
-
                     vi.UpdatedBy = User.Id;
                     vi.UpdatedAt = DateTime.Now;
                 }
+                db.Update(voucher);
 
-                
-                var newItems = obj.VoucherItem.Where(x => x.Id == 0).ToList();
-                foreach (var vi in newItems)
+                var newItem = obj.VoucherItem.Where(x => x.Id == 0).ToList();
+                foreach (var vi in newItem)
                 {
+                    vi.StoreId = voucher.StateId;
+                    vi.VoucherId = voucher.Id;
                     vi.Status = voucher.Status;
                     vi.CreatedBy = User.Id;
                     vi.CreatedAt = DateTime.Now;
                     vi.UpdatedBy = User.Id;
-                    vi.UpdatedAt = DateTime.Now;
-
-                    voucher.VoucherItem.Add(vi);
+                    vi.UpdatedAt = DateTime.Now;                    
                 }
-
+                db.AddRange(newItem);
                 await db.SaveChangesAsync();
-                Message.Success(ref objMsg, "Voucher updated successfully");
+                Message.Update(ref objMsg, (await db.SaveChangesAsync()));
 
-                objMsg.obj = (await ListAsync(
+                if (objMsg.status == Message.Type.success) 
+                {
+                    objMsg.obj = (await ListAsync(
                     new Voucher { ListId = new List<int> { obj.Id } },
                     User)).FirstOrDefault();
+                }
             }
             catch (Exception ex)
             {
@@ -316,7 +299,105 @@ namespace CRMApi.Repository
 
             return objMsg;
         }
+        public async Task<Message> DeleteAsync(int Id,User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var Voucher = await db.Voucher
+                    .Include(vc => vc.VoucherItem.Where(vi=> App.ActiveStatus.Contains(vi.Status)))
+                    .FirstOrDefaultAsync(vc => App.ActiveStatus.Contains(vc.Status) && vc.Id == Id);
+                if (Voucher == null)
+                {
+                    Message.Error(ref objMsg, "Voucher was not found for Delete");
+                    return objMsg;
+                }
+                Voucher.Status = App.Status.Delete;
+                Voucher.UpdatedBy = User.Id;
+                Voucher.UpdatedAt = DateTime.Now;
+                Voucher.VoucherItem.ForEach(vi =>
+                {
+                    vi.Status = Voucher.Status;
+                    vi.UpdatedBy = User.Id;
+                    vi.UpdatedAt = DateTime.Now;
+                });
+                db.Update(Voucher);                
+                Message.Delete(ref objMsg, (await db.SaveChangesAsync()));
+                if (objMsg.status == Message.Type.success)
+                {
+                    objMsg.obj = (await ListAsync(new Voucher
+                    {
+                        ListId = new List<int> { Voucher.Id },
+                        ListStatus = new List<int> { App.Status.Delete }
+                    }, User)).FirstOrDefault();                   
+                }
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+        public async Task<Message> DeleteItemAsync(int id, User user)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var voucherItem = await db.VoucherItem.FirstOrDefaultAsync(vci => App.ActiveStatus.Contains(vci.Status) && vci.Id == id);
+                if (voucherItem == null)
+                {
+                    Message.Error(ref objMsg, "Voucher item was not found for delete");
+                    return objMsg;
+                }
+                voucherItem.Status = App.Status.Delete;
+                voucherItem.UpdatedBy = user.Id;
+                voucherItem.UpdatedAt = DateTime.Now;
+                db.Update(voucherItem);
+                Message.Delete(ref objMsg, (await db.SaveChangesAsync()));                
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+        public async Task<Message> EnableAsync(int id, User user)
+        {
+            Message objMsg = new Message();
 
-
+            try
+            {
+                var voucher = await db.Voucher
+                    .Include(v => v.VoucherItem.Where(vi=> vi.Status == App.Status.Delete))
+                    .FirstOrDefaultAsync(v => v.Id == id && v.Status == App.Status.Delete);
+                if (voucher == null)
+                {
+                    Message.Error(ref objMsg, "Voucher was not found for enable");
+                    return objMsg;
+                }
+                voucher.Status = App.Status.Enable;
+                voucher.UpdatedBy = user.Id;
+                voucher.UpdatedAt = DateTime.Now;
+                foreach (var vi in voucher.VoucherItem)
+                {
+                    vi.Status = App.Status.Enable;
+                    vi.UpdatedBy = user.Id;
+                    vi.UpdatedAt = DateTime.Now;
+                }                
+                Message.Enable(ref objMsg, (await db.SaveChangesAsync()));
+                if (objMsg.status == Message.Type.success) 
+                {
+                    //Assing Voucher in objMsg.obj
+                }
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
     }
+
+
+
 }
