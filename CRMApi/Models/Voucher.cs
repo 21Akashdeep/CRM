@@ -27,6 +27,8 @@ namespace CRMApi.Models
         [StringLength(12)] public string? EwayNo { get; set; }
         public DateTime? EwayDate { get; set; }
         [StringLength(100)] public string? Remarks { get; set; }
+        [NotMapped] public DateTime FromDate { get; set; }
+        [NotMapped] public DateTime ToDate { get; set; }
         public int Status { get; set; } = 1;
         [NotMapped] public string? StatusDesc { get; set; }
         [NotMapped] public string? StatusCss { get; set; }
