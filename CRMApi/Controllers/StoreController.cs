@@ -4,33 +4,36 @@ using CRMApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-
-//An error occurred while saving the entity changes. See the inner exception for details.
-//Table 'pcats_crm.Customer' doesn't exist
-
 namespace CRMApi.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
     [Authorize]
-    public class PartyController : ControllerBase
+    public class StoreController : ControllerBase
     {
         private readonly DBCRM db;
-        private readonly RepoParty RepoParty;
-        public PartyController(DBCRM _db)
+        private readonly RepoStore RepoStore;
+
+        public StoreController(DBCRM _db)
         {
             db = _db;
-            RepoParty = new RepoParty(db);
+            RepoStore = new RepoStore(db);
         }
+
         [HttpGet]
-        public async Task<IActionResult> GetViewOption()
+        public IActionResult GetViewOption()
         {
             Message objMsg = new Message();
             try
             {
-                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
+                var User = Util.RequestVerify(
+                    new Request { HttpRequest = Request, ActionType = ActionType.View },
+                    db,
+                    ref objMsg
+                );
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoParty.GetViewOptionAsync();
+
+                objMsg = RepoStore.GetViewOption();
             }
             catch (Exception ex)
             {
@@ -38,15 +41,21 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
+
         [HttpGet]
-        public async Task<IActionResult> GetAddOption()
+        public IActionResult GetAddOption()
         {
             Message objMsg = new Message();
             try
             {
-                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
+                var User = Util.RequestVerify(
+                    new Request { HttpRequest = Request, ActionType = ActionType.View },
+                    db,
+                    ref objMsg
+                );
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoParty.GetAddOptionAsync();
+
+                objMsg = RepoStore.GetAddOption();
             }
             catch (Exception ex)
             {
@@ -54,15 +63,21 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
+
         [HttpPost]
-        public async Task<IActionResult> Get([FromBody] Party obj)
+        public IActionResult Get(Store obj)
         {
             Message objMsg = new Message();
             try
             {
-                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
+                var User = Util.RequestVerify(
+                    new Request { HttpRequest = Request, ActionType = ActionType.View },
+                    db,
+                    ref objMsg
+                );
                 if (User == null) return Ok(objMsg);
-                objMsg.data = await RepoParty.ListAsync(obj, User);
+
+                objMsg.data = RepoStore.List(obj, User);
                 Message.Get(ref objMsg, "");
             }
             catch (Exception ex)
@@ -71,15 +86,21 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
+
         [HttpPost]
-        public async Task<IActionResult> Print(Party obj)
+        public IActionResult Print(Store obj)
         {
             Message objMsg = new Message();
             try
             {
-                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Print }, db, ref objMsg);
+                var User = Util.RequestVerify(
+                    new Request { HttpRequest = Request, ActionType = ActionType.Print },
+                    db,
+                    ref objMsg
+                );
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoParty.PrintAsync(obj, User);
+
+                objMsg = RepoStore.Print(obj, User);
             }
             catch (Exception ex)
             {
@@ -87,15 +108,21 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
+
         [HttpPost]
-        public async Task<IActionResult> Export(Party obj)
+        public IActionResult Export(Store obj)
         {
             Message objMsg = new Message();
             try
             {
-                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
+                var User = Util.RequestVerify(
+                    new Request { HttpRequest = Request, ActionType = ActionType.Export },
+                    db,
+                    ref objMsg
+                );
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoParty.ExportAsync(obj, User);
+
+                objMsg = RepoStore.Export(obj, User);
             }
             catch (Exception ex)
             {
@@ -103,15 +130,21 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
+
         [HttpPost]
-        public async Task<IActionResult> Add(Party obj)
+        public IActionResult Add(Store obj)
         {
             Message objMsg = new Message();
             try
             {
-                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.Export }, db, ref objMsg);
+                var User = Util.RequestVerify(
+                    new Request { HttpRequest = Request, ActionType = ActionType.Add },
+                    db,
+                    ref objMsg
+                );
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoParty.AddAsync(obj, User);
+
+                objMsg = RepoStore.Add(obj, User);
             }
             catch (Exception ex)
             {
@@ -119,17 +152,24 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
+
         [HttpGet]
-        public async Task<IActionResult> Edit(int Id)
+        public IActionResult Edit(int Id)
         {
             Message objMsg = new Message();
             try
             {
-                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
+                var User = Util.RequestVerify(
+                    new Request { HttpRequest = Request, ActionType = ActionType.View },
+                    db,
+                    ref objMsg
+                );
                 if (User == null) return Ok(objMsg);
-                Party obj = new Party();
+
+                Store obj = new Store();
                 obj.ListId.Add(Id);
-                objMsg = await RepoParty.EditAsync(obj, User);
+
+                objMsg = RepoStore.Edit(obj, User);
             }
             catch (Exception ex)
             {
@@ -137,15 +177,21 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
+
         [HttpPatch]
-        public async Task<IActionResult> Update(Party obj)
+        public IActionResult Update(Store obj)
         {
             Message objMsg = new Message();
             try
             {
-                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
+                var User = Util.RequestVerify(
+                    new Request { HttpRequest = Request, ActionType = ActionType.View },
+                    db,
+                    ref objMsg
+                );
                 if (User == null) return Ok(objMsg);
-                objMsg = await RepoParty.UpdateAsync(obj, User);
+
+                objMsg = RepoStore.Update(obj, User);
             }
             catch (Exception ex)
             {
@@ -153,17 +199,24 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
+
         [HttpDelete]
-        public async Task<IActionResult> Delete(int Id)
+        public IActionResult Delete(int Id)
         {
             Message objMsg = new Message();
             try
             {
-                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
+                var User = Util.RequestVerify(
+                    new Request { HttpRequest = Request, ActionType = ActionType.Delete },
+                    db,
+                    ref objMsg
+                );
                 if (User == null) return Ok(objMsg);
-                Party obj = new Party();
+
+                Store obj = new Store();
                 obj.Id = Id;
-                objMsg = await RepoParty.DeleteAsync(obj, User);
+
+                objMsg = RepoStore.Delete(obj, User);
             }
             catch (Exception ex)
             {
@@ -171,17 +224,24 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
+
         [HttpPatch]
-        public async Task<IActionResult> Enable(int Id)
+        public IActionResult Enable(int Id)
         {
             Message objMsg = new Message();
             try
             {
-                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
+                var User = Util.RequestVerify(
+                    new Request { HttpRequest = Request, ActionType = ActionType.Enable },
+                    db,
+                    ref objMsg
+                );
                 if (User == null) return Ok(objMsg);
-                Party obj = new Party();
+
+                Store obj = new Store();
                 obj.Id = Id;
-                objMsg = await RepoParty.EnableAsync(obj, User);
+
+                objMsg = RepoStore.Enable(obj, User);
             }
             catch (Exception ex)
             {
