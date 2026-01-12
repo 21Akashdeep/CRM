@@ -4,6 +4,10 @@ using CRMApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+
+//An error occurred while saving the entity changes. See the inner exception for details.
+//Table 'pcats_crm.Customer' doesn't exist
+
 namespace CRMApi.Controllers
 {
     [Route("api/[controller]/[action]")]

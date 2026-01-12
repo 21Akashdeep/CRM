@@ -126,7 +126,7 @@ namespace CRMApi.Repository
             ).ToList();
             return Voucher;
         }
-        public async Task<List<VoucherItem>> ListItemAsync(Voucher? obj,User User)
+        public async Task<List<VoucherItem>> ListItemAsync(Voucher? obj,User User)  
         {
             obj ??= new Voucher();
             obj.ListStatus = obj.ListStatus.Any() ? obj.ListStatus : App.ActiveStatus;
