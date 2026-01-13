@@ -1,7 +1,7 @@
 ﻿class Grn{ 
     static item = [];
     static reasonCode = [];
-    static store = [];
+   
     static stateList = [];
     static init() {
 
@@ -44,8 +44,8 @@
                 OnlineApi.pinCode({
                     pinCode: pinCode,
                     postOfficeId: '#Grn-ConPostOffice',
-                    //stateId: '#Grn-ConStateCode',
-                    stateName:'#Grn-ConStateName'
+                    stateId: '#Grn-ConStateCode',
+                    stateId:'#Grn-ConStateName'
 
                 })
             }
@@ -115,7 +115,7 @@
                 Grn.reasonCode = response.data.ReasonCode;
                 let store = response.data.Store;
                 let state = response.data.State;
-                Dropdown.bind({ id: '#Grn-ConStateCode', data: state, value: 'Code', text: 'Code', initialValue:[Grn.stateList.Code] });
+                Dropdown.bind({ id: '#Grn-ConStateCode', data: state, value: 'Code', text: 'Code', initialValue: [state.Code] });
                 Dropdown.bind({ id: '#Grn-ConStateName', data: state, value: 'Name', text: 'Name', initialValue: [state.Name] });
                 Dropdown.bind({ id: '#Grn-PartyId', data: response.data.Party, value: 'Id', text: 'Name' });
                 Dropdown.bind({ id: '#Grn-Type', data: response.data.Type, value: 'Value', text: 'Description' });
@@ -194,7 +194,7 @@
                 obj.StoreId = StoreId;
                 obj.Id = action == 'Edit' ? obj.Id : null;
                 let title = action == 'Edit' ? Grn / `Edit (Code: ${obj.GrnNo})` : `Grn / Add`;
-                Dropdown.bind({ id: '#Grn-ConStateCode', data: state, value: 'Code', text: 'Code', initialValue: [Grn.stateList.Code] });
+                Dropdown.bind({ id: '#Grn-ConStateCode', data: state, value: 'Code', text: 'Code', initialValue: [state.Code] });
                 Dropdown.bind({ id: '#Grn-ConStateName', data: state, value: 'Name', text: 'Name', initialValue: [state.Name] });
                 Dropdown.bind({ id: '#Grn-PartyId', data: response.data.Party, value: 'Id', text: 'Name' });
                 Dropdown.bind({ id: '#Grn-Type', data: response.data.Type, value: 'Value', text: 'Description' });
@@ -256,19 +256,6 @@
 
         }
     }
-
-
-    //static delete({ id }) {
-    //    Data.delete({
-    //        url: `Grn/Delete?Id=${id}`,
-    //        onSuccess: (response) => {
-    //            Message.show(response);
-    //            if (response.status == Message.Type.success) {
-    //                Table.updateById({ id: '#tableGrn', objId: response.obj.Id, obj: response.obj });
-    //            }
-    //        }
-    //    });
-    //}
 }
 
 window.tableGrnRefNoAndDate = (value, obj, index) => {
@@ -360,7 +347,7 @@ window.tableGrnConAddress = (value, obj, index) => {
 };
 window.tableGrnActionEvent = {
     'click .btn-edit': (e, value, obj, index) => {
-        Grn.edit({ id: obj.Id });
+        Grn.edit({ id: obj.Id,action: 'Edit' });
     },
     'click .btn-duplicate': (e, value, obj, index) => {
         Grn.edit({ id: obj.Id, action: 'Add' });

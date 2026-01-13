@@ -231,7 +231,7 @@ namespace CRMApi.Repository
         public async Task<Message> UpdateAsync(Voucher obj, User User)
         {
             Message objMsg = new Message();
-
+            var storeid = obj.StoreId;
             try
             {
                 var voucher = await db.Voucher.Include(v => v.VoucherItem).FirstOrDefaultAsync(x => App.ActiveStatus.Contains(x.Status) && x.Id == obj.Id);
@@ -286,7 +286,7 @@ namespace CRMApi.Repository
                 var newItem = obj.VoucherItem.Where(x => x.Id == 0).ToList();
                 foreach (var vi in newItem)
                 {
-                    vi.StoreId = voucher.StoreId;
+                    vi.StoreId = storeid;
                     vi.VoucherId = voucher.Id;
                     vi.Status = voucher.Status;
                     vi.CreatedBy = User.Id;
@@ -295,7 +295,7 @@ namespace CRMApi.Repository
                     vi.UpdatedAt = DateTime.Now;                    
                 }
                 db.AddRange(newItem);
-                await db.SaveChangesAsync();
+               // await db.SaveChangesAsync();
                 Message.Update(ref objMsg, (await db.SaveChangesAsync()));
 
                 if (objMsg.status == Message.Type.success) 
