@@ -24,15 +24,15 @@
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <label>Customer</label>
+                    <label>Party</label>
                     <select id="ListCustomerId" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
                     </select>
                 </div>
-                @* <div class="col-md-3">
-                    <label>Consignee Name</label>
-                    <select id="ListConName" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                <div class="col-md-2">
+                    <label>Grn No.</label>
+                    <select id="ListGrnNo" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
                     </select>
-                </div> *@
+                </div>
                 <div class="col-md-2">
                     <div class="btn-group">
                         <button type="button" id="btnSearch" class="btn btn-sm btn-filter btn-outline-success" title="Search">
@@ -58,8 +58,8 @@
                                 <th data-sortable="true" data-formatter="tableGrnDate">Date</th>
                                 <th data-sortable="true" data-field="No">Number</th>
                                 <th data-sortable="true" data-field="PartyDesc">Party</th>
-                                @* <th data-sortable="true" data-field="ConName">Consignee Name </th>
-                                <th data-sortable="true" data-formatter="tableGrnConAddress" class="text-nowrap">Consignee Address</th>
+                                 <th data-sortable="true" data-field="ConName">Consignee Name </th>
+                                @* <th data-sortable="true" data-formatter="tableGrnConAddress" class="text-nowrap">Consignee Address</th>
                                 <th data-sortable="true" data-formatter="tableGrnRefNoAndDate" class="text-nowrap">Ref No / Date </th>
                                 <th data-sortable="true" data-field="Remarks">Remarks</th> *@
                                 <th data-sortable="false" data-formatter="tableGrnCreatedByAndAt" class="text-nowrap">Created By & At</th>
@@ -122,7 +122,6 @@
                             <label>EwayNo<span class="text-mandatory">*</span></label>
                             <input type="text" id="Grn-EwayNo" name="EwayNo" class="form-control form-control-sm required" maxlength="10" data-alpha-lg-num="true" />
                         </div>
-
                         <div class="col-md-2">
                             <label>EwayDate</label>
                             <div class="input-group input-group-sm">
@@ -132,17 +131,15 @@
                         </div>
                         <div class="col-md-4">
                             <label>Conssigne Name<span class="text-mandatory">*</span></label>
-                            <input type="text" id="Grn-ConName" name="ConName" class="form-control form-control-sm required" maxlength="10" data-alpha-lg-num="true" />
+                            <input type="text" id="Grn-ConName" name="ConName" class="form-control form-control-sm required" maxlength="10"  />
                         </div>
-
-
                         <div class="col-md-6">
                             <label>Conssigne Address 1<span class="text-mandatory">*</span></label>
-                            <input type="text" id="Grn-ConAdd1" name="ConAdd1" class="form-control form-control-sm required" maxlength="100" data-alpha-lg-num="true" />
+                            <input type="text" id="Grn-ConAdd1" name="ConAdd1" class="form-control form-control-sm required" maxlength="100"  />
                         </div>
                         <div class="col-md-6">
                             <label>Conssigne Address 2</label>
-                            <input type="text" id="Grn-ConAdd2" name="ConAdd2" class="form-control form-control-sm" maxlength="100" data-alpha-lg-num="true" />
+                            <input type="text" id="Grn-ConAdd2" name="ConAdd2" class="form-control form-control-sm" maxlength="100"  />
                         </div>
                         <div class="col-md-2">
                             <label>Con Pin Code</label>

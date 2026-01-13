@@ -152,6 +152,7 @@ namespace CRMApi.Repository
         public async Task<List<Voucher>> ListAsync(Voucher? obj, User User)
         {
             obj ??= new Voucher();
+            obj.ListType = new List<string> {"DeliveryNote"};
             var voucher = await new RepoVoucher(db).ListAsync(obj, User);
             return voucher;
         }

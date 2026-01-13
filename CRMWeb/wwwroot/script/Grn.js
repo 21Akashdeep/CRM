@@ -10,13 +10,12 @@
 
     $('#btnSearch').on('click', () => {
         Grn.get({
-            method: 'Get',
+            method: 'Get',      
             onSuccess: (response) => {
                 Table.add({ id: '#tableGrn', data: response.data });
             }
         });
     }); 
-
     $('#btnPrint').on('click', () => {
         Grn.get({
             method: 'Print',
@@ -33,8 +32,7 @@
             }
         });
     });
-
-        $('#Grn-ConPinCode').on('input', () => {
+    $('#Grn-ConPinCode').on('input', () => {
 
             let pinCode = $('#Grn-ConPinCode').val();
             if (pinCode.length == 6) {
@@ -43,13 +41,9 @@
                     postOfficeId: '#Grn-ConPostOffice',
                     stateId: '#Grn-ConStateCode',
                     stateId:'#Grn-ConStateName'
-
                 })
             }
-
-
-        })
-
+    })
     $('#Grn-BtnSave').on('click', () => {
         if (!Field.isMandatory({ class: '.required' })) {
             return;
@@ -74,7 +68,6 @@
         else {
             Grn.update(obj);
         }
-
     });
 }
     static getViewOption() {
@@ -84,6 +77,7 @@
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
             Dropdown.bind({ id: '#ListCustomerId', data: response.data.Customer, value: 'Id', text: 'Name' });
             Dropdown.bind({ id: '#ListConName', data: response.data.ConName, value: 'Id', text: 'ConName' });
+            Dropdown.bind({ id: '#ListGrnNo', data: response.data.GrnNo, value: 'Id', text: 'No' })
         }
     });
 }
@@ -96,7 +90,7 @@
         FromDate: DateTime.json($('#DateRange').val().split('|')[0]),
         ToDate: DateTime.json($('#DateRange').val().split('|')[1]),
         ListCustomerId: $('#ListCustomerId').val(),
-        ListConName: $('#ListConName').val()
+        ListNo: $('#ListGrnNo').val()
     };
         Data.post({
             url: `Grn/${method}`,

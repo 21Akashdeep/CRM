@@ -41,8 +41,9 @@ namespace CRMApi.Models
         public List<VoucherItem> VoucherItem { get; set; } = new List<VoucherItem>();
         [NotMapped] public List<int> ListId { get; set; } = new List<int>();
         [NotMapped] public List<int> ListPartyId { get; set; } = new List<int>();
-        [NotMapped] public List<int> ListConName { get; set; } = new List<int>();
+        [NotMapped] public List<int> ListNo { get; set; } = new List<int>();
         [NotMapped] public List<int> ListStatus { get; set; } = new List<int>();
+        [NotMapped] public List<string> ListType { get; set; } = new List<string>();
         [NotMapped] public bool IsEdit { get; set; } = false;
         [NotMapped] public bool IsPrint { get; set; } = false;
         [NotMapped] public bool IsDelete { get; set; } = false;

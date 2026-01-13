@@ -36,10 +36,10 @@ namespace CRMApi.Repository
                     x.Id,
                     x.Name
                 }).ToListAsync();
-                Option.ConName = await db.Voucher.Where(x => App.ActiveStatus.Contains(x.Status) && !string.IsNullOrEmpty(x.ConName)).Select(x => new
+                Option.GrnNo = await db.Voucher.Where(x => App.ActiveStatus.Contains(x.Status) && x.Type == "ReceiptNote").Select(x => new
                 {
                     x.Id,
-                    x.ConName,
+                    x.No,
                 }).ToListAsync();
 
                 objMsg.data = Option;
@@ -92,8 +92,7 @@ namespace CRMApi.Repository
                 }).ToListAsync();
                 var Item = await (
                     from itm in db.Item
-                    join unt in db.Unit on itm.UnitId equals unt.Id
-                    
+                    join unt in db.Unit on itm.UnitId equals unt.Id                   
                     select new
                     {
                         itm.Id,
@@ -126,9 +125,8 @@ namespace CRMApi.Repository
         {
 
             obj ??= new Voucher();
-
+            obj.ListType = new List<string> {"ReceiptNote"};
             var voucher = await new RepoVoucher(db).ListAsync(obj, User);
-
             return voucher;
            
            

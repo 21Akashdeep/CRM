@@ -112,7 +112,7 @@ namespace CRMApi.Controllers
             {
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
-                obj.Type = "DeliveryNote";
+                obj.Type = "ReceiptNote";
                 objMsg = await RepoVoucher.UpdateAsync(obj, User);
             }
             catch (Exception ex)

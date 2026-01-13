@@ -18,8 +18,12 @@ namespace CRMApi.Repository
             obj.ListStatus = obj.ListStatus.Any() ? obj.ListStatus : App.ActiveStatus;
             var dbVoucherQuery = db.Voucher.Where(grn => obj.ListStatus.Contains(grn.Status)).AsQueryable();
             //Add Filter
+            if(obj.ListType.Any())
+                dbVoucherQuery = dbVoucherQuery.Where(vc => obj.ListType.Contains(vc.Type));
             if (obj.ListId.Any())
-                dbVoucherQuery = dbVoucherQuery.Where(grn => obj.ListId.Contains(grn.Id));
+                dbVoucherQuery = dbVoucherQuery.Where(grn => obj.ListId.Contains(grn.Id));  
+            if (obj.ListNo.Any())
+                dbVoucherQuery = dbVoucherQuery.Where(vc => obj.ListNo.Contains(vc.Id));
             if (obj.FromDate != DateTime.MinValue)
                 dbVoucherQuery = dbVoucherQuery.Where(grn => grn.Date.Date >= obj.FromDate.Date);
             if (obj.ToDate != DateTime.MinValue)

@@ -106,7 +106,7 @@ namespace CRMApi.Controllers
                 Message.Exception(ref objMsg, ex);
             }
             return Ok(objMsg);
-        }
+        }   
         [HttpGet]
         public async Task<IActionResult> Edit(int Id)
         {
