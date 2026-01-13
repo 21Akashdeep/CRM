@@ -1,8 +1,5 @@
 ﻿class Grn{ 
     static item = [];
-    static reasonCode = [];
-   
-    static stateList = [];
     static init() {
 
     Grn.getViewOption();
@@ -93,7 +90,6 @@
     static getAddOption({ onSuccess }) {
         Data.get({ url: 'Grn/GetAddOption', onSuccess: onSuccess });
     }
-
     static get({ method = 'Get', onSuccess }) {
     let obj = {
         ListStatus: $('#ListStatus').val(),
@@ -111,8 +107,7 @@
     static newEntry() {
         Grn.getAddOption({
             onSuccess: (response) => {
-                Grn.item = response.data.Item;
-                Grn.reasonCode = response.data.ReasonCode;
+                Grn.item = response.data.Item;              
                 let store = response.data.Store;
                 let state = response.data.State;
                 Dropdown.bind({ id: '#Grn-ConStateCode', data: state, value: 'Code', text: 'Code', initialValue: [state.Code] });
@@ -185,15 +180,14 @@
             url: `Grn/Edit?Id=${id}`,
             onSuccess: (response) => {
                 let option = response.data;
-                Grn.item = option.Item;
-                Grn.reasonCode = response.data.ReasonCode;
+                Grn.item = option.Item;              
                 let store = response.data.Store;
                 let state = response.data.State;
                 let obj = response.obj;
                 let StoreId = obj.VoucherItem[0].StoreId;
                 obj.StoreId = StoreId;
                 obj.Id = action == 'Edit' ? obj.Id : null;
-                let title = action == 'Edit' ? Grn / `Edit (Code: ${obj.GrnNo})` : `Grn / Add`;
+                let title = action === 'Edit' ? `Grn / Edit (Code: ${obj.No})` : `Grn / Add`;
                 Dropdown.bind({ id: '#Grn-ConStateCode', data: state, value: 'Code', text: 'Code', initialValue: [state.Code] });
                 Dropdown.bind({ id: '#Grn-ConStateName', data: state, value: 'Name', text: 'Name', initialValue: [state.Name] });
                 Dropdown.bind({ id: '#Grn-PartyId', data: response.data.Party, value: 'Id', text: 'Name' });
@@ -228,7 +222,6 @@
             }
         });
     }
-
     static delete({ id }) {
         Message.confirm(
             {
@@ -257,7 +250,6 @@
         }
     }
 }
-
 window.tableGrnRefNoAndDate = (value, obj, index) => {
     return `
         <div>${obj.RefNo ?? ''}</div>
