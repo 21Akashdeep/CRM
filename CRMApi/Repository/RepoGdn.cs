@@ -58,6 +58,16 @@ namespace CRMApi.Repository
                         x.ConName,
                     }).ToListAsync();
 
+                Option.Number = await db.Voucher
+                 .Where(x => App.ActiveStatus.Contains(x.Status)
+                    && !string.IsNullOrEmpty(x.No)
+                    && x.Type == "DeliveryNote")
+                      .Select(x => new
+                    {
+                       x.Id,
+                       x.No,
+                    }).ToListAsync();
+
                 objMsg.data = Option;
                 Message.Success(ref objMsg, "Record found");
             }
@@ -198,6 +208,53 @@ namespace CRMApi.Repository
             return objMsg;
         }
 
-        // ExportAsync can be added later same as GRN if needed
+        public async Task<Message> ExportAsync(Voucher obj, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                // 1️⃣ Get Company
+                var objCompany = await db.Company
+                    .FirstOrDefaultAsync(pt => App.ActiveStatus.Contains(pt.Status));
+
+                if (objCompany == null)
+                {
+                    Message.Error(ref objMsg, "GDN info not found");
+                    return objMsg;
+                }
+
+                // 2️⃣ Get GDN List using same pattern
+                var Gdn = (await ListAsync(obj, User)).Select(co => new
+                {
+                    co.Id,
+                    co.No,
+                    co.Date,
+                    Party = co.PartyDesc,
+                    co.ConName,
+                    Status= co.StatusDesc,
+                    co.CreatedByName,
+                    co.CreatedAt,
+                    co.UpdatedByName,
+                    co.UpdatedAt
+                }).ToList();
+
+                
+                DataTable objDataTable = Util.ListToDataTable(Gdn);
+
+                objCompany.SheetName = "GDN List";
+                objCompany.ReportDesc = $"GDN - {DateTime.Now:dd-MMM-yyyy}";
+                objMsg.base64 = Util.DataTableToBase64(objDataTable, objCompany);
+
+                Message.Get(ref objMsg, "");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+
+            return objMsg;
+        }
+
+
     }
 }
