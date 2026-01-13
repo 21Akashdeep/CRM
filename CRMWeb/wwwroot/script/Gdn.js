@@ -46,9 +46,13 @@
                 OnlineApi.pinCode({
                     pinCode: pinCode,
                     postOfficeId: '#Gdn-ConPostOffice',
-                    stateName: '#Gdn-ConStateName',
+                    stateId: '#Gdn-ConStateCode',
+                    stateId: '#Gdn-ConStateName'
+
                 })
             }
+
+
         })
 
         $('#Gdn-BtnSave').on('click', () => {
@@ -81,7 +85,8 @@
             onSuccess: (response) => {
                 Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
                 Dropdown.bind({ id: '#ListCustomerId', data: response.data.Customer, value: 'Id', text: 'Name' });
-                Dropdown.bind({ id: '#ListConName', data: response.data.ConName, value: 'Id', text: 'ConName' });
+                //Dropdown.bind({ id: '#ListConName', data: response.data.ConName, value: 'Id', text: 'ConName' });
+                Dropdown.bind({ id: '#ListNo', data: response.data.Number, value: 'Id', text: 'No' });
             }
         });
     }
@@ -96,7 +101,8 @@
             FromDate: DateTime.json($('#DateRange').val().split('|')[0]),
             ToDate: DateTime.json($('#DateRange').val().split('|')[1]),
             ListCustomerId: $('#ListCustomerId').val(),
-            ListConName: $('#ListConName').val()
+            //ListConName: $('#ListConName').val(),
+            ListNo: $('#ListNo').val()
         };
         Data.post({
             url: `Gdn/${method}`,
@@ -197,9 +203,9 @@
                 obj.StoreId = StoreId;
                 obj.Id = action == 'Edit' ? obj.Id : null;
 
-                let title = action == 'Edit' ? `Gdn / Edit (Code: ${obj.GdnNo})` : `Gdn / Add`;
+                let title = action == 'Edit' ? `Gdn / Edit (Code: ${obj.No})` : `Gdn / Add`;
 
-                Dropdown.bind({ id: '#Gdn-ConStateCode', data: state, value: 'Code', text: 'Code', initialValue: [Gdn.stateList.Code] });
+                Dropdown.bind({ id: '#Gdn-ConStateCode', data: state, value: 'Code', text: 'Code', initialValue: [state.Code] });
                 Dropdown.bind({ id: '#Gdn-ConStateName', data: state, value: 'Name', text: 'Name', initialValue: [state.Name] });
                 Dropdown.bind({ id: '#Gdn-PartyId', data: response.data.Party, value: 'Id', text: 'Name' });
                 Dropdown.bind({ id: '#Gdn-Type', data: response.data.Type, value: 'Value', text: 'Description' });

@@ -123,7 +123,24 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
-
+        [HttpPatch]
+        public async Task<IActionResult> Update([FromBody] Voucher obj)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
+                if (User == null) return Ok(objMsg);
+                obj.Type = "DeliveryNote";
+                objMsg = await RepoVoucher.UpdateAsync(obj, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
+        [HttpDelete]
         public async Task<IActionResult> Delete(int Id)
         {
             Message objMsg = new Message();
@@ -161,25 +178,25 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> Export(Voucher obj)
-        //{
-        //    Message objMsg = new Message();
-        //    try
-        //    {
-        //        var User = Util.RequestVerify(
-        //            new Request { HttpRequest = Request, ActionType = ActionType.Export }, 
-        //            db, ref objMsg);
-        //
-        //        if (User == null) return Ok(objMsg);
-        //
-        //        // objMsg = await RepoGdn.ExportAsync(obj, User);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Message.Exception(ref objMsg, ex);
-        //    }
-        //    return Ok(objMsg);
-        //}
+        [HttpPost]
+        public async Task<IActionResult> Export(Voucher obj)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(
+                    new Request { HttpRequest = Request, ActionType = ActionType.Export },
+                    db, ref objMsg);
+
+                if (User == null) return Ok(objMsg);
+
+                 objMsg = await RepoGdn.ExportAsync(obj, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
     }
 }
