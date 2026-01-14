@@ -533,3 +533,273 @@ window.tableGdnExpiryOnEvent = {
         });
     }
 };
+window.tableRtnRefNoAndDate = (value, obj, index) => {
+    return `
+        <div>${obj.RefNo ?? ''}</div>
+        <div>${obj.RefDate ? moment(obj.RefDate).format('DD-MMM-YYYY') : ''}</div>
+    `;
+};
+
+window.tableRtnSlNo = (value, obj, index) => {
+    return index + 1;
+}
+
+window.tableRtnDate = (value, obj, index) => {
+    return moment(obj.Date).format('DD-MMM-YYYY');
+}
+
+window.tableRtnStatus = (value, obj, index) => {
+    return `<div class="${obj.StatusCss}">${obj.StatusDesc}</div>`;
+}
+
+window.tableRtnCreatedByAndAt = (value, obj, index) => {
+    return `
+        <div>${obj.CreatedByName}</div>
+        <div>${moment(obj.CreatedAt).format('DD-MMM-YYYY HH:mm')}</div>
+    `;
+}
+
+window.tableRtnUpdatedByAndAt = (value, obj, index) => {
+    return `
+        <div>${obj.UpdatedByName}</div>
+        <div>${DateTime.dateTime(obj.UpdatedAt)}</div>
+    `;
+}
+
+window.tableRtnAction = (value, obj, index) => {
+    let actionBtn = `
+        <div class="btn-group dropstart">            
+            <button class="btn btn-sm border-0" data-bs-toggle="dropdown"><i class="fa fa-ellipsis-v"></i></button>
+            <ul class="dropdown-menu dropdown-menu-lg-end mt-4">
+                ${obj.IsEdit ?
+            `<li>
+                        <a href="#" class="dropdown-item text-success-100 btn-edit" title="View / Edit">
+                            <span class="fa fa-edit text-success-100"></span>&nbsp;&nbsp;View / Edit
+                        </a>
+                    </li>` : ``
+        }
+                ${obj.IsDuplicate ?
+            `<li>
+                        <a href="#" class="dropdown-item text-primary-100 btn-duplicate" title="Duplicate">
+                            <span class="fa fa-copy text-primary-100"></span>&nbsp;&nbsp;Duplicate
+                        </a>
+                    </li>` : ``
+        }
+                ${obj.IsDelete ?
+            `<li>
+                        <a href="#" class="dropdown-item text-danger-100 btn-delete" title="Delete">
+                            <span class="fa fa-trash text-danger-100"></span>&nbsp;&nbsp;Delete
+                        </a>
+                    </li>` : ``
+        }
+                ${obj.IsEnable ?
+            `<li>
+                        <a href="#" class="dropdown-item text-success-100 btn-enable" title="Enable">
+                            <span class="fa fa-toggle-on text-success-100"></span>&nbsp;&nbsp;Enable
+                        </a>
+                    </li>` : ``
+        }
+            </ul>
+        </div>
+    `;
+    return actionBtn;
+}
+
+window.tableRtnConAddress = (value, obj, index) => {
+    const parts = [
+        obj.ConAdd1,
+        obj.ConAdd2,
+        obj.ConPostOffice,
+        obj.ConPincode,
+        obj.ConStateName
+    ]
+        .filter(x => x && x.trim() !== "")
+        .map(x => x.trim());
+
+    if (parts.length === 0) return "";
+
+    let lines = [];
+    for (let i = 0; i < parts.length; i += 2) {
+        lines.push(parts.slice(i, i + 2).join(", "));
+    }
+
+    return lines.join("<br>");
+};
+
+window.tableRtnActionEvent = {
+    'click .btn-edit': (e, value, obj, index) => {
+        Rtn.edit({ id: obj.Id });
+    },
+    'click .btn-duplicate': (e, value, obj, index) => {
+        Rtn.edit({ id: obj.Id, action: 'Add' });
+    },
+    'click .btn-print': (e, value, obj, index) => {
+        Rtn.print({ id: obj.Id });
+    },
+    'click .btn-delete': (e, value, obj, index) => {
+        Rtn.delete({ id: obj.Id });
+    }
+}
+
+
+window.tableRtnItemSlNo = (value, obj, index) => {
+    return index + 1;
+}
+
+window.tableRtnItemDesc = (value, obj, index) => {
+    return `
+        ${Dropdown.html({ id: `RtnItem_${index}`, className: 'rtn-item', data: Rtn.item, value: 'Id', text: 'Description', initialValue: [obj.ItemId], json: true, parent: '.modal' })}
+        <input type="text" id="RtnItemRemarks_${index}" class="form-control form-control-sm mb-0 mt-1 rtn-item-remarks" maxlength="100" placeholder="Remarks" value="${obj.Remarks ?? ""}">
+    `;
+}
+
+window.tableRtnItemDescEvent = {
+    'change .rtn-item': (e, value, obj, index) => {
+        obj.ItemId = !Field.isNullOrEmpty(e.currentTarget.value) ? parseInt(e.currentTarget.value) : 0;
+        let itemJson = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
+        obj.UnitDesc = itemJson?.UnitDesc ?? null;
+
+        obj.Rate = itemJson?.Rate ?? 0;
+        obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
+
+        Table.updateByIndex({ id: '#tableRtnItem', index: index, obj: obj, value: obj.ItemId, event: e });
+        Rtn.sumOfTotalRtnItem();
+    },
+    'input .rtn-item-remarks': (e, value, obj, index) => {
+        obj.Remarks = e.currentTarget.value;
+        Table.updateByIndex({ id: '#tableRtnItem', index: index, obj: obj, value: obj.Remarks, event: e });
+    }
+}
+
+window.tableRtnItemRate = (value, obj, index) => {
+    return `
+        <input type="text" id="RtnItemRate_${index}" class="form-control form-control-sm text-right rtn-item-rate" value="${obj.Rate}" oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})">
+    `;
+}
+
+window.tableRtnItemRateEvent = {
+    'input .rtn-item-rate': (e, value, obj, index) => {
+        obj.Rate = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
+        obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
+        Table.updateByIndex({ id: '#tableRtnItem', index: index, obj: obj, value: obj.Rate, event: e });
+        Rtn.sumOfTotalRtnItem();
+    }
+}
+
+window.tableRtnItemQty = (value, obj, index) => {
+    return `
+        <input type="text" id="RtnItemQty_${index}" class="form-control form-control-sm text-right rtn-item-qty" value="${obj.Qty}" oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})">
+    `;
+}
+
+window.tableRtnItemQtyEvent = {
+    'input .rtn-item-qty': (e, value, obj, index) => {
+        obj.Qty = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
+        obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
+        Table.updateByIndex({ id: '#tableRtnItem', index: index, obj: obj, value: obj.Qty, event: e });
+        Rtn.sumOfTotalRtnItem();
+    }
+}
+
+window.tableRtnItemAmount = (value, obj, index) => {
+    return `
+        <input type="text" id="RtnItemAmt_${index}" class="form-control form-control-sm text-right rtn-item-amount" value="${obj.Amount}" oninput="this.value = _Number.validate({value: this.value, dp: 2, min: 0, max: 999999999999})">
+    `;
+}
+
+window.tableRtnItemAmountEvent = {
+    'input .rtn-item-amount': (e, value, obj, index) => {
+        obj.Amount = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
+        Table.updateByIndex({ id: '#tableRtnItem', index: index, obj: obj, value: obj.Amount, event: e });
+        Rtn.sumOfTotalRtnItem();
+    }
+}
+
+window.tableRtnReasonCodeDesc = (value, obj, index) => {
+    return `
+        ${Dropdown.html({ id: `RtnReasonCode_${index}`, className: 'rtn-item', data: Rtn.reasonCode, value: 'Value', text: 'Description', initialValue: [obj.ReasonCode], json: true, parent: '.modal' })}
+    `;
+}
+
+window.tableRtnReasonCodeDescEvent = {
+    'change .rtn-item': (e, value, obj, index) => {
+        obj.ReasonCode = e.currentTarget.value || "";
+        Table.updateByIndex({
+            id: '#tableRtnItem',
+            index: index,
+            obj: obj,
+            value: obj.ReasonCode,
+            event: e
+        });
+    }
+};
+
+window.tableRtnStoreDesc = (value, obj, index) => {
+    return `
+        ${Dropdown.html({ id: `RtnStore_${index}`, className: 'rtn-item', data: Rtn.store, value: 'Id', text: 'Description', initialValue: [obj.StoreId], json: true, parent: '.modal' })}
+    `;
+}
+
+window.tableRtnStoreDescEvent = {
+    'change .rtn-item': (e, value, obj, index) => {
+        obj.StoreId = !Field.isNullOrEmpty(e.currentTarget.value) ? parseInt(e.currentTarget.value) : 0;
+        Table.updateByIndex({
+            id: '#tableRtnItem',
+            index: index,
+            obj: obj,
+            value: obj.StoreId,
+            event: e
+        });
+    }
+};
+
+window.tableTaskSerialNo = (value, obj, index) => {
+    return `<input type="text" id="RtnSerialNo_${index}" class="form-control form-control-sm mb-0 rtn-item" value="${obj.SerialNo}" maxlength="150" />`;
+}
+
+window.tableRtnSerialNoDescEvent = {
+    'input .rtn-item': (e, value, obj, index) => {
+        obj.SerialNo = e.currentTarget.value || "";
+        Table.updateByIndex({
+            id: '#tableRtnItem',
+            index: index,
+            obj: obj,
+            value: obj.SerialNo,
+            event: e
+        });
+    }
+};
+
+window.tableTaskBatchNo = (value, obj, index) => {
+    return `<input type="text" id="RtnBatchNo_${index}" class="form-control form-control-sm mb-0 rtn-item" value="${obj.BatchNo}" maxlength="150" />`;
+}
+
+window.tableRtnBatchNoDescEvent = {
+    'input .rtn-item': (e, value, obj, index) => {
+        obj.BatchNo = e.currentTarget.value || "";
+        Table.updateByIndex({
+            id: '#tableRtnItem',
+            index: index,
+            obj: obj,
+            value: obj.BatchNo,
+            event: e
+        });
+    }
+};
+
+window.tableRtnExpiryOn = (value, obj, index) => {
+    return `<input type="date" id="RtnExpiryOn_${index}" class="form-control form-control-sm mb-0 rtn-item" value="${obj.ExpiryOn ?? ""}"/>`;
+}
+
+window.tableRtnExpiryOnEvent = {
+    'input .rtn-item': (e, value, obj, index) => {
+        obj.ExpiryOn = e.currentTarget.value || "";
+        Table.updateByIndex({
+            id: '#tableRtnItem',
+            index: index,
+            obj: obj,
+            value: obj.ExpiryOn,
+            event: e
+        });
+    }
+};
