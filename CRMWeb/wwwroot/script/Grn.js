@@ -33,13 +33,11 @@
         });
     });
     $('#Grn-ConPinCode').on('input', () => {
-
             let pinCode = $('#Grn-ConPinCode').val();
             if (pinCode.length == 6) {
                 OnlineApi.pinCode({
                     pinCode: pinCode,
-                    postOfficeId: '#Grn-ConPostOffice',
-                    stateId: '#Grn-ConStateCode',
+                    postOfficeId: '#Grn-ConPostOffice',                    
                     stateId:'#Grn-ConStateName'
                 })
             }
@@ -49,19 +47,10 @@
             return;
         }
         let GrnItem = $('#tableGrnItem').bootstrapTable('getData').filter(x => x.ItemId > 0);
-
-        if (GrnItem.length == 0) {
-
-            Message.error({ statusText: 'Grn Item not found. Add atleast one Grn Item' });
-            return;
-        }
-
         let obj = Data.serializeToObject({ formId: '#formGrn' });
-
+        let state = Dropdown.itemJson({ id: '#Grn-ConStateName' });
+        obj.ConStateCode = state ? state.Code : '';
         obj.VoucherItem = GrnItem;
-
-        obj.NetAmount = GrnItem.reduce((sum, x) => sum + (Number(x.Amount) || 0), 0).toFixed(2);
-
         if (!obj.Id) {
             Grn.add(obj);
         }
@@ -75,8 +64,7 @@
         url: 'Grn/GetViewOption',
         onSuccess: (response) => {
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
-            Dropdown.bind({ id: '#ListCustomerId', data: response.data.Customer, value: 'Id', text: 'Name' });
-            Dropdown.bind({ id: '#ListConName', data: response.data.ConName, value: 'Id', text: 'ConName' });
+            Dropdown.bind({ id: '#ListCustomerId', data: response.data.Customer, value: 'Id', text: 'Name' });          
             Dropdown.bind({ id: '#ListGrnNo', data: response.data.GrnNo, value: 'Id', text: 'No' })
         }
     });
@@ -89,7 +77,7 @@
         ListStatus: $('#ListStatus').val(),
         FromDate: DateTime.json($('#DateRange').val().split('|')[0]),
         ToDate: DateTime.json($('#DateRange').val().split('|')[1]),
-        ListCustomerId: $('#ListCustomerId').val(),
+        ListPartyId: $('#ListCustomerId').val(),
         ListNo: $('#ListGrnNo').val()
     };
         Data.post({
@@ -103,13 +91,12 @@
             onSuccess: (response) => {
                 Grn.item = response.data.Item;              
                 let store = response.data.Store;
-                let state = response.data.State;
-                Dropdown.bind({ id: '#Grn-ConStateCode', data: state, value: 'Code', text: 'Code', initialValue: [state.Code] });
-                Dropdown.bind({ id: '#Grn-ConStateName', data: state, value: 'Name', text: 'Name', initialValue: [state.Name] });
+                let state = response.data.State;                
                 Dropdown.bind({ id: '#Grn-PartyId', data: response.data.Party, value: 'Id', text: 'Name' });
-                Dropdown.bind({ id: '#Grn-Type', data: response.data.Type, value: 'Value', text: 'Description' });
-                Dropdown.bind({ id: '#Grn-Store', data:store, value: 'Id', text: 'Description' });
+                Dropdown.bind({ id: '#Grn-ConStateName', data: state, value: 'Name', text: 'Name', initialValue: [state.Name], json: true });
+                Dropdown.bind({ id: '#Grn-StoreId', data:store, value: 'Id', text: 'Description' });
                 Modal.open({ id: '#modalGrn', title: 'Grn / Add', action: 'Add' });
+                $('#Grn-RefDate,#Grn-EwayDate').val('');
             }
         });
     }

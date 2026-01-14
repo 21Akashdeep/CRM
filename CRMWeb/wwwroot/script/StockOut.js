@@ -1,0 +1,457 @@
+﻿class StockOut {
+    static item = [];
+    static init() {
+
+        StockOut.getViewOption();
+
+        $('#btnNewEntry').on('click', () => {
+            StockOut.newEntry();
+        });
+
+        $('#btnSearch').on('click', () => {
+            StockOut.get({
+                method: 'Get',
+                onSuccess: (response) => {
+                    Table.add({ id: '#tableStockOut', data: response.data });
+                }
+            });
+        });
+        $('#btnPrint').on('click', () => {
+            StockOut.get({
+                method: 'Print',
+                onSuccess: (response) => {
+                    Table.add({ id: '#tableStockOut', data: response.data, isPrint: true });
+                }
+            });
+        });
+        $('#btnExport').on('click', () => {
+            StockOut.get({
+                method: 'Export',
+                onSuccess: (response) => {
+                    Export.Base64ToExcel({ base64: response.base64, fileName: 'StockOut' });
+                }
+            });
+        });
+
+        $('#StockOut-BtnSave').on('click', () => {
+            if (!Field.isMandatory({ class: '.required' })) {
+                return;
+            }
+            let StockOutItem = $('#tableStockOutItem').bootstrapTable('getData').filter(x => x.ItemId > 0);
+            let obj = Data.serializeToObject({ formId: '#formStockOut' });
+            obj.VoucherItem = StockOutItem;
+
+            if (!obj.Id) {
+                StockOut.add(obj);
+            }
+            else {
+                StockOut.update(obj);
+            }
+        });
+    }
+    static getViewOption() {
+        Data.get({
+            url: 'StockOut/GetViewOption',
+            onSuccess: (response) => {
+                Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
+                Dropdown.bind({ id: '#ListStockOutNo', data: response.data.StockOutNo, value: 'Id', text: 'No' })
+            }
+        });
+    }
+    static getAddOption({ onSuccess }) {
+        Data.get({ url: 'StockOut/GetAddOption', onSuccess: onSuccess });
+    }
+    static get({ method = 'Get', onSuccess }) {
+        let obj = {
+            ListStatus: $('#ListStatus').val(),
+            FromDate: DateTime.json($('#DateRange').val().split('|')[0]),
+            ToDate: DateTime.json($('#DateRange').val().split('|')[1]),
+            ListNo: $('#ListStockOutNo').val()
+        };
+        Data.post({
+            url: `StockOut/${method}`,
+            data: obj,
+            onSuccess: onSuccess
+        });
+    }
+    static newEntry() {
+        StockOut.getAddOption({
+            onSuccess: (response) => {
+                StockOut.item = response.data.Item;
+                let store = response.data.Store;
+
+                Dropdown.bind({ id: '#StockOut-StoreId', data: store, value: 'Id', text: 'Description' });
+                Modal.open({ id: '#modalStockOut', title: 'StockOut / Add', action: 'Add' });
+                $('#StockOut-RefDate,#StockOut-EwayDate').val('');
+            }
+        });
+    }
+    static addStockOutItem() {
+        let obj = {
+            StockOutId: 0,
+            ItemId: 0,
+            VoucherId: 0,
+            StoreId: 0,
+            ItemDesc: null,
+            SerialNo: "",
+            BatchNo: "",
+            ExpiryOn: null,
+            Qty: 0,
+            Rate: 0,
+            UnitDesc: null,
+            Amount: 0,
+            DiscountAmount: 0,
+            TotalAmount: 0,
+            ListTax: "",
+            TaxRate: 0,
+            TaxAmount: 0,
+            GrossAmount: 0,
+            ImageUrl: null,
+            ReasonCode: null,
+            Remarks: null
+        };
+        Table.add({ id: '#tableStockOutItem', data: obj, action: 'append', selectPick: true });
+        StockOut.sumOfTotalStockOutItem();
+    }
+    static sumOfTotalStockOutItem() {
+        let StockOutItem = $('#tableStockOutItem').bootstrapTable('getData').filter(x => x.ItemId > 0);
+        let Qty = StockOutItem.length == 0 ? 0 : StockOutItem.map(x => parseFloat(x.Qty)).reduce((s, v) => s + v, 0);
+        let Amount = StockOutItem.length == 0 ? 0 : StockOutItem.map(x => parseFloat(x.Amount)).reduce((s, v) => s + v, 0);
+        let tfoot = `
+            <tfoot>
+                <tr>
+                    <th class="text-right" colspan="4">Total</th>
+                    <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
+                </tr>
+            </tfoot>
+        `;
+        $('#tableStockOutItem tfoot').remove();
+        $('#tableStockOutItem').append(tfoot);
+    }
+    static add(obj) {
+        Data.post({
+            url: 'StockOut/Add',
+            data: obj,
+            onSuccess: (response) => {
+                Message.show(response);
+                if (response.status == Message.Type.success) {
+                    Modal.reset({ id: '#modalStockOut' });
+                    Table.add({ id: '#tableStockOut', data: response.obj, action: 'prepend' });
+                    Dropdown.bind({ id: '#ListId', data: response.data.ViewOption.StockOut, value: 'Id', text: 'StockOutNo', subText: 'Date' });
+                }
+            }
+        });
+    }
+    static edit({ id, action = 'Edit' }) {
+        Data.get({
+            url: `StockOut/Edit?Id=${id}`,
+            onSuccess: (response) => {
+                let option = response.data;
+                StockOut.item = option.Item;
+                let store = response.data.Store;
+                let state = response.data.State;
+                let obj = response.obj;
+                let StoreId = obj.VoucherItem[0].StoreId;
+                obj.StoreId = StoreId;
+                obj.Id = action == 'Edit' ? obj.Id : null;
+                let title = action === 'Edit' ? `StockOut / Edit (Code: ${obj.No})` : `StockOut / Add`;
+                Dropdown.bind({ id: '#StockOut-StoreId', data: store, value: 'Id', text: 'Description' });
+                Modal.open({ id: '#modalStockOut', title: title, action: action, obj: obj });
+                Table.add({ id: '#tableStockOutItem', data: obj.VoucherItem, selectPick: true });
+                StockOut.sumOfTotalStockOutItem();
+
+
+            }
+        });
+    }
+    static update(obj) {
+        Data.update({
+            url: 'StockOut/Update',
+            data: obj,
+            onSuccess: (response) => {
+                Message.show(response);
+                if (response.status == Message.Type.success) {
+                    Modal.close({ id: '#modalStockOut' });
+                    Table.updateById({ id: '#tableStockOut', objId: response.obj.Id, obj: response.obj });
+                }
+            }
+        });
+    }
+    static delete({ id }) {
+        Message.confirm(
+            {
+                msg: "Do you want to delete???",
+                confirmButtonText: "Delete",
+                denyButtonText: "Don't Delete",
+                data: id,
+                onConfirm: (id) => {
+                    Data.delete(
+                        {
+                            url: `StockOut/Delete?Id=${id}`,
+                            onSuccess: StockOut.deleteOnSuccess
+                        }
+                    );
+                }
+            },
+        );
+    }
+    static deleteOnSuccess = (response) => {
+        Message.show(response);
+        if (response.status == Message.Type.success) {
+            Table.updateById({ id: "#tableTask", objId: response.obj.Id, obj: response.obj });
+            Dropdown.bind({ id: '#ListId', data: response.data.ListId, value: 'Id', text: 'Description', subText: "Code" });
+            Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
+
+        }
+    }
+}
+window.tableStockOutRefNoAndDate = (value, obj, index) => {
+    return `
+        <div>${obj.RefNo ?? ''}</div>
+        <div>${obj.RefDate ? moment(obj.RefDate).format('DD-MMM-YYYY') : ''}</div>
+    `;
+};
+window.tableStockOutSlNo = (value, obj, index) => {
+    return index + 1;
+}
+window.tableStockOutDate = (value, obj, index) => {
+    return moment(obj.Date).format('DD-MMM-YYYY');
+}
+window.tableStockOutStatus = (value, obj, index) => {
+    return `<div class="${obj.StatusCss}">${obj.StatusDesc}</div>`;
+}
+window.tableStockOutCreatedByAndAt = (value, obj, index) => {
+    return `
+        <div>${obj.CreatedByName}</div>
+        <div>${moment(obj.CreatedAt).format('DD-MMM-YYYY HH:mm')}</div>
+    `;
+}
+window.tableStockOutUpdatedByAndAt = (value, obj, index) => {
+    return `
+        <div>${obj.UpdatedByName}</div>
+        <div>${DateTime.dateTime(obj.UpdatedAt)}</div>
+    `;
+}
+window.tableStockOutAction = (value, obj, index) => {
+    let actionBtn = `
+        <div class="btn-group dropstart">            
+            <button class="btn btn-sm border-0" data-bs-toggle="dropdown"><i class="fa fa-ellipsis-v"></i></button>
+            <ul class="dropdown-menu dropdown-menu-lg-end mt-4">
+                ${obj.IsEdit ?
+            `<li>
+                        <a href="#" class="dropdown-item text-success-100 btn-edit" title="View / Edit">
+                            <span class="fa fa-edit text-success-100"></span>&nbsp;&nbsp;View / Edit
+                        </a>
+                    </li>` : ``
+        }
+                ${obj.IsDuplicate ?
+            `<li>
+                        <a href="#" class="dropdown-item text-primary-100 btn-duplicate" title="Duplicate">
+                            <span class="fa fa-copy text-primary-100"></span>&nbsp;&nbsp;Duplicate
+                        </a>
+                    </li>` : ``
+        }
+                ${obj.IsDelete ?
+            `<li>
+                        <a href="#" class="dropdown-item text-danger-100 btn-delete" title="Delete">
+                            <span class="fa fa-trash text-danger-100"></span>&nbsp;&nbsp;Delete
+                        </a>
+                    </li>` : ``
+        }
+                ${obj.IsEnable ?
+            `<li>
+                        <a href="#" class="dropdown-item text-success-100 btn-enable" title="Enable">
+                            <span class="fa fa-toggle-on text-success-100"></span>&nbsp;&nbsp;Enable
+                        </a>
+                    </li>` : ``
+        }
+            </ul>
+        </div>
+    `;
+    return actionBtn;
+}
+window.tableStockOutConAddress = (value, obj, index) => {
+
+    const parts = [
+        obj.ConAdd1,
+        obj.ConAdd2,
+        obj.ConPostOffice,
+        obj.ConPincode,
+        obj.ConStateName
+    ]
+        .filter(x => x && x.trim() !== "")
+        .map(x => x.trim());
+
+    if (parts.length === 0) return "";
+
+    // Break into lines (max 2–3 items per line for readability)
+    let lines = [];
+    for (let i = 0; i < parts.length; i += 2) {
+        lines.push(parts.slice(i, i + 2).join(", "));
+    }
+
+    return lines.join("<br>");
+};
+window.tableStockOutActionEvent = {
+    'click .btn-edit': (e, value, obj, index) => {
+        StockOut.edit({ id: obj.Id, action: 'Edit' });
+    },
+    'click .btn-duplicate': (e, value, obj, index) => {
+        StockOut.edit({ id: obj.Id, action: 'Add' });
+    },
+    'click .btn-print': (e, value, obj, index) => {
+        StockOut.print({ id: obj.Id });
+    },
+    'click .btn-delete': (e, value, obj, index) => {
+        StockOut.delete({ id: obj.Id });
+    }
+}
+
+//Table StockOut Item
+window.tableStockOutItemSlNo = (value, obj, index) => {
+    return index + 1;
+}
+window.tableStockOutItemDesc = (value, obj, index) => {
+    return `
+        ${Dropdown.html({ id: `StockOutItem_${index}`, className: 'StockOut-item', data: StockOut.item, value: 'Id', text: 'Description', initialValue: [obj.ItemId], json: true, parent: '.modal' })}
+        <input type="text" id="StockOutItemRemarks_${index}" class="form-control form-control-sm mb-0 mt-1 StockOut-item-remarks" maxlength="100" placeholder="Remarks" value="${obj.Remarks ?? ""}">
+    `;
+}
+window.tableStockOutItemDescEvent = {
+    'change .StockOut-item': (e, value, obj, index) => {
+        obj.ItemId = !Field.isNullOrEmpty(e.currentTarget.value) ? parseInt(e.currentTarget.value) : 0;
+        let itemJson = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
+        obj.UnitDesc = itemJson?.UnitDesc ?? null;
+
+        obj.Rate = itemJson?.Rate ?? 0;
+        obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
+
+        Table.updateByIndex({ id: '#tableStockOutItem', index: index, obj: obj, value: obj.ItemId, event: e });
+        StockOut.sumOfTotalStockOutItem();
+    },
+    'input .StockOut-item-remarks': (e, value, obj, index) => {
+        obj.Remarks = e.currentTarget.value;
+        Table.updateByIndex({ id: '#tableStockOutItem', index: index, obj: obj, value: obj.Remarks, event: e });
+    }
+}
+window.tableStockOutItemRate = (value, obj, index) => {
+    return `
+        <input type="text" id="StockOutItemRate_${index}" class="form-control form-control-sm text-right StockOut-item-rate" value="${obj.Rate}" oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})">
+    `;
+}
+window.tableStockOutItemRateEvent = {
+    'input .StockOut-item-rate': (e, value, obj, index) => {
+        obj.Rate = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
+        obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
+        Table.updateByIndex({ id: '#tableStockOutItem', index: index, obj: obj, value: obj.Rate, event: e });
+        StockOut.sumOfTotalStockOutItem();
+    }
+}
+window.tableStockOutItemQty = (value, obj, index) => {
+    return `
+        <input type="text" id="StockOutItemQty_${index}" class="form-control form-control-sm text-right StockOut-item-qty" value="${obj.Qty}" oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})">
+    `;
+}
+window.tableStockOutItemQtyEvent = {
+    'input .StockOut-item-qty': (e, value, obj, index) => {
+        obj.Qty = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
+        obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
+        Table.updateByIndex({ id: '#tableStockOutItem', index: index, obj: obj, value: obj.Qty, event: e });
+        StockOut.sumOfTotalStockOutItem();
+    }
+}
+window.tableStockOutItemAmount = (value, obj, index) => {
+    return `
+        <input type="text" id="StockOutItemAmt_${index}" class="form-control form-control-sm text-right StockOut-item-amount" value="${obj.Amount}" oninput="this.value = _Number.validate({value: this.value, dp: 2, min: 0, max: 999999999999})">
+    `;
+}
+window.tableStockOutItemAmountEvent = {
+    'input .StockOut-item-amount': (e, value, obj, index) => {
+        obj.Amount = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
+        Table.updateByIndex({ id: '#tableStockOutItem', index: index, obj: obj, value: obj.Amount, event: e });
+        StockOut.sumOfTotalStockOutItem();
+    }
+}
+window.tableStockOutReasonCodeDesc = (value, obj, index) => {
+    return `
+        ${Dropdown.html({ id: `StockOutReasonCode_${index}`, className: 'StockOut-item', data: StockOut.reasonCode, value: 'Value', text: 'Description', initialValue: [obj.ReasonCode], json: true, parent: '.modal' })}
+       
+    `;
+}
+window.tableStockOutReasonCodeDescEvent = {
+    'change .StockOut-item': (e, value, obj, index) => {
+        obj.ReasonCode = e.currentTarget.value || "";
+        Table.updateByIndex({
+            id: '#tableStockOutItem',
+            index: index,
+            obj: obj,
+            value: obj.ReasonCode,
+            event: e
+        });
+    }
+};
+window.tableStockOutStoreDesc = (value, obj, index) => {
+    return `
+        ${Dropdown.html({ id: `StockOutStore_${index}`, className: 'StockOut-item', data: StockOut.store, value: 'Id', text: 'Description', initialValue: [obj.StoreId], json: true, parent: '.modal' })}
+       
+    `;
+}
+window.tableStockOutStoreDescEvent = {
+    'change .StockOut-item': (e, value, obj, index) => {
+        obj.StoreId = !Field.isNullOrEmpty(e.currentTarget.value) ? parseInt(e.currentTarget.value) : 0;
+        Table.updateByIndex({
+            id: '#tableStockOutItem',
+            index: index,
+            obj: obj,
+            value: obj.StoreId,
+            event: e
+        });
+    }
+};
+window.tableTaskSerialNo = (value, obj, index) => {
+    return `<input type="text" id="StockOutSerialNo_${index}" class="form-control form-control-sm mb-0 StockOut-item" value="${obj.SerialNo}" maxlength="150" />  
+    `;
+}
+window.tableStockOutSerialNoDescEvent = {
+    'input .StockOut-item': (e, value, obj, index) => {
+        obj.SerialNo = e.currentTarget.value || "";
+        Table.updateByIndex({
+            id: '#tableStockOutItem',
+            index: index,
+            obj: obj,
+            value: obj.SerialNo,
+            event: e
+        });
+    }
+};
+window.tableTaskBatchNo = (value, obj, index) => {
+    return `<input type="text" id="StockOutBatchNo_${index}" class="form-control form-control-sm mb-0 StockOut-item" value="${obj.BatchNo}" maxlength="150" />  
+    `;
+}
+window.tableStockOutBatchNoDescEvent = {
+    'input .StockOut-item': (e, value, obj, index) => {
+        obj.BatchNo = e.currentTarget.value || "";
+        Table.updateByIndex({
+            id: '#tableStockOutItem',
+            index: index,
+            obj: obj,
+            value: obj.BatchNo,
+            event: e
+        });
+    }
+};
+window.tableStockOutExpiryOn = (value, obj, index) => {
+    return `<input type="date" id="StockOutExpiryOn_${index}" class="form-control form-control-sm mb-0 StockOut-item" value="${obj.ExpiryOn ?? ""}"/>`;
+}
+window.tableStockOutExpiryOnEvent = {
+    'input .StockOut-item': (e, value, obj, index) => {
+        obj.ExpiryOn = e.currentTarget.value || "";
+        Table.updateByIndex({
+            id: '#tableStockOutItem',
+            index: index,
+            obj: obj,
+            value: obj.ExpiryOn,
+            event: e
+        });
+    }
+};

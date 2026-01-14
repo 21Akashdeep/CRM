@@ -18,7 +18,7 @@ namespace CRMApi.Repository
             obj.ListStatus = obj.ListStatus.Any() ? obj.ListStatus : App.ActiveStatus;
             var dbVoucherQuery = db.Voucher.Where(grn => obj.ListStatus.Contains(grn.Status)).AsQueryable();
             //Add Filter
-            if(obj.ListType.Any())
+                if(obj.ListType.Any())
                 dbVoucherQuery = dbVoucherQuery.Where(vc => obj.ListType.Contains(vc.Type));
             if (obj.ListId.Any())
                 dbVoucherQuery = dbVoucherQuery.Where(grn => obj.ListId.Contains(grn.Id));  
@@ -29,19 +29,23 @@ namespace CRMApi.Repository
             if (obj.ToDate != DateTime.MinValue)
                 dbVoucherQuery = dbVoucherQuery.Where(grn => grn.Date.Date <= obj.ToDate.Date);
             if (obj.ListPartyId.Any())
-                dbVoucherQuery = dbVoucherQuery.Where(grn => obj.ListPartyId.Contains(grn.PartyId));
-            
+            {
+              dbVoucherQuery = dbVoucherQuery.Where(grn =>grn.PartyId.HasValue && obj.ListPartyId.Contains(grn.PartyId.Value)
+                );
+            }
+
 
             var dbVoucher = await (
                 from vc in dbVoucherQuery
-                join par in db.Party on vc.PartyId equals par.Id            
+                join par in db.Party on vc.PartyId equals par.Id into partyJoin
+                from par in partyJoin.DefaultIfEmpty()
                 join sts in db.Setting on new { Category = App.SettingName.Status, Value = vc.Status.ToString() } equals new { sts.Category, sts.Value }
                 join cby in db.User on vc.CreatedBy equals cby.Id
                 join uby in db.User on vc.UpdatedBy equals uby.Id
                 select new
                 {
                     Voucher = vc,
-                    PartyDesc = par.Description,                  
+                    PartyDesc = par != null ? par.Description : null,
                     StatusDesc = sts.Description,
                     StatusCss = sts.CssClass,
                     CreatedByName = cby.Name,
@@ -319,7 +323,7 @@ namespace CRMApi.Repository
                     }
                     else
                     {
-                        vi.StoreId = item.StoreId;
+                        vi.StoreId = storeid;
                         vi.ItemId = item.ItemId;
                         vi.SerialNo = item.SerialNo;
                         vi.BatchNo = item.BatchNo;

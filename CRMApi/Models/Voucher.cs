@@ -9,7 +9,7 @@ namespace CRMApi.Models
         [StringLength(50)] public string Type { get; set; } = string.Empty;
         [StringLength(16)] public string No { get; set; } = string.Empty;
         public DateTime Date { get; set; }
-        public int PartyId { get; set; }
+        public int? PartyId { get; set; }
         [NotMapped] public int StateId { get; set; }
         [NotMapped] public int StoreId { get; set; }
         [NotMapped] public string? PartyDesc { get; set; }       
