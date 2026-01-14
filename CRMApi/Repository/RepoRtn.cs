@@ -186,19 +186,21 @@ namespace CRMApi.Repository
             Message objMsg = new Message();
             try
             {
-                objMsg.obj = (await ListAsync(new Voucher
+                var obj = (await ListAsync(new Voucher
                 {
                     ListId = new List<int> { Id },
                     ListStatus = new List<int>(App.ActiveStatus) { App.Status.Delete }
                 }, User)).FirstOrDefault();
 
-                if (objMsg.obj == null)
+                if (obj == null)
                 {
-                    Message.Error(ref objMsg, "Voucher was not found for edit.");
+                    Message.Error(ref objMsg, "RTN not found.");
                     return objMsg;
                 }
 
+                objMsg.obj = obj;
                 objMsg.data = (await GetAddOptionAsync()).data;
+
                 Message.Success(ref objMsg, "Record found");
             }
             catch (Exception ex)
@@ -207,6 +209,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
+
 
         public async Task<Message> PrintAsync(Voucher obj, User User)
         {
@@ -330,6 +333,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
+
 
     }
 }

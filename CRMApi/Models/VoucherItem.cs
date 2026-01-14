@@ -84,6 +84,8 @@ namespace CRMApi.Models
 
         [NotMapped]
         public string? ItemDesc { get; set; }
+        [NotMapped]
+        public int? SourceVoucherId { get; set; } 
 
         [NotMapped] public string StatusDesc { get; set; } = string.Empty;
         [NotMapped] public string StatusCss { get; set; } = string.Empty;

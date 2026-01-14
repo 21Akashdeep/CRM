@@ -12,8 +12,6 @@
 
     <div class="card-body">
         <form autocomplete="off" onsubmit="return false;">
-
-            <!-- ===================== FILTER ===================== -->
             <div class="row">
                 <div class="col-md-2">
                     <label>Status</label>
@@ -49,8 +47,6 @@
                     </select>
                 </div>
 
-              
-
                 <div class="col-md-2">
                     <div class="btn-group">
                         <button type="button" id="btnSearch"
@@ -68,10 +64,7 @@
                     </div>
                 </div>
             </div>
-
             <hr />
-
-            <!-- ===================== MAIN TABLE ===================== -->
             <div class="row">
                 <div class="col-md-12">
                     <table id="tableRtn"
@@ -110,13 +103,10 @@
     </div>
 </div>
 
-<!-- ===================== RTN MODAL ===================== -->
-
 <div id="modalRtn" class="modal fade" data-bs-backdrop="static" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen">
         <div class="modal-content">
 
-            <!-- ===== MODAL HEADER ===== -->
             <div class="modal-header">
                 <span class="modal-title"></span>
                 <div class="btn-group">
@@ -129,15 +119,11 @@
                     </button>
                 </div>
             </div>
-
-            <!-- ===== MODAL BODY ===== -->
             <div class="modal-body" style="min-height:75vh;">
                 <form id="formRtn" autocomplete="off" onsubmit="return false;">
 
                     <input type="hidden" id="Id" name="Id" />
                     <input type="hidden" id="No" name="No" />
-
-                    <!-- ===== HEADER FIELDS ===== -->
                     <div class="row">
                         <div class="col-md-2">
                             <label>Date<span class="text-mandatory">*</span></label>
@@ -166,10 +152,7 @@
                             </select>
                         </div>
                     </div>
-
                     <hr />
-
-                    <!-- ===================== RTN ITEM TABLE ===================== -->
                     <div class="row">
                         <div class="col-md-12 rtn-item-table">
                             <table id="tableRtnItem"
@@ -217,7 +200,6 @@
 
                     <hr />
 
-                    <!-- ===== REMARKS ===== -->
                     <div class="row">
                         <div class="col-md-6">
                             <label>Remarks</label>
@@ -231,7 +213,6 @@
                 </form>
             </div>
 
-            <!-- ===== MODAL FOOTER ===== -->
             <div class="modal-footer">
                 <button type="button" id="Rtn-BtnSave"
                         class="btn btn-sm btn-success rounded-5">

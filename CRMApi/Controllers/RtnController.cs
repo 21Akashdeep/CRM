@@ -103,6 +103,7 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
+
         [HttpGet]
         public async Task<IActionResult> Edit(int Id)
         {
@@ -123,6 +124,7 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
+
         [HttpPatch]
         public async Task<IActionResult> Update([FromBody] Voucher obj)
         {

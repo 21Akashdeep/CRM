@@ -686,13 +686,10 @@ class Rtn {
             }
         });
     }
-
-    // ================= ADD OPTIONS =================
+    
     static getAddOption({ onSuccess }) {
         Data.get({ url: 'Rtn/GetAddOption', onSuccess: onSuccess });
     }
-
-    // ================= GET =================
     static get({ method = 'Get', onSuccess }) {
 
         let obj = {
@@ -706,7 +703,6 @@ class Rtn {
         Data.post({ url: `Rtn/${method}`, data: obj, onSuccess: onSuccess });
     }
 
-    // ================= NEW ENTRY =================
     static newEntry() {
 
         Rtn.getAddOption({
@@ -722,7 +718,6 @@ class Rtn {
         });
     }
 
-    // ================= ADD EMPTY ITEM =================
     static addRtnItem() {
 
         let obj = {
@@ -745,8 +740,6 @@ class Rtn {
             selectPick: true
         });
     }
-
-    // ================= ADD =================
     static add(obj) {
         Data.post({
             url: 'Rtn/Add',
@@ -761,28 +754,87 @@ class Rtn {
         });
     }
 
-    // ================= EDIT =================
+
     static edit({ id, action = 'Edit' }) {
+
         Data.get({
             url: `Rtn/Edit?Id=${id}`,
             onSuccess: (response) => {
 
                 let option = response.data;
-                Rtn.item = option.Item || [];
-
                 let obj = response.obj;
-                let title = action == 'Edit' ? `RTN / Edit (No: ${obj.No})` : `RTN / Add`;
+                let storeId = null;
+                if (obj.VoucherItem && obj.VoucherItem.length > 0) {
+                    storeId = obj.VoucherItem[0].StoreId;
+                }
 
-                Dropdown.bind({ id: '#Rtn-Store', data: option.Store, value: 'Id', text: 'Description', initialValue: obj.StoreId });
-                Dropdown.bind({ id: '#Rtn-GdnNoId', data: option.GdnNo, value: 'Id', text: 'No' });
+                let gdnIds = [];
+                if (obj.ListVoucherId) {
+                    try {
+                        gdnIds = JSON.parse(obj.ListVoucherId);  
+                    } catch (e) {
+                        console.error("Invalid ListVoucherId:", obj.ListVoucherId);
+                    }
+                }
+                let title = action === 'Edit'
+                    ? `RTN / Edit (No: ${obj.No})`
+                    : `RTN / Add`;
+                Modal.open({id: '#modalRtn',title: title,action: action,obj: obj});
+                Dropdown.bind({id: '#Rtn-Store',data: option.Store || [],value: 'Id',text: 'Description',initialValue: storeId ? [storeId] : []});
 
-                Modal.open({ id: '#modalRtn', title: title, action: action, obj: obj });
-                Table.add({ id: '#tableRtnItem', data: obj.VoucherItem, selectPick: true });
+                Dropdown.bind({id: '#Rtn-GdnNoId', data: option.GdnNo || [],value: 'Id', text: 'No',initialValue: gdnIds});
+
+                Table.add({id: '#tableRtnItem', data: obj.VoucherItem || [],selectPick: true});
             }
         });
     }
 
-    // ================= UPDATE =================
+        
+    //static edit({ id, action = 'Edit' }) {
+    //    Data.get({
+    //        url: `Rtn/Edit?Id=${id}`,
+    //        onSuccess: (response) => {
+
+    //            let option = response.data;
+    //            Rtn.item = option.Item || [];
+
+    //            let obj = response.obj;
+    //            let title = action == 'Edit' ? `RTN / Edit (No: ${obj.No})` : `RTN / Add`;
+
+    //           // Dropdown.bind({ id: '#Rtn-Store', data: response.data.Store, value: 'Id', text: 'Description', initialValue: obj.voucherItem.StoreId });
+    //            //Dropdown.bind({ id:'#Rtn-GdnNoId', data: response.data.GdnNo, value: 'Id', text: 'No' });
+
+    //            Dropdown.bind({
+    //                id: '#Rtn-Store',
+    //                data: response.data.Store,
+    //                value: 'Id',
+    //                text: 'Description',
+    //                initialValue: [obj.StoreId]   // ✅ correct
+    //            });
+
+    //            let gdnIds = [];
+    //            if (obj.ListVoucherId) {
+    //                try {
+    //                    gdnIds = JSON.parse(obj.ListVoucherId);
+    //                } catch (e) {
+    //                    console.error("Invalid ListVoucherId JSON:", obj.ListVoucherId);
+    //                }
+    //            }
+
+    //            Dropdown.bind({
+    //                id: '#Rtn-GdnNoId',
+    //                data: response.data.GdnNo,
+    //                value: 'Id',
+    //                text: 'No',
+    //                initialValue: gdnIds          // ✅ correct
+    //            });
+
+
+    //            Modal.open({ id: '#modalRtn', title: title, action: action, obj: obj });
+    //            Table.add({ id: '#tableRtnItem', data: obj.VoucherItem, selectPick: true });
+    //        }
+    //    });
+    //}
     static update(obj) {
         Data.update({
             url: 'Rtn/Update',
@@ -861,8 +913,12 @@ window.tableRtnAction = (value, obj, index) => {
 };
 
 window.tableRtnActionEvent = {
-    'click .btn-edit': (e, value, obj, index) => {
-        Rtn.edit({ id: obj.Id });
+    //'click .btn-edit': (e, value, obj, index) => {
+    //    Rtn.edit({ id: obj.Id });
+    //},
+    'click .btn-edit': function (e, value, row, index) {
+        e.preventDefault();
+        Rtn.edit({ id: row.Id });
     },
     'click .btn-delete': (e, value, obj, index) => {
         Rtn.delete({ id: obj.Id });
