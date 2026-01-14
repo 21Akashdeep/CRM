@@ -41,8 +41,7 @@ namespace CRMApi.Repository
                         st.Value,
                         st.Description
                     }).ToListAsync();
-
-                Option.Customer = await db.Party
+                Option.Party = await db.Party
                     .Where(x => App.ActiveStatus.Contains(x.Status))
                     .Select(x => new
                     {
@@ -255,7 +254,5 @@ namespace CRMApi.Repository
 
             return objMsg;
         }
-
-
     }
 }
