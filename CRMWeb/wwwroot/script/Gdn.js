@@ -84,8 +84,8 @@
             url: 'Gdn/GetViewOption',
             onSuccess: (response) => {
                 Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
-                Dropdown.bind({ id: '#ListCustomerId', data: response.data.Customer, value: 'Id', text: 'Name' });
-                //Dropdown.bind({ id: '#ListConName', data: response.data.ConName, value: 'Id', text: 'ConName' });
+                Dropdown.bind({ id: '#ListPartyId', data: response.data.Party, value: 'Id', text: 'Name' });
+              
                 Dropdown.bind({ id: '#ListNo', data: response.data.Number, value: 'Id', text: 'No' });
             }
         });
@@ -100,7 +100,7 @@
             ListStatus: $('#ListStatus').val(),
             FromDate: DateTime.json($('#DateRange').val().split('|')[0]),
             ToDate: DateTime.json($('#DateRange').val().split('|')[1]),
-            ListCustomerId: $('#ListCustomerId').val(),
+            ListPartyId: $('#ListPartyId').val(),
             //ListConName: $('#ListConName').val(),
             ListNo: $('#ListNo').val()
         };
@@ -120,12 +120,12 @@
                 let state = response.data.State;
 
                 Dropdown.bind({ id: '#Gdn-ConStateCode', data: state, value: 'Code', text: 'Code', initialValue: [Gdn.stateList.Code] });
-                Dropdown.bind({ id: '#Gdn-ConStateName', data: state, value: 'Name', text: 'Name', initialValue: [state.Name] });
                 Dropdown.bind({ id: '#Gdn-PartyId', data: response.data.Party, value: 'Id', text: 'Name' });
-                Dropdown.bind({ id: '#Gdn-Type', data: response.data.Type, value: 'Value', text: 'Description' });
                 Dropdown.bind({ id: '#Gdn-Store', data: store, value: 'Id', text: 'Description' });
+                Dropdown.bind({ id: '#Gdn-ConStateName', data: state, value: 'Name', text: 'Name', initialValue: [state.Name] });
 
                 Modal.open({ id: '#modalGdn', title: 'Gdn / Add', action: 'Add' });
+                $('#Gdn-RefDate, #Gdn-EwayDate').val('');
             }
         });
     }
@@ -371,7 +371,6 @@ window.tableGdnActionEvent = {
     }
 }
 
-// ================= GDN ITEM TABLE =================
 
 window.tableGdnItemSlNo = (value, obj, index) => {
     return index + 1;
