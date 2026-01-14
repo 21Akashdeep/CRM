@@ -11,11 +11,11 @@ using static CRMApi.Dto.DtoTask;
 
 namespace CRMApi.Repository
 {
-    public class RepoGrn
+    public class RepoStockOut
     {
         private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
-        public RepoGrn(DBCRM _db)
+        public RepoStockOut(DBCRM _db)
         {
             db = _db;
         }
@@ -36,7 +36,7 @@ namespace CRMApi.Repository
                     x.Id,
                     x.Name
                 }).ToListAsync();
-                Option.GrnNo = await db.Voucher.Where(x => App.ActiveStatus.Contains(x.Status) && x.Type == "ReceiptNote").Select(x => new
+                Option.StockOutNo = await db.Voucher.Where(x => App.ActiveStatus.Contains(x.Status) && x.Type == "StockOut").Select(x => new
                 {
                     x.Id,
                     x.No,
@@ -56,33 +56,7 @@ namespace CRMApi.Repository
             Message objMsg = new Message();
             try
             {
-                var Party = await db.Party.Where(par => App.ActiveStatus.Contains(par.Status) ).Select(par => new
-                {
-                    par.Id,
-                    par.Code,
-                    par.Name,
-                    par.Description
-                }).ToListAsync();
-                var Type = await db.Setting.Where(x => App.ActiveStatus.Contains(x.Status) && x.Name == App.SettingName.VoucherType).Select(x => new
-                {
-                    x.Value,
-                    x.Description
-                }).ToListAsync();
 
-                var State = await db.AdminDiv.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
-                {
-                    x.Id,
-                    x.Code,
-                    x.Name,                    
-
-                }).ToListAsync();
-
-                var ReasonCode = await db.Setting.Where(x => App.ActiveStatus.Contains(x.Status) && x.Name == App.SettingName.ReasonCode).Select(x => new
-                {
-                    x.Value,
-                    x.Description
-
-                }).ToListAsync();
                 var Store = await db.Store.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
                 {
 
@@ -92,7 +66,7 @@ namespace CRMApi.Repository
                 }).ToListAsync();
                 var Item = await (
                     from itm in db.Item
-                    join unt in db.Unit on itm.UnitId equals unt.Id                   
+                    join unt in db.Unit on itm.UnitId equals unt.Id
                     select new
                     {
                         itm.Id,
@@ -101,19 +75,36 @@ namespace CRMApi.Repository
                         itm.Description,
                         itm.UnitId,
                         UnitDesc = unt.Description,
-                        
+
                     }
                 ).ToListAsync();
                 objMsg.data = new
                 {
-                    State,
-                    Party,
-                    Type,
+
                     Item,
-                    ReasonCode,
                     Store,
                 };
                 Message.Success(ref objMsg, "Record found");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+        public async Task<Message> AddAsync(Voucher obj, User User)
+        {
+            Message objMsg = new Message();
+
+            try
+            {
+                obj.PartyId = obj.PartyId == 0 ? null : obj.PartyId;
+                obj.Type = "StockOut";
+                foreach (var item in obj.VoucherItem)
+                {
+                    item.Qty = -(item.Qty);
+                }
+                objMsg = await new RepoVoucher(db).AddAsync(obj, User);
             }
             catch (Exception ex)
             {
@@ -125,11 +116,11 @@ namespace CRMApi.Repository
         {
 
             obj ??= new Voucher();
-            obj.ListType = new List<string> {"ReceiptNote"};
+            obj.ListType = new List<string> { "StockOut" };
             var voucher = await new RepoVoucher(db).ListAsync(obj, User);
             return voucher;
-           
-           
+
+
         }
         public async Task<Message> EditAsync(int Id, User User)
         {
@@ -143,11 +134,32 @@ namespace CRMApi.Repository
                 }, User)).FirstOrDefault();
                 if (objMsg.obj == null)
                 {
-                    Message.Error(ref objMsg, "Voucher was not found for edit.");
+                    Message.Error(ref objMsg, "StockIn was not found for edit.");
                     return objMsg;
                 }
                 objMsg.data = (await GetAddOptionAsync()).data;
                 Message.Success(ref objMsg, "Record found");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+        public async Task<Message> UpdateAsync(Voucher obj, User User)
+        {
+            Message objMsg = new Message();
+
+            try
+            {
+                obj.Type = "StockOut";
+                foreach (var item in obj.VoucherItem)
+                {
+                    if(item.Qty >= 0)
+                    item.Qty = -(item.Qty);
+                }
+                objMsg = objMsg = await new RepoVoucher(db).UpdateAsync(obj, User);
+
             }
             catch (Exception ex)
             {
@@ -184,7 +196,7 @@ namespace CRMApi.Repository
 
                 if (objCompany == null)
                 {
-                    Message.Error(ref objMsg, "GRN info not found");
+                    Message.Error(ref objMsg, "StockIn info not found");
                     return objMsg;
                 }
 
@@ -206,8 +218,8 @@ namespace CRMApi.Repository
 
                 DataTable objDataTable = Util.ListToDataTable(Gdn);
 
-                objCompany.SheetName = "GRN List";
-                objCompany.ReportDesc = $"GRN - {DateTime.Now:dd-MMM-yyyy}";
+                objCompany.SheetName = "StockIn List";
+                objCompany.ReportDesc = $"StockIn - {DateTime.Now:dd-MMM-yyyy}";
                 objMsg.base64 = Util.DataTableToBase64(objDataTable, objCompany);
 
                 Message.Get(ref objMsg, "");

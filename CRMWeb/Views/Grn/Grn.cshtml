@@ -102,42 +102,46 @@
                                 <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
                             </div>
                         </div>
+                        <div class="col-md-2">
+                            <label>To Store<span class="text-mandatory">*</span></label>
+                            <select id="Grn-StoreId" name="StoreId" class="select-pick required" data-search="true" data-size="4"></select>
+                        </div>
                         <div class="col-md-4">
                             <label>Party<span class="text-mandatory">*</span></label>
                             <select id="Grn-PartyId" name="PartyId" class="select-pick required" data-size="4" data-search="true"></select>
                         </div>
 
                         <div class="col-md-2">
-                            <label>Ref No.<span class="text-mandatory">*</span></label>
-                            <input type="text" id="Grn-RefNo" name="RefNo" class="form-control form-control-sm required" maxlength="10" data-alpha-lg-num="true" />
+                            <label>Ref No.</label>
+                            <input type="text" id="Grn-RefNo" name="RefNo" class="form-control form-control-sm" maxlength="10" data-alpha-lg-num="true" />
                         </div>
                         <div class="col-md-2">
-                            <label>Ref Date<span class="text-mandatory">*</span></label>
+                            <label>Ref Date</label>
                             <div class="input-group input-group-sm">
-                                <input type="text" id="Grn-RefDate" name="RefDate" class="form-control form-control-sm required" readonly />
+                                <input type="text" id="Grn-RefDate" name="RefDate" class="form-control form-control-sm " readonly />
                                 <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
                             </div>
                         </div>
                         <div class="col-md-2">
-                            <label>EwayNo<span class="text-mandatory">*</span></label>
-                            <input type="text" id="Grn-EwayNo" name="EwayNo" class="form-control form-control-sm required" maxlength="10" data-alpha-lg-num="true" />
+                            <label>E-Way No</label>
+                            <input type="text" id="Grn-EwayNo" name="EwayNo" class="form-control form-control-sm" maxlength="10" data-alpha-lg-num="true" />
                         </div>
                         <div class="col-md-2">
-                            <label>EwayDate</label>
+                            <label>E-Way Date</label>
                             <div class="input-group input-group-sm">
-                                <input type="text" id="Grn-EwayDate" name="EwayDate" class="form-control form-control-sm required" readonly />
+                                <input type="text" id="Grn-EwayDate" name="EwayDate" class="form-control form-control-sm " readonly />
                                 <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <label>Conssigne Name<span class="text-mandatory">*</span></label>
-                            <input type="text" id="Grn-ConName" name="ConName" class="form-control form-control-sm required" maxlength="10"  />
+                            <label>Conssigne Name</label>
+                            <input type="text" id="Grn-ConName" name="ConName" class="form-control form-control-sm" maxlength="10"  />
                         </div>
-                        <div class="col-md-6">
-                            <label>Conssigne Address 1<span class="text-mandatory">*</span></label>
-                            <input type="text" id="Grn-ConAdd1" name="ConAdd1" class="form-control form-control-sm required" maxlength="100"  />
+                        <div class="col-md-4">
+                            <label>Conssigne Address 1</label>
+                            <input type="text" id="Grn-ConAdd1" name="ConAdd1" class="form-control form-control-sm" maxlength="100"  />
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label>Conssigne Address 2</label>
                             <input type="text" id="Grn-ConAdd2" name="ConAdd2" class="form-control form-control-sm" maxlength="100"  />
                         </div>
@@ -150,20 +154,10 @@
                             <input type="text" id="Grn-ConPostOffice" name="ConPostOffice" class="form-control form-control-sm" maxlength="10" data-alpha-lg-num="true" />
                         </div>                        
                         <div class="col-md-2">
-                            <label>Con State Code</label>
-                            <select id="Grn-ConStateCode" name="ConStateCode" class="select-pick party-required" data-search="true" data-size="4" ></select>
+                            <label>Con State</label>
+                            <select id="Grn-ConStateName" name="ConStateName" class="select-pick " data-search="true" data-size="4"></select>
                         </div>
-
-                        <div class="col-md-2">
-                            <label>Con State Name<span class="text-mandatory">*</span></label>
-                            <select id="Grn-ConStateName" name="ConStateName" class="select-pick party-required" data-search="true" data-size="4"></select>
-                        </div>
-
-
-                        <div class="col-md-2">
-                            <label>Store<span class="text-mandatory">*</span></label>
-                            <select id="Grn-Store" name="StoreId" class="select-pick required" data-search="true" data-size="4"></select>
-                        </div>
+                       
                     </div>
                     <hr />
                     <div class="row">

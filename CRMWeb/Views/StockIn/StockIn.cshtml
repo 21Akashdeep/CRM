@@ -1,0 +1,166 @@
+﻿@{
+    ViewData["Title"] = "StockIn";
+}
+<div class="card shadow">
+    <div class="card-header">
+        <span class="card-title">StockIn / View</span>
+        <button type="button" class="btn btn-sm btn-primary float-end rounded-5" id="btnNewEntry">
+            <span class="fa fa-plus"></span>&nbsp;&nbsp;Add
+        </button>
+    </div>
+    <div class="card-body">
+        <form autocomplete="off" onsubmit="return false;">
+            <div class="row">
+                <div class="col-md-2">
+                    <label>Status</label>
+                    <select id="ListStatus" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label>Date Range</label>
+                    <div class="input-group input-group-sm">
+                        <input id="DateRange" type="text" class="form-control" readonly>
+                        <span class="input-group-text date-range-picker"><i class="fa fa-calendar"></i></span>
+                    </div>
+                </div>            
+                <div class="col-md-2">
+                    <label>StockIn No.</label>
+                    <select id="ListStockInNo" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <div class="btn-group">
+                        <button type="button" id="btnSearch" class="btn btn-sm btn-filter btn-outline-success" title="Search">
+                            <span class="fa fa-search"></span>
+                        </button>
+                        <button type="button" id="btnPrint" class="btn btn-sm btn-filter btn-outline-secondary" title="Print">
+                            <span class="fa fa-print"></span>
+                        </button>
+                        <button type="button" id="btnExport" class="btn btn-sm btn-filter btn-outline-primary" title="Export To Excel">
+                            <span class="fa fa-file-excel"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-md-12">
+                    <table id="tableStockIn" class="table table-bordered table-hover table-default" border="1" data-sort-name="Code"
+                           data-unique-id="Id">
+                        <thead>
+                            <tr>
+                                <th data-sortable="false" data-formatter="tableStockInSlNo" class="text-center">#</th>
+                                <th data-sortable="true" data-formatter="tableStockInDate">Date</th>
+                                <th data-sortable="true" data-field="No">Number</th>
+                                @* <th data-sortable="true" data-field="PartyDesc">Party</th>
+                                <th data-sortable="true" data-field="ConName">Consignee Name </th> *@
+                                @* <th data-sortable="true" data-formatter="tableStockInConAddress" class="text-nowrap">Consignee Address</th>
+                                <th data-sortable="true" data-formatter="tableStockInRefNoAndDate" class="text-nowrap">Ref No / Date </th>
+                                <th data-sortable="true" data-field="Remarks">Remarks</th> *@
+                                <th data-sortable="false" data-formatter="tableStockInCreatedByAndAt" class="text-nowrap">Created By & At</th>
+                                <th data-sortable="false" data-formatter="tableStockInUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
+                                <th data-sortable="false" data-formatter="tableStockInStatus" class="Status text-center">Status</th>
+                                <th data-formatter="tableStockInAction" data-events="tableStockInActionEvent" class="not-print text-center"><i class="fa-solid fa-list-check"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="modalStockIn" class="modal fade" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title"></span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal" aria-label="Close">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body" style="min-height:75vh;">
+                <form id="formStockIn" autocomplete="off" onsubmit="return false;">
+                    <input type="hidden" id="Id" name="Id" />
+                    <input type="hidden" id="No" name="No" />
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label>Date</label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" id="StockIn-Date" name="Date" class="form-control form-control-sm required" readonly />
+                                <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label>To Store<span class="text-mandatory">*</span></label>
+                            <select id="StockIn-StoreId" name="StoreId" class="select-pick required" data-search="true" data-size="4"></select>
+                        </div>
+                       
+                        <div class="col-md-2">
+                            <label>Scan</label>
+                            <input type="text" id="StockIn-Scan" name="Scan" class="form-control form-control-sm" maxlength="10" data-alpha-lg-num="true" />
+                        </div>
+                       
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-12 StockIn-item-table">
+                            <table id="tableStockInItem" class="table table-bordered table-hover table-default line-item" data-search="false">
+                                <thead>
+                                    <tr>
+                                        <th colspan="5">
+                                            StockIn Item
+                                            <button type="button" class="btn btn-sm btn-primary float-end rounded-5 btn-add-item" onclick="StockIn.addStockInItem()">
+                                                <span class="fa fa-plus"></span>
+                                            </button>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th data-formatter="tableStockInItemSlNo" class="text-center">#</th>
+                                        <th class="desc" data-formatter="tableStockInItemDesc" data-events="tableStockInItemDescEvent">Description</th>
+                                        <th class="qty" data-formatter="tableTaskSerialNo" data-events="tableStockInSerialNoDescEvent">SerialNo</th>
+                                        <th class="qty" data-formatter="tableTaskBatchNo" data-events="tableStockInBatchNoDescEvent">BatchNo</th>
+                                        <th class="qty" data-formatter="tableStockInItemQty" data-events="tableStockInItemQtyEvent">Qty</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Remarks</label>
+                            <textarea type="text" id="StockIn-Remarks" name="Remarks" style="resize:none;" class="form-control form-control-sm" rows="2" maxlength="100"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="StockIn-BtnSave" class="btn btn-sm btn-success rounded-5">
+                    <span class="fa fa-save"></span>&nbsp;&nbsp;Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+@section Scripts {
+    <script src="~/script/StockIn.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        $(() => {
+            StockIn.init();
+        });
+    </script>
+}
