@@ -21,6 +21,7 @@ namespace CRMApi.Controllers
             RepoVoucher = new RepoVoucher(db);
         }
         [HttpGet]
+
         public async Task<IActionResult> GetViewOption()
         {
             Message objMsg = new Message();
@@ -203,5 +204,28 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> GetGdnItem([FromBody] List<int> ListGdnId)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(
+                    new Request { HttpRequest = Request, ActionType = ActionType.View },
+                    db, ref objMsg);
+
+                if (User == null) return Ok(objMsg);
+
+                objMsg = await RepoRtn.GetGdnItemAsync(ListGdnId, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
+
+
     }
 }

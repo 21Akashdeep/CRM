@@ -268,5 +268,68 @@ namespace CRMApi.Repository
 
             return objMsg;
         }
+
+        public async Task<Message> GetGdnItemAsync(List<int> ListGdnId, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                if (ListGdnId == null || !ListGdnId.Any())
+                {
+                    Message.Error(ref objMsg, "GDN not selected");
+                    return objMsg;
+                }
+
+                var gdnItem = await (
+                    from vci in db.VoucherItem
+                    join vc in db.Voucher on vci.VoucherId equals vc.Id
+                    join itm in db.Item on vci.ItemId equals itm.Id
+                    join st in db.Store on vci.StoreId equals st.Id
+                    where ListGdnId.Contains(vc.Id)
+                       && vc.Type == "DeliveryNote"
+                       && App.ActiveStatus.Contains(vc.Status)
+                       && App.ActiveStatus.Contains(vci.Status)
+                    select new VoucherItem
+                    {
+                        Id = 0,
+                        VoucherId = 0,
+
+                        ItemId = vci.ItemId,
+                        ItemDesc = itm.Description,
+                        StoreId = vci.StoreId,
+                        StoreDesc = st.Description,
+
+                        SerialNo = vci.SerialNo,
+                        BatchNo = vci.BatchNo,
+                        ExpiryOn = vci.ExpiryOn,
+
+                        Qty = vci.Qty,
+                        Rate = vci.Rate,
+                        Amount = vci.Amount,
+
+                        DiscountRate = vci.DiscountRate,
+                        DiscountAmount = vci.DiscountAmount,
+                        TotalAmount = vci.TotalAmount,
+
+                        ListTax = vci.ListTax,
+                        TaxRate = vci.TaxRate,
+                        TaxAmount = vci.TaxAmount,
+                        GrossAmount = vci.GrossAmount,
+
+                        Remarks = vci.Remarks,
+                        Status = App.Status.Enable
+                    }
+                ).ToListAsync();
+
+                objMsg.data = gdnItem;
+                Message.Success(ref objMsg, "GDN items loaded");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+
     }
 }
