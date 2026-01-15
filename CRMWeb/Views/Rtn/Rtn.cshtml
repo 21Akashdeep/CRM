@@ -1,0 +1,234 @@
+﻿@{
+    ViewData["Title"] = "Rtn";
+}
+
+<div class="card shadow">
+    <div class="card-header">
+        <span class="card-title">RTN / View</span>
+        <button type="button" class="btn btn-sm btn-primary float-end rounded-5" id="btnNewEntry">
+            <span class="fa fa-plus"></span>&nbsp;&nbsp;Add
+        </button>
+    </div>
+
+    <div class="card-body">
+        <form autocomplete="off" onsubmit="return false;">
+            <div class="row">
+                <div class="col-md-2">
+                    <label>Status</label>
+                    <select id="ListStatus"
+                            class="form-control form-control-sm select-pick"
+                            title="Nothing Selected"
+                            data-size="4"
+                            data-search="true"
+                            data-action="true"
+                            multiple>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label>Date Range</label>
+                    <div class="input-group input-group-sm">
+                        <input id="DateRange" type="text" class="form-control" readonly>
+                        <span class="input-group-text date-range-picker">
+                            <i class="fa fa-calendar"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <label>RTN No.</label>
+                    <select id="ListNo"
+                            class="select-pick"
+                            title="Nothing Selected"
+                            data-size="4"
+                            data-search="true"
+                            data-action="true"
+                            multiple>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="btn-group">
+                        <button type="button" id="btnSearch"
+                                class="btn btn-sm btn-filter btn-outline-success" title="Search">
+                            <span class="fa fa-search"></span>
+                        </button>
+                        <button type="button" id="btnPrint"
+                                class="btn btn-sm btn-filter btn-outline-secondary" title="Print">
+                            <span class="fa fa-print"></span>
+                        </button>
+                        <button type="button" id="btnExport"
+                                class="btn btn-sm btn-filter btn-outline-primary" title="Export To Excel">
+                            <span class="fa fa-file-excel"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-md-12">
+                    <table id="tableRtn"
+                           class="table table-bordered table-hover table-default"
+                           border="1"
+                           data-sort-name="Date"
+                           data-unique-id="Id">
+                        <thead>
+                            <tr>
+                                <th data-sortable="false" data-formatter="tableRtnSlNo" class="text-center">#</th>
+                                <th data-sortable="true" data-formatter="tableRtnDate">Date</th>
+                                <th data-sortable="true" data-field="No">Number</th>
+                                <th data-sortable="false" data-formatter="tableRtnCreatedByAndAt" class="text-nowrap">
+                                    Created By & At
+                                </th>
+                                <th data-sortable="false" data-formatter="tableRtnUpdatedByAndAt" class="text-nowrap">
+                                    Updated By & At
+                                </th>
+                                <th data-sortable="false" data-formatter="tableRtnStatus"
+                                    class="Status text-center">
+                                    Status
+                                </th>
+                                <th data-formatter="tableRtnAction"
+                                    data-events="tableRtnActionEvent"
+                                    class="not-print text-center">
+                                    <i class="fa-solid fa-list-check"></i>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div id="modalRtn" class="modal fade" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <span class="modal-title"></span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal"
+                            aria-label="Close">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body" style="min-height:75vh;">
+                <form id="formRtn" autocomplete="off" onsubmit="return false;">
+
+                    <input type="hidden" id="Id" name="Id" />
+                    <input type="hidden" id="No" name="No" />
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label>Date<span class="text-mandatory">*</span></label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" id="Rtn-Date" name="Date"
+                                       class="form-control form-control-sm required" readonly />
+                                <span class="input-group-text date-picker">
+                                    <i class="fa fa-calendar"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>To Store<span class="text-mandatory">*</span></label>
+                            <select id="Rtn-Store" name="StoreId"
+                                    class="select-pick required"
+                                    data-search="true" data-size="4">
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>GDN No.<span class="text-mandatory">*</span></label>
+                            <select id="Rtn-GdnNoId" name="GdnNoId"
+                                    class="select-pick-menu required"
+                                    data-size="4" data-search="true" multiple>
+                            </select>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-12 rtn-item-table">
+                            <table id="tableRtnItem"
+                                   class="table table-bordered table-hover table-default line-item"
+                                   data-search="false">
+                                <thead>
+                                    <tr>
+                                        <th colspan="5">
+                                            RTN Item
+                                            <button type="button"
+                                                    class="btn btn-sm btn-primary float-end rounded-5 btn-add-item"
+                                                    onclick="Rtn.addRtnItem()">
+                                                <span class="fa fa-plus"></span>
+                                            </button>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th data-formatter="tableRtnItemSlNo" class="text-center">#</th>
+                                        <th class="desc"
+                                            data-formatter="tableRtnItemDesc"
+                                            data-events="tableRtnItemDescEvent">
+                                            Description
+                                        </th>
+                                        <th class="qty"
+                                            data-formatter="tableTaskSerialNo"
+                                            data-events="tableRtnSerialNoDescEvent">
+                                            Serial No
+                                        </th>
+                                        <th class="qty"
+                                            data-formatter="tableTaskBatchNo"
+                                            data-events="tableRtnBatchNoDescEvent">
+                                            Batch No
+                                        </th>
+                                        <th class="qty"
+                                            data-formatter="tableRtnItemQty"
+                                            data-events="tableRtnItemQtyEvent">
+                                            Qty
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Remarks</label>
+                            <textarea id="Rtn-Remarks" name="Remarks"
+                                      style="resize:none;"
+                                      class="form-control form-control-sm"
+                                      rows="2" maxlength="100"></textarea>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="Rtn-BtnSave"
+                        class="btn btn-sm btn-success rounded-5">
+                    <span class="fa fa-save"></span>&nbsp;&nbsp;Save
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/script/Rtn.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        $(() => {
+            Rtn.init();
+        });
+    </script>
+}
