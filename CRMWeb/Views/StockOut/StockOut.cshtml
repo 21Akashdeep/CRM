@@ -93,7 +93,7 @@
                         <div class="col-md-2">
                             <label>Date</label>
                             <div class="input-group input-group-sm">
-                                <input type="text" id="StockOut-Date" name="Date" class="form-control form-control-sm required" readonly />
+                                <input type="text" id="StockOut-Date" name="Date" class="form-control form-control-sm required" data-date-format="DD-MMM-YYYY" readonly />
                                 <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
                             </div>
                         </div>
@@ -104,7 +104,7 @@
 
                         <div class="col-md-2">
                             <label>Scan</label>
-                            <input type="text" id="StockOut-Scan" name="Scan" class="form-control form-control-sm" maxlength="10" data-alpha-lg-num="true" />
+                            <input type="text" id="StockOut-Scan" name="Scan" class="form-control form-control-sm"  />
                         </div>
 
                     </div>
@@ -114,7 +114,7 @@
                             <table id="tableStockOutItem" class="table table-bordered table-hover table-default line-item" data-search="false">
                                 <thead>
                                     <tr>
-                                        <th colspan="5">
+                                        <th colspan="6">
                                             StockOut Item
                                             <button type="button" class="btn btn-sm btn-primary float-end rounded-5 btn-add-item" onclick="StockOut.addStockOutItem()">
                                                 <span class="fa fa-plus"></span>
@@ -127,6 +127,7 @@
                                         <th class="qty" data-formatter="tableTaskSerialNo" data-events="tableStockOutSerialNoDescEvent">SerialNo</th>
                                         <th class="qty" data-formatter="tableTaskBatchNo" data-events="tableStockOutBatchNoDescEvent">BatchNo</th>
                                         <th class="qty" data-formatter="tableStockOutItemQty" data-events="tableStockOutItemQtyEvent">Qty</th>
+                                        <th class="qty" data-formatter="tableStockOutItemAction" data-events="tableStockOutItemActionEvents">Remove</th>
                                     </tr>
                                 </thead>
                                 <tbody>
