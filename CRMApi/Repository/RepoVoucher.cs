@@ -194,48 +194,6 @@ namespace CRMApi.Repository
 
             return voucherItem;
         }
-        //public async Task<Message> AddAsync (Voucher obj,User User)
-        //{
-        //    Message objMsg = new Message();
-        //    try
-        //    {
-        //        obj.CreatedBy = User.Id;
-        //        obj.CreatedAt = DateTime.Now;
-        //        obj.UpdatedBy = User.Id;
-        //        obj.UpdatedAt = DateTime.Now;
-        //        obj.VoucherItem.ForEach(vi =>
-        //        {
-        //            vi.StoreId = obj.StoreId;
-        //            vi.CreatedBy = User.Id;
-        //            vi.CreatedAt = DateTime.Now;
-        //            vi.UpdatedBy = User.Id;
-        //            vi.UpdatedAt = DateTime.Now;
-        //        });
-        //        db.Add(obj);
-        //        Message.Add(ref objMsg, (await db.SaveChangesAsync()));
-
-        //        db.Entry(obj).Reload();
-
-        //        foreach (var vi in obj.VoucherItem)
-        //        {
-        //            vi.VoucherId = obj.Id;
-        //        }
-        //        Message.Add(ref objMsg, (await db.SaveChangesAsync()));
-
-        //        if (objMsg.status == Message.Type.success)
-        //        {
-        //            objMsg.obj = (await ListAsync(new Voucher
-        //            {
-        //                ListId = new List<int> { obj.Id }
-        //            }, User)).FirstOrDefault();                   
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Message.Exception(ref objMsg, ex);
-        //    }
-        //    return objMsg;
-        //}
         public async Task<Message> AddAsync(Voucher obj, User User)
         {
             Message objMsg = new Message();
@@ -465,7 +423,4 @@ namespace CRMApi.Repository
             return objMsg;
         }
     }
-
-
-
 }
