@@ -163,6 +163,20 @@ namespace CRMApi.Repository
         //{
 
         //}
+
+        public async Task<Message> DeleteItemAsync(int id, User user)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                objMsg = await new RepoVoucher(db).DeleteItemAsync(id, user);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
         public async Task<Message> PrintAsync(Voucher obj, User User)
         {
             Message objMsg = new Message();

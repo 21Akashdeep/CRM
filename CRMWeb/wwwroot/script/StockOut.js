@@ -32,7 +32,18 @@
                 }
             });
         });
-
+        $('#StockOut-Scan').on('keydown', (e) => {
+            if (e.key == "Enter") {
+                try {
+                    let obj = JSON.parse($('#StockOut-Scan').val());
+                    StockOut.addStockOutItem({ ItemId: obj.ItemId, SerialNo: obj.SerialNo, BatchNo: obj.BatchNo, Qty: 1 });
+                }
+                catch (ex) {
+                    Message.error({ statusText: "Scanned QR Code is Invalid." });
+                }
+                $('#StockOut-Scan').val('');
+            }
+        });
         $('#StockOut-BtnSave').on('click', () => {
             if (!Field.isMandatory({ class: '.required' })) {
                 return;
@@ -86,17 +97,17 @@
             }
         });
     }
-    static addStockOutItem() {
+    static addStockOutItem({ ItemId = 0, SerialNo = "", BatchNo = "", Qty = 0 } = {}) {
         let obj = {
             StockOutId: 0,
-            ItemId: 0,
+            ItemId:ItemId,
             VoucherId: 0,
             StoreId: 0,
             ItemDesc: null,
-            SerialNo: "",
-            BatchNo: "",
+            SerialNo: SerialNo,
+            BatchNo: BatchNo,
             ExpiryOn: null,
-            Qty: 0,
+            Qty: Qty,
             Rate: 0,
             UnitDesc: null,
             Amount: 0,
@@ -110,6 +121,11 @@
             ReasonCode: null,
             Remarks: null
         };
+        let isDuplicate = $('#tableStockOutItem').bootstrapTable('getData').filter(x => x.ItemId == obj.ItemId && x.SerialNo == obj.SerialNo && x.BatchNo == obj.BatchNo);
+        if (isDuplicate.length > 0) {
+            Message.error({ statusText: "Item alredy added in list" });
+            return;
+        }
         Table.add({ id: '#tableStockOutItem', data: obj, action: 'append', selectPick: true });
         StockOut.sumOfTotalStockOutItem();
     }
@@ -204,6 +220,9 @@
 
         }
     }
+    static deleteItem({ id, index }) {     
+         Table.remove({ id: '#tableStockOutItem', value: [index] });
+    }
 }
 window.tableStockOutRefNoAndDate = (value, obj, index) => {
     return `
@@ -233,42 +252,35 @@ window.tableStockOutUpdatedByAndAt = (value, obj, index) => {
     `;
 }
 window.tableStockOutAction = (value, obj, index) => {
-    let actionBtn = `
+    let actionBtn = [];
+
+    if (obj.IsEdit) {
+        actionBtn.push(`
+            <li>
+                <a href="#" class="dropdown-item text-success-100 btn-edit" title="View / Edit">
+                            <span class="fa fa-edit text-success-100"></span>&nbsp;&nbsp;View / Edit
+                        </a>
+            </li>
+        `);
+    }
+    if (obj.IsDelete) {
+        actionBtn.push(`
+            <li>
+                <a href="#" class="dropdown-item text-danger-100 btn-delete" title="Delete">
+                    <span class="fa fa-trash text-danger-100"></span>&nbsp;&nbsp;Delete
+                </a>
+            </li>
+        `);
+    }
+
+    return `
         <div class="btn-group dropstart">            
             <button class="btn btn-sm border-0" data-bs-toggle="dropdown"><i class="fa fa-ellipsis-v"></i></button>
             <ul class="dropdown-menu dropdown-menu-lg-end mt-4">
-                ${obj.IsEdit ?
-            `<li>
-                        <a href="#" class="dropdown-item text-success-100 btn-edit" title="View / Edit">
-                            <span class="fa fa-edit text-success-100"></span>&nbsp;&nbsp;View / Edit
-                        </a>
-                    </li>` : ``
-        }
-                ${obj.IsDuplicate ?
-            `<li>
-                        <a href="#" class="dropdown-item text-primary-100 btn-duplicate" title="Duplicate">
-                            <span class="fa fa-copy text-primary-100"></span>&nbsp;&nbsp;Duplicate
-                        </a>
-                    </li>` : ``
-        }
-                ${obj.IsDelete ?
-            `<li>
-                        <a href="#" class="dropdown-item text-danger-100 btn-delete" title="Delete">
-                            <span class="fa fa-trash text-danger-100"></span>&nbsp;&nbsp;Delete
-                        </a>
-                    </li>` : ``
-        }
-                ${obj.IsEnable ?
-            `<li>
-                        <a href="#" class="dropdown-item text-success-100 btn-enable" title="Enable">
-                            <span class="fa fa-toggle-on text-success-100"></span>&nbsp;&nbsp;Enable
-                        </a>
-                    </li>` : ``
-        }
+            ${actionBtn.join('')}
             </ul>
         </div>
     `;
-    return actionBtn;
 }
 window.tableStockOutConAddress = (value, obj, index) => {
 
@@ -455,3 +467,12 @@ window.tableStockOutExpiryOnEvent = {
         });
     }
 };
+window.tableStockOutItemAction = (value, obj, index) => {
+    if (!obj.Id)
+        return `<button type="button" class="btn btn-sm btn-danger rounded-5 btn-delete"><span class="fa fa-trash"></span></button>`;
+}
+window.tableStockOutItemActionEvents = {
+    'click .btn-delete': (e, value, obj, index) => {
+        StockOut.deleteItem({ id: obj.Id, index: index });
+    }
+}
