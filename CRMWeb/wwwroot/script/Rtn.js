@@ -521,10 +521,9 @@
 //};
 
 
-class Rtn {
-
+class Rtn
+{
     static item = [];
-
     static init() {
 
         Rtn.getViewOption();
@@ -537,7 +536,6 @@ class Rtn {
                 }
             });
         });
-
         $('#btnExport').on('click', () => {
             Rtn.get({
                 method: 'Export',
@@ -546,149 +544,68 @@ class Rtn {
                 }
             });
         });
-
         $('#btnNewEntry').on('click', () => {
             Rtn.newEntry();
         });
-
-        // ================= GDN CHANGE =================
-        //$('#Rtn-GdnNoId').on('change', () => {
-
-        //    let listGdnId = $('#Rtn-GdnNoId').val() || [];
-
-        //    if (listGdnId.length === 0) {
-        //        Table.add({ id: '#tableRtnItem', data: [] });
-        //        return;
-        //    }
-
-        //    Message.confirm({
-        //        msg: 'Do you want to load GDN items?',
-        //        confirmButtonText: 'Yes',
-        //        denyButtonText: 'No',
-        //        data: listGdnId,
-        //        onConfirm: (listGdnId) => {
-
-        //            Data.post({
-        //                url: 'Rtn/GetGdnItem',
-        //                data: listGdnId,
-        //                onSuccess: (response) => {
-        //                    Table.add({
-        //                        id: '#tableRtnItem',
-        //                        data: response.data,
-        //                        selectPick: true
-        //                    });
-        //                }
-        //            });
-
-        //        }
-        //    });
-        //});
-        //$('#Rtn-GdnNoId').on('change', () => {
-
-        //    let listGdnId = $('#Rtn-GdnNoId').val() || [];
-
-        //    let manualItems = $('#tableRtnItem').bootstrapTable('getData')
-        //        .filter(x => !x.SourceVoucherId || x.SourceVoucherId === null);
-
-
-        //    if (listGdnId.length === 0) {
-        //        Table.add({
-        //            id: '#tableRtnItem',
-        //            data: manualItems,
-        //            selectPick: true
-        //        });
-        //        return;
-        //    }
-
-        //    Message.confirm({
-        //        msg: 'Do you want to load DLN items?',
-        //        confirmButtonText: 'Yes',
-        //        denyButtonText: 'No',
-        //        data: listGdnId,
-        //        onConfirm: (listGdnId) => {
-
-        //            Data.post({
-        //                url: 'Rtn/GetGdnItem',
-        //                data: listGdnId,
-        //                onSuccess: (response) => {
-
-
-        //                    let dlnItems = response.data.map(x => {
-        //                        x.SourceVoucherId = x.SourceVoucherId || x.VoucherId;
-        //                        return x;
-        //                    });
-
-        //                    let uniqueMap = {};
-
-        //                    [...manualItems, ...dlnItems].forEach(x => {
-
-        //                        let key = [
-        //                            x.SourceVoucherId || 'MANUAL',
-        //                            x.ItemId || 0,
-        //                            x.SerialNo || '',
-        //                            x.BatchNo || ''
-        //                        ].join('_');
-
-        //                        if (!uniqueMap[key]) {
-        //                            uniqueMap[key] = x;
-        //                        }
-        //                    });
-
-        //                    let finalData = Object.values(uniqueMap);
-
-        //                    Table.add({
-        //                        id: '#tableRtnItem',
-        //                        data: finalData,
-        //                        selectPick: true
-        //                    });
-        //                }
-        //            });
-
-        //        }
-        //    });
-        //});
-
-
+        let previousGdnIds = [];
         $('#Rtn-GdnNoId').on('change', () => {
 
-            let listGdnId = $('#Rtn-GdnNoId').val() || [];
+            let currentGdnIds = $('#Rtn-GdnNoId').val() || [];
+            currentGdnIds = currentGdnIds.map(x => parseInt(x));
 
-            let manualItems = $('#tableRtnItem').bootstrapTable('getData')
-                .filter(x => !x.SourceVoucherId || x.SourceVoucherId === null && x.Id == 0);
+            // --- Detect Added & Removed ---
+            let addedGdn = currentGdnIds.filter(x => !previousGdnIds.includes(x));
+            let removedGdn = previousGdnIds.filter(x => !currentGdnIds.includes(x));
 
-               
+            let tableData = $('#tableRtnItem').bootstrapTable('getData');
 
+            // ---------------- REMOVE DESELECTED GDN ITEMS ----------------
+            if (removedGdn.length > 0) {
+                tableData = tableData.filter(x => !removedGdn.includes(x.SourceVoucherId));
+            }
 
-            //if (listGdnId.length === 0) {
-            //    Table.add({
-            //        id: '#tableRtnItem',
-            //        data: manualItems,
-            //        selectPick: true
-            //    });
-            //    return;
-            //}
+            // If no new GDN added, just refresh table
+            if (addedGdn.length === 0) {
+                Table.add({
+                    id: '#tableRtnItem',
+                    data: tableData,
+                    selectPick: true
+                });
+                previousGdnIds = currentGdnIds;
+                return;
+            }
 
+            // ---------------- CONFIRM LOAD FOR NEW GDN ----------------
             Message.confirm({
                 msg: 'Do you want to load DLN items?',
                 confirmButtonText: 'Yes',
                 denyButtonText: 'No',
-                data: listGdnId,
-                onConfirm: (listGdnId) => {
+                data: addedGdn,
+                onConfirm: (addedGdn) => {
 
                     Data.post({
                         url: 'Rtn/GetGdnItem',
-                        data: listGdnId,
+                        data: addedGdn,
                         onSuccess: (response) => {
 
-
+                            //let dlnItems = response.data.map(x => {
+                            //    x.SourceVoucherId = x.SourceVoucherId || x.VoucherId;
+                            //    return x;
+                            //});
                             let dlnItems = response.data.map(x => {
-                                x.SourceVoucherId = x.SourceVoucherId || x.VoucherId;
-                                return x;
+                                return {
+                                    ...x,
+                                    Id: 0,                    // 🔥 very important
+                                    VoucherId: 0,
+                                    SourceVoucherId: x.SourceVoucherId || x.VoucherId
+                                };
                             });
 
+
+                            // ---------------- MERGE WITHOUT DUPLICATES ----------------
                             let uniqueMap = {};
 
-                            [...manualItems, ...dlnItems].forEach(x => {
+                            [...tableData, ...dlnItems].forEach(x => {
 
                                 let key = [
                                     x.SourceVoucherId || 'MANUAL',
@@ -709,22 +626,38 @@ class Rtn {
                                 data: finalData,
                                 selectPick: true
                             });
+
+                            previousGdnIds = currentGdnIds;
                         }
                     });
-
+                },
+                onDeny: () => {
+                    // Rollback dropdown selection
+                    Dropdown.setValue({
+                        id: '#Rtn-GdnNoId',
+                        value: previousGdnIds
+                    });
                 }
             });
         });
-
-
-
-
         $('#Rtn-BtnSave').on('click', () => {
 
             if (!Field.isMandatory({ class: '.required' })) return;
 
+            let isEdit = !!$('#Id').val();   // if Id exists → Edit mode
+
             let voucherItem = $('#tableRtnItem').bootstrapTable('getData')
-                .filter(x => x.ItemId > 0 && x.Qty > 0);
+                .filter(x => x.ItemId > 0 && x.Qty > 0)
+                .map(x => {
+
+                    // 🔥 IMPORTANT FIX
+                    if (!isEdit) {
+                        x.Id = 0;                // NEW RTN → force insert
+                        x.VoucherId = 0;
+                    }
+
+                    return x;
+                });
 
             if (voucherItem.length === 0) {
                 Message.error({ statusText: 'Add at least one RTN item' });
@@ -735,18 +668,17 @@ class Rtn {
 
             obj.VoucherItem = voucherItem;
 
-            // 🔥 LINK RTN WITH GDN VOUCHERS
-            obj.ListVoucherId = JSON.stringify($('#Rtn-GdnNoId').val());
+            // Link with selected GDNs
+            obj.ListVoucherId = JSON.stringify($('#Rtn-GdnNoId').val() || []);
 
             if (!obj.Id) {
-                Rtn.add(obj);
+                Rtn.add(obj);       // INSERT
             } else {
-                Rtn.update(obj);
+                Rtn.update(obj);    // UPDATE
             }
         });
-    }
 
-    // ================= VIEW OPTIONS =================
+    }
     static getViewOption() {
         Data.get({
             url: 'Rtn/GetViewOption',
@@ -757,7 +689,6 @@ class Rtn {
             }
         });
     }
-    
     static getAddOption({ onSuccess }) {
         Data.get({ url: 'Rtn/GetAddOption', onSuccess: onSuccess });
     }
@@ -773,7 +704,6 @@ class Rtn {
 
         Data.post({ url: `Rtn/${method}`, data: obj, onSuccess: onSuccess });
     }
-
     static newEntry() {
 
         Rtn.getAddOption({
@@ -788,7 +718,6 @@ class Rtn {
             }
         });
     }
-
     static addRtnItem() {
 
         let obj = {
@@ -824,8 +753,6 @@ class Rtn {
             }
         });
     }
-
-
     static edit({ id, action = 'Edit' }) {
 
         Data.get({
@@ -834,78 +761,36 @@ class Rtn {
 
                 let option = response.data;
                 let obj = response.obj;
+
+               
+                Rtn.item = option.Item || [];
+
                 let storeId = null;
                 if (obj.VoucherItem && obj.VoucherItem.length > 0) {
                     storeId = obj.VoucherItem[0].StoreId;
                 }
 
+
+                let title = action === 'Edit'
+                    ? `RTN / Edit (No: ${obj.No})`
+                    : `RTN / Add`;
+
+                Modal.open({id: '#modalRtn',title: title,action: action,obj: obj});
+                Dropdown.bind({ id: '#Rtn-Store',data: option.Store || [], value: 'Id', text: 'Description',initialValue: storeId ? [storeId] : []});
                 let gdnIds = [];
                 if (obj.ListVoucherId) {
                     try {
-                        gdnIds = JSON.parse(obj.ListVoucherId);  
+                        gdnIds = JSON.parse(obj.ListVoucherId);
                     } catch (e) {
                         console.error("Invalid ListVoucherId:", obj.ListVoucherId);
                     }
                 }
-                let title = action === 'Edit'
-                    ? `RTN / Edit (No: ${obj.No})`
-                    : `RTN / Add`;
-                Modal.open({id: '#modalRtn',title: title,action: action,obj: obj});
-                Dropdown.bind({id: '#Rtn-Store',data: option.Store || [],value: 'Id',text: 'Description',initialValue: storeId ? [storeId] : []});
-
-                Dropdown.bind({id: '#Rtn-GdnNoId', data: option.GdnNo || [],value: 'Id', text: 'No',initialValue: gdnIds});
-
-                Table.add({id: '#tableRtnItem', data: obj.VoucherItem || [],selectPick: true});
+                Dropdown.bind({id: '#Rtn-GdnNoId',data: option.GdnNo || [],value: 'Id', text: 'No',initialValue: gdnIds });
+                Table.add({id: '#tableRtnItem',data: obj.VoucherItem || [],selectPick: true });
+             
             }
         });
     }
-
-        
-    //static edit({ id, action = 'Edit' }) {
-    //    Data.get({
-    //        url: `Rtn/Edit?Id=${id}`,
-    //        onSuccess: (response) => {
-
-    //            let option = response.data;
-    //            Rtn.item = option.Item || [];
-
-    //            let obj = response.obj;
-    //            let title = action == 'Edit' ? `RTN / Edit (No: ${obj.No})` : `RTN / Add`;
-
-    //           // Dropdown.bind({ id: '#Rtn-Store', data: response.data.Store, value: 'Id', text: 'Description', initialValue: obj.voucherItem.StoreId });
-    //            //Dropdown.bind({ id:'#Rtn-GdnNoId', data: response.data.GdnNo, value: 'Id', text: 'No' });
-
-    //            Dropdown.bind({
-    //                id: '#Rtn-Store',
-    //                data: response.data.Store,
-    //                value: 'Id',
-    //                text: 'Description',
-    //                initialValue: [obj.StoreId]   // ✅ correct
-    //            });
-
-    //            let gdnIds = [];
-    //            if (obj.ListVoucherId) {
-    //                try {
-    //                    gdnIds = JSON.parse(obj.ListVoucherId);
-    //                } catch (e) {
-    //                    console.error("Invalid ListVoucherId JSON:", obj.ListVoucherId);
-    //                }
-    //            }
-
-    //            Dropdown.bind({
-    //                id: '#Rtn-GdnNoId',
-    //                data: response.data.GdnNo,
-    //                value: 'Id',
-    //                text: 'No',
-    //                initialValue: gdnIds          // ✅ correct
-    //            });
-
-
-    //            Modal.open({ id: '#modalRtn', title: title, action: action, obj: obj });
-    //            Table.add({ id: '#tableRtnItem', data: obj.VoucherItem, selectPick: true });
-    //        }
-    //    });
-    //}
     static update(obj) {
         Data.update({
             url: 'Rtn/Update',
@@ -919,35 +804,28 @@ class Rtn {
             }
         });
     }
+
 }
 
-
-/* ====================== MAIN TABLE FORMATTERS ====================== */
-
 window.tableRtnSlNo = (value, obj, index) => index + 1;
-
 window.tableRtnDate = (value, obj, index) => {
     return obj.Date ? moment(obj.Date).format('DD-MMM-YYYY') : '';
 };
-
 window.tableRtnStatus = (value, obj, index) => {
     return `<div class="${obj.StatusCss}">${obj.StatusDesc}</div>`;
 };
-
 window.tableRtnCreatedByAndAt = (value, obj, index) => {
     return `
         <div>${obj.CreatedByName ?? ''}</div>
         <div>${moment(obj.CreatedAt).format('DD-MMM-YYYY HH:mm')}</div>
     `;
 };
-
 window.tableRtnUpdatedByAndAt = (value, obj, index) => {
     return `
         <div>${obj.UpdatedByName ?? ''}</div>
         <div>${moment(obj.UpdatedAt).format('DD-MMM-YYYY HH:mm')}</div>
     `;
 };
-
 window.tableRtnAction = (value, obj, index) => {
     let actionBtn = [];
 
@@ -982,11 +860,7 @@ window.tableRtnAction = (value, obj, index) => {
         </div>
     `;
 };
-
 window.tableRtnActionEvent = {
-    //'click .btn-edit': (e, value, obj, index) => {
-    //    Rtn.edit({ id: obj.Id });
-    //},
     'click .btn-edit': function (e, value, row, index) {
         e.preventDefault();
         Rtn.edit({ id: row.Id });
@@ -995,13 +869,7 @@ window.tableRtnActionEvent = {
         Rtn.delete({ id: obj.Id });
     }
 };
-
-
-/* ====================== ITEM TABLE FORMATTERS ====================== */
-
 window.tableRtnItemSlNo = (value, obj, index) => index + 1;
-
-/* ---------- ITEM DESCRIPTION ---------- */
 window.tableRtnItemDesc = (value, obj, index) => {
     return `
         ${Dropdown.html({
@@ -1016,7 +884,6 @@ window.tableRtnItemDesc = (value, obj, index) => {
     })}
     `;
 };
-
 window.tableRtnItemDescEvent = {
     'change .rtn-item': (e, value, obj, index) => {
 
@@ -1040,9 +907,6 @@ window.tableRtnItemDescEvent = {
         });
     }
 };
-
-
-/* ---------- SERIAL NO ---------- */
 window.tableTaskSerialNo = (value, obj, index) => {
     return `
         <input type="text"
@@ -1052,7 +916,6 @@ window.tableTaskSerialNo = (value, obj, index) => {
                maxlength="150" />
     `;
 };
-
 window.tableRtnSerialNoDescEvent = {
     'input .rtn-item': (e, value, obj, index) => {
         obj.SerialNo = e.currentTarget.value || "";
@@ -1065,9 +928,6 @@ window.tableRtnSerialNoDescEvent = {
         });
     }
 };
-
-
-/* ---------- BATCH NO ---------- */
 window.tableTaskBatchNo = (value, obj, index) => {
     return `
         <input type="text"
@@ -1077,7 +937,6 @@ window.tableTaskBatchNo = (value, obj, index) => {
                maxlength="150" />
     `;
 };
-
 window.tableRtnBatchNoDescEvent = {
     'input .rtn-item': (e, value, obj, index) => {
         obj.BatchNo = e.currentTarget.value || "";
@@ -1090,9 +949,6 @@ window.tableRtnBatchNoDescEvent = {
         });
     }
 };
-
-
-/* ---------- QTY ---------- */
 window.tableRtnItemQty = (value, obj, index) => {
     return `
         <input type="text"
@@ -1102,7 +958,6 @@ window.tableRtnItemQty = (value, obj, index) => {
                oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})">
     `;
 };
-
 window.tableRtnItemQtyEvent = {
     'input .rtn-item-qty': (e, value, obj, index) => {
 
@@ -1118,9 +973,6 @@ window.tableRtnItemQtyEvent = {
         });
     }
 };
-
-
-/* ---------- AMOUNT (OPTIONAL DISPLAY) ---------- */
 window.tableRtnItemAmount = (value, obj, index) => {
     return `
         <input type="text"
@@ -1130,9 +982,6 @@ window.tableRtnItemAmount = (value, obj, index) => {
                readonly>
     `;
 };
-
-
-/* ====================== DELETE HANDLER ====================== */
 Rtn.delete = ({ id }) => {
     Message.confirm({
         msg: "Do you want to delete this RTN?",
