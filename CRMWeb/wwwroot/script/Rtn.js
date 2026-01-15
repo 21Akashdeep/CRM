@@ -583,21 +583,90 @@ class Rtn {
         //        }
         //    });
         //});
+        //$('#Rtn-GdnNoId').on('change', () => {
+
+        //    let listGdnId = $('#Rtn-GdnNoId').val() || [];
+
+        //    let manualItems = $('#tableRtnItem').bootstrapTable('getData')
+        //        .filter(x => !x.SourceVoucherId || x.SourceVoucherId === null);
+
+
+        //    if (listGdnId.length === 0) {
+        //        Table.add({
+        //            id: '#tableRtnItem',
+        //            data: manualItems,
+        //            selectPick: true
+        //        });
+        //        return;
+        //    }
+
+        //    Message.confirm({
+        //        msg: 'Do you want to load DLN items?',
+        //        confirmButtonText: 'Yes',
+        //        denyButtonText: 'No',
+        //        data: listGdnId,
+        //        onConfirm: (listGdnId) => {
+
+        //            Data.post({
+        //                url: 'Rtn/GetGdnItem',
+        //                data: listGdnId,
+        //                onSuccess: (response) => {
+
+
+        //                    let dlnItems = response.data.map(x => {
+        //                        x.SourceVoucherId = x.SourceVoucherId || x.VoucherId;
+        //                        return x;
+        //                    });
+
+        //                    let uniqueMap = {};
+
+        //                    [...manualItems, ...dlnItems].forEach(x => {
+
+        //                        let key = [
+        //                            x.SourceVoucherId || 'MANUAL',
+        //                            x.ItemId || 0,
+        //                            x.SerialNo || '',
+        //                            x.BatchNo || ''
+        //                        ].join('_');
+
+        //                        if (!uniqueMap[key]) {
+        //                            uniqueMap[key] = x;
+        //                        }
+        //                    });
+
+        //                    let finalData = Object.values(uniqueMap);
+
+        //                    Table.add({
+        //                        id: '#tableRtnItem',
+        //                        data: finalData,
+        //                        selectPick: true
+        //                    });
+        //                }
+        //            });
+
+        //        }
+        //    });
+        //});
+
+
         $('#Rtn-GdnNoId').on('change', () => {
 
             let listGdnId = $('#Rtn-GdnNoId').val() || [];
 
             let manualItems = $('#tableRtnItem').bootstrapTable('getData')
-                .filter(x => !x.SourceVoucherId || x.SourceVoucherId === null);
+                .filter(x => !x.SourceVoucherId || x.SourceVoucherId === null && x.Id == 0);
 
-            if (listGdnId.length === 0) {
-                Table.add({
-                    id: '#tableRtnItem',
-                    data: manualItems,
-                    selectPick: true
-                });
-                return;
-            }
+               
+
+
+            //if (listGdnId.length === 0) {
+            //    Table.add({
+            //        id: '#tableRtnItem',
+            //        data: manualItems,
+            //        selectPick: true
+            //    });
+            //    return;
+            //}
 
             Message.confirm({
                 msg: 'Do you want to load DLN items?',
@@ -611,7 +680,7 @@ class Rtn {
                         data: listGdnId,
                         onSuccess: (response) => {
 
-                      
+
                             let dlnItems = response.data.map(x => {
                                 x.SourceVoucherId = x.SourceVoucherId || x.VoucherId;
                                 return x;
@@ -646,6 +715,8 @@ class Rtn {
                 }
             });
         });
+
+
 
 
         $('#Rtn-BtnSave').on('click', () => {

@@ -294,8 +294,8 @@ namespace CRMApi.Repository
                        && App.ActiveStatus.Contains(vci.Status)
                     select new VoucherItem
                     {
-                        Id = 0,
-                        VoucherId = 0,
+                        Id = vci.Id,
+                        VoucherId = vci.VoucherId,
 
                         ItemId = vci.ItemId,
                         ItemDesc = itm.Description,
