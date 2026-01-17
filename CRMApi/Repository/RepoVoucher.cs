@@ -108,7 +108,8 @@ namespace CRMApi.Repository
                     Date = voucher.Date,
                     PartyId = voucher.PartyId,
                     PartyDesc = x.PartyDesc,
-                    StoreDesc = dbVoucherItem[0].StoreDesc,
+                    //StoreDesc = dbVoucherItem[0].StoreDesc,
+                    StoreDesc = VoucherItemLookup[voucher.Id].Select(x => x.StoreDesc).FirstOrDefault(),
                     ConName = voucher.ConName,
                     ConAdd1 = voucher.ConAdd1,
                     ConAdd2 = voucher.ConAdd2,
@@ -139,7 +140,7 @@ namespace CRMApi.Repository
             }
             ).ToList();
             return Voucher;
-        }
+            }
         public async Task<List<VoucherItem>> ListItemAsync(Voucher? obj,User User)  
         {
             obj ??= new Voucher();
