@@ -67,6 +67,8 @@ namespace CRMApi.Models
         [MaxLength(200)]
         public string? Remarks { get; set; }
 
+        public bool IsScanned { get; set; }
+
         // Status
         public int Status { get; set; } = 1;
 

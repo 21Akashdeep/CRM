@@ -1398,7 +1398,56 @@ const Export = {
     }
 }
 const OnlineApi = {
-    pinCode({
+    pinCode({ pinCode = '', loader = false, callback = () => { }}) {
+        let data = {
+            status: Message.Type.warning,
+            statusText: 'No records found',
+            obj: {
+                PinCode: pinCode,                
+                PostOfficeList: [],
+                District: '',
+                State: '',
+                Country: ''
+            }
+        };
+
+        if (pinCode.length !== 6) return;
+
+        $.ajax({
+            url: `https://api.postalpincode.in/pincode/${pinCode}`,
+            type: 'Get',
+            dataType: 'json',
+            contenttype: 'application/json; charset=utf-8',
+            beforeSend: () => {
+                if (loader) PageLoader.on();
+            },
+            success: (response) => {
+                let obj = response[0];
+                if (obj.Status == 'Success') {
+                    data.status = Message.Type.success;
+                    data.statusText = obj.Message;
+                    let objPost = obj.PostOffice?.[0] ?? null;                    
+                    data.obj.PostOfficeList = objPost == null ? [] : obj.PostOffice;
+                    data.obj.District = objPost == null ? null : objPost.District;
+                    data.obj.State = objPost == null ? null : objPost.State;
+                    data.obj.Country = objPost == null ? null : objPost.Country;                    
+                }
+                else {
+                    data.status = Message.Type.error;
+                    data.statusText = `Pin Code : ${pinCode}<br>${response[0].Message}`;                    
+                }                
+            },
+            error: (response) => {                
+                data.status = Message.Type.error;
+                data.statusText = `Pin Code server is not responding.<br>${response.statusText}`;
+            },
+            complete: () => {
+                if (loader) PageLoader.off();
+                callback(data);
+            }
+        });
+    },
+    pinCode1({
         pinCode = '',
         postOffice = null,
         district = null,
@@ -2375,7 +2424,8 @@ const Dropdown = {
             select.value = null;
         }
         if (isEditable) {
-            $(id).editableSelect({ effects: 'slide' });
+            $(id).editableSelect({ effects: 'slide' });            
+            $(id).val(initialValue.length == 0 ? '' : initialValue[0]);
         }
         else if (isSelectPick) {
             SelectPick.render(select);
