@@ -288,6 +288,7 @@ namespace CRMApi.Repository
                     }
                     else
                     {
+                        vi.ExpiryOn = item.ExpiryOn;
                         vi.StoreId = storeid;
                         vi.ItemId = item.ItemId;
                         vi.SerialNo = item.SerialNo;

@@ -40,26 +40,64 @@
         });
 
         $('#Gdn-ConPinCode').on('input', () => {
-
-            let pinCode = $('#Gdn-ConPinCode').val();
-            if (pinCode.length == 6) {
-                OnlineApi.pinCode({
-                    pinCode: pinCode,
-                    postOfficeId: '#Gdn-ConPostOffice',
-                    stateId: '#Gdn-ConStateCode',
-                    stateId: '#Gdn-ConStateName'
-
-                })
+            OnlineApi.pinCode({
+                pinCode: $('#Gdn-ConPinCode').val(),
+                callback: (data) => {
+                    Dropdown.bind({ id: '#Gdn-ConPostOffice', data: data.obj.PostOfficeList, value: 'Name', text: 'Name', isEditable: true });
+                    Dropdown.set({ id: '#Gdn-ConStateName', text: [data.obj.State] });
+                }
+            });
+        });
+        $('#GdnScan-ItemSerialNo').on('keydown', (e) => {
+            if (e.key == 'Enter') {
+                if (!Field.isMandatory({ class: '.scan-required' })) {
+                    return;
+                }
+                let serialNo = $('#GdnScan-ItemSerialNo').val();
+                let countGdnItem = $('#tableGdnItem').bootstrapTable('getData').filter(x => x.SerialNo == serialNo).length;
+                let countScanItem = $('#tableGdnScanItem').bootstrapTable('getData').filter(x => x.SerialNo == serialNo).length;
+                if (countGdnItem > 0 || countScanItem > 0) {
+                    Message.error({ statusText: `Serial No. ${serialNo} already added in Scan List or Item List.` });
+                    return;
+                }
+                Gdn.addGdnItem({
+                    itemId: $('#GdnScan-ItemId').val(),
+                    itemDesc: $('#GdnScan-ItemId option:selected').text(),
+                    expiryOn: $('#GdnScan-ItemExpiryOn').val(),
+                    serialNo: serialNo,
+                    qty: 1,
+                    isScanned: true,
+                    callback: (obj) => {
+                        Table.add({ id: '#tableGdnScanItem', data: obj, action: 'prepend' });
+                        $('#GdnScan-ItemSerialNo').val('');
+                    }
+                });
             }
+        });
 
-
-        })
+        $('#btnScanItemAdd').on('click', () => {
+            let scanItems = $('#tableGdnScanItem').bootstrapTable('getData');
+            if (scanItems.length === 0) {
+                Message.error({ statusText: 'No scanned items found' });
+                return;
+            }
+            Table.add({ id: '#tableGdnItem', data: scanItems, action: 'append', selectPick: true });
+            Gdn.sumOfTotalGdnItem();
+            Modal.close({ id: '#modalGdnItemScan' });
+        });
 
         $('#Gdn-BtnSave').on('click', () => {
             if (!Field.isMandatory({ class: '.required' })) {
                 return;
             }
-            let GdnItem = $('#tableGdnItem').bootstrapTable('getData').filter(x => x.ItemId > 0);
+            let GdnItem = $('#tableGdnItem').bootstrapTable('getData').filter(x => x.ItemId > 0)
+                .map(x => {
+                    if (x.ExpiryOn) {
+                        x.ExpiryOn = moment(x.ExpiryOn).format('YYYY-MM-DD');
+                    }
+                    return x;
+                });
+
 
             if (GdnItem.length == 0) {
                 Message.error({ statusText: 'Gdn Item not found. Add atleast one Gdn Item' });
@@ -129,18 +167,23 @@
             }
         });
     }
+    static scanner() {
+        Modal.open({ id: '#modalGdnItemScan', title: 'Gdn / Scan Item' });
+        Dropdown.bind({ id: '#GdnScan-ItemId', data: Gdn.item, value: 'Id', text: 'Description' });
+        $('#Gdn-ExpiryOn').val('');
+    }
 
-    static addGdnItem() {
+    static addGdnItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, isScanned = false, callback } = { }) {
         let obj = {
             GdnId: 0,
-            ItemId: 0,
+            ItemId: itemId,
             VoucherId: 0,
             StoreId: 0,
-            ItemDesc: null,
-            SerialNo: "",
+            ItemDesc: itemDesc,
+            SerialNo: serialNo,
             BatchNo: "",
-            ExpiryOn: null,
-            Qty: 0,
+            ExpiryOn: expiryOn,
+            Qty: qty,
             Rate: 0,
             UnitDesc: null,
             Amount: 0,
@@ -152,10 +195,19 @@
             GrossAmount: 0,
             ImageUrl: null,
             ReasonCode: null,
-            Remarks: null
+            Remarks: null,
+            IsScanned: isScanned
         };
-        Table.add({ id: '#tableGdnItem', data: obj, action: 'append', selectPick: true });
-        Gdn.sumOfTotalGdnItem();
+        if (!callback) {
+            Table.add({ id: '#tableGdnItem', data: obj, action: 'append', selectPick: true });
+            Gdn.sumOfTotalGdnItem();
+        }
+        else {
+            callback(obj);
+        }
+    }
+    static addGdnScanItem({ ItemId, SerialNo, ExpiryOn, Qty }) {
+        Table.add({ id: '#tableGdnScanItem', data: { ItemId, SerialNo, ExpiryOn, Qty }, action: 'append' });
     }
 
     static sumOfTotalGdnItem() {
@@ -217,8 +269,10 @@
 
                 setTimeout(() => {
                     OnlineApi.pinCode({
-                        postOfficeId: '#Gdn-ConPostOffice',
-                        stateName: '#Gdn-ConStateName'
+                        pinCode: obj.ConPincode,
+                        callback: (data) => {
+                            Dropdown.bind({ id: '#Gdn-ConPostOffice', data: data.obj.PostOfficeList, value: 'Name', text: 'Name', isEditable: true, initialValue: [obj.ConPostOffice] });
+                        }
                     });
                 }, 100);
             }
@@ -259,6 +313,9 @@
         if (response.status == Message.Type.success) {
             Table.updateById({ id: "#tableGdn", objId: response.obj.Id, obj: response.obj });
         }
+    }
+    static deleteItem({ id, index }) {
+        Table.remove({ id: '#tableGdnScanItem', value: [index] });
     }
 }
 
@@ -819,12 +876,22 @@ window.tableGdnItemQtyEvent = {
     }
 };
 
-window.tableRtnExpiryOn = (value, obj, index) => {
-    return `<input type="date" id="RtnExpiryOn_${index}" class="form-control form-control-sm mb-0 rtn-item" value="${obj.ExpiryOn ?? ""}"/>`;
-}
+window.tableGdnExpiryOn = (value, obj, index) => {
 
-window.tableRtnExpiryOnEvent = {
-    'input .rtn-item': (e, value, obj, index) => {
+    let val = obj.ExpiryOn
+        ? moment(obj.ExpiryOn).format('YYYY-MM-DD')
+        : '';
+
+    return `
+        <input type="date"
+               class="form-control form-control-sm mb-0 gdn-item-expiry"
+               value="${val}">
+    `;
+};
+
+
+window.tableGdnExpiryOnEvent = {
+    'input .Gdn-item': (e, value, obj, index) => {
         obj.ExpiryOn = e.currentTarget.value || "";
         Table.updateByIndex({
             id: '#tableRtnItem',
@@ -834,4 +901,36 @@ window.tableRtnExpiryOnEvent = {
             event: e
         });
     }
+};
+window.tableScanExpiry = (v, obj) => {
+    return obj.ExpiryOn
+        ? moment(obj.ExpiryOn).format('DD-MMM-YYYY')
+        : '';
+};
+window.tableScanQty = (v, obj) => {
+    return obj.Qty;
+};
+window.tableScanSerial = (v, obj) => {
+    return obj.SerialNo;
+};
+window.tableGdnScanItemAction = (value, obj, index) => {
+    if (!obj.Id)
+        return `<button type="button" class="btn btn-sm btn-danger rounded-5 btn-delete"><span class="fa fa-trash"></span></button>`;
+}
+window.tableGdnScanItemActionEvents = {
+    'click .btn-delete': (e, value, obj, index) => {
+        Gdn.deleteItem({ id: obj.Id, index: index });
+    }
+}
+
+window.tableGdnScanExpiryOn = (value, obj, index) => {
+    let val = obj.ExpiryOn
+        ? moment(obj.ExpiryOn, ['DD-MMM-YYYY', 'YYYY-MM-DD']).format('YYYY-MM-DD')
+        : '';
+
+    return `
+        <input type="date"
+            class="form-control form-control-sm mb-0 Gdn-item-expiry"
+            value="${val}">
+    `;
 };

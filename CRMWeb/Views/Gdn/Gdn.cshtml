@@ -59,6 +59,7 @@
                                 <th data-sortable="true" data-field="No">Number</th>
                                 <th data-sortable="true" data-field="PartyDesc">Party</th>
                                 <th data-sortable="true" data-field="ConName">Consignee Name </th>
+                                <th data-sortable="true" data-field="StoreDesc">From Store </th>
                                 <th data-sortable="false" data-formatter="tableGdnCreatedByAndAt" class="text-nowrap">Created By & At</th>
                                 <th data-sortable="false" data-formatter="tableGdnUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
                                 <th data-sortable="false" data-formatter="tableGdnStatus" class="Status text-center">Status</th>
@@ -171,16 +172,21 @@
                                     <tr>
                                         <th colspan="5">
                                             Gdn Item
-                                            <button type="button" class="btn btn-sm btn-primary float-end rounded-5 btn-add-item" onclick="Gdn.addGdnItem()">
-                                                <span class="fa fa-plus"></span>
-                                            </button>
+                                            <div class="btn-group float-end">
+                                                <button type="button" class="btn btn-sm btn-primary rounded-5 me-e" onclick="Gdn.addGdnItem()">
+                                                    <span class="fa fa-plus"></span>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-success rounded-5" onclick=" Gdn.scanner()">
+                                                    <span class="fa fa-qrcode"></span>
+                                                </button>
+                                            </div>
                                         </th>
                                     </tr>
                                     <tr>
                                         <th data-formatter="tableGdnItemSlNo" class="text-center">#</th>
                                         <th class="desc" data-formatter="tableGdnItemDesc" data-events="tableGdnItemDescEvent">Description</th>
                                         <th class="qty" data-formatter="tableTaskSerialNo" data-events="tableGdnSerialNoDescEvent">SerialNo</th>
-                                        <th class="qty" data-formatter="tableTaskBatchNo" data-events="tableGdnBatchNoDescEvent">BatchNo</th>
+                                        <th class="qty" data-formatter="tableGdnExpiryOn" data-events="tableGdnExpiryOnEvent">ExpiryOn</th>
                                         <th class="qty" data-formatter="tableGdnItemQty" data-events="tableGdnItemQtyEvent">Qty</th>
                                     </tr>
                                 </thead>
@@ -196,6 +202,75 @@
                         </div>
                     </div>
                 </form>
+                <div id="modalGdnItemScan" class="modal fade" data-bs-backdrop="static" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <span class="modal-title"></span>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                                        <span class="fa fa-minus"></span>
+                                    </button>
+                                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal" aria-label="Close">
+                                        <span class="fa fa-remove"></span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="modal-body" style="min-height:75vh;">
+                                <form id="formGdnScanItem" autocomplete="off" onsubmit="return false;">
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <label>Item<span class="text-mandatory">*</span></label>
+                                            <select id="GdnScan-ItemId" name="ItemId" class="select-pick scan-required" data-size="4" data-search="true"></select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>ExpiryOn</label>
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" id="GdnScan-ItemExpiryOn" name="ExpiryOn" class="form-control form-control-sm scan-required" data-date-format="DD-MMM-YYYY" readonly />
+                                                <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>Scan</label>
+                                            <input type="text" id="GdnScan-ItemSerialNo" name="Scan" class="form-control form-control-sm" />
+                                        </div>
+                                    </div>
+                                    <hr />
+                                    <div class="row">
+                                        <div class="col-md-12 Gdn-scan-item-table">
+                                            <table id="tableGdnScanItem"
+                                                   class="table table-bordered table-hover table-default line-item"
+                                                   data-search="false">
+                                                <thead>
+                                                    <tr>
+                                                        <th data-formatter="tableGdnItemSlNo" class="text-center">#</th>
+                                                        <th data-field="ItemDesc">Item</th>
+                                                        <th data-formatter="tableScanExpiry">Expiry</th>
+                                                        <th data-formatter="tableScanSerial">Serial No</th>
+                                                        <th data-formatter="tableScanQty" class="text-end">Qty</th>
+                                                        <th data-formatter="tableGdnScanItemAction" data-events="tableGdnScanItemActionEvents" class="text-center">
+                                                            <i class="fa-solid fa-list-check"></i>
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+
+
+                                        </div>
+                                    </div>
+                                    <hr />
+                                </form>
+                            </div>
+                            <div class="modal-footer justify-content-end">
+                                <button type="button"
+                                        class="btn btn-success rounded-5" id="btnScanItemAdd">
+                                    <span class="fa fa-add"></span>&nbsp;Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="modal-footer">

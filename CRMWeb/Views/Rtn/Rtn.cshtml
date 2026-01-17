@@ -160,10 +160,14 @@
                                     <tr>
                                         <th colspan="6">
                                             RTN Item
-                                            <button type="button"
-                                                    class="btn btn-sm btn-primary float-end rounded-5 btn-add-item"
-                                                    onclick="Rtn.addRtnItem()"><span class="fa fa-plus"></span>
-                                            </button>
+                                            <div class="btn-group float-end">
+                                                <button type="button" class="btn btn-sm btn-primary rounded-5 me-e" onclick="Rtn.addRtnItem()">
+                                                    <span class="fa fa-plus"></span>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-success rounded-5" onclick=" Rtn.scanner()">
+                                                    <span class="fa fa-qrcode"></span>
+                                                </button>
+                                            </div>
                                         </th>
                                     </tr>
                                     <tr>
@@ -175,12 +179,13 @@
                                             data-formatter="tableTaskSerialNo"data-events="tableRtnSerialNoDescEvent">Serial No
                                         </th>
                                         <th class="qty"
-                                            data-formatter="tableTaskBatchNo" data-events="tableRtnBatchNoDescEvent">Batch No
+                                            data-formatter="tableRtnExpiryOn" data-events="tableRtnExpiryOnEvent">
+                                            ExpiryOn
                                         </th>
                                         <th class="qty"
                                             data-formatter="tableRtnItemQty" data-events="tableRtnItemQtyEvent">Qty
                                         </th>
-                                        <th class="qty text-center"data-formatter="tableRtnItemDeleteAction"data-events="tableRtnItemDeleteActionEvents">Remove</th>
+                                        <th class="qty text-center" data-formatter="tableRtnItemDeleteAction" data-events="tableRtnItemDeleteActionEvents">Remove</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -199,6 +204,75 @@
                     </div>
 
                 </form>
+                <div id="modalRtnItemScan" class="modal fade" data-bs-backdrop="static" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <span class="modal-title"></span>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                                        <span class="fa fa-minus"></span>
+                                    </button>
+                                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal" aria-label="Close">
+                                        <span class="fa fa-remove"></span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="modal-body" style="min-height:75vh;">
+                                <form id="formRtnScanItem" autocomplete="off" onsubmit="return false;">
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <label>Item<span class="text-mandatory">*</span></label>
+                                            <select id="RtnScan-ItemId" name="ItemId" class="select-pick scan-required" data-size="4" data-search="true"></select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>ExpiryOn</label>
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" id="RtnScan-ItemExpiryOn" name="ExpiryOn" class="form-control form-control-sm scan-required" data-date-format="DD-MMM-YYYY" readonly />
+                                                <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>Scan</label>
+                                            <input type="text" id="RtnScan-ItemSerialNo" name="Scan" class="form-control form-control-sm" />
+                                        </div>
+                                    </div>
+                                    <hr />
+                                    <div class="row">
+                                        <div class="col-md-12 Rtn-scan-item-table">
+                                            <table id="tableRtnScanItem"
+                                                   class="table table-bordered table-hover table-default line-item"
+                                                   data-search="false">
+                                                <thead>
+                                                    <tr>
+                                                        <th data-formatter="tableRtnItemSlNo" class="text-center">#</th>
+                                                        <th data-field="ItemDesc">Item</th>
+                                                        <th data-formatter="tableScanExpiry">Expiry</th>
+                                                        <th data-formatter="tableScanSerial">Serial No</th>
+                                                        <th data-formatter="tableScanQty" class="text-end">Qty</th>
+                                                        <th data-formatter="tableRtnScanItemAction" data-events="tableRtnScanItemActionEvents" class="text-center">
+                                                            <i class="fa-solid fa-list-check"></i>
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+
+
+                                        </div>
+                                    </div>
+                                    <hr />
+                                </form>
+                            </div>
+                            <div class="modal-footer justify-content-end">
+                                <button type="button"
+                                        class="btn btn-success rounded-5" id="btnScanItemAdd">
+                                    <span class="fa fa-add"></span>&nbsp;Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="modal-footer">

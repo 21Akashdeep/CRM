@@ -32,23 +32,57 @@
                 }
             });
         });
-        $('#StockOut-Scan').on('keydown', (e) => {
-            if (e.key == "Enter") {
-                try {
-                    let obj = JSON.parse($('#StockOut-Scan').val());
-                    StockOut.addStockOutItem({ ItemId: obj.ItemId, SerialNo: obj.SerialNo, BatchNo: obj.BatchNo, Qty: 1 });
+        $('#StockOutScan-ItemSerialNo').on('keydown', (e) => {
+            if (e.key == 'Enter') {
+                if (!Field.isMandatory({ class: '.scan-required' })) {
+                    return;
                 }
-                catch (ex) {
-                    Message.error({ statusText: "Scanned QR Code is Invalid." });
+                let serialNo = $('#StockOutScan-ItemSerialNo').val();
+                let countStockOutItem = $('#tableStockOutItem').bootstrapTable('getData').filter(x => x.SerialNo == serialNo).length;
+                let countScanItem = $('#tableStockOutScanItem').bootstrapTable('getData').filter(x => x.SerialNo == serialNo).length;
+                if (countStockOutItem > 0 || countScanItem > 0) {
+                    Message.error({ statusText: `Serial No. ${serialNo} already added in Scan List or Item List.` });
+                    return;
                 }
-                $('#StockOut-Scan').val('');
+                StockOut.addStockOutItem({
+                    itemId: $('#StockOutScan-ItemId').val(),
+                    itemDesc: $('#StockOutScan-ItemId option:selected').text(),
+                    expiryOn: $('#StockOutScan-ItemExpiryOn').val(),
+                    serialNo: serialNo,
+                    qty: 1,
+                    isScanned: true,
+                    callback: (obj) => {
+                        Table.add({ id: '#tableStockOutScanItem', data: obj, action: 'prepend' });
+                        $('#StockOutScan-ItemExpiryOn,#StockOutScan-ItemSerialNo').val('');
+
+                    }
+                });
             }
         });
+
+        $('#btnScanItemAdd').on('click', () => {
+            let scanItems = $('#tableStockOutScanItem').bootstrapTable('getData');
+            if (scanItems.length === 0) {
+                Message.error({ statusText: 'No scanned items found' });
+                return;
+            }
+            Table.add({ id: '#tableStockOutItem', data: scanItems, action: 'append', selectPick: true });
+            StockOut.sumOfTotalStockOutItem();
+
+            Modal.close({ id: '#modalStockOutItemScan' });
+        });
+
         $('#StockOut-BtnSave').on('click', () => {
             if (!Field.isMandatory({ class: '.required' })) {
                 return;
             }
-            let StockOutItem = $('#tableStockOutItem').bootstrapTable('getData').filter(x => x.ItemId > 0);
+            let StockOutItem = $('#tableStockOutItem').bootstrapTable('getData').filter(x => x.ItemId > 0)
+                .map(x => {
+                    if (x.ExpiryOn) {
+                        x.ExpiryOn = moment(x.ExpiryOn).format('YYYY-MM-DD');
+                    }
+                    return x;
+                });
             let obj = Data.serializeToObject({ formId: '#formStockOut' });
             obj.VoucherItem = StockOutItem;
 
@@ -97,17 +131,23 @@
             }
         });
     }
-    static addStockOutItem({ ItemId = 0, SerialNo = "", BatchNo = "", Qty = 0 } = {}) {
+    static scanner() {
+        Modal.open({ id: '#modalStockOutItemScan', title: 'StockOut / Scan Item' });
+        Dropdown.bind({ id: '#StockOutScan-ItemId', data: StockOut.item, value: 'Id', text: 'Description' });
+        $('#StockOut-ExpiryOn,#StockOutScan-ItemSerialNo').val('');
+
+    }
+    static addStockOutItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, isScanned = false, callback } = {}) {
         let obj = {
-            StockOutId: 0,
-            ItemId:ItemId,
+            Id: 0,
+            ItemId: itemId,
             VoucherId: 0,
             StoreId: 0,
-            ItemDesc: null,
-            SerialNo: SerialNo,
-            BatchNo: BatchNo,
-            ExpiryOn: null,
-            Qty: Qty,
+            ItemDesc: itemDesc,
+            SerialNo: serialNo,
+            BatchNo: "",
+            ExpiryOn: expiryOn,
+            Qty: qty,
             Rate: 0,
             UnitDesc: null,
             Amount: 0,
@@ -119,15 +159,19 @@
             GrossAmount: 0,
             ImageUrl: null,
             ReasonCode: null,
-            Remarks: null
+            Remarks: null,
+            IsScanned: isScanned
         };
-        let isDuplicate = $('#tableStockOutItem').bootstrapTable('getData').filter(x => x.ItemId == obj.ItemId && x.SerialNo == obj.SerialNo && x.BatchNo == obj.BatchNo);
-        if (isDuplicate.length > 0) {
-            Message.error({ statusText: "Item alredy added in list" });
-            return;
+        if (!callback) {
+            Table.add({ id: '#tableStockOutItem', data: obj, action: 'append', selectPick: true });
+            StockOut.sumOfTotalStockOutItem();
         }
-        Table.add({ id: '#tableStockOutItem', data: obj, action: 'append', selectPick: true });
-        StockOut.sumOfTotalStockOutItem();
+        else {
+            callback(obj);
+        }
+    }
+    static addStockOutScanItem({ ItemId, SerialNo, ExpiryOn, Qty }) {
+        Table.add({ id: '#tableStockOutScanItem', data: { ItemId, SerialNo, ExpiryOn, Qty }, action: 'append' });
     }
     static sumOfTotalStockOutItem() {
         let StockOutItem = $('#tableStockOutItem').bootstrapTable('getData').filter(x => x.ItemId > 0);
@@ -153,7 +197,7 @@
                 if (response.status == Message.Type.success) {
                     Modal.reset({ id: '#modalStockOut' });
                     Table.add({ id: '#tableStockOut', data: response.obj, action: 'prepend' });
-                    Dropdown.bind({ id: '#ListId', data: response.data.ViewOption.StockOut, value: 'Id', text: 'StockOutNo', subText: 'Date' });
+                    //Dropdown.bind({ id: '#ListId', data: response.data.ViewOption.StockOut, value: 'Id', text: 'StockOutNo', subText: 'Date' });
                 }
             }
         });
@@ -222,6 +266,9 @@
     }
     static deleteItem({ id, index }) {     
          Table.remove({ id: '#tableStockOutItem', value: [index] });
+    }
+    static deleteScanItem({ id, index }) {
+        Table.remove({ id: '#tableStockOutScanItem', value: [index] });
     }
 }
 window.tableStockOutRefNoAndDate = (value, obj, index) => {
@@ -452,9 +499,20 @@ window.tableStockOutBatchNoDescEvent = {
         });
     }
 };
+//window.tableStockOutExpiryOn = (value, obj, index) => {
+//    return `<input type="date" id="StockOutExpiryOn_${index}" class="form-control form-control-sm mb-0 StockOut-item" value="${obj.ExpiryOn ?? ""}"/>`;
+//}
 window.tableStockOutExpiryOn = (value, obj, index) => {
-    return `<input type="date" id="StockOutExpiryOn_${index}" class="form-control form-control-sm mb-0 StockOut-item" value="${obj.ExpiryOn ?? ""}"/>`;
-}
+    let val = obj.ExpiryOn
+        ? moment(obj.ExpiryOn, ['DD-MMM-YYYY', 'YYYY-MM-DD']).format('YYYY-MM-DD')
+        : '';
+
+    return `
+        <input type="date"
+            class="form-control form-control-sm mb-0 StockOut-item-expiry"
+            value="${val}">
+    `;
+};
 window.tableStockOutExpiryOnEvent = {
     'input .StockOut-item': (e, value, obj, index) => {
         obj.ExpiryOn = e.currentTarget.value || "";
@@ -468,6 +526,35 @@ window.tableStockOutExpiryOnEvent = {
     }
 };
 window.tableStockOutItemAction = (value, obj, index) => {
+    if (!obj.Id)
+        return `<button type="button" class="btn btn-sm btn-danger rounded-5 btn-delete"><span class="fa fa-trash"></span></button>`;
+}
+window.tableStockOutItemActionEvents = {
+    'click .btn-delete': (e, value, obj, index) => {
+        StockOut.deleteItem({ id: obj.Id, index: index });
+    }
+}
+window.tableScanExpiry = (v, obj) => {
+    return obj.ExpiryOn
+        ? moment(obj.ExpiryOn).format('DD-MMM-YYYY')
+        : '';
+};
+window.tableScanQty = (v, obj) => {
+    return obj.Qty;
+};
+window.tableScanSerial = (v, obj) => {
+    return obj.SerialNo;
+};
+window.tableStockOutScanItemAction = (value, obj, index) => {
+    if (!obj.Id)
+        return `<button type="button" class="btn btn-sm btn-danger rounded-5 btn-delete"><span class="fa fa-trash"></span></button>`;
+}
+window.tableStockOutScanItemActionEvents = {
+    'click .btn-delete': (e, value, obj, index) => {
+        StockOut.deleteScanItem({ id: obj.Id, index: index });
+    }
+}
+window.tableStockItemAction = (value, obj, index) => {
     if (!obj.Id)
         return `<button type="button" class="btn btn-sm btn-danger rounded-5 btn-delete"><span class="fa fa-trash"></span></button>`;
 }

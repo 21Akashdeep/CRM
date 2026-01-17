@@ -59,7 +59,8 @@
                     isScanned: true,
                     callback: (obj) => {
                         Table.add({ id: '#tableGrnScanItem', data: obj, action: 'prepend' });
-                        $('#Grn-Scan').val('');
+                        $('#GrnScan-ItemExpiryOn,#GrnScan-ItemSerialNo').val('');
+
                     }
                 });
             }
@@ -73,6 +74,7 @@
             }
             Table.add({ id: '#tableGrnItem', data: scanItems, action: 'append', selectPick: true });
             Grn.sumOfTotalGrnItem();
+
             Modal.close({ id: '#modalGrnItemScan' });
         });
         $('#Grn-BtnSave').on('click', () => {
@@ -146,7 +148,8 @@
     static scanner() {
         Modal.open({ id: '#modalGrnItemScan', title: 'GRN / Scan Item' });
         Dropdown.bind({ id: '#GrnScan-ItemId', data: Grn.item, value: 'Id', text: 'Description' });
-        $('#Grn-ExpiryOn').val('');
+        $('#Grn-ExpiryOn,#GrnScan-ItemSerialNo').val('');
+
     }
     static addGrnItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, isScanned = false, callback } = {}) {
         let obj = {

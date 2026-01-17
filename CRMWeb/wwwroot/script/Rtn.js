@@ -60,6 +60,7 @@
                             //    x.SourceVoucherId = x.SourceVoucherId || x.VoucherId;
                             //    return x;
                             //});
+
                             let dlnItems = response.data.map(x => {
                                 return {
                                     ...x,Id: 0, VoucherId: 0,SourceVoucherId: x.SourceVoucherId || x.VoucherId
@@ -84,13 +85,60 @@
                 },onDeny: () => {Dropdown.setValue({id: '#Rtn-GdnNoId', value: previousGdnIds});}
             });
         });
+        $('#RtnScan-ItemSerialNo').on('keydown', (e) => {
+            if (e.key == 'Enter') {
+                if (!Field.isMandatory({ class: '.scan-required' })) {
+                    return;
+                }
+                let serialNo = $('#RtnScan-ItemSerialNo').val();
+                let countRtnItem = $('#tableRtnItem').bootstrapTable('getData').filter(x => x.SerialNo == serialNo).length;
+                let countScanItem = $('#tableRtnScanItem').bootstrapTable('getData').filter(x => x.SerialNo == serialNo).length;
+                if (countRtnItem > 0 || countScanItem > 0) {
+                    Message.error({ statusText: `Serial No. ${serialNo} already added in Scan List or Item List.` });
+                    return;
+                }
+                Rtn.addRtnItem({
+                    itemId: $('#RtnScan-ItemId').val(),
+                    itemDesc: $('#RtnScan-ItemId option:selected').text(),
+                    expiryOn: $('#RtnScan-ItemExpiryOn').val(),
+                    serialNo: serialNo,
+                    qty: 1,
+                    isScanned: true,
+                    callback: (obj) => {
+                        Table.add({ id: '#tableRtnScanItem', data: obj, action: 'prepend' });
+                        $('#RtnScan-ItemExpiryOn,#RtnScan-ItemSerialNo').val('');
+
+                    }
+                });
+            }
+        });
+
+        $('#btnScanItemAdd').on('click', () => {
+            let scanItems = $('#tableRtnScanItem').bootstrapTable('getData');
+            if (scanItems.length === 0) {
+                Message.error({ statusText: 'No scanned items found' });
+                return;
+            }
+            Table.add({ id: '#tableRtnItem', data: scanItems, action: 'append', selectPick: true });
+            Rtn.sumOfTotalRtnItem();
+
+            Modal.close({ id: '#modalRtnItemScan' });
+        });
         $('#Rtn-BtnSave').on('click', () => {
 
             if (!Field.isMandatory({ class: '.required' })) return;
             let isEdit = !!$('#Id').val();  
             let voucherItem = $('#tableRtnItem').bootstrapTable('getData')
                 .filter(x => x.ItemId > 0 && x.Qty > 0)
-                .map(x => {if (!isEdit) {x.Id = 0;x.VoucherId = 0;} return x;});
+                .map(x => {
+                    if (!isEdit && x.ExpiryOn) {
+                        x.Id = 0;
+                        x.VoucherId = 0;
+                        x.ExpiryOn = moment(x.ExpiryOn).format('YYYY-MM-DD');
+                    }
+                    return x;
+                });
+
 
             if (voucherItem.length === 0) {
                 Message.error({ statusText: 'Add at least one RTN item' });
@@ -133,6 +181,7 @@
 
         Data.post({ url: `Rtn/${method}`, data: obj, onSuccess: onSuccess });
     }
+
     static newEntry() {
 
         Rtn.getAddOption({
@@ -148,24 +197,62 @@
             }
         });
     }
-    static addRtnItem() {
+    static scanner() {
+        Modal.open({ id: '#modalRtnItemScan', title: 'Rtn / Scan Item' });
+        Dropdown.bind({ id: '#RtnScan-ItemId', data: Rtn.item, value: 'Id', text: 'Description' });
+        $('#Rtn-ExpiryOn,#RtnScan-ItemSerialNo').val('');
 
+    }
+    static addRtnItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, isScanned = false, callback } = {}) {
         let obj = {
             Id: 0,
+            ItemId: itemId,
             VoucherId: 0,
-            ItemId: 0,
-            ItemDesc: null,
-            SerialNo: null,
-            BatchNo: null,
-            Qty: 0,
+            StoreId: 0,
+            ItemDesc: itemDesc,
+            SerialNo: serialNo,
+            BatchNo: "",
+            ExpiryOn: expiryOn,
+            Qty: qty,
             Rate: 0,
+            UnitDesc: null,
             Amount: 0,
-            Remarks: null
+            DiscountAmount: 0,
+            TotalAmount: 0,
+            ListTax: "",
+            TaxRate: 0,
+            TaxAmount: 0,
+            GrossAmount: 0,
+            ImageUrl: null,
+            ReasonCode: null,
+            Remarks: null,
+            IsScanned: isScanned
         };
-
-        Table.add({
-            id: '#tableRtnItem',data: obj,action: 'append',selectPick: true
-        });
+        if (!callback) {
+            Table.add({ id: '#tableRtnItem', data: obj, action: 'append', selectPick: true });
+            Rtn.sumOfTotalRtnItem();
+        }
+        else {
+            callback(obj);
+        }
+    }
+    static addRtnScanItem({ ItemId, SerialNo, ExpiryOn, Qty }) {
+        Table.add({ id: '#tableRtnScanItem', data: { ItemId, SerialNo, ExpiryOn, Qty }, action: 'append' });
+    }
+    static sumOfTotalRtnItem() {
+        let RtnItem = $('#tableRtnItem').bootstrapTable('getData').filter(x => x.ItemId > 0);
+        let Qty = RtnItem.length == 0 ? 0 : RtnItem.map(x => parseFloat(x.Qty)).reduce((s, v) => s + v, 0);
+        let Amount = RtnItem.length == 0 ? 0 : RtnItem.map(x => parseFloat(x.Amount)).reduce((s, v) => s + v, 0);
+        let tfoot = `
+            <tfoot>
+                <tr>
+                    <th class="text-right" colspan="4">Total</th>
+                    <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
+                </tr>
+            </tfoot>
+        `;
+        $('#tableRtnItem tfoot').remove();
+        $('#tableRtnItem').append(tfoot);
     }
     static add(obj) {
         Data.post({
@@ -232,13 +319,13 @@
             }
         });
     }
-    static deleteItem({ id,index }) {
+    static deleteItems({ id,index }) {
 
         let obj = {             
             Id:Rtn.Id,
             DeleteItemId: id     
         };
-        if (index > 0 && id == 0 ) {
+        if (index >= 0 && id == 0 ) {
             Table.remove({ id: '#tableRtnItem', value: [index] });
             return;
         }
@@ -266,6 +353,9 @@
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
 
         }
+    }
+    static deleteItem({ id, index }) {
+        Table.remove({ id: '#tableRtnScanItem', value: [index] });
     }
 }
 
@@ -494,11 +584,54 @@ Rtn.delete = ({ id }) => {
         }
     });
 };
+window.tableRtnExpiryOn = (value, obj, index) => {
+    let val = obj.ExpiryOn
+        ? moment(obj.ExpiryOn, ['DD-MMM-YYYY', 'YYYY-MM-DD']).format('YYYY-MM-DD')
+        : '';
+
+    return `
+        <input type="date"
+            class="form-control form-control-sm mb-0 Rtn-item-expiry"
+            value="${val}">
+    `;
+};
+window.tableRtnExpiryOnEvent = {
+    'input .Rtn-item': (e, value, obj, index) => {
+        obj.ExpiryOn = e.currentTarget.value || "";
+        Table.updateByIndex({
+            id: '#tableRtnItem',
+            index: index,
+            obj: obj,
+            value: obj.ExpiryOn,
+            event: e
+        });
+    }
+};
 window.tableRtnItemDeleteAction = (value, obj, index) => {
     if (obj.Id || obj.Id ==0)
         return `<button type="button" class="btn btn-sm btn-danger rounded-5 btn-delete"><span class="fa fa-trash"></span></button>`;
 }
 window.tableRtnItemDeleteActionEvents = {
+    'click .btn-delete': (e, value, obj, index) => {
+        Rtn.deleteItems({ id: obj.Id, index: index });
+    }
+}
+window.tableScanExpiry = (v, obj) => {
+    return obj.ExpiryOn
+        ? moment(obj.ExpiryOn).format('DD-MMM-YYYY')
+        : '';
+};
+window.tableScanQty = (v, obj) => {
+    return obj.Qty;
+};
+window.tableScanSerial = (v, obj) => {
+    return obj.SerialNo;
+};
+window.tableRtnScanItemAction = (value, obj, index) => {
+    if (!obj.Id)
+        return `<button type="button" class="btn btn-sm btn-danger rounded-5 btn-delete"><span class="fa fa-trash"></span></button>`;
+}
+window.tableRtnScanItemActionEvents = {
     'click .btn-delete': (e, value, obj, index) => {
         Rtn.deleteItem({ id: obj.Id, index: index });
     }
