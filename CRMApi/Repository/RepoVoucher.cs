@@ -18,6 +18,10 @@ namespace CRMApi.Repository
             obj.ListStatus = obj.ListStatus.Any() ? obj.ListStatus : App.ActiveStatus;
             var dbVoucherQuery = db.Voucher.Where(grn => obj.ListStatus.Contains(grn.Status)).AsQueryable();
             //Add Filter
+            if(obj.Id >0)
+            {
+                dbVoucherQuery = dbVoucherQuery.Where(x => x.Id == obj.Id);
+            }
                 if(obj.ListType.Any())
                 dbVoucherQuery = dbVoucherQuery.Where(vc => obj.ListType.Contains(vc.Type));
             if (obj.ListId.Any())
@@ -67,6 +71,7 @@ namespace CRMApi.Repository
                     Id = vci.Id,
                     VoucherId = vci.VoucherId,
                     StoreId = vci.StoreId,
+                    StoreDesc = st.Description,
                     ItemId = vci.ItemId,
                     ItemDesc = itm.Description,
                     VoucherDesc = vc.Type,
@@ -103,6 +108,7 @@ namespace CRMApi.Repository
                     Date = voucher.Date,
                     PartyId = voucher.PartyId,
                     PartyDesc = x.PartyDesc,
+                    StoreDesc = dbVoucherItem[0].StoreDesc,
                     ConName = voucher.ConName,
                     ConAdd1 = voucher.ConAdd1,
                     ConAdd2 = voucher.ConAdd2,
@@ -115,7 +121,7 @@ namespace CRMApi.Repository
                     ListVoucherId = voucher.ListVoucherId,
                     EwayNo = voucher.EwayNo,
                     EwayDate = voucher.EwayDate,
-                    Remarks = voucher.Remarks,                  
+                    Remarks = voucher.Remarks,
                     Status = voucher.Status,
                     StatusDesc = x.StatusDesc,
                     StatusCss = x.StatusCss,
@@ -384,6 +390,7 @@ namespace CRMApi.Repository
             catch (Exception ex)
             {
                 Message.Exception(ref objMsg, ex);
+
             }
             return objMsg;
         }

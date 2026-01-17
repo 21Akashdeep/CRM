@@ -95,7 +95,8 @@ namespace CRMApi.Controllers
                 if (User == null) return Ok(objMsg);
 
                 obj.Type = "ReturnNote";   // RTN Type
-                objMsg = await RepoVoucher.AddAsync(obj, User);
+               
+                objMsg =await RepoRtn.AddAsync(obj, User);
             }
             catch (Exception ex)
             {
@@ -159,6 +160,28 @@ namespace CRMApi.Controllers
                 if (User == null) return Ok(objMsg);
 
                 objMsg = await RepoVoucher.DeleteAsync(Id, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
+        [HttpPost]
+        public async Task<IActionResult> DeleteItem([FromBody] Voucher obj)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(
+                    new Request { HttpRequest = Request, ActionType = ActionType.View },
+                    db, ref objMsg);
+
+                if (User == null) return Ok(objMsg);
+
+                //objMsg = await RepoVoucher.DeleteAsync(Id, User);
+                //objMsg = await RepoRtn.DeleteItemAsync(Id, User);
+                objMsg = await RepoRtn.DeleteItemAsync(obj, User);
             }
             catch (Exception ex)
             {

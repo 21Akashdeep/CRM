@@ -1,6 +1,7 @@
 ﻿class Rtn
 {
     static item = [];
+    static Id;
     static init()
     {
         Rtn.getViewOption();
@@ -25,7 +26,6 @@
         });
         let previousGdnIds = [];
         $('#Rtn-GdnNoId').on('change', () => {
-
             let currentGdnIds = $('#Rtn-GdnNoId').val() || [];
             currentGdnIds = currentGdnIds.map(x => parseInt(x));
             let addedGdn = currentGdnIds.filter(x => !previousGdnIds.includes(x));
@@ -139,6 +139,7 @@
             onSuccess: (response) => {
 
                 Rtn.item = response.data.Item || [];
+                Rtn.Id = response.data.Id;
 
                 Dropdown.bind({ id: '#Rtn-Store', data: response.data.Store, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#Rtn-GdnNoId', data: response.data.GdnNo, value: 'Id', text: 'No' });
@@ -163,10 +164,7 @@
         };
 
         Table.add({
-            id: '#tableRtnItem',
-            data: obj,
-            action: 'append',
-            selectPick: true
+            id: '#tableRtnItem',data: obj,action: 'append',selectPick: true
         });
     }
     static add(obj) {
@@ -193,6 +191,7 @@
 
                
                 Rtn.item = option.Item || [];
+                Rtn.Id = response.obj.Id;
 
                 let storeId = null;
                 if (obj.VoucherItem && obj.VoucherItem.length > 0) {
@@ -233,15 +232,48 @@
             }
         });
     }
+    static deleteItem({ id,index }) {
+
+        let obj = {             
+            Id:Rtn.Id,
+            DeleteItemId: id     
+        };
+        if (index > 0 && id == 0 ) {
+            Table.remove({ id: '#tableRtnItem', value: [index] });
+            return;
+        }
+        Message.confirm({
+            msg: "Do you want to delete?",
+            confirmButtonText: "Delete",
+            denyButtonText: "Don't Delete",
+            onConfirm: () => {
+                Data.post({
+                    url: "Rtn/DeleteItem",
+                    data: obj,
+                    onSuccess: Rtn.deleteItemOnSuccess
+                });
+            }
+        });
+    }
+    static deleteItemOnSuccess = (response) => {
+            Message.show(response);
+        if (response.status == Message.Type.success) {
+            let manualData = $('#tableRtnItem').bootstrapTable('getData').filter(x => x.Id == 0);
+            let finaldata = manualData.concat(response.data[0].VoucherItem);
+            Table.updateById({ id: "#tableTask", obj: response.data.obj });
+            Table.add({ id: '#tableRtnItem', data: finaldata, selectPick: true })
+            Dropdown.bind({ id: '#ListId', data: response.data.ListId, value: 'Id', text: 'Description', subText: "Code" });
+            Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
+
+        }
+    }
 }
+
 window.tableRtnSlNo = (value, obj, index) => index + 1;
 window.tableRtnDate = (value, obj, index) => {
     return obj.Date ? moment(obj.Date).format('DD-MMM-YYYY') : '';
 };
 window.tableRtnStore = function (value, row, index) {
-    if (!value) {
-        return '<span class="text-muted">N/A</span>';
-    }
     return `
         <div class="store-wrapper">
             <i class="fa-solid fa-store me-1"></i> 
@@ -462,3 +494,12 @@ Rtn.delete = ({ id }) => {
         }
     });
 };
+window.tableRtnItemDeleteAction = (value, obj, index) => {
+    if (obj.Id || obj.Id ==0)
+        return `<button type="button" class="btn btn-sm btn-danger rounded-5 btn-delete"><span class="fa fa-trash"></span></button>`;
+}
+window.tableRtnItemDeleteActionEvents = {
+    'click .btn-delete': (e, value, obj, index) => {
+        Rtn.deleteItem({ id: obj.Id, index: index });
+    }
+}

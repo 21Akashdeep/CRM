@@ -77,7 +77,7 @@
                                 <th data-sortable="false" data-formatter="tableRtnSlNo" class="text-center">#</th>
                                 <th data-sortable="true" data-formatter="tableRtnDate">Date</th>
                                 <th data-sortable="true" data-field="No">Number</th>
-                                <th data-sortable="true" data-field="StoreDesc"data-formatter="tableRtnStore">Store</th>
+                                <th data-sortable="true" data-field="StoreDesc">Store</th>
                                 <th data-sortable="false" data-formatter="tableRtnCreatedByAndAt" class="text-nowrap">
                                     Created By & At
                                 </th>
@@ -147,9 +147,7 @@
 
                         <div class="col-md-4">
                             <label>GDN No.<span class="text-mandatory">*</span></label>
-                            <select id="Rtn-GdnNoId" name="GdnNoId"
-                                    class="select-pick-menu required"
-                                    data-size="4" data-search="true" multiple>
+                            <select id="Rtn-GdnNoId" name="GdnNoId"class="select-pick-menu required"data-size="4" data-search="true" multiple>
                             </select>
                         </div>
                     </div>
@@ -157,41 +155,32 @@
                     <div class="row">
                         <div class="col-md-12 rtn-item-table">
                             <table id="tableRtnItem"
-                                   class="table table-bordered table-hover table-default line-item"
-                                   data-search="false">
+                                   class="table table-bordered table-hover table-default line-item"data-search="false">
                                 <thead>
                                     <tr>
-                                        <th colspan="5">
+                                        <th colspan="6">
                                             RTN Item
                                             <button type="button"
                                                     class="btn btn-sm btn-primary float-end rounded-5 btn-add-item"
-                                                    onclick="Rtn.addRtnItem()">
-                                                <span class="fa fa-plus"></span>
+                                                    onclick="Rtn.addRtnItem()"><span class="fa fa-plus"></span>
                                             </button>
                                         </th>
                                     </tr>
                                     <tr>
                                         <th data-formatter="tableRtnItemSlNo" class="text-center">#</th>
                                         <th class="desc"
-                                            data-formatter="tableRtnItemDesc"
-                                            data-events="tableRtnItemDescEvent">
-                                            Description
+                                            data-formatter="tableRtnItemDesc"data-events="tableRtnItemDescEvent">Description
                                         </th>
                                         <th class="qty"
-                                            data-formatter="tableTaskSerialNo"
-                                            data-events="tableRtnSerialNoDescEvent">
-                                            Serial No
+                                            data-formatter="tableTaskSerialNo"data-events="tableRtnSerialNoDescEvent">Serial No
                                         </th>
                                         <th class="qty"
-                                            data-formatter="tableTaskBatchNo"
-                                            data-events="tableRtnBatchNoDescEvent">
-                                            Batch No
+                                            data-formatter="tableTaskBatchNo" data-events="tableRtnBatchNoDescEvent">Batch No
                                         </th>
                                         <th class="qty"
-                                            data-formatter="tableRtnItemQty"
-                                            data-events="tableRtnItemQtyEvent">
-                                            Qty
+                                            data-formatter="tableRtnItemQty" data-events="tableRtnItemQtyEvent">Qty
                                         </th>
+                                        <th class="qty text-center"data-formatter="tableRtnItemDeleteAction"data-events="tableRtnItemDeleteActionEvents">Remove</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
