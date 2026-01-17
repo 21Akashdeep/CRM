@@ -12,6 +12,8 @@ namespace CRMApi.Models
         public int? PartyId { get; set; }
         [NotMapped] public int StateId { get; set; }
         [NotMapped] public int StoreId { get; set; }
+        [NotMapped] public int DeleteItemId { get; set; }
+
         [NotMapped] public string? PartyDesc { get; set; }       
         [StringLength(100)] public string? ConName { get; set; }
         [StringLength(100)] public string? ConAdd1 { get; set; }
@@ -31,6 +33,7 @@ namespace CRMApi.Models
         [NotMapped] public DateTime ToDate { get; set; }
         public int Status { get; set; } = 1;
         [NotMapped] public string? StatusDesc { get; set; }
+        [NotMapped] public string? StoreDesc { get; set; }
         [NotMapped] public string? StatusCss { get; set; }
         public int CreatedBy { get; set; }
         [NotMapped] public string? CreatedByName { get; set; }

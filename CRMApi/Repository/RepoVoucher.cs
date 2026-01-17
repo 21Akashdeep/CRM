@@ -18,6 +18,10 @@ namespace CRMApi.Repository
             obj.ListStatus = obj.ListStatus.Any() ? obj.ListStatus : App.ActiveStatus;
             var dbVoucherQuery = db.Voucher.Where(grn => obj.ListStatus.Contains(grn.Status)).AsQueryable();
             //Add Filter
+            if(obj.Id >0)
+            {
+                dbVoucherQuery = dbVoucherQuery.Where(x => x.Id == obj.Id);
+            }
                 if(obj.ListType.Any())
                 dbVoucherQuery = dbVoucherQuery.Where(vc => obj.ListType.Contains(vc.Type));
             if (obj.ListId.Any())
@@ -67,6 +71,7 @@ namespace CRMApi.Repository
                     Id = vci.Id,
                     VoucherId = vci.VoucherId,
                     StoreId = vci.StoreId,
+                    StoreDesc = st.Description,
                     ItemId = vci.ItemId,
                     ItemDesc = itm.Description,
                     VoucherDesc = vc.Type,
@@ -103,6 +108,8 @@ namespace CRMApi.Repository
                     Date = voucher.Date,
                     PartyId = voucher.PartyId,
                     PartyDesc = x.PartyDesc,
+                    //StoreDesc = dbVoucherItem[0].StoreDesc,
+                    StoreDesc = VoucherItemLookup[voucher.Id].Select(x => x.StoreDesc).FirstOrDefault(),
                     ConName = voucher.ConName,
                     ConAdd1 = voucher.ConAdd1,
                     ConAdd2 = voucher.ConAdd2,
@@ -115,7 +122,7 @@ namespace CRMApi.Repository
                     ListVoucherId = voucher.ListVoucherId,
                     EwayNo = voucher.EwayNo,
                     EwayDate = voucher.EwayDate,
-                    Remarks = voucher.Remarks,                  
+                    Remarks = voucher.Remarks,
                     Status = voucher.Status,
                     StatusDesc = x.StatusDesc,
                     StatusCss = x.StatusCss,
@@ -133,7 +140,7 @@ namespace CRMApi.Repository
             }
             ).ToList();
             return Voucher;
-        }
+            }
         public async Task<List<VoucherItem>> ListItemAsync(Voucher? obj,User User)  
         {
             obj ??= new Voucher();
@@ -194,48 +201,6 @@ namespace CRMApi.Repository
 
             return voucherItem;
         }
-        //public async Task<Message> AddAsync (Voucher obj,User User)
-        //{
-        //    Message objMsg = new Message();
-        //    try
-        //    {
-        //        obj.CreatedBy = User.Id;
-        //        obj.CreatedAt = DateTime.Now;
-        //        obj.UpdatedBy = User.Id;
-        //        obj.UpdatedAt = DateTime.Now;
-        //        obj.VoucherItem.ForEach(vi =>
-        //        {
-        //            vi.StoreId = obj.StoreId;
-        //            vi.CreatedBy = User.Id;
-        //            vi.CreatedAt = DateTime.Now;
-        //            vi.UpdatedBy = User.Id;
-        //            vi.UpdatedAt = DateTime.Now;
-        //        });
-        //        db.Add(obj);
-        //        Message.Add(ref objMsg, (await db.SaveChangesAsync()));
-
-        //        db.Entry(obj).Reload();
-
-        //        foreach (var vi in obj.VoucherItem)
-        //        {
-        //            vi.VoucherId = obj.Id;
-        //        }
-        //        Message.Add(ref objMsg, (await db.SaveChangesAsync()));
-
-        //        if (objMsg.status == Message.Type.success)
-        //        {
-        //            objMsg.obj = (await ListAsync(new Voucher
-        //            {
-        //                ListId = new List<int> { obj.Id }
-        //            }, User)).FirstOrDefault();                   
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Message.Exception(ref objMsg, ex);
-        //    }
-        //    return objMsg;
-        //}
         public async Task<Message> AddAsync(Voucher obj, User User)
         {
             Message objMsg = new Message();
@@ -426,6 +391,7 @@ namespace CRMApi.Repository
             catch (Exception ex)
             {
                 Message.Exception(ref objMsg, ex);
+
             }
             return objMsg;
         }
@@ -465,7 +431,4 @@ namespace CRMApi.Repository
             return objMsg;
         }
     }
-
-
-
 }

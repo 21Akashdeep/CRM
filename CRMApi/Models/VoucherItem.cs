@@ -57,11 +57,7 @@ namespace CRMApi.Models
 
         [Column(TypeName = "decimal(18,6)")]
         public decimal GrossAmount { get; set; } = 0;
-
-        // Extra Info
-        [MaxLength(100)]
-        public string? ImageUrl { get; set; }
-
+        [MaxLength(100)] public string? ImageUrl { get; set; }
         public string? ReasonCode { get; set; }
 
         [MaxLength(200)]
@@ -72,22 +68,15 @@ namespace CRMApi.Models
         // Status
         public int Status { get; set; } = 1;
 
-        // Audit Fields
         public int CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         public int UpdatedBy { get; set; }
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
+        [NotMapped] public string? VoucherNo { get; set; }
 
-        // -------- NotMapped Fields (UI / API Use) --------
-
-        [NotMapped]
-        public string? VoucherNo { get; set; }
-
-        [NotMapped]
-        public string? ItemDesc { get; set; }
-        [NotMapped]
-        public int? SourceVoucherId { get; set; } 
+        [NotMapped] public string? ItemDesc { get; set; }
+        [NotMapped] public int? SourceVoucherId { get; set; } 
 
         [NotMapped] public string StatusDesc { get; set; } = string.Empty;
         [NotMapped] public string StatusCss { get; set; } = string.Empty;

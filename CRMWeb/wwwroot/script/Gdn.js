@@ -754,14 +754,16 @@ window.tableRtnStoreDescEvent = {
 };
 
 window.tableTaskSerialNo = (value, obj, index) => {
-    return `<input type="text" id="RtnSerialNo_${index}" class="form-control form-control-sm mb-0 rtn-item" value="${obj.SerialNo}" maxlength="150" />`;
+    return `<input type="text" id="GdnSerialNo_${index}" 
+        class="form-control form-control-sm mb-0 gdn-serial" 
+        value="${obj.SerialNo ?? ''}" maxlength="150" />`;
 }
 
-window.tableRtnSerialNoDescEvent = {
-    'input .rtn-item': (e, value, obj, index) => {
+window.tableGdnSerialNoDescEvent = {
+    'input .gdn-serial': (e, value, obj, index) => {
         obj.SerialNo = e.currentTarget.value || "";
         Table.updateByIndex({
-            id: '#tableRtnItem',
+            id: '#tableGdnItem',
             index: index,
             obj: obj,
             value: obj.SerialNo,
@@ -770,20 +772,50 @@ window.tableRtnSerialNoDescEvent = {
     }
 };
 
+
 window.tableTaskBatchNo = (value, obj, index) => {
-    return `<input type="text" id="RtnBatchNo_${index}" class="form-control form-control-sm mb-0 rtn-item" value="${obj.BatchNo}" maxlength="150" />`;
+    return `<input type="text" id="GdnBatchNo_${index}" 
+        class="form-control form-control-sm mb-0 gdn-batch" 
+        value="${obj.BatchNo ?? ''}" maxlength="150" />`;
 }
 
-window.tableRtnBatchNoDescEvent = {
-    'input .rtn-item': (e, value, obj, index) => {
+window.tableGdnBatchNoDescEvent = {
+    'input .gdn-batch': (e, value, obj, index) => {
         obj.BatchNo = e.currentTarget.value || "";
         Table.updateByIndex({
-            id: '#tableRtnItem',
+            id: '#tableGdnItem',
             index: index,
             obj: obj,
             value: obj.BatchNo,
             event: e
         });
+    }
+};
+
+
+window.tableGdnItemQty = (value, obj, index) => {
+    return `
+        <input type="text" id="GdnItemQty_${index}" 
+            class="form-control form-control-sm text-right gdn-item-qty" 
+            value="${obj.Qty}" 
+            oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})">
+    `;
+}
+
+window.tableGdnItemQtyEvent = {
+    'input .gdn-item-qty': (e, value, obj, index) => {
+        obj.Qty = e.currentTarget.value || '0';
+        obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
+
+        Table.updateByIndex({
+            id: '#tableGdnItem',
+            index: index,
+            obj: obj,
+            value: obj.Qty,
+            event: e
+        });
+
+        Gdn.sumOfTotalGdnItem();
     }
 };
 

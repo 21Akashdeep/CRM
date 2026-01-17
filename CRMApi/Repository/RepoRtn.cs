@@ -15,12 +15,10 @@ namespace CRMApi.Repository
     {
         private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
-
         public RepoRtn(DBCRM _db)
         {
             db = _db;
         }
-
         public async Task<Message> GetViewOptionAsync()
         {
             Message objMsg = new Message();
@@ -81,7 +79,6 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-
         public async Task<Message> GetAddOptionAsync()
         {
             Message objMsg = new Message();
@@ -172,7 +169,6 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-
         public async Task<List<Voucher>> ListAsync(Voucher? obj, User User)
         {
             obj ??= new Voucher();
@@ -180,98 +176,6 @@ namespace CRMApi.Repository
             var voucher = await new RepoVoucher(db).ListAsync(obj, User);
             return voucher;
         }
-
-        public async Task<Message> EditAsync(int Id, User User)
-        {
-            Message objMsg = new Message();
-            try
-            {
-                var obj = (await ListAsync(new Voucher
-                {
-                    ListId = new List<int> { Id },
-                    ListStatus = new List<int>(App.ActiveStatus) { App.Status.Delete }
-                }, User)).FirstOrDefault();
-
-                if (obj == null)
-                {
-                    Message.Error(ref objMsg, "RTN not found.");
-                    return objMsg;
-                }
-
-                objMsg.obj = obj;
-                objMsg.data = (await GetAddOptionAsync()).data;
-
-                Message.Success(ref objMsg, "Record found");
-            }
-            catch (Exception ex)
-            {
-                Message.Exception(ref objMsg, ex);
-            }
-            return objMsg;
-        }
-
-
-        public async Task<Message> PrintAsync(Voucher obj, User User)
-        {
-            Message objMsg = new Message();
-            try
-            {
-                objMsg.data = await ListAsync(obj, User);
-                Message.Get(ref objMsg, "");
-            }
-            catch (Exception ex)
-            {
-                Message.Exception(ref objMsg, ex);
-            }
-            return objMsg;
-        }
-
-        public async Task<Message> ExportAsync(Voucher obj, User User)
-        {
-            Message objMsg = new Message();
-            try
-            {
-                // 1️⃣ Get Company
-                var objCompany = await db.Company
-                    .FirstOrDefaultAsync(pt => App.ActiveStatus.Contains(pt.Status));
-
-                if (objCompany == null)
-                {
-                    Message.Error(ref objMsg, "RTN info not found");
-                    return objMsg;
-                }
-
-                // 2️⃣ Get RTN List
-                var Rtn = (await ListAsync(obj, User)).Select(co => new
-                {
-                    co.Id,
-                    co.No,
-                    co.Date,
-                    Party = co.PartyDesc,
-                    co.ConName,
-                    Status = co.StatusDesc,
-                    co.CreatedByName,
-                    co.CreatedAt,
-                    co.UpdatedByName,
-                    co.UpdatedAt
-                }).ToList();
-
-                DataTable objDataTable = Util.ListToDataTable(Rtn);
-
-                objCompany.SheetName = "RTN List";
-                objCompany.ReportDesc = $"RTN - {DateTime.Now:dd-MMM-yyyy}";
-                objMsg.base64 = Util.DataTableToBase64(objDataTable, objCompany);
-
-                Message.Get(ref objMsg, "");
-            }
-            catch (Exception ex)
-            {
-                Message.Exception(ref objMsg, ex);
-            }
-
-            return objMsg;
-        }
-
         public async Task<Message> GetGdnItemAsync(List<int> ListGdnId, User User)
         {
             Message objMsg = new Message();
@@ -333,7 +237,158 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
+        public async Task<Message> AddAsync(Voucher obj, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
 
+                obj.CreatedBy = User.Id;
+                obj.CreatedAt = DateTime.Now;
+                obj.UpdatedBy = User.Id;
+                obj.UpdatedAt = DateTime.Now;
+
+                obj.VoucherItem.ForEach(vi =>
+                {
+                    vi.StoreId = obj.StoreId;
+                    vi.CreatedBy = User.Id;
+                    vi.CreatedAt = DateTime.Now;
+                    vi.UpdatedBy = User.Id;
+                    vi.UpdatedAt = DateTime.Now;
+                });
+
+                db.Add(obj);
+
+                int result = await db.SaveChangesAsync();
+                Message.Add(ref objMsg, result);
+
+
+                if (objMsg.status == Message.Type.success)
+                {
+                    db.Entry(obj).Reload();
+
+                    foreach (var vi in obj.VoucherItem)
+                    {
+                        vi.VoucherId = obj.Id;
+                    }
+                    await db.SaveChangesAsync();
+
+                    objMsg.obj = (await ListAsync(new Voucher
+                    {
+                        ListId = new List<int> { obj.Id }
+                    }, User)).FirstOrDefault();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+        public async Task<Message> EditAsync(int Id, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var obj = (await ListAsync(new Voucher
+                {
+                    ListId = new List<int> { Id },
+                    ListStatus = new List<int>(App.ActiveStatus) { App.Status.Delete }
+                }, User)).FirstOrDefault();
+
+                if (obj == null)
+                {
+                    Message.Error(ref objMsg, "RTN not found.");
+                    return objMsg;
+                }
+
+                objMsg.obj = obj;
+                objMsg.data = (await GetAddOptionAsync()).data;
+
+                Message.Success(ref objMsg, "Record found");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+        public async Task<Message> DeleteItemAsync(Voucher obj, User user)
+        {
+            Message objMsg = new Message();
+            try
+            {
+
+                objMsg = await  new RepoVoucher(db).DeleteItemAsync(obj.DeleteItemId, user);
+                objMsg.data = await ListAsync(obj, user);
+
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+        public async Task<Message> PrintAsync(Voucher obj, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                objMsg.data = await ListAsync(obj, User);
+                Message.Get(ref objMsg, "");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+        public async Task<Message> ExportAsync(Voucher obj, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                // 1️⃣ Get Company
+                var objCompany = await db.Company
+                    .FirstOrDefaultAsync(pt => App.ActiveStatus.Contains(pt.Status));
+
+                if (objCompany == null)
+                {
+                    Message.Error(ref objMsg, "RTN info not found");
+                    return objMsg;
+                }
+
+                // 2️⃣ Get RTN List
+                var Rtn = (await ListAsync(obj, User)).Select(co => new
+                {
+                    co.Id,
+                    co.No,
+                    co.Date,
+                    Party = co.PartyDesc,
+                    co.ConName,
+                    Status = co.StatusDesc,
+                    co.CreatedByName,
+                    co.CreatedAt,
+                    co.UpdatedByName,
+                    co.UpdatedAt
+                }).ToList();
+
+                DataTable objDataTable = Util.ListToDataTable(Rtn);
+
+                objCompany.SheetName = "RTN List";
+                objCompany.ReportDesc = $"RTN - {DateTime.Now:dd-MMM-yyyy}";
+                objMsg.base64 = Util.DataTableToBase64(objDataTable, objCompany);
+
+                Message.Get(ref objMsg, "");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+
+            return objMsg;
+        }
 
     }
 }
