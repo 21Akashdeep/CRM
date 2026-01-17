@@ -52,11 +52,6 @@
                                 <th data-sortable="false" data-formatter="tableStockInSlNo" class="text-center">#</th>
                                 <th data-sortable="true" data-formatter="tableStockInDate">Date</th>
                                 <th data-sortable="true" data-field="No">Number</th>
-                                @* <th data-sortable="true" data-field="PartyDesc">Party</th>
-                                <th data-sortable="true" data-field="ConName">Consignee Name </th> *@
-                                @* <th data-sortable="true" data-formatter="tableStockInConAddress" class="text-nowrap">Consignee Address</th>
-                                <th data-sortable="true" data-formatter="tableStockInRefNoAndDate" class="text-nowrap">Ref No / Date </th>
-                                <th data-sortable="true" data-field="Remarks">Remarks</th> *@
                                 <th data-sortable="false" data-formatter="tableStockInCreatedByAndAt" class="text-nowrap">Created By & At</th>
                                 <th data-sortable="false" data-formatter="tableStockInUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
                                 <th data-sortable="false" data-formatter="tableStockInStatus" class="Status text-center">Status</th>
@@ -98,43 +93,44 @@
                             </div>
                         </div>
                         <div class="col-md-2">
-                            <label>To Store<span class="text-mandatory">*</span></label>
-                            <select id="StockIn-StoreId" name="StoreId" class="select-pick required" data-search="true" data-size="4"></select>
+                            <label>To Store<span class="text-mandatory">*</span></label> <select id="StockIn-StoreId" name="StoreId" class="select-pick required" data-search="true" data-size="4"></select>
                         </div>
-                       
                         <div class="col-md-2">
-                            <label>Scan</label>
-                            <input type="text" id="StockIn-Scan" name="Scan" class="form-control form-control-sm" />
+                            <label>Scan</label><input type="text" id="StockIn-Scan" name="Scan" class="form-control form-control-sm" />
                         </div>
                        
                     </div>
                     <hr />
                     <div class="row">
                         <div class="col-md-12 StockIn-item-table">
-                            <table id="tableStockInItem" class="table table-bordered table-hover table-default line-item" data-search="false">
+                            <table id="tableStockInItem"
+                                   class="table table-bordered table-hover table-default line-item"
+                                   data-search="false">
                                 <thead>
                                     <tr>
                                         <th colspan="6">
                                             StockIn Item
-                                            <button type="button" class="btn btn-sm btn-primary float-end rounded-5 btn-add-item" onclick="StockIn.addStockInItem()">
-                                                <span class="fa fa-plus"></span>
-                                            </button>
+                                            <div class="btn-group float-end">
+                                                <button type="button" class="btn btn-sm btn-primary rounded-5" onclick="StockIn.addStockInItem()"> <span class="fa fa-plus"></span>  </button>
+                                                <span>&nbsp;&nbsp;</span>
+                                                <button type="button"class="btn btn-sm btn-success rounded-5"onclick="StockIn.scanner()"><span class="fa fa-qrcode"></span> </button>
+                                            </div>
                                         </th>
                                     </tr>
                                     <tr>
                                         <th data-formatter="tableStockInItemSlNo" class="text-center">#</th>
-                                        <th class="desc" data-formatter="tableStockInItemDesc" data-events="tableStockInItemDescEvent">Description</th>
-                                        <th class="qty" data-formatter="tableTaskSerialNo" data-events="tableStockInSerialNoDescEvent">SerialNo</th>
-                                        <th class="qty" data-formatter="tableTaskBatchNo" data-events="tableStockInBatchNoDescEvent">BatchNo</th>
-                                        <th class="qty" data-formatter="tableStockInItemQty" data-events="tableStockInItemQtyEvent">Qty</th>
-                                        <th class="qty" data-formatter="tableStockInItemAction" data-events="tableStockInItemActionEvents">Remove</th>
+                                        <th class="desc" data-formatter="tableStockInItemDesc"data-events="tableStockInItemDescEvent">Description </th>
+                                        <th class="qty"data-formatter="tableStockInExpiryOn"data-events="tableStockInExpiryOnEvent"> ExpiryOn </th>
+                                        <th class="qty" data-formatter="tableTaskSerialNo"data-events="tableStockInSerialNoDescEvent">SerialNo </th>
+                                        <th class="qty" data-formatter="tableStockInItemQty"data-events="tableStockInItemQtyEvent">Qty </th>
+                                        <th class="qty"data-formatter="tableStockInItemAction"data-events="tableStockInItemActionEvents">Remove</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                </tbody>
+                                <tbody></tbody>
                             </table>
                         </div>
                     </div>
+
                     <hr />
                     <div class="row">
                         <div class="col-md-6">
@@ -143,8 +139,84 @@
                         </div>
                     </div>
                 </form>
-            </div>
+                <div id="modalStockInItemScan" class="modal fade" data-bs-backdrop="static" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <span class="modal-title"></span>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                                        <span class="fa fa-minus"></span>
+                                    </button>
+                                    <button type="button"class="btn btn-danger rounded-5 me-2"data-bs-dismiss="modal">
+                                        <span class="fa fa-remove"></span>
+                                    </button>
+                                </div>
+                            </div>
 
+                            <div class="modal-body" style="min-height:75vh;">
+                                <form id="formStockInScanItem" autocomplete="off" onsubmit="return false;">
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <label>Item<span class="text-mandatory">*</span></label>
+                                            <select id="StockInScan-ItemId"
+                                                    class="select-pick scan-required"
+                                                    data-size="4"
+                                                    data-search="true"></select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>ExpiryOn</label>
+                                            <div class="input-group input-group-sm">
+                                                <input type="text"
+                                                       id="StockInScan-ItemExpiryOn"
+                                                       class="form-control form-control-sm scan-required"
+                                                       data-date-format="DD-MMM-YYYY"
+                                                       readonly />
+                                                <span class="input-group-text date-picker">
+                                                    <i class="fa fa-calendar"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>Scan</label>
+                                            <input type="text"
+                                                   id="StockInScan-ItemSerialNo"
+                                                   class="form-control form-control-sm" />
+                                        </div>
+                                    </div>
+                                    <hr />
+                                    <div class="row">
+                                        <div class="col-md-12 StockIn-scan-item-table">
+                                            <table id="tableStockInScanItem"
+                                                   class="table table-bordered table-hover table-default line-item"
+                                                   data-search="false">
+                                                <thead>
+                                                    <tr>
+                                                        <th data-formatter="tableStockInItemSlNo" class="text-center">#</th>
+                                                        <th data-field="ItemDesc">Item</th>
+                                                        <th data-formatter="tableStockInScanExpiry">Expiry</th>
+                                                        <th data-formatter="tableStockInScanSerial">Serial No</th>
+                                                        <th data-formatter="tableStockInScanQty" class="text-end">Qty 1 </th>
+                                                        <th data-formatter="tableStockInScanItemAction" data-events="tableStockInScanItemActionEvents"> Remove </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer justify-content-end">
+                                <button type="button"
+                                        class="btn btn-success rounded-5"
+                                        id="btnScanItemAdd">
+                                    <span class="fa fa-add"></span>&nbsp;Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="modal-footer">
                 <button type="button" id="StockIn-BtnSave" class="btn btn-sm btn-success rounded-5">
                     <span class="fa fa-save"></span>&nbsp;&nbsp;Save
@@ -153,9 +225,6 @@
         </div>
     </div>
 </div>
-
-
-
 
 @section Scripts {
     <script src="~/script/StockIn.js" asp-append-version="true"></script>
