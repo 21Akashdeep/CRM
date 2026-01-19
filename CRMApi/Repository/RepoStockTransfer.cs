@@ -1,13 +1,16 @@
 ﻿using CRMApi.Models;
-using CRMApi.Services;
-using System.Dynamic;
 using CRMApi.Repository;
+using CRMApi.Services;
 using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Data;
+using System.Dynamic;
 using System.Linq;
 using System.Net.Mail;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Runtime.InteropServices;
 
 namespace CRMApi.Repository
 {
@@ -426,11 +429,69 @@ namespace CRMApi.Repository
         public async Task<Message> UpdateAsync(Voucher obj, User User)
         {
             Message objMsg = new Message();
+            var VoucherItem = obj.VoucherItem;
+
+            var voucherIdList = VoucherItem.Select(x =>  x.VoucherId).ToList();
+            var serialNoList = VoucherItem.Select(x => x.SerialNo).ToList();
+            var itemIdList = VoucherItem.Select(x =>  x.ItemId).ToList();
+
+            
 
             try
             {
+                var AddedStockItem = await db.VoucherItem.Where(x => App.ActiveStatus.Contains(x.Status) && voucherIdList.Contains(x.VoucherId) && serialNoList.Contains(x.SerialNo) && itemIdList.Contains(x.ItemId)).ToListAsync();
+                var groupedItems = AddedStockItem
+                    .GroupBy(x => new { x.SerialNo, x.ItemId, x.StoreId })
+                    .Select(g => new
+                    {
+                        g.Key.SerialNo,
+                        g.Key.ItemId,
+                        g.Key.StoreId,
+                        TotalQty = g.Sum(x => x.Qty)
+                    })
+                    .ToList();
+
+                var invalid = groupedItems.FirstOrDefault(x => x.TotalQty > 0);
+                if (invalid != null)
+                {
+                    Message.Error(
+                        ref objMsg,
+                        $"Stock validation failed. SerialNo: {invalid.SerialNo}, " +
+                        $"ItemId: {invalid.ItemId}, StoreId: {invalid.StoreId}, TotalQty: {invalid.TotalQty}");
+
+                    return objMsg;
+                }
+                var newAddedVoucherItem = obj.VoucherItem.Where(x => x.Id == 0).ToList();
+
+                foreach( var vi in newAddedVoucherItem)
+                {
+
+                    var newItem = new VoucherItem
+                    {
+                        VoucherId = obj.Id,
+                        ItemId = vi.ItemId,
+                        SerialNo = vi.SerialNo,
+                        StoreId = obj.ToStoreId,
+                        Qty = Math.Abs(vi.Qty),
+                        ExpiryOn = vi.ExpiryOn,
+                        Remarks = vi.Remarks,
+                        Status = App.Status.Enable,
+                        CreatedBy = User.Id,
+                        CreatedAt = DateTime.Now,
+                        UpdatedBy = User.Id,
+                        UpdatedAt = DateTime.Now
+                    };
+
+                    db.VoucherItem.Add(newItem);
+
+                }
+
+
+
                 obj.Type = "StockIn";
                 objMsg = objMsg = await  RepoVoucher.UpdateAsync(obj, User);
+
+
 
             }
             catch (Exception ex)
@@ -439,10 +500,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        //public async Task<Message> AddAsync(Voucher obj, User User)
-        //{
-
-        //}
+       
         public async Task<Message> DeleteItemAsync(int id, User user)
         {
             Message objMsg = new Message();
