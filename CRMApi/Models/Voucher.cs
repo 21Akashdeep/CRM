@@ -12,6 +12,8 @@ namespace CRMApi.Models
         public int? PartyId { get; set; }
         [NotMapped] public int StateId { get; set; }
         [NotMapped] public int StoreId { get; set; }
+        [NotMapped] public int FromStoreId { get; set; }
+        [NotMapped] public int ToStoreId { get; set; }
         [NotMapped] public int DeleteItemId { get; set; }
 
         [NotMapped] public string? PartyDesc { get; set; }       
