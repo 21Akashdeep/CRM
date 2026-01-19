@@ -1,0 +1,233 @@
+﻿@{
+    ViewData["Title"] = "StockTransfer";
+}
+<div class="card shadow">
+    <div class="card-header">
+        <span class="card-title">StockTransfer / View</span>
+        <button type="button" class="btn btn-sm btn-primary float-end rounded-5" id="btnNewEntry">
+            <span class="fa fa-plus"></span>&nbsp;&nbsp;Add
+        </button>
+    </div>
+    <div class="card-body">
+        <form autocomplete="off" onsubmit="return false;">
+            <div class="row">
+                <div class="col-md-2">
+                    <label>Status</label>
+                    <select id="ListStatus" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label>Date Range</label>
+                    <div class="input-group input-group-sm">
+                        <input id="DateRange" type="text" class="form-control" readonly>
+                        <span class="input-group-text date-range-picker"><i class="fa fa-calendar"></i></span>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="btn-group">
+                        <button type="button" id="btnSearch" class="btn btn-sm btn-filter btn-outline-success" title="Search">
+                            <span class="fa fa-search"></span>
+                        </button>
+                        <button type="button" id="btnPrint" class="btn btn-sm btn-filter btn-outline-secondary" title="Print">
+                            <span class="fa fa-print"></span>
+                        </button>
+                        <button type="button" id="btnExport" class="btn btn-sm btn-filter btn-outline-primary" title="Export To Excel">
+                            <span class="fa fa-file-excel"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-md-12">
+                    <table id="tableStockTransfer" class="table table-bordered table-hover table-default" border="1" data-sort-name="Code"
+                           data-unique-id="Id">
+                        <thead>
+                            <tr>
+                                <th data-sortable="false" data-formatter="tableStockTransferSlNo" class="text-center">#</th>
+                                <th data-sortable="true" data-formatter="tableStockTransferDate">Date</th>
+                                <th data-sortable="true" data-field="No">Number</th>
+                                <th data-sortable="true" data-field="StoreDesc">To Store</th>
+                                <th data-sortable="false" data-formatter="tableStockTransferCreatedByAndAt" class="text-nowrap">Created By & At</th>
+                                <th data-sortable="false" data-formatter="tableStockTransferUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
+                                <th data-sortable="false" data-formatter="tableStockTransferStatus" class="Status text-center">Status</th>
+                                <th data-formatter="tableStockTransferAction" data-events="tableStockTransferActionEvent" class="not-print text-center"><i class="fa-solid fa-list-check"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="modalStockTransfer" class="modal fade" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title"></span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal" aria-label="Close">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body" style="min-height:75vh;">
+                <form id="formStockTransfer" autocomplete="off" onsubmit="return false;">
+                    <input type="hidden" id="Id" name="Id" />
+                    <input type="hidden" id="No" name="No" />
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label>Date</label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" id="StockTransfer-Date" name="Date" class="form-control form-control-sm required" data-date-format="DD-MMM-YYYY" readonly />
+                                <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label>From Store<span class="text-mandatory">*</span></label> <select id="FromStoreId" name="FromStoreId" class="select-pick required" data-search="true" data-size="4"></select>
+                        </div>
+                        <div class="col-md-2">
+                            <label>To Store<span class="text-mandatory">*</span></label> <select id="ToStoreId" name="ToStoreId" class="select-pick required" data-search="true" data-size="4"></select>
+                        </div>
+                       
+
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-12 StockTransfer-item-table">
+                            <table id="tableStockTransferItem"
+                                   class="table table-bordered table-hover table-default line-item"
+                                   data-search="false">
+                                <thead>
+                                    <tr>
+                                        <th colspan="6">
+                                            StockTransfer Item
+                                            <div class="btn-group float-end">
+                                                <button type="button" class="btn btn-sm btn-primary rounded-5" onclick="StockTransfer.addStockTransferItem()"> <span class="fa fa-plus"></span>  </button>
+                                                <span>&nbsp;&nbsp;</span>
+                                                <button type="button" class="btn btn-sm btn-success rounded-5" onclick="StockTransfer.scanner()"><span class="fa fa-qrcode"></span> </button>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th data-formatter="tableStockTransferItemSlNo" class="text-center">#</th>
+                                        <th class="desc" data-formatter="tableStockTransferItemDesc" data-events="tableStockTransferItemDescEvent">Description </th>
+                                        <th class="qty" data-formatter="tableStockTransferExpiryOn" data-events="tableStockTransferExpiryOnEvent"> ExpiryOn </th>
+                                        <th class="qty" data-formatter="tableTaskSerialNo" data-events="tableStockTransferSerialNoDescEvent">SerialNo </th>
+                                        <th class="qty" data-formatter="tableStockTransferItemQty" data-events="tableStockTransferItemQtyEvent">Qty </th>
+                                        <th class="qty" data-formatter="tableStockTransferItemAction" data-events="tableStockTransferItemActionEvents">Remove</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Remarks</label>
+                            <textarea type="text" id="StockTransfer-Remarks" name="Remarks" style="resize:none;" class="form-control form-control-sm" rows="2" maxlength="100"></textarea>
+                        </div>
+                    </div>
+                </form>
+                <div id="modalStockTransferItemScan" class="modal fade" data-bs-backdrop="static" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <span class="modal-title"></span>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                                        <span class="fa fa-minus"></span>
+                                    </button>
+                                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal">
+                                        <span class="fa fa-remove"></span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="modal-body" style="min-height:75vh;">
+                                <form id="formStockTransferScanItem" autocomplete="off" onsubmit="return false;">
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <label>Item<span class="text-mandatory">*</span></label>
+                                            <select id="StockTransferScan-ItemId"
+                                                    class="select-pick scan-required"
+                                                    data-size="4"
+                                                    data-search="true"></select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>ExpiryOn</label>
+                                            <div class="input-group input-group-sm">
+                                                <input type="text"
+                                                       id="StockTransferScan-ItemExpiryOn"
+                                                       class="form-control form-control-sm scan-required"
+                                                       data-date-format="DD-MMM-YYYY"
+                                                       readonly />
+                                                <span class="input-group-text date-picker">
+                                                    <i class="fa fa-calendar"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>Scan</label>
+                                            <input type="text"
+                                                   id="StockTransferScan-ItemSerialNo"
+                                                   class="form-control form-control-sm" />
+                                        </div>
+                                    </div>
+                                    <hr />
+                                    <div class="row">
+                                        <div class="col-md-12 StockTransfer-scan-item-table">
+                                            <table id="tableStockTransferScanItem"
+                                                   class="table table-bordered table-hover table-default line-item"
+                                                   data-search="false">
+                                                <thead>
+                                                    <tr>
+                                                        <th data-formatter="tableStockTransferItemSlNo" class="text-center">#</th>
+                                                        <th data-field="ItemDesc">Item</th>
+                                                        <th data-formatter="tableStockTransferScanExpiry">Expiry</th>
+                                                        <th data-formatter="tableStockTransferScanSerial">Serial No</th>
+                                                        <th data-formatter="tableStockTransferScanQty" class="text-end">Qty 1 </th>
+                                                        <th data-formatter="tableStockTransferScanItemAction" data-events="tableStockTransferScanItemActionEvents"> Remove </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer justify-content-end">
+                                <button type="button"
+                                        class="btn btn-success rounded-5"
+                                        id="btnScanItemAdd">
+                                    <span class="fa fa-add"></span>&nbsp;Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="StockTransfer-BtnSave" class="btn btn-sm btn-success rounded-5">
+                    <span class="fa fa-save"></span>&nbsp;&nbsp;Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/script/StockTransfer.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        $(() => {
+            StockTransfer.init();
+        });
+    </script>
+}
