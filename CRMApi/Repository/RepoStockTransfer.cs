@@ -98,7 +98,6 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-
         public async Task<List<Voucher>> ListAsync(Voucher? obj, User User)
         {
 
@@ -372,7 +371,6 @@ namespace CRMApi.Repository
             {
                 Message.Exception(ref objMsg, ex);
             }
-
             return objMsg;
         }
         //public async Task<List<VoucherItem>> GetListItemAsync(Voucher? obj, User User)
@@ -426,7 +424,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public async Task<Message> UpdateAsync(Voucher obj, User User)
+        public async Task<Message> UpdateAsync1(Voucher obj, User User)
         {
             Message objMsg = new Message();
             var VoucherItem = obj.VoucherItem;
@@ -434,9 +432,6 @@ namespace CRMApi.Repository
             var voucherIdList = VoucherItem.Select(x =>  x.VoucherId).ToList();
             var serialNoList = VoucherItem.Select(x => x.SerialNo).ToList();
             var itemIdList = VoucherItem.Select(x =>  x.ItemId).ToList();
-
-            
-
             try
             {
                 var AddedStockItem = await db.VoucherItem.Where(x => App.ActiveStatus.Contains(x.Status) && voucherIdList.Contains(x.VoucherId) && serialNoList.Contains(x.SerialNo) && itemIdList.Contains(x.ItemId)).ToListAsync();
@@ -485,14 +480,9 @@ namespace CRMApi.Repository
                     db.VoucherItem.Add(newItem);
 
                 }
-
-
-
                 obj.Type = "StockIn";
-                objMsg = objMsg = await  RepoVoucher.UpdateAsync(obj, User);
-
-
-
+                objMsg = await  RepoVoucher.UpdateAsync(obj, User);
+                
             }
             catch (Exception ex)
             {
@@ -500,7 +490,135 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-       
+        public async Task<Message> UpdateAsync(Voucher obj, User User)
+        {
+            Message objMsg = new Message();
+            var newAdddedItem = obj.VoucherItem.Where(x => x.Id == 0);
+
+            try
+            {
+                var strategy = db.Database.CreateExecutionStrategy();
+
+                await strategy.ExecuteAsync(async () =>
+                {
+                    await using var transaction = await db.Database.BeginTransactionAsync();
+
+                    try
+                    {
+
+                        foreach (var vi in newAdddedItem)
+                        {
+                            var newItem = new VoucherItem
+                            {
+                                VoucherId = obj.Id,
+                                ItemId = vi.ItemId,
+                                SerialNo = vi.SerialNo,
+                                StoreId = obj.FromStoreId,
+                                Qty = -(vi.Qty),
+                                ExpiryOn = vi.ExpiryOn,
+                                Remarks = vi.Remarks,
+                                Status = App.Status.Enable,
+                                CreatedBy = User.Id,
+                                CreatedAt = DateTime.Now,
+                                UpdatedBy = User.Id,
+                                UpdatedAt = DateTime.Now
+                            };
+
+                            db.VoucherItem.Add(newItem);
+
+
+                        }
+                        int result = await db.SaveChangesAsync();
+                        Message.Add(ref objMsg, result);
+
+                        if (objMsg.status != Message.Type.success)
+                        {
+                            await transaction.RollbackAsync();
+                            return;
+                        }
+
+                        var dbItems = await db.VoucherItem.Where(x => x.Status == App.Status.Enable && x.StoreId == obj.FromStoreId).Select(x => new VoucherItem
+                        {
+                            SerialNo = x.SerialNo,
+                            Qty = x.Qty,
+                            VoucherId = x.VoucherId,
+                            ItemId = x.ItemId,
+                            StoreId = x.StoreId,
+                            Remarks = x.Remarks,
+                            ExpiryOn = x.ExpiryOn,
+                            Status = x.Status
+                        }).ToListAsync();
+
+                        var stockTran = dbItems.Where(x => obj.VoucherItem.Any(vi => vi.SerialNo == x.SerialNo && vi.ItemId == x.ItemId)).ToList();
+                        var groupedItems = stockTran.GroupBy(x => new { x.SerialNo, x.ItemId, x.StoreId }).Select(g => new
+                        {
+                        g.Key.SerialNo,
+                        g.Key.ItemId,
+                        g.Key.StoreId,
+                        TotalQty = g.Sum(x => x.Qty)
+                        }).ToList();
+
+                        var invalid = groupedItems.FirstOrDefault(x => x.TotalQty < 0);
+                        if (invalid != null)
+                        {
+                            Message.Error(
+                                ref objMsg,
+                                $"Stock validation failed. SerialNo: {invalid.SerialNo}, " +
+                                $"ItemId: {invalid.ItemId}, StoreId: {invalid.StoreId}, TotalQty: {invalid.TotalQty}");
+
+                            return ;
+                        }
+                       
+
+                        foreach (var vi in newAdddedItem)
+                        {
+                            var newItem = new VoucherItem
+                            {
+                                VoucherId = obj.Id,
+                                ItemId = vi.ItemId,
+                                SerialNo = vi.SerialNo,
+                                StoreId = obj.ToStoreId,
+                                Qty = vi.Qty,
+                                ExpiryOn = vi.ExpiryOn,
+                                Remarks = vi.Remarks,
+                                Status = App.Status.Enable,
+                                CreatedBy = User.Id,
+                                CreatedAt = DateTime.Now,
+                                UpdatedBy = User.Id,
+                                UpdatedAt = DateTime.Now
+                            };
+
+                            db.VoucherItem.Add(newItem);
+                        }
+
+                        Message.Update(ref objMsg, await db.SaveChangesAsync());
+                        if (objMsg.status == Message.Type.error)
+                        {
+                            Message.Error(ref objMsg,
+                                "Stock transaction was not saved. The entire transaction has been rolled back.");
+                            await transaction.RollbackAsync();
+                            return;
+                        }
+                        await transaction.CommitAsync();
+
+                        objMsg.obj = await ListAsync(obj, User);
+                    }
+                    catch (Exception ex)
+                    {
+                        await transaction.RollbackAsync();
+                        Message.Exception(ref objMsg, ex);
+                    }
+
+                });
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+
+            return objMsg;
+        }
+
         public async Task<Message> DeleteItemAsync(int id, User user)
         {
             Message objMsg = new Message();
@@ -527,6 +645,11 @@ namespace CRMApi.Repository
                     db.Update(voucherItemStock);
                 }
                 Message.Delete(ref objMsg, (await db.SaveChangesAsync()));
+
+                Voucher voucher = new Voucher();
+                voucher.Id = voucherItem.VoucherId;
+
+                objMsg.obj = await ListAsync(voucher, user);
             }
             catch (Exception ex)
             {

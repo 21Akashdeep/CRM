@@ -258,8 +258,8 @@
                 StockTransfer.item = option.Item;
                 let store = response.data.Store;
                 let obj = response.obj;
-                let FromStoreId = obj.VoucherItem.filter(x => x.Qty < 0)[0].StoreId;
-                let ToStoreId = obj.VoucherItem.filter(x => x.Qty >= 0)[0].StoreId;
+                obj.FromStoreId = obj.VoucherItem.filter(x => x.Qty < 0)[0].StoreId;
+                obj.ToStoreId = obj.VoucherItem.filter(x => x.Qty >= 0)[0].StoreId;
                 let voucherItem = obj.VoucherItem.filter(x => x.Qty >= 0);
                 obj.Id = action == 'Edit' ? obj.Id : null;
                 let title = action === 'Edit' ? `StockTransfer / Edit (Code: ${obj.No})` : `StockTransfer / Add`;
@@ -268,8 +268,6 @@
                 Modal.open({ id: '#modalStockTransfer', title: title, action: action, obj: obj });
                 Table.add({ id: '#tableStockTransferItem', data:voucherItem, selectPick: true });
                 StockTransfer.sumOfTotalStockTransferItem();
-
-
             }
         });
     }
@@ -281,7 +279,8 @@
                 Message.show(response);
                 if (response.status == Message.Type.success) {
                     Modal.close({ id: '#modalStockTransfer' });
-                    Table.updateById({ id: '#tableStockTransfer', objId: response.obj.Id, obj: response.obj });
+                    Table.updateById({ id: '#tableStockTransfer', objId: response.obj[0].Id, obj: response.obj });
+                    Table.add({ id: '#tableStockTransferItem', data: response.obj[0].VoucherItem, selectPick: true })
                 }
             }
         });
@@ -334,8 +333,11 @@
     static deleteItemOnSuccess = (response) => {
         Message.show(response);
         if (response.status == Message.Type.success) {
-            Table.updateById({ id: "#tableTask", obj: response.data.obj.VoucherItem });
-            Table.add({ id: '#tableStockTransferItem', data: data.obj.VoucherItem, selectPick: true })
+            let manualAddedItem = $('#tableStockTransferItem').bootstrapTable('getData').filter(x => x.Id == 0);
+            let voucherItem = response.obj[0].VoucherItem.filter(x => x.Qty >= 0);
+                let allItem = voucherItem.concat(manualAddedItem);        
+            Table.updateById({ id: "#tableStockTransferItem", objId: response.obj.Id });
+            Table.add({ id: '#tableStockTransferItem', data:allItem, selectPick: true })
             Dropdown.bind({ id: '#ListId', data: response.data.ListId, value: 'Id', text: 'Description', subText: "Code" });
             Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
 
