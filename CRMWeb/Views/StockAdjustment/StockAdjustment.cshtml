@@ -52,11 +52,6 @@
                                 <th data-sortable="false" data-formatter="tableStockAdjustmentSlNo" class="text-center">#</th>
                                 <th data-sortable="true" data-formatter="tableStockAdjustmentDate">Date</th>
                                 <th data-sortable="true" data-field="No">Number</th>
-                                @* <th data-sortable="true" data-field="PartyDesc">Party</th>
-                                <th data-sortable="true" data-field="ConName">Consignee Name </th> *@
-                                @* <th data-sortable="true" data-formatter="tableStockAdjustmentConAddress" class="text-nowrap">Consignee Address</th>
-                                <th data-sortable="true" data-formatter="tableStockAdjustmentRefNoAndDate" class="text-nowrap">Ref No / Date </th>
-                                <th data-sortable="true" data-field="Remarks">Remarks</th> *@
                                 <th data-sortable="false" data-formatter="tableStockAdjustmentCreatedByAndAt" class="text-nowrap">Created By & At</th>
                                 <th data-sortable="false" data-formatter="tableStockAdjustmentUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
                                 <th data-sortable="false" data-formatter="tableStockAdjustmentStatus" class="Status text-center">Status</th>
@@ -124,11 +119,11 @@
                                     <tr>
                                         <th data-formatter="tableStockAdjustmentItemSlNo" class="text-center">#</th>
                                         <th class="desc" data-formatter="tableStockAdjustmentItemDesc" data-events="tableStockAdjustmentItemDescEvent">Description</th>
+                                        <th class="desc" data-formatter="tableStockAdjustmentReasonCodeDesc" data-events="tableStockAdjustmentReasonCodeDescEvent"> Reason Code</th>
                                         <th class="qty" data-formatter="tableTaskSerialNo" data-events="tableStockAdjustmentSerialNoDescEvent">SerialNo</th>
                                         <th class="qty" data-formatter="tableStockAdjustmentExpiryOn" data-events="tableStockAdjustmentExpiryOnEvent">ExpiryOn</th>
-                                        <th class="qty" data-formatter="tableStockAdjustmentReasonCodeDesc" data-events="tableStockAdjustmentReasonCodeDescEvent">Reason Code</th>
                                         <th class="qty" data-formatter="tableStockAdjustmentItemQty" data-events="tableStockAdjustmentItemQtyEvent">Qty</th>
-                                        <th class="qty fa fa-checkList" data-formatter="tableStockItemAction" data-events="tableStockAdjustmentItemActionEvents"></th>
+                                        <th class="qty" data-formatter="tableStockItemAction" data-events="tableStockAdjustmentItemActionEvents">Remove</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -173,8 +168,8 @@
                                             </div>
                                         </div>
                                         <div class="col-md-3">
-                                            <label>Reason Code <span class="text-mandatory">*</span></label>
-                                            <select id="StockAdjustmentScan-ReasonCode" name="ReasoneCode" class="select-pick scan-required" data-size="4" data-search="true"></select>
+                                            <label>Reason<span class="text-mandatory">*</span></label>
+                                            <select id="StockAdjustmentScan-ReasonCode" name="ReasonCode" class="select-pick scan-required" data-size="4" data-search="true"></select>
                                         </div>
                                         <div class="col-md-3">
                                             <label>Scan</label>
@@ -184,16 +179,14 @@
                                     <hr />
                                     <div class="row">
                                         <div class="col-md-12 StockAdjustment-scan-item-table">
-                                            <table id="tableStockAdjustmentScanItem"
-                                                   class="table table-bordered table-hover table-default line-item"
-                                                   data-search="false">
+                                            <table id="tableStockAdjustmentScanItem" class="table table-bordered table-hover table-default line-item" data-search="false">
                                                 <thead>
                                                     <tr>
                                                         <th data-formatter="tableStockAdjustmentItemSlNo" class="text-center">#</th>
                                                         <th data-field="ItemDesc">Item</th>
                                                         <th data-formatter="tableScanExpiry">Expiry</th>
-                                                        <th data-formatter="ReasonCode">Reason Code</th>
                                                         <th data-formatter="tableScanSerial">Serial No</th>
+                                                        <th data-field="ReasonCodeDesc">Reason</th>
                                                         <th data-formatter="tableScanQty" class="text-end">Qty</th>
                                                         <th data-formatter="tableStockAdjustmentScanItemAction" data-events="tableStockAdjustmentScanItemActionEvents" class="text-center">
                                                             <i class="fa-solid fa-list-check"></i>

@@ -48,16 +48,15 @@
                 StockAdjustment.addStockAdjustmentItem({
                     itemId: $('#StockAdjustmentScan-ItemId').val(),
                     itemDesc: $('#StockAdjustmentScan-ItemId option:selected').text(),
-                    reasonCodeId: $('#StockAdjustmentScan-ReasonCode').val(),
-                    reasonCode: $('#StockAdjustmentScan-ReasonCode option:selected').text(),
                     expiryOn: $('#StockAdjustmentScan-ItemExpiryOn').val(),
-                    serialNo: serialNo,
                     reasonCode: $('#StockAdjustmentScan-ReasonCode').val(),
+                    reasonCodeDesc: $('#StockAdjustmentScan-ReasonCode option:selected').text(),
+                    serialNo: serialNo,
                     qty: 1,
                     isScanned: true,
                     callback: (obj) => {
                         Table.add({ id: '#tableStockAdjustmentScanItem', data: obj, action: 'prepend' });
-                        $('#StockAdjustmentScan-ItemExpiryOn,#StockAdjustmentScan-ItemSerialNo,StockAdjustmentScan-ReasonCode').val('');
+                        $('#StockAdjustmentScan-ItemExpiryOn,#StockAdjustmentScan-ItemSerialNo').val('');
 
                     }
                 });
@@ -129,30 +128,26 @@
                 StockAdjustment.item = response.data.Item;
                 let store = response.data.Store;
                 StockAdjustment.reasonCode = response.data.ReasonCode;
-                
-
                 Dropdown.bind({ id: '#StockAdjustment-StoreId', data: store, value: 'Id', text: 'Description' });
                 Modal.open({ id: '#modalStockAdjustment', title: 'StockAdjustment / Add', action: 'Add' });
-                $('#StockAdjustment-RefDate,#StockAdjustment-EwayDate,StockAdjustmentScan-ReasonCode').val('');
+                $('#StockAdjustment-RefDate,#StockAdjustment-EwayDate').val('');
             }
         });
     }
     static scanner() {
         Modal.open({ id: '#modalStockAdjustmentItemScan', title: 'StockAdjustment / Scan Item' });
         Dropdown.bind({ id: '#StockAdjustmentScan-ItemId', data: StockAdjustment.item, value: 'Id', text: 'Description' });
-        Dropdown.bind({ id: '#StockAdjustmentScan-ReasonCode', data: StockAdjustment.reasonCode, value: 'Value', text: 'Value' });
-        $('#StockAdjustment-ExpiryOn,#StockAdjustmentScan-ItemSerialNo,StockAdjustmentScan-ReasonCode').val('');
+        Dropdown.bind({ id: '#StockAdjustmentScan-ReasonCode', data: StockAdjustment.reasonCode, value: 'Value', text: 'Description' });
+        $('#StockAdjustment-ExpiryOn,#StockAdjustmentScan-ItemSerialNo').val('');
 
     }
-    static addStockAdjustmentItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, reasonCodeId = 0, reasonCode = null, reasonCode = "", isScanned = false, callback } = {}) {
+    static addStockAdjustmentItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0,reasonCode="",reasonCodeDesc ="", isScanned = false, callback } = {}) {
         let obj = {
             Id: 0,
             ItemId: itemId,
             VoucherId: 0,
             StoreId: 0,
             ItemDesc: itemDesc,
-            ReasonCode: reasonCode,
-            ReasonCode: reasonCode,
             SerialNo: serialNo,
             BatchNo: "",
             ExpiryOn: expiryOn,
@@ -168,6 +163,7 @@
             GrossAmount: 0,
             ImageUrl: null,
             ReasonCode: reasonCode,
+            ReasonCodeDesc: reasonCodeDesc,
             Remarks: null,
             IsScanned: isScanned
         };
@@ -179,8 +175,8 @@
             callback(obj);
         }
     }
-    static addStockAdjustmentScanItem({ ItemId, SerialNo, ExpiryOn, ReasonCode, Qty }) {
-        Table.add({ id: '#tableStockAdjustmentScanItem', data: { ItemId, SerialNo, ExpiryOn, ReasonCode, Qty }, action: 'append' });
+    static addStockAdjustmentScanItem({ ItemId, SerialNo, ExpiryOn,ReasonCode, Qty }) {
+        Table.add({ id: '#tableStockAdjustmentScanItem', data: { ItemId, SerialNo, ExpiryOn,ReasonCode, Qty }, action: 'append' });
     }
     static sumOfTotalStockAdjustmentItem() {
         let StockAdjustmentItem = $('#tableStockAdjustmentItem').bootstrapTable('getData').filter(x => x.ItemId > 0);
@@ -189,7 +185,7 @@
         let tfoot = `
             <tfoot>
                 <tr>
-                    <th class="text-right" colspan="4">Total</th>
+                    <th class="text-right" colspan="6">Total</th>
                     <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
                 </tr>
             </tfoot>
@@ -206,6 +202,7 @@
                 if (response.status == Message.Type.success) {
                     Modal.reset({ id: '#modalStockAdjustment' });
                     Table.add({ id: '#tableStockAdjustment', data: response.obj, action: 'prepend' });
+                    //Dropdown.bind({ id: '#ListId', data: response.data.ViewOption.StockAdjustment, value: 'Id', text: 'StockAdjustmentNo', subText: 'Date' });
                 }
             }
         });
@@ -221,7 +218,7 @@
                 let obj = response.obj;
                 let StoreId = obj.VoucherItem[0].StoreId;
                 obj.StoreId = StoreId;
-                StockAdjustment.reasonCode = response.data.ReasonCode;
+                obj.reasonCode = ReasonCode;
                 obj.Id = action == 'Edit' ? obj.Id : null;
                 let title = action === 'Edit' ? `StockAdjustment / Edit (Code: ${obj.No})` : `StockAdjustment / Add`;
                 Dropdown.bind({ id: '#StockAdjustment-StoreId', data: store, value: 'Id', text: 'Description' });
@@ -352,7 +349,6 @@ window.tableStockAdjustmentConAddress = (value, obj, index) => {
 
     if (parts.length === 0) return "";
 
-    // Break into lines (max 2–3 items per line for readability)
     let lines = [];
     for (let i = 0; i < parts.length; i += 2) {
         lines.push(parts.slice(i, i + 2).join(", "));
@@ -374,6 +370,7 @@ window.tableStockAdjustmentActionEvent = {
         StockAdjustment.delete({ id: obj.Id });
     }
 }
+
 
 //Table StockAdjustment Item
 window.tableStockAdjustmentItemSlNo = (value, obj, index) => {
@@ -508,9 +505,6 @@ window.tableStockAdjustmentBatchNoDescEvent = {
         });
     }
 };
-//window.tableStockAdjustmentExpiryOn = (value, obj, index) => {
-//    return `<input type="date" id="StockAdjustmentExpiryOn_${index}" class="form-control form-control-sm mb-0 StockAdjustment-item" value="${obj.ExpiryOn ?? ""}"/>`;
-//}
 window.tableStockAdjustmentExpiryOn = (value, obj, index) => {
     let val = obj.ExpiryOn
         ? moment(obj.ExpiryOn, ['DD-MMM-YYYY', 'YYYY-MM-DD']).format('YYYY-MM-DD')
@@ -572,33 +566,69 @@ window.tableStockAdjustmentItemActionEvents = {
         StockAdjustment.deleteItem({ id: obj.Id, index: index });
     }
 }
+
+
+
+
+
+
 window.tableStockAdjustmentReasonCodeDesc = (value, obj, index) => {
-    return Dropdown.html({
-        id: `StockAdjustmentReasonCode_${index}`,
-        className: 'StockAdjustment-reason',
-        data: StockAdjustment.reasonCode,
-        value: 'Value',
-        text: 'Value',
-        initialValue: [obj.ReasonCode],
-        json: true,
-        parent: '.modal'
-    });
-};
-window.tableStockAdjustmentItemDesc = (value, obj, index) => {
     return `
-        ${Dropdown.html({ id: `StockAdjustmentItem_${index}`, className: 'StockAdjustment-item', data: StockAdjustment.item, value: 'Id', text: 'Description', initialValue: [obj.ItemId], json: true, parent: '.modal' })}
-        <input type="text" id="StockAdjustmentItemRemarks_${index}" class="form-control form-control-sm mb-0 mt-1 StockAdjustment-item-remarks" maxlength="100" placeholder="Remarks" value="${obj.Remarks ?? ""}">
+        ${Dropdown.html({ id: `StockAdjustmentReasonCode_${index}`, className: 'StockAdjustment-reasoncode', data: StockAdjustment.reasonCode, value: 'Value', text:'Description', initialValue: [obj.ReasonCode], json: true, parent: '.modal' })}       
     `;
 }
 window.tableStockAdjustmentReasonCodeDescEvent = {
-    'change .StockAdjustment-reason': (e, value, obj, index) => {
-        obj.ReasonCode = e.currentTarget.value || "";
+    'change .StockAdjustment-reasoncode': (e, value, obj, index) => {
+        const val = e.currentTarget.value || '';
+        obj.ReasonCode = val;
+        const item = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
+        obj.ReasonCodeDesc = item?.ReasonCodeDesc ?? null;
         Table.updateByIndex({
             id: '#tableStockAdjustmentItem',
             index,
             obj,
-            value: obj.ReasonCode,
             event: e
         });
+
+        StockAdjustment.sumOfTotalStockAdjustmentItem();
     }
-};
+}
+
+
+
+
+
+
+//window.tableScanReasonCode = (value, obj, index) => {
+//    return Dropdown.html({
+//        id: `ScanReasonCode_${index}`, className: 'StockAdjustment-scan-item-reason',
+//        data: StockAdjustment.reasonCode,value: 'Value',
+//        text: 'Description',initialValue: [obj.ReasonCode ?? ''], 
+//        json: true, parent: '.modal'
+//    });
+//}
+
+
+//window.tableScanReasonCodeEvent = {
+//    'change .StockAdjustment-scan-item-reason': (e, value, obj, index) => {
+//        obj.ReasonCode = e.currentTarget.value || "";
+
+//        Table.updateByIndex({ id: '#tableStockAdjustmentScanItem',index: index,
+//            obj: obj,
+//            value: obj.ReasonCode,
+//            event: e
+//        });
+//    }
+//};
+//window.tableStockAdjustmentReasonCode = (value, obj, index) => {
+//    const data = StockAdjustment.reasonCode || [];
+
+//    return Dropdown.html({
+//        id: `StockAdjustmentReasonCode_${index}`,className: 'StockAdjustment-reason-item',data: data,value: 'Value', text: 'Description',initialValue: [obj.ReasonCode || ""],  json: true,parent: '.modal'});
+//};
+//window.tableStockAdjustmentReasonCodeEvent = {
+//    'change .StockAdjustment-reason-item': (e, value, obj, index) => {
+//        obj.ReasonCode = e.currentTarget.value || "";
+//        Table.updateByIndex({ id: '#tableStockAdjustmentItem', index: index, obj: obj, value: obj.ReasonCode,event: e});
+//    }
+//};

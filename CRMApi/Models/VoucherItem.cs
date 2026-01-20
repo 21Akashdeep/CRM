@@ -59,6 +59,7 @@ namespace CRMApi.Models
         public decimal GrossAmount { get; set; } = 0;
         [MaxLength(100)] public string? ImageUrl { get; set; }
         public string? ReasonCode { get; set; }
+        [NotMapped]public string? ReasonDesc { get; set; }
 
         [MaxLength(200)]
         public string? Remarks { get; set; }
@@ -117,7 +118,10 @@ namespace CRMApi.Models
         [NotMapped]
         public List<int> ListStoreId { get; set; } = new List<int>();
 
-        
+        [NotMapped]
+        public List<string> ListReasonCode { get; set; } = new List<string>();
+
+
 
 
     }
