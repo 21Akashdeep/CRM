@@ -6,8 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Dynamic;
 using System.Linq;
-using System.Net.Mail;
-using static CRMApi.Dto.DtoTask;
 
 namespace CRMApi.Repository
 {
@@ -15,10 +13,12 @@ namespace CRMApi.Repository
     {
         private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
+
         public RepoStockAdjustment(DBCRM _db)
         {
             db = _db;
         }
+
         public async Task<Message> GetViewOptionAsync()
         {
             Message objMsg = new Message();
@@ -26,16 +26,19 @@ namespace CRMApi.Repository
             {
                 dynamic Option = new ExpandoObject();
                 var ListStatus = await db.Voucher.GroupBy(x => new { x.Status }).Select(x => x.Key.Status.ToString()).ToListAsync();
+
                 Option.Status = await db.Setting.Where(st => App.ActiveStatus.Contains(st.Status) && st.Name == App.SettingName.Status && ListStatus.Contains(st.Value)).Select(st => new
                 {
                     st.Value,
                     st.Description
                 }).ToListAsync();
+
                 Option.Customer = await db.Party.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
                 {
                     x.Id,
                     x.Name
                 }).ToListAsync();
+
                 Option.StockAdjustmentNo = await db.Voucher.Where(x => App.ActiveStatus.Contains(x.Status) && x.Type == "StockAdjustment").Select(x => new
                 {
                     x.Id,
@@ -51,19 +54,18 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
+
         public async Task<Message> GetAddOptionAsync()
         {
             Message objMsg = new Message();
             try
             {
-
                 var Store = await db.Store.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
                 {
-
                     x.Id,
                     x.Description
-
                 }).ToListAsync();
+
                 var Item = await (
                     from itm in db.Item
                     join unt in db.Unit on itm.UnitId equals unt.Id
@@ -75,19 +77,20 @@ namespace CRMApi.Repository
                         itm.Description,
                         itm.UnitId,
                         UnitDesc = unt.Description,
-
                     }
                 ).ToListAsync();
-                var ReasonCode = await db.Setting.Where(x => x.Category== App.SettingName.ReasonCode && App.ActiveStatus.Contains(x.Status)).Select(x => new
-                    {
-                    x.Id,
-                    x.Value,
-                    })
-                    .ToListAsync();
+
+                var ReasonCode =await db.Setting.Where(x => x.Category == App.SettingName.ReasonCode).
+                   Select(x => new
+                   {
+                       x.Value,
+                       x.Description
+
+                   })
+                   .ToListAsync();
 
                 objMsg.data = new
                 {
-
                     Item,
                     Store,
                     ReasonCode
@@ -100,18 +103,16 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
+
         public async Task<Message> AddAsync(Voucher obj, User User)
         {
             Message objMsg = new Message();
-
             try
             {
                 obj.PartyId = obj.PartyId == 0 ? null : obj.PartyId;
                 obj.Type = "StockAdjustment";
-                foreach (var item in obj.VoucherItem)
-                {
-                    item.Qty = -(item.Qty);
-                }
+
+                // Note: For Adjustment, we keep the user-defined Qty (could be + or -)
                 objMsg = await new RepoVoucher(db).AddAsync(obj, User);
             }
             catch (Exception ex)
@@ -120,16 +121,15 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
+
         public async Task<List<Voucher>> ListAsync(Voucher? obj, User User)
         {
-
             obj ??= new Voucher();
             obj.ListType = new List<string> { "StockAdjustment" };
             var voucher = await new RepoVoucher(db).ListAsync(obj, User);
             return voucher;
-
-
         }
+
         public async Task<Message> EditAsync(int Id, User User)
         {
             Message objMsg = new Message();
@@ -140,9 +140,10 @@ namespace CRMApi.Repository
                     ListId = new List<int> { Id },
                     ListStatus = new List<int>(App.ActiveStatus) { App.Status.Delete }
                 }, User)).FirstOrDefault();
+
                 if (objMsg.obj == null)
                 {
-                    Message.Error(ref objMsg, "Stock Adjustment  was not found for edit.");
+                    Message.Error(ref objMsg, "StockAdjustment was not found for edit.");
                     return objMsg;
                 }
                 objMsg.data = (await GetAddOptionAsync()).data;
@@ -154,20 +155,14 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
+
         public async Task<Message> UpdateAsync(Voucher obj, User User)
         {
             Message objMsg = new Message();
-
             try
             {
                 obj.Type = "StockAdjustment";
-                foreach (var item in obj.VoucherItem)
-                {
-                    if (item.Qty >= 0)
-                        item.Qty = -(item.Qty);
-                }
-                objMsg = objMsg = await new RepoVoucher(db).UpdateAsync(obj, User);
-
+                objMsg = await new RepoVoucher(db).UpdateAsync(obj, User);
             }
             catch (Exception ex)
             {
@@ -175,10 +170,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        //public async Task<Message> AddAsync(Voucher obj, User User)
-        //{
 
-        //}
         public async Task<Message> PrintAsync(Voucher obj, User User)
         {
             Message objMsg = new Message();
@@ -193,23 +185,22 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
+
         public async Task<Message> ExportAsync(Voucher obj, User User)
         {
             Message objMsg = new Message();
             try
             {
-                // 1️⃣ Get Company
                 var objCompany = await db.Company
                     .FirstOrDefaultAsync(pt => App.ActiveStatus.Contains(pt.Status));
 
                 if (objCompany == null)
                 {
-                    Message.Error(ref objMsg, "StockIn info not found");
+                    Message.Error(ref objMsg, "Company info not found");
                     return objMsg;
                 }
 
-                // 2️⃣ Get GDN List using same pattern
-                var Gdn = (await ListAsync(obj, User)).Select(co => new
+                var Adjustments = (await ListAsync(obj, User)).Select(co => new
                 {
                     co.Id,
                     co.No,
@@ -223,11 +214,10 @@ namespace CRMApi.Repository
                     co.UpdatedAt
                 }).ToList();
 
+                DataTable objDataTable = Util.ListToDataTable(Adjustments);
 
-                DataTable objDataTable = Util.ListToDataTable(Gdn);
-
-                objCompany.SheetName = "StockIn List";
-                objCompany.ReportDesc = $"StockIn - {DateTime.Now:dd-MMM-yyyy}";
+                objCompany.SheetName = "StockAdjustment List";
+                objCompany.ReportDesc = $"StockAdjustment - {DateTime.Now:dd-MMM-yyyy}";
                 objMsg.base64 = Util.DataTableToBase64(objDataTable, objCompany);
 
                 Message.Get(ref objMsg, "");
@@ -236,7 +226,6 @@ namespace CRMApi.Repository
             {
                 Message.Exception(ref objMsg, ex);
             }
-
             return objMsg;
         }
     }
