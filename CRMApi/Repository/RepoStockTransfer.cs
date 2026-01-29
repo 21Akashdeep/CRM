@@ -188,6 +188,7 @@ namespace CRMApi.Repository
             var Voucher = dbVoucher.Select(x =>
             {
                 var voucher = x.Voucher;
+                var item = VoucherItemLookup[voucher.Id];
                 return new Voucher
                 {
                     Id = voucher.Id,
@@ -198,6 +199,9 @@ namespace CRMApi.Repository
                     PartyDesc = x.PartyDesc,
                     //StoreDesc = dbVoucherItem[0].StoreDesc,
                     StoreDesc = VoucherItemLookup[voucher.Id].Select(x => x.StoreDesc).FirstOrDefault(),
+                    TotalQty = item.Where(i => !string.IsNullOrEmpty(i.ItemDesc) && i.Qty >= 0).Count(),
+                    ItemName = item.Where(i => !string.IsNullOrEmpty(i.ItemDesc) && i.Qty >=0).Select(i => i.ItemDesc!)
+                    .Distinct().ToList(),
                     ConName = voucher.ConName,
                     ConAdd1 = voucher.ConAdd1,
                     ConAdd2 = voucher.ConAdd2,

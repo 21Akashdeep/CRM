@@ -54,6 +54,7 @@ namespace CRMApi.Repository
                     StatusCss = sts.CssClass,
                     CreatedByName = cby.Name,
                     UpdatedByName = uby.Name
+                    
                 }
             ).ToListAsync();
 
@@ -100,6 +101,7 @@ namespace CRMApi.Repository
             var Voucher = dbVoucher.Select(x =>
             {
                 var voucher = x.Voucher;
+                var item = VoucherItemLookup[voucher.Id];
                 return new Voucher
                 {
                     Id = voucher.Id,
@@ -110,6 +112,9 @@ namespace CRMApi.Repository
                     PartyDesc = x.PartyDesc,
                     //StoreDesc = dbVoucherItem[0].StoreDesc,
                     StoreDesc = VoucherItemLookup[voucher.Id].Select(x => x.StoreDesc).FirstOrDefault(),
+                    ItemName = item.Where(i => !string.IsNullOrEmpty(i.ItemDesc)).Select(i => i.ItemDesc!)
+                    .Distinct().ToList(),
+                    TotalQty = item.Count(),
                     ConName = voucher.ConName,
                     ConAdd1 = voucher.ConAdd1,
                     ConAdd2 = voucher.ConAdd2,
