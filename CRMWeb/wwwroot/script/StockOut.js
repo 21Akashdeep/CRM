@@ -270,6 +270,150 @@
     static deleteScanItem({ id, index }) {
         Table.remove({ id: '#tableStockOutScanItem', value: [index] });
     }
+    static print({ obj }) {
+        Data.post({
+            url: "StockOut/Print",
+            data: obj,
+            onSuccess: (response) => {
+                if (response.status !== Message.Type.success) {
+                    Message.error(response);
+                    return;
+                }
+
+                let reportTitle = 'Stock Out';
+                if (obj.FromDate && obj.TillDate) {
+                    reportTitle += ` ${moment(obj.FromDate).format('DD-MMM-YYYY')} To ${moment(obj.TillDate).format('DD-MMM-YYYY')}`;
+                }
+
+                let printContent = [];
+                let grnList = Array.isArray(response.data) ? response.data : [];
+
+                grnList.forEach((obj, index) => {
+                    let table = [];
+                    table.push('<table class="table table-bordered">');
+
+                    // ===== Header =====
+                    table.push(`
+            <thead>
+                <tr>
+                    <th colspan="8">
+                        <div class="text-center brand-name">${App.Company.Description}</div>
+                        <div class="text-center">${reportTitle}</div>
+                    </th>
+                </tr>
+                <tr>
+                    <th>SL No.</th>
+                    <th>StockOut No.</th>
+                    <th>Date</th>
+                    <th> From Store</th>
+                    <th>Party</th>
+                    <th>Ref No</th>
+                    <th>Remarks</th>
+                    <th>Created By</th>
+                </tr>
+            </thead>
+            `);
+
+                    table.push('<tbody>');
+
+                    // ===== GRN Master Row =====
+                    table.push(`
+            <tr>
+                <td class="text-center">${index + 1}</td>
+                <td>${obj.No}</td>
+                <td>${moment(obj.Date).format('DD-MMM-YYYY')}</td>
+                <td>${obj.StoreDesc || '-'}</td>
+                <td>${obj.PartyDesc || '-'}</td>
+                <td>${obj.RefNo || '-'}</td>                
+                <td>${obj.Remarks || '-'}</td>
+                <td>${obj.CreatedByName}</td>
+            </tr>
+            `);
+
+                    // ===== GRN Items =====
+                    let items = obj.VoucherItem || [];
+
+                    table.push(`
+            <tr>
+                <td colspan="10" style="border-bottom:none;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th colspan="7">StockOut Items</th>
+                            </tr>
+                            <tr>
+                                <th>SL No.</th>
+                                <th>Item</th>                                  
+                                <th>Expiry</th> 
+                                <th>Serial No</th>
+                                <th class="text-right">Qty</th>
+                                
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${items.map((row, idx) => `
+                                <tr>
+                                    <td class="text-center">${idx + 1}</td>
+                                    <td>${row.ItemDesc}</td>                                     
+                                    <td>${row.ExpiryOn ? moment(row.ExpiryOn).format('DD-MMM-YYYY') : '-'}</td> 
+                                     <td>${row.SerialNo}</td>
+                                    <td class="text-right">${row.Qty}</td>
+                                </tr>
+                            `).join('')}
+                            <tr>
+                                <th colspan="4" class="text-right">Total</th>
+                                <th class="text-right">
+                                    ${items.reduce((s, x) => s + Number(x.Qty || 0), 0)}
+                                </th>                                
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            `);
+
+                    table.push('</tbody>');
+                    table.push('</table>');
+
+                    printContent.push(`
+            <div class="page-container">
+                <div class="page">
+                    ${table.join('')}
+                </div>
+            </div>
+            `);
+                });
+
+                // ===== Styles =====
+                let style = [];
+                style.push(`
+            table {
+                border-collapse: collapse;
+                width: 100%;
+            }
+            table td, table th {
+                border: 1px solid black;
+                padding: 5px;
+            }
+            .text-right {
+                text-align: right;
+            }
+            .text-center {
+                text-align: center;
+            }
+        `);
+
+                Print.page({
+                    title: reportTitle,
+                    style: style,
+                    content: printContent,
+                    border: false,
+                    orientation: 'A4 landscape',
+                    isPrint: false
+                });
+            }
+        });
+    }
 }
 window.tableStockOutRefNoAndDate = (value, obj, index) => {
     return `
@@ -319,6 +463,17 @@ window.tableStockOutAction = (value, obj, index) => {
             </li>
         `);
     }
+    if (obj.IsPrint) {
+        actionBtn.push(
+            `
+     <li>
+        <a href="#" class="dropdown-item text-primary-100 btn-print" title="Print">
+            <span class="fa fa-print text-primary-100"></span>&nbsp;&nbsp;Print
+        </a>
+    </li>
+            `
+        );
+    }
 
     return `
         <div class="btn-group dropstart">            
@@ -359,7 +514,7 @@ window.tableStockOutActionEvent = {
         StockOut.edit({ id: obj.Id, action: 'Add' });
     },
     'click .btn-print': (e, value, obj, index) => {
-        StockOut.print({ id: obj.Id });
+        StockOut.print({ obj: { ListId: [obj.Id] } });
     },
     'click .btn-delete': (e, value, obj, index) => {
         StockOut.delete({ id: obj.Id });
@@ -562,4 +717,15 @@ window.tableStockOutItemActionEvents = {
     'click .btn-delete': (e, value, obj, index) => {
         StockOut.deleteItem({ id: obj.Id, index: index });
     }
+}
+window.tabelItemName = (value, obj, index) => {
+    if (!obj.ItemName || obj.ItemName.length === 0) {
+        return '-';
+    }
+
+    return `
+        <ol class="mb-0 ps-3">
+            ${obj.ItemName.map(name => `<li>${name}</li>`).join('')}
+        </ol>
+    `;
 }
