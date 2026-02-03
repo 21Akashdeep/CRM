@@ -66,6 +66,30 @@
             }
         });
 
+        Party.initAdd();
+        Party.addOnSuccess = (response) => {
+            let obj = response.obj;
+            Modal.close({ id: '#modalParty' });
+            Grn.getAddOption({
+                onSuccess: (response) => {
+                    Dropdown.bind({ id: '#Grn-PartyId', data: response.data.Party, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
+                    Field.triggerOnChange('#Grn-PartyId');
+                }
+            });
+        }
+        Party.updateOnSuccess = (response) => {
+            let obj = response.obj;
+            Modal.close({ id: '#modalParty' });
+            setTimeout(() => {
+                Grn.getAddOption({
+                    onSuccess: (response) => {
+                        Dropdown.bind({ id: '#Grn-PartyId', data: response.data.Party, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
+                        Field.triggerOnChange('#Grn-PartyId');
+                    }
+                });
+            }, 500);
+        }
+
         $('#btnScanItemAdd').on('click', () => {
             let scanItems = $('#tableGrnScanItem').bootstrapTable('getData');
             if (scanItems.length === 0) {
@@ -77,6 +101,7 @@
 
             Modal.close({ id: '#modalGrnItemScan' });
         });
+
         $('#Grn-BtnSave').on('click', () => {
             if (!Field.isMandatory({ class: '.required' })) {
                 return;
@@ -103,6 +128,7 @@
 
 
     }
+
     static getViewOption() {
         Data.get({
             url: 'Grn/GetViewOption',
@@ -131,6 +157,7 @@
         });
     }
     static newEntry() {
+        //Party.initAdd();
         Grn.getAddOption({
             onSuccess: (response) => {
                 Grn.item = response.data.Item;
@@ -141,6 +168,29 @@
                 Dropdown.bind({ id: '#Grn-StoreId', data: store, value: 'Id', text: 'Description' });
                 Modal.open({ id: '#modalGrn', title: 'Grn / Add', action: 'Add' });
                 $('#Grn-RefDate,#Grn-EwayDate').val('');
+                
+                //Party.addOnSuccess = (response) => {
+                //    let obj = response.obj;
+                //    Modal.close({ id: '#modalParty' });
+                //    Grn.getAddOption({
+                //        onSuccess: (response) => {
+                //            Dropdown.bind({ id: '#Grn-PartyId', data: response.data.Party, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
+                //            Field.triggerOnChange('#Grn-PartyId');
+                //        }
+                //    });
+                //}
+                //Party.updateOnSuccess = (response) => {
+                //    let obj = response.obj;
+                //    Modal.close({ id: '#modalParty' });
+                //    setTimeout(() => {
+                //        Grn.getAddOption({
+                //            onSuccess: (response) => {
+                //                Dropdown.bind({ id: '#Grn-PartyId', data: response.data.Party, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
+                //                Field.triggerOnChange('#Grn-PartyId');
+                //            }
+                //        });
+                //    }, 500);
+                //}
 
             }
         });

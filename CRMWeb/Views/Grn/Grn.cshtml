@@ -106,9 +106,14 @@
                             <label>To Store<span class="text-mandatory">*</span></label>
                             <select id="Grn-StoreId" name="StoreId" class="select-pick required" data-search="true" data-size="4"></select>
                         </div>
-                        <div class="col-md-4">
+                        @* <div class="col-md-4">
                             <label>Party<span class="text-mandatory">*</span></label>
                             <select id="Grn-PartyId" name="PartyId" class="select-pick required" data-size="4" data-search="true"></select>
+                        </div> *@
+                        <div class="col-md-4">
+                            <label>Party<span class="text-mandatory">*</span></label>
+                            <select id="Grn-PartyId" name="PartyId" class="select-pick complaint-required" data-search='true' data-size="4" data-addFn="Party.newEntry" data-editFn="Party.edit">
+                            </select>
                         </div>
 
                         <div class="col-md-2">
@@ -281,9 +286,11 @@
 </div>
 
 
-
+<!-- Party Add Modal -->
+<partial name="../Party/PartyAdd.cshtml" />
 
 @section Scripts {
+    <script src="~/script/Party.js" asp-append-version="true"></script>
     <script src="~/script/Grn.js" asp-append-version="true"></script>
     <script type="text/javascript">
         $(() => {
