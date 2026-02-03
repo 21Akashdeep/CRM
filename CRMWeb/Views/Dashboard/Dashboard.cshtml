@@ -240,6 +240,9 @@
         color: var(--color-total);
     }
 
+    .green-text {
+        color: #2ecc71; 
+    }
     .yellow-text {
         color: var(--color-soon);
     }
@@ -347,6 +350,7 @@
             
         </div>
     </div>
+    <hr />
     <div class="dashboard-grid table">
         <div class="stat-card" onclick="location.href='@Url.Action("Index", "GatePass")'">
             <table class="overview-table">
@@ -408,6 +412,132 @@
             </table>
         </div>
     </div>
+    @* ----------------------- *@
+
+    <div class="dashboard-header-container card-header">
+        @* <div class="blue-accent-bar "></div> *@
+        <div class="header-text-content">
+            <h1 class="main-title ">Store Overview</h1>
+
+        </div>
+    </div>
+    <hr />
+    <div class="dashboard-grid table">
+
+        <!-- Receipt Note -->
+        <div class="stat-card" onclick="location.href='@Url.Action("Index", "Grn", new { type = "ReceiptNote" })'">
+            <table class="overview-table">
+                <thead>
+                    <tr>
+                        <th colspan="2"><i class="fa-solid fa-file-invoice"></i> Receipt Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="label-cell blue-text">Total</td><td class="value-cell blue-text" id="receiptNoteTotal">0</td></tr>
+                    <tr><td class="label-cell yellow-text">This Month</td><td class="value-cell yellow-text" id="receiptNoteMonth">0</td></tr>
+                    <tr><td class="label-cell green-text">Today</td><td class="value-cell green-text" id="receiptNoteToday">0</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Stock In -->
+        <div class="stat-card" onclick="location.href='@Url.Action("Index", "StockIn", new { type = "StockIn" })'">
+            <table class="overview-table">
+                <thead>
+                    <tr>
+                        <th colspan="2"><i class="fa-solid fa-arrow-down"></i> Stock In</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="label-cell blue-text">Total</td><td class="value-cell blue-text" id="stockInTotal">0</td></tr>
+                    <tr><td class="label-cell yellow-text">This Month</td><td class="value-cell yellow-text" id="stockInMonth">0</td></tr>
+                    <tr><td class="label-cell green-text">Today</td><td class="value-cell green-text" id="stockInToday">0</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Delivery Note -->
+        <div class="stat-card" onclick="location.href='@Url.Action("Index", "Gdn", new { type = "DeliveryNote" })'">
+            <table class="overview-table">
+                <thead>
+                    <tr>
+                        <th colspan="2"><i class="fa-solid fa-truck"></i> Delivery Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="label-cell blue-text">Total</td><td class="value-cell blue-text" id="deliveryNoteTotal">0</td></tr>
+                    <tr><td class="label-cell yellow-text">This Month</td><td class="value-cell yellow-text" id="deliveryNoteMonth">0</td></tr>
+                    <tr><td class="label-cell green-text">Today</td><td class="value-cell green-text" id="deliveryNoteToday">0</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Return Note -->
+        <div class="stat-card" onclick="location.href='@Url.Action("Index", "Rtn", new { type = "ReturnNote" })'">
+            <table class="overview-table">
+                <thead>
+                    <tr>
+                        <th colspan="2"><i class="fa-solid fa-rotate-left"></i> Return Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="label-cell blue-text">Total</td><td class="value-cell blue-text" id="returnNoteTotal">0</td></tr>
+                    <tr><td class="label-cell yellow-text">This Month</td><td class="value-cell yellow-text" id="returnNoteMonth">0</td></tr>
+                    <tr><td class="label-cell green-text">Today</td><td class="value-cell green-text" id="returnNoteToday">0</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Stock Out -->
+        <div class="stat-card" onclick="location.href='@Url.Action("Index", "StockOut", new { type = "StockOut" })'">
+            <table class="overview-table">
+                <thead>
+                    <tr>
+                        <th colspan="2"><i class="fa-solid fa-arrow-up"></i> Stock Out</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="label-cell blue-text">Total</td><td class="value-cell blue-text" id="stockOutTotal">0</td></tr>
+                    <tr><td class="label-cell yellow-text">This Month</td><td class="value-cell yellow-text" id="stockOutMonth">0</td></tr>
+                    <tr><td class="label-cell green-text">Today</td><td class="value-cell green-text" id="stockOutToday">0</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Stock Transfer -->
+        <div class="stat-card" onclick="location.href='@Url.Action("Index", "StockTransfer", new { type = "StockTransfer" })'">
+            <table class="overview-table">
+                <thead>
+                    <tr>
+                        <th colspan="2"><i class="fa-solid fa-right-left"></i> Stock Transfer</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="label-cell blue-text">Total</td><td class="value-cell blue-text" id="stockTransferTotal">0</td></tr>
+                    <tr><td class="label-cell yellow-text">This Month</td><td class="value-cell yellow-text" id="stockTransferMonth">0</td></tr>
+                    <tr><td class="label-cell green-text">Today</td><td class="value-cell green-text" id="stockTransferToday">0</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Stock Adjustment -->
+        <div class="stat-card" onclick="location.href='@Url.Action("Index", "StockAdjustment", new { type = "StockAdjustment" })'">
+            <table class="overview-table">
+                <thead>
+                    <tr>
+                        <th colspan="2"><i class="fa-solid fa-sliders"></i> Stock Adjustment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="label-cell blue-text">Total</td><td class="value-cell blue-text" id="stockAdjustmentTotal">0</td></tr>
+                    <tr><td class="label-cell yellow-text">This Month</td><td class="value-cell yellow-text" id="stockAdjustmentMonth">0</td></tr>
+                    <tr><td class="label-cell green-text">Today</td><td class="value-cell green-text" id="stockAdjustmentToday">0</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
 </div>
 
 

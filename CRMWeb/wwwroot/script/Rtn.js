@@ -123,6 +123,7 @@
             Rtn.sumOfTotalRtnItem();
 
             Modal.close({ id: '#modalRtnItemScan' });
+
         });
         $('#Rtn-BtnSave').on('click', () => {
 
@@ -246,7 +247,7 @@
         let tfoot = `
             <tfoot>
                 <tr>
-                    <th class="text-right" colspan="4">Total</th>
+                    <th class="text-right" colspan="5">Total</th>
                     <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
                 </tr>
             </tfoot>
@@ -341,6 +342,33 @@
                 });
             }
         });
+    }
+    static delete({ id }) {
+        Message.confirm(
+            {
+                msg: "Do you want to delete???",
+                confirmButtonText: "Delete",
+                denyButtonText: "Don't Delete",
+                data: id,
+                onConfirm: (id) => {
+                    Data.delete(
+                        {
+                            url: `Rtn/Delete?Id=${id}`,
+                            onSuccess: Rtn.deleteOnSuccess
+                        }
+                    );
+                }
+            },
+        );
+    }
+    static deleteOnSuccess = (response) => {
+        Message.show(response);
+        if (response.status == Message.Type.success) {
+            Table.updateById({ id: "#tableTask", objId: response.obj.Id, obj: response.obj });
+            Dropdown.bind({ id: '#ListId', data: response.data.ListId, value: 'Id', text: 'Description', subText: "Code" });
+            Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
+
+        }
     }
     static deleteItemOnSuccess = (response) => {
             Message.show(response);
@@ -530,6 +558,50 @@ window.tableRtnUpdatedByAndAt = (value, obj, index) => {
         <div>${moment(obj.UpdatedAt).format('DD-MMM-YYYY HH:mm')}</div>
     `;
 };
+//window.tableRtnAction = (value, obj, index) => {
+//    let actionBtn = [];
+
+//    if (obj.IsEdit) {
+//        actionBtn.push(`
+//            <li>
+//                <a href="#" class="dropdown-item text-success-100 btn-edit">
+//                    <span class="fa fa-edit"></span>&nbsp;&nbsp;View / Edit
+//                </a>
+//            </li>
+//        `);
+//    }
+
+//    if (obj.IsDelete) {
+//        actionBtn.push(`
+//            <li>
+//                <a href="#" class="dropdown-item text-danger-100 btn-delete">
+//                    <span class="fa fa-trash"></span>&nbsp;&nbsp;Delete
+//                </a>
+//            </li>
+//        `);
+//    }
+
+//    return `
+//        <div class="btn-group dropstart">
+//            <button class="btn btn-sm border-0" data-bs-toggle="dropdown">
+//                <i class="fa fa-ellipsis-v"></i>
+//            </button>
+//            <ul class="dropdown-menu dropdown-menu-lg-end mt-4">
+//                ${actionBtn.join('')}
+//            </ul>
+//        </div>
+//    `;
+//};
+//window.tableRtnActionEvent = {
+//    'click .btn-edit': function (e, value, row, index) {
+//        e.preventDefault();
+//        Rtn.edit({ id: row.Id });
+//    },
+//    'click .btn-delete': (e, value, obj, index) => {
+//        Rtn.delete({ id: obj.Id });
+//    }
+//};
+
 window.tableRtnAction = (value, obj, index) => {
     let actionBtn = [];
 
@@ -578,10 +650,11 @@ window.tableRtnAction = (value, obj, index) => {
         </div>
     `;
 };
+
 window.tableRtnActionEvent = {
-    'click .btn-edit': function (e, value, row, index) {
+    'click .btn-edit': (e, value, obj, index) => {
         e.preventDefault();
-        Rtn.edit({ id: row.Id });
+        Rtn.edit({ id: obj.Id, action: 'Edit' });
     },
     'click .btn-delete': (e, value, obj, index) => {
         Rtn.delete({ id: obj.Id });
@@ -590,6 +663,7 @@ window.tableRtnActionEvent = {
         Rtn.print({ obj: { ListId: [obj.Id] } });
     }
 };
+
 window.tableRtnItemSlNo = (value, obj, index) => index + 1;
 window.tableRtnItemDesc = (value, obj, index) => {
     return `
@@ -722,29 +796,29 @@ window.tableRtnItemAmount = (value, obj, index) => {
                readonly>
     `;
 };
-Rtn.delete = ({ id }) => {
-    Message.confirm({
-        msg: "Do you want to delete this RTN?",
-        confirmButtonText: "Delete",
-        denyButtonText: "Cancel",
-        data: id,
-        onConfirm: (id) => {
-            Data.delete({
-                url: `Rtn/Delete?Id=${id}`,
-                onSuccess: (response) => {
-                    Message.show(response);
-                    if (response.status === Message.Type.success) {
-                        Table.updateById({
-                            id: "#tableRtn",
-                            objId: response.obj.Id,
-                            obj: response.obj
-                        });
-                    }
-                }
-            });
-        }
-    });
-};
+//Rtn.delete = ({ id }) => {
+//    Message.confirm({
+//        msg: "Do you want to delete this RTN?",
+//        confirmButtonText: "Delete",
+//        denyButtonText: "Cancel",
+//        data: id,
+//        onConfirm: (id) => {
+//            Data.delete({
+//                url: `Rtn/Delete?Id=${id}`,
+//                onSuccess: (response) => {
+//                    Message.show(response);
+//                    if (response.status === Message.Type.success) {
+//                        Table.updateById({
+//                            id: "#tableRtn",
+//                            objId: response.obj.Id,
+//                            obj: response.obj
+//                        });
+//                    }
+//                }
+//            });
+//        }
+//    });
+//};
 window.tableRtnExpiryOn = (value, obj, index) => {
     let val = obj.ExpiryOn
         ? moment(obj.ExpiryOn, ['DD-MMM-YYYY', 'YYYY-MM-DD']).format('YYYY-MM-DD')

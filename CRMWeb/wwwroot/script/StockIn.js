@@ -552,6 +552,7 @@ window.tableStockInConAddress = (value, obj, index) => {
 
     return lines.join("<br>");
 };
+
 window.tableStockInActionEvent = {
     'click .btn-edit': (e, value, obj, index) => {
         StockIn.edit({ id: obj.Id, action: 'Edit' });
