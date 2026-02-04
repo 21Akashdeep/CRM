@@ -98,9 +98,9 @@
                         <div class="col-md-2">
                             <label>To Store<span class="text-mandatory">*</span></label> <select id="StockIn-StoreId" name="StoreId" class="select-pick required" data-search="true" data-size="4"></select>
                         </div>
-                        <div class="col-md-2">
+                        @* <div class="col-md-2">
                             <label>Scan</label><input type="text" id="StockIn-Scan" name="Scan" class="form-control form-control-sm" />
-                        </div>
+                        </div> *@
                        
                     </div>
                     <hr />
@@ -229,7 +229,12 @@
     </div>
 </div>
 
+<partial name="../Item/ItemAdd.cshtml" />
+
 @section Scripts {
+    <script src="~/script/ItemSubGroup.js"></script>
+    <script src="~/script/ItemGroup.js"></script>
+    <script src="~/script/Item.js" asp-append-version="true"></script>
     <script src="~/script/StockIn.js" asp-append-version="true"></script>
     <script type="text/javascript">
         $(() => {

@@ -110,6 +110,33 @@
 
             Modal.close({ id: '#modalStockInItemScan' });
         });
+        Item.initAdd();
+        Item.addOnSuccess = (response) => {
+            let obj = response.obj;
+            Modal.close({ id: '#modalItem' });
+            StockIn.getAddOption({
+                onSuccess: (response) => {
+                    StockIn.item = response.data.Item;
+                    StockIn.refreshStockInItemDropdowns();
+                    Field.triggerOnChange('#StockIn-ItemId');
+                }
+            });
+        };
+
+        Item.updateOnSuccess = (response) => {
+            let obj = response.obj;
+            Modal.close({ id: '#modalItem' });
+
+            setTimeout(() => {
+                StockIn.getAddOption({
+                    onSuccess: (response) => {
+                        StockIn.item = response.data.Item;
+                        StockIn.refreshStockInItemDropdowns();
+                        Field.triggerOnChange('#StockIn-ItemId');
+                    }
+                });
+            }, 500);
+        };
         $('#StockIn-BtnSave').on('click', () => {
             if (!Field.isMandatory({ class: '.required' })) {
                 return;
@@ -457,6 +484,24 @@
             }
         });
     }
+    static editItemFromStockIn(item) {
+
+        Item.edit(item.id, 'Edit');
+    }
+    static refreshStockInItemDropdowns() {
+        let rows = $('#tableStockInItem').bootstrapTable('getData');
+
+        rows.forEach((row, index) => {
+            Dropdown.bind({
+                id: `#StockInItem_${index}`,
+                data: StockIn.item,
+                value: 'Id',
+                text: 'Description',
+                json: true,
+                initialValue: [row.ItemId]
+            });
+        });
+    }
 }
 
 window.tableStockInRefNoAndDate = (value, obj, index) => {
@@ -574,7 +619,10 @@ window.tableStockInItemSlNo = (value, obj, index) => {
 }
 window.tableStockInItemDesc = (value, obj, index) => {
     return `
-        ${Dropdown.html({ id: `StockInItem_${index}`, className: 'StockIn-item', data: StockIn.item, value: 'Id', text: 'Description', initialValue: [obj.ItemId], json: true, parent: '.modal' })}
+        ${Dropdown.html({
+            id: `StockInItem_${index}`, className: 'StockIn-item', data: StockIn.item, value: 'Id', text: 'Description', initialValue: [obj.ItemId], json: true, parent: '.modal', search: true,
+            size: 4, addFn: 'Item.fill', editFn: 'StockIn.editItemFromStockIn' })}
+        
         <input type="text" id="StockInItemRemarks_${index}" class="form-control form-control-sm mb-0 mt-1 StockIn-item-remarks" maxlength="100" placeholder="Remarks" value="${obj.Remarks ?? ""}">
     `;
 }
