@@ -89,6 +89,33 @@
                 });
             }, 500);
         }
+        Item.initAdd();
+        Item.addOnSuccess = (response) => {
+            let obj = response.obj;
+            Modal.close({ id: '#modalItem' });
+            Grn.getAddOption({
+                onSuccess: (response) => {
+                    Grn.item = response.data.Item;
+                    Grn.refreshGrnItemDropdowns();
+                    Field.triggerOnChange('#Grn-ItemId');
+                }
+            });
+        };
+
+        Item.updateOnSuccess = (response) => {
+            let obj = response.obj;
+            Modal.close({ id: '#modalItem' });
+
+            setTimeout(() => {
+                Grn.getAddOption({
+                    onSuccess: (response) => {
+                        Grn.item = response.data.Item; 
+                        Grn.refreshGrnItemDropdowns();
+                        Field.triggerOnChange('#Grn-ItemId');
+                    }
+                });
+            }, 500);
+        };
 
         $('#btnScanItemAdd').on('click', () => {
             let scanItems = $('#tableGrnScanItem').bootstrapTable('getData');
@@ -106,7 +133,7 @@
             if (!Field.isMandatory({ class: '.required' })) {
                 return;
             }
-            //let GrnItem = $('#tableGrnItem').bootstrapTable('getData').filter(x => x.ItemId > 0);
+            
             let GrnItem = $('#tableGrnItem').bootstrapTable('getData').filter(x => x.ItemId > 0)
                 .map(x => {
                     if (x.ExpiryOn) {
@@ -157,7 +184,7 @@
         });
     }
     static newEntry() {
-        //Party.initAdd();
+       
         Grn.getAddOption({
             onSuccess: (response) => {
                 Grn.item = response.data.Item;
@@ -169,28 +196,7 @@
                 Modal.open({ id: '#modalGrn', title: 'Grn / Add', action: 'Add' });
                 $('#Grn-RefDate,#Grn-EwayDate').val('');
                 
-                //Party.addOnSuccess = (response) => {
-                //    let obj = response.obj;
-                //    Modal.close({ id: '#modalParty' });
-                //    Grn.getAddOption({
-                //        onSuccess: (response) => {
-                //            Dropdown.bind({ id: '#Grn-PartyId', data: response.data.Party, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
-                //            Field.triggerOnChange('#Grn-PartyId');
-                //        }
-                //    });
-                //}
-                //Party.updateOnSuccess = (response) => {
-                //    let obj = response.obj;
-                //    Modal.close({ id: '#modalParty' });
-                //    setTimeout(() => {
-                //        Grn.getAddOption({
-                //            onSuccess: (response) => {
-                //                Dropdown.bind({ id: '#Grn-PartyId', data: response.data.Party, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
-                //                Field.triggerOnChange('#Grn-PartyId');
-                //            }
-                //        });
-                //    }, 500);
-                //}
+                
 
             }
         });
@@ -487,8 +493,24 @@
             }
         });
     }
+    static editItemFromGrn(item) {
+        
+        Item.edit(item.id, 'Edit');
+    }
+    static refreshGrnItemDropdowns() {
+        let rows = $('#tableGrnItem').bootstrapTable('getData');
 
-
+        rows.forEach((row, index) => {
+            Dropdown.bind({
+                id: `#GrnItem_${index}`,
+                data: Grn.item,
+                value: 'Id',
+                text: 'Description',
+                json: true,
+                initialValue: [row.ItemId]
+            });
+        });
+    }
 }
 window.tableGrnRefNoAndDate = (value, obj, index) => {
     return `
@@ -618,7 +640,9 @@ window.tableGrnItemSlNo = (value, obj, index) => {
 }
 window.tableGrnItemDesc = (value, obj, index) => {
     return `
-        ${Dropdown.html({ id: `GrnItem_${index}`, className: 'grn-item', data: Grn.item, value: 'Id', text: 'Description', initialValue: [obj.ItemId], json: true, parent: '.modal' })}
+        ${Dropdown.html({
+            id: `GrnItem_${index}`, className: 'grn-item', data: Grn.item, value: 'Id', text: 'Description', initialValue: [obj.ItemId], json: true, parent: '.modal', search: true,
+            size: 4, addFn: 'Item.fill', editFn: 'Grn.editItemFromGrn' })}
         <input type="text" id="GrnItemRemarks_${index}" class="form-control form-control-sm mb-0 mt-1 grn-item-remarks" maxlength="100" placeholder="Remarks" value="${obj.Remarks ?? ""}">
     `;
 }
