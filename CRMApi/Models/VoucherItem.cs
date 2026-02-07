@@ -80,6 +80,8 @@ namespace CRMApi.Models
         [NotMapped] public int? SourceVoucherId { get; set; } 
 
         [NotMapped] public string StatusDesc { get; set; } = string.Empty;
+        [NotMapped] public string Itemgroup { get; set; } = string.Empty;
+        [NotMapped] public string ItemSubGroup { get; set; } = string.Empty;
         [NotMapped] public string StatusCss { get; set; } = string.Empty;
 
         [NotMapped]
@@ -117,6 +119,8 @@ namespace CRMApi.Models
 
         [NotMapped]
         public List<int> ListStoreId { get; set; } = new List<int>();
+
+       
 
         [NotMapped]
         public List<string> ListReasonCode { get; set; } = new List<string>();

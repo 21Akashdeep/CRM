@@ -50,6 +50,12 @@ namespace CRMApi.Models
         [NotMapped] public List<int> ListNo { get; set; } = new List<int>();
         [NotMapped] public List<int> ListStatus { get; set; } = new List<int>();
         [NotMapped] public List<string> ListType { get; set; } = new List<string>();
+        [NotMapped]
+        public List<int> ListGroupId { get; set; } = new List<int>();
+        [NotMapped]
+        public List<int> ListSubGroupId { get; set; } = new List<int>();
+        [NotMapped]
+        public List<int> ListItemId { get; set; } = new List<int>();
         [NotMapped] public bool IsEdit { get; set; } = false;
         [NotMapped] public bool IsPrint { get; set; } = false;
         [NotMapped] public bool IsDelete { get; set; } = false;

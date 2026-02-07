@@ -1,1 +1,288 @@
-﻿
+﻿class StoreDashboard {
+    static mainItem = [];
+    static item = [];
+    static itemGroup = [];
+    static itemSubGroup = [];
+    static storeDesc = [];
+    static store =[];
+    static init() {
+
+        StoreDashboard.getViewOption();
+
+        $('#btnNewEntry').on('click', () => {
+            StoreDashboard.newEntry();
+        });
+
+        $('#btnSearch').on('click', () => {
+            StoreDashboard.get({
+                method: 'Get',
+                onSuccess: (response) => {
+                    let data = response.data;
+                    Table.add({ id: '#tableStoreDashboard', data: response.data });
+                }
+            });
+        });
+        $('#btnPrint').on('click', () => {
+
+            StoreDashboard.print(StoreDashboard.mainItem);
+
+        });
+
+
+        $('#btnExport').on('click', () => {
+            StoreDashboard.get({
+                method: 'Export',
+                onSuccess: (response) => {
+                    Export.Base64ToExcel({ base64: response.base64, fileName: 'StoreDashboard' });
+                }
+            });
+        });
+        $('#ListStoreId').on('change', () => {
+
+            let obj = {
+                StoreId: $('#ListStoreId').val()
+            };
+            StoreDashboard.storeDesc = $('#ListStoreId').val();
+            
+
+            if (obj.StoreId) { 
+            Data.post({
+                url: 'StoreDashboard/Get',
+                data: obj,
+                onSuccess: (response) => {
+                    Message.success(response)
+                    StoreDashboard.mainItem = response.data.ItemInJamshedpur;
+                    let itemGroup = StoreDashboard.itemGroup;
+                    Dropdown.bind({ id: '#ListItemGroupId', data: itemGroup, value: 'Id', text: 'Description' });
+                    Table.add({ id: '#tableStoreDashboard', data: response.data.ItemInJamshedpur });
+
+                }
+
+            });
+        }
+        });
+
+        $('#ListItemGroupId').on('change', () => {
+            let itemStoreId = $('#ListStoreId').val();
+            let itemgroupId = $('#ListItemGroupId').val();
+
+            let obj = {
+                StoreId: itemStoreId,
+                ListGroupId: itemgroupId
+            }
+            StoreDashboard.groupId = itemgroupId;
+
+            if (itemgroupId.length > 0) {
+
+                Data.post({
+                    url: 'StoreDashboard/GetDataByItemGroup',
+                    data:obj,
+                    onSuccess: (response) => {
+                        StoreDashboard.mainItem = response.data.ItemInJamshedpur;
+                        StoreDashboard.itemSubGroup = response.data.itemSubGroup;                    
+                        Dropdown.bind({ id: '#ListItemSubGroupId', data: StoreDashboard.itemSubGroup, value: 'Id', text: 'Description' });
+                        Table.remove({ id: '#tableStoreDashboard' });
+                        Table.add({ id: '#tableStoreDashboard', data: response.data.ItemInJamshedpur });                    
+                    }
+                });
+
+
+            }
+
+
+        });
+
+        $('#ListItemSubGroupId').on('change', () => {
+            let itemStoreId = $('#ListStoreId').val();
+            let itemSubGroupId = $('#ListItemSubGroupId').val();
+            let itemgroupid = $('#ListItemGroupId').val()
+
+            let obj = {
+                StoreId: itemStoreId,
+                ListGroupId: itemgroupid,
+                ListSubGroupId: itemSubGroupId
+            }
+
+            if (itemSubGroupId.length>0) {
+                Data.post({
+                    url: 'StoreDashboard/GetDataByItemGroupItemSubGroup',
+                    data: obj,
+                    onSuccess: (response) => {
+                        StoreDashboard.mainItem = response.data.ItemInJamshedpur;
+                        let itemgroupIds = itemgroupid.map(Number);
+                        let itemsubgroupIds = itemSubGroupId.map(Number);
+                        let selectItem = StoreDashboard.item.filter(x => itemgroupIds.includes(x.ItemGroupId) && itemsubgroupIds.includes(x.itemSubGroupId));
+                        Dropdown.bind({ id: '#ListItemId', data: response.data.item, value: 'Id', text: 'Description' });
+                        Table.remove({ id: '#tableStoreDashboard' });
+                        Table.add({ id: '#tableStoreDashboard', data: response.data.ItemInJamshedpur });
+                    }
+                });
+
+
+               
+            }
+        });
+        $('#ListItemId').on('change', () => {
+            let itemStoreId = $('#ListStoreId').val();
+            let itemSubGroupId = $('#ListItemSubGroupId').val();
+            let itemgroupid = $('#ListItemGroupId').val();
+            let itemId = $('#ListItemId').val();
+
+            let obj = {
+                StoreId: itemStoreId,
+                ListGroupId: itemgroupid,
+                ListSubGroupId: itemSubGroupId,
+                ListItemId: itemId
+            }
+
+            if (itemId.length>0) {
+                Data.post({
+                    url: 'StoreDashboard/GetDataByItemId',
+                    data: obj,
+                    onSuccess: (response) => {
+                        StoreDashboard.mainItem = response.data.ItemInJamshedpur;                                        
+                        Table.remove({ id: '#tableStoreDashboard' });
+                        Table.add({ id: '#tableStoreDashboard', data: response.data.ItemInJamshedpur });
+                    }
+                });
+
+
+                    
+            }
+        });
+
+    }
+    static getViewOption() {
+        Data.get({
+            url: 'StoreDashboard/GetViewOption',
+            onSuccess: (response) => {
+                StoreDashboard.item = response.data.Item;
+                StoreDashboard.itemGroup = response.data.ItemGroup;
+                StoreDashboard.itemSubGroup = response.data.ItemSubGroup;
+                StoreDashboard.store = response.data.Store;
+                Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
+                Dropdown.bind({ id: '#ListStoreId', data: response.data.Store, value: 'Id', text: 'Description' });
+               
+
+                Dropdown.bind
+                
+            }
+        });
+    }
+    static get({ method = 'Get', onSuccess }) {
+        let obj = {
+            ListStatus: $('#ListStatus').val(),          
+            StoreId: $('#ListStoreId').val()
+            
+        };
+        Data.post({
+            url: `StoreDashboard/${method}`,
+            data: obj,
+            onSuccess: onSuccess
+        });
+    }
+    static print(data) {
+        let StoreDesc = StoreDashboard.store
+            .filter(x => x.Id == StoreDashboard.storeDesc)
+            .map(x => x.Description);
+        let reportTitle = 'Store Dashboard';
+
+        let list = Array.isArray(data) ? data : [];
+        let printContent = [];
+        let table = [];
+
+        table.push('<table class="table table-bordered">');
+
+        table.push(`
+        <thead>
+            <tr>
+                <th colspan="6">
+                    <div class="text-center brand-name">${App.Company.Description}</div>
+                    <div class="title-row">
+        <div class="report-title text-center">${reportTitle}</div>
+        <div class="store-name ">Location: ${StoreDesc}</div>
+         <div class="store-name text-right ">Generated At : ${moment().format('DD-MMM-YYYY HH:mm')}</div>
+    </div>
+                </th>
+            </tr>
+            <tr>
+                <th>SL No.</th>
+                <th>Material</th>
+                <th>Material Type</th>
+                <th>Make</th>
+                <th class="text-center">Qty</th>
+            </tr>
+        </thead>
+    `);
+
+        table.push('<tbody>');
+
+        list.forEach((row, index) => {
+
+            table.push(`
+            <tr>
+                <td class="text-center">${index + 1}</td>
+                <td>${row.ItemGroupDesc || '-'}</td>
+                <td>${row.ItemSubGroupDesc || '-'}</td>
+                <td>${row.ItemDesc || '-'}</td>
+                <td class="text-center">${row.TotalQty || 0}</td>
+            </tr>
+        `);
+
+        });
+
+        let totalQty = list.reduce((s, x) => s + Number(x.TotalQty || 0), 0);
+
+        table.push(`
+        <tr>
+            <th colspan="4" class="text-right">Total</th>
+            <th class="text-center">${totalQty}</th>
+        </tr>
+    `);
+
+        table.push('</tbody>');
+        table.push('</table>');
+
+        printContent.push(`
+       <div class="page-container">
+       <div class="page">
+
+        ${table.join('')}
+
+        <div class="print-footer not-print" style="text-align:center;margin-top:20px;">
+            <button onclick="window.print()" 
+            style="padding:8px 25px;background:white;color:black;border:2px solid black;border-radius:4px;cursor:pointer;">
+                Print
+            </button>
+        </div>
+
+      </div>
+      </div>
+      `);
+
+
+        let style = [];
+        style.push(`
+        table { border-collapse: collapse; width: 100%; }
+        table td, table th { border: 1px solid black; padding: 5px; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+    `);
+
+        Print.page({
+            title: reportTitle,
+            style: style,
+            content: printContent,
+            border: false,
+            orientation: 'A4 landscape',
+            isPrint: false
+        });
+
+    }
+
+
+}
+window.tableStoreDashboardSLNo = (value, obj, index) => {
+    return index + 1;
+}
+   

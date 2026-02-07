@@ -1,5 +1,79 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "StoreDashboard";
+}
+<div class="card shadow">
+    <div class="card-header">
+        <span class="card-title">StoreDashboard / View</span>
+       
+    </div>
+    <div class="card-body">
+        <form autocomplete="off" onsubmit="return false;">
+            <div class="row">
+                <div class="col-md-2">
+                    <label>Status</label>
+                    <select id="ListStatus" class="form-control form-control-sm select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                    </select>
+                </div>
+                
+                <div class="col-md-2">
+                    <label>Store</label>
+                    <select id="ListStoreId" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true">
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label>Item Group</label>
+                    <select id="ListItemGroupId" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label>Item SubGroup</label>
+                    <select id="ListItemSubGroupId" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label>Item</label>
+                    <select id="ListItemId" class="select-pick" title="Nothing Selected" data-size="4" data-search="true" data-action="true" multiple>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <div class="btn-group">
+                        
+                        <button type="button" id="btnPrint" class="btn btn-sm btn-filter btn-outline-secondary" title="Print">
+                            <span class="fa fa-print"></span>
+                        </button> 
+                        @* <button type="button" id="btnExport" class="btn btn-sm btn-filter btn-outline-primary" title="Export To Excel">
+                            <span class="fa fa-file-excel"></span>
+                        </button> *@
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-md-12">
+                    <table id="tableStoreDashboard" class="table table-bordered table-hover table-default" border="1" data-sort-name="Code"
+                           data-unique-id="Id">
+                        <thead>
+                            <tr>
+                                <th data-sortable="false" data-formatter="tableStoreDashboardSLNo" class="text-center">#</th> 
+                                <th data-sortable="true" data-field="ItemGroupDesc"> Material </th>
+                                <th data-sortable="true" data-field="ItemSubGroupDesc"> Material Type </th>
+                                <th data-sortable="true" data-field="ItemDesc"> Make </th>                            
+                               <th data-sortable="true" data-field="TotalQty"> Qty </th>
+                               
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>  
+@section Scripts {
+    <script src="~/script/StoreDashboard.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        $(() => {
+            StoreDashboard.init();
+        });
+    </script>
 }
