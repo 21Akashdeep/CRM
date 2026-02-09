@@ -119,20 +119,13 @@ namespace CRMApi.Repository
 
                 }).ToList();
 
-                Option.User = (
-                     from usr in db.User
-                     join ulo in db.UserLocation on usr.Id equals ulo.UserId
-                     join cus in db.Party on ulo.LocationId equals cus.LocationId
+                Option.User = db.User.Where(x => x.Status == App.Status.Enable).Select(x => new
+                {
+                     x.Id,
+                    UserName = x.Name
+                }).ToList();
 
-                     where App.ActiveStatus.Contains(usr.Status)
-                     select new
-                     {
-                         Id = usr.Id,
-                         UserName = usr.Name,
-
-
-                     }
-                 ).ToList();
+               
 
                 objMsg.data = Option;
 
