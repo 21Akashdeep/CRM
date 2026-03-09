@@ -263,7 +263,7 @@ namespace CRMApi.Repository
                
                 objMail.To.Add(User.Email);
                 string EmailBody = $@"                        
-                    <p>Complaint No. <strong>{Task.Code}</strong> has been updated with status <strong>{obj.StatusDesc}</strong>.</p>
+                    <p>Task Code No. <strong>{Task.Code}</strong> has been updated with status <strong>{obj.StatusDesc}</strong>.</p>
                     <p>Remarks: {obj.Remarks}</p>
                 ";
                 string ColorType = obj.Status == App.Status.Completed ? "success" : "warning";
