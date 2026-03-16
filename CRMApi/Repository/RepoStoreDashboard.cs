@@ -48,8 +48,7 @@ namespace CRMApi.Repository
                 Message.Exception(ref objMsg, ex);
             }
             return objMsg;
-        }
-        
+        }      
         public async Task<Message> ListAsync(Voucher? obj, User User)
         {
 
@@ -94,7 +93,6 @@ namespace CRMApi.Repository
 
             return objMsg;
         }
-
         public async Task<Message> GetDataByGroup(Voucher obj, User User)
         {
             Message objMsg = new Message();
@@ -308,6 +306,320 @@ namespace CRMApi.Repository
             {
                 Message.Exception(ref objMsg, ex);
             }
+            return objMsg;
+        }
+        //public async Task<Message> GetItemFullHistoryAsync(int itemId, int storeId)
+        //{
+        //    Message objMsg = new Message();
+
+        //    try
+        //    {
+        //        var history = await
+        //        (
+        //            from vi in db.VoucherItem
+        //            join v in db.Voucher on vi.VoucherId equals v.Id
+        //            join s in db.Store on vi.StoreId equals s.Id
+        //            join u in db.User on v.CreatedBy equals u.Id
+
+        //            where vi.Status == App.Status.Enable
+        //            && v.Status == App.Status.Enable
+        //            && vi.ItemId == itemId
+        //            && vi.StoreId == storeId
+
+        //            group new { vi, v, s, u } by new
+        //            {
+        //                v.Id,
+        //                v.Type,
+        //                v.No,
+        //                v.Date,
+        //                StoreDesc = s.Description,
+        //                CreatedBy = u.Name,
+        //                v.CreatedAt
+        //            } into g
+
+        //            orderby g.Key.Date, g.Key.Id
+
+        //            select new
+        //            {
+        //                VoucherId = g.Key.Id,
+        //                g.Key.Type,
+        //                g.Key.No,
+        //                g.Key.Date,
+        //                g.Key.StoreDesc,
+        //                g.Key.CreatedBy,
+        //                g.Key.CreatedAt,
+
+        //                QtyIn =
+        //                (g.Key.Type == "ReceiptNote"
+        //                || g.Key.Type == "StockIn"
+        //                || g.Key.Type == "Return")
+        //                ? g.Sum(x => x.vi.Qty)
+        //                : 0,
+
+        //                QtyOut =
+        //                (g.Key.Type == "DeliveryNote"
+        //                || g.Key.Type == "StockOut"
+        //                || g.Key.Type == "Transfer"
+        //                || g.Key.Type == "Adjustment")
+        //                ? g.Sum(x => x.vi.Qty)
+        //                : 0
+        //            }
+
+        //        ).ToListAsync();
+
+        //        decimal balance = 0;
+
+        //        var ledger = history.Select(x =>
+        //        {
+        //            balance += x.QtyIn - x.QtyOut;
+
+        //            return new
+        //            {
+        //                x.VoucherId,
+        //                x.Type,
+        //                x.No,
+        //                x.Date,
+        //                x.StoreDesc,
+        //                x.QtyIn,
+        //                x.QtyOut,
+        //                Balance = balance,
+        //                x.CreatedBy,
+        //                x.CreatedAt
+        //            };
+        //        }).ToList();
+
+        //        objMsg.data = ledger;
+
+        //        Message.Success(ref objMsg, "History found");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Message.Exception(ref objMsg, ex);
+        //    }
+
+        //    return objMsg;
+        //}
+        //    public async Task<Message> GetItemFullHistoryAsync(int itemId, int storeId)
+        //    {
+        //        Message objMsg = new Message();
+
+        //        try
+        //        {
+        //            var history = await
+        //            (
+        //                from vi in db.VoucherItem
+        //                join v in db.Voucher on vi.VoucherId equals v.Id
+        //                join s in db.Store on vi.StoreId equals s.Id
+        //                join u in db.User on v.CreatedBy equals u.Id
+
+        //                where vi.Status == App.Status.Enable
+        //                && v.Status == App.Status.Enable
+        //                && vi.ItemId == itemId
+        //                && vi.StoreId == storeId
+
+        //                group new { vi, v, s, u } by new
+        //                {
+        //                    v.Id,
+        //                    v.Type,
+        //                    v.No,
+        //                    v.Date,
+        //                    StoreDesc = s.Description,
+        //                    CreatedBy = u.Name,
+        //                    v.CreatedAt
+        //                } into g
+
+        //                orderby g.Key.Date, g.Key.Id
+
+        //                select new
+        //                {
+        //                    VoucherId = g.Key.Id,
+        //                    g.Key.Type,
+        //                    g.Key.No,
+        //                    g.Key.Date,
+        //                    g.Key.StoreDesc,
+        //                    g.Key.CreatedBy,
+        //                    g.Key.CreatedAt,
+        //                    QtyIn =
+        //(g.Key.Type == "ReceiptNote"
+        //|| g.Key.Type == "StockIn"
+        //|| g.Key.Type == "Return")
+        //? g.Sum(x => x.vi.Qty)
+        //: 0,
+
+        //                    //QtyOut =
+        //                    //(g.Key.Type == "DeliveryNote"
+        //                    //|| g.Key.Type == "StockOut"
+        //                    //|| g.Key.Type == "Transfer"
+        //                    //|| g.Key.Type == "Adjustment")
+        //                    //? g.Sum(x => x.vi.Qty)
+        //                    //: 0
+
+        //                    QtyOut =
+        //(g.Key.Type == "DeliveryNote"
+        //|| g.Key.Type == "StockOut"
+        //|| g.Key.Type == "Transfer"
+        //|| g.Key.Type == "Adjustment")
+        //? Math.Abs(g.Sum(x => x.vi.Qty))
+        //: 0
+
+
+        //                }
+
+        //            ).ToListAsync();
+
+        //            //decimal balance = 0;
+
+        //            //var ledger = history.Select(x =>
+        //            //{
+        //            //    balance += x.QtyIn - x.QtyOut;
+
+        //            //    return new
+        //            //    {
+        //            //        x.VoucherId,
+        //            //        x.Type,
+        //            //        x.No,
+        //            //        x.Date,
+        //            //        x.StoreDesc,
+        //            //        x.QtyIn,
+        //            //        x.QtyOut,
+        //            //        Balance = balance,
+        //            //        x.CreatedBy,
+        //            //        x.CreatedAt
+        //            //    };
+        //            //}).ToList();
+
+        //            decimal balance = 0;
+
+        //            var ledger = history.Select(x =>
+        //            {
+        //                balance += x.QtyIn;
+        //                balance -= x.QtyOut;
+
+        //                return new
+        //                {
+        //                    x.VoucherId,
+        //                    x.Type,
+        //                    x.No,
+        //                    x.Date,
+        //                    x.StoreDesc,
+        //                    x.QtyIn,
+        //                    x.QtyOut,
+        //                    Balance = balance,
+        //                    x.CreatedBy,
+        //                    x.CreatedAt
+        //                };
+        //            }).ToList();
+
+
+        //            objMsg.data = ledger;
+
+        //            Message.Success(ref objMsg, "History found");
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Message.Exception(ref objMsg, ex);
+        //        }
+
+        //        return objMsg;
+        //    }
+
+        public async Task<Message> GetItemFullHistoryAsync(int itemId, int storeId)
+        {
+            Message objMsg = new Message();
+
+            try
+            {
+                var history = await
+                (
+                    from vi in db.VoucherItem
+                    join v in db.Voucher on vi.VoucherId equals v.Id
+                    join s in db.Store on vi.StoreId equals s.Id
+                    join u in db.User on v.CreatedBy equals u.Id
+                    join itm in db.Item on vi.ItemId equals itm.Id
+                    join ig in db.ItemGroup on itm.ItemGroupId equals ig.Id
+                    join isg in db.ItemSubGroup on itm.ItemSubGroupId equals isg.Id
+                    join unit in db.Unit on itm.UnitId equals unit.Id
+                    join p in db.Party on v.PartyId equals p.Id into party
+                    from p in party.DefaultIfEmpty()
+
+                    where vi.Status == App.Status.Enable && v.Status == App.Status.Enable && vi.ItemId == itemId && vi.StoreId == storeId
+                    group new{vi, v,s,u,itm,ig,isg,
+                        PartyName = p != null ? p.Name : null,
+                        UnitName = unit.Description
+                    }
+       by new
+       {
+           v.Id,
+           v.Type,
+           v.No,
+           v.Date,
+           StoreDesc = s.Description,
+           CreatedBy = u.Name,
+           v.CreatedAt
+       } into g
+
+                    orderby g.Key.Date, g.Key.Id
+
+                    select new
+                    {
+                        VoucherId = g.Key.Id,
+                        g.Key.Type,
+                        g.Key.No,
+                        g.Key.Date,
+                        g.Key.StoreDesc,
+                        g.Key.CreatedBy,
+                        g.Key.CreatedAt,
+                        ItemGroup = g.Select(x => x.ig.Description).FirstOrDefault(),
+                        ItemSubGroup = g.Select(x => x.isg.Description).FirstOrDefault(),
+                        ItemName = g.Select(x => x.itm.Description).FirstOrDefault(),
+                        Party = g.Select(x => x.PartyName).FirstOrDefault() ?? "",
+                        Unit = g.Select(x => x.UnitName).FirstOrDefault(),
+
+                        SerialList = g.Select(x => x.vi.SerialNo),
+
+                        QtyIn = (g.Key.Type == "ReceiptNote"|| g.Key.Type == "StockIn"|| g.Key.Type == "Return")? g.Sum(x => x.vi.Qty): 0,
+                        QtyOut =(g.Key.Type == "DeliveryNote"|| g.Key.Type == "StockOut"|| g.Key.Type == "Transfer"|| g.Key.Type == "Adjustment")? Math.Abs(g.Sum(x => x.vi.Qty)): 0
+                    }
+
+                ).ToListAsync();
+
+                decimal balance = 0;
+
+                var ledger = history.Select(x =>
+                {
+                    balance += x.QtyIn;
+                    balance -= x.QtyOut;
+
+                    return new
+                    {
+                        x.VoucherId,
+                        x.Type,
+                        x.No,
+                        x.Date,
+                        x.ItemGroup,
+                        x.ItemSubGroup,
+                        x.ItemName,
+                        x.StoreDesc,
+                        x.Party,
+                        x.Unit,
+                        SerialNo = string.Join(",", x.SerialList.Where(s => !string.IsNullOrEmpty(s)).Distinct()),
+                        x.QtyIn,
+                        x.QtyOut,
+                        Balance = balance,
+                        x.CreatedBy,
+                        x.CreatedAt
+                    };
+                }).ToList();
+
+                objMsg.data = ledger;
+
+                Message.Success(ref objMsg, "Record found");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+
             return objMsg;
         }
     }

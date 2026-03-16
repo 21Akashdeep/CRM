@@ -4,7 +4,7 @@
     static itemGroup = [];
     static itemSubGroup = [];
     static storeDesc = [];
-    static store =[];
+    static store = [];
     static init() {
 
         StoreDashboard.getViewOption();
@@ -43,23 +43,23 @@
                 StoreId: $('#ListStoreId').val()
             };
             StoreDashboard.storeDesc = $('#ListStoreId').val();
-            
 
-            if (obj.StoreId) { 
-            Data.post({
-                url: 'StoreDashboard/Get',
-                data: obj,
-                onSuccess: (response) => {
-                    Message.success(response)
-                    StoreDashboard.mainItem = response.data.ItemInJamshedpur;
-                    let itemGroup = StoreDashboard.itemGroup;
-                    Dropdown.bind({ id: '#ListItemGroupId', data: itemGroup, value: 'Id', text: 'Description' });
-                    Table.add({ id: '#tableStoreDashboard', data: response.data.ItemInJamshedpur });
 
-                }
+            if (obj.StoreId) {
+                Data.post({
+                    url: 'StoreDashboard/Get',
+                    data: obj,
+                    onSuccess: (response) => {
+                        Message.success(response)
+                        StoreDashboard.mainItem = response.data.ItemInJamshedpur;
+                        let itemGroup = StoreDashboard.itemGroup;
+                        Dropdown.bind({ id: '#ListItemGroupId', data: itemGroup, value: 'Id', text: 'Description' });
+                        Table.add({ id: '#tableStoreDashboard', data: response.data.ItemInJamshedpur });
 
-            });
-        }
+                    }
+
+                });
+            }
         });
 
         $('#ListItemGroupId').on('change', () => {
@@ -76,13 +76,13 @@
 
                 Data.post({
                     url: 'StoreDashboard/GetDataByItemGroup',
-                    data:obj,
+                    data: obj,
                     onSuccess: (response) => {
                         StoreDashboard.mainItem = response.data.ItemInJamshedpur;
-                        StoreDashboard.itemSubGroup = response.data.itemSubGroup;                    
+                        StoreDashboard.itemSubGroup = response.data.itemSubGroup;
                         Dropdown.bind({ id: '#ListItemSubGroupId', data: StoreDashboard.itemSubGroup, value: 'Id', text: 'Description' });
                         Table.remove({ id: '#tableStoreDashboard' });
-                        Table.add({ id: '#tableStoreDashboard', data: response.data.ItemInJamshedpur });                    
+                        Table.add({ id: '#tableStoreDashboard', data: response.data.ItemInJamshedpur });
                     }
                 });
 
@@ -103,7 +103,7 @@
                 ListSubGroupId: itemSubGroupId
             }
 
-            if (itemSubGroupId.length>0) {
+            if (itemSubGroupId.length > 0) {
                 Data.post({
                     url: 'StoreDashboard/GetDataByItemGroupItemSubGroup',
                     data: obj,
@@ -119,7 +119,7 @@
                 });
 
 
-               
+
             }
         });
         $('#ListItemId').on('change', () => {
@@ -135,19 +135,19 @@
                 ListItemId: itemId
             }
 
-            if (itemId.length>0) {
+            if (itemId.length > 0) {
                 Data.post({
                     url: 'StoreDashboard/GetDataByItemId',
                     data: obj,
                     onSuccess: (response) => {
-                        StoreDashboard.mainItem = response.data.ItemInJamshedpur;                                        
+                        StoreDashboard.mainItem = response.data.ItemInJamshedpur;
                         Table.remove({ id: '#tableStoreDashboard' });
                         Table.add({ id: '#tableStoreDashboard', data: response.data.ItemInJamshedpur });
                     }
                 });
 
 
-                    
+
             }
         });
 
@@ -162,18 +162,18 @@
                 StoreDashboard.store = response.data.Store;
                 Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
                 Dropdown.bind({ id: '#ListStoreId', data: response.data.Store, value: 'Id', text: 'Description' });
-               
+
 
                 Dropdown.bind
-                
+
             }
         });
     }
     static get({ method = 'Get', onSuccess }) {
         let obj = {
-            ListStatus: $('#ListStatus').val(),          
+            ListStatus: $('#ListStatus').val(),
             StoreId: $('#ListStoreId').val()
-            
+
         };
         Data.post({
             url: `StoreDashboard/${method}`,
@@ -279,10 +279,109 @@
         });
 
     }
+    static edit({ id }) {
 
+        let storeId = $('#ListStoreId').val();
 
+        Data.get({
+            url: `StoreDashboard/GetItemHistory?itemId=${id}&storeId=${storeId}`,
+            onSuccess: (response) => {
+
+                let data = response.data;
+                let d = data[0];
+
+                $('#historyItemGroup').text(d.ItemGroup || '');
+                $('#historyItemSubGroup').text(d.ItemSubGroup || '');
+                $('#historyItemName').text(d.ItemName || '');
+                $('#historyItemGroupBadge').text(d.ItemGroup || '');
+                $('#historyItemSubGroupBadge').text(d.ItemSubGroup || '');
+                $('#historyItemNameBadge').text(d.ItemName || '');
+
+                if (data && data.length > 0) {
+
+                    let group = data[0].ItemGroup || '';
+                    let subGroup = data[0].ItemSubGroup || '';
+                    let item = data[0].ItemName || '';
+
+                    // 🔹 Update modal header
+                    $('#modalItemHistory .modal-title')
+                        .text(`Item History / ${group} / ${subGroup} / ${item}`);
+
+                }
+
+                Table.remove({ id: '#tableItemHistory' });
+
+                Table.add({
+                    id: '#tableItemHistory',
+                    data: data
+                });
+
+                Modal.open({
+                    id: '#modalItemHistory'
+                });
+            }
+        });
+    }
 }
 window.tableStoreDashboardSLNo = (value, obj, index) => {
     return index + 1;
 }
    
+window.tableStoreDashboardAction = (value, obj, index) => {
+    return `
+        <div class="btn-group dropstart">            
+            <button class="btn btn-sm border-0" data-bs-toggle="dropdown">
+                <i class="fa fa-ellipsis-v"></i>
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-lg-end mt-4">
+
+                <li>
+                    <a href="#" class="dropdown-item text-success btn-edit">
+                        <span class="fa fa-edit"></span>&nbsp;&nbsp;View
+                    </a>
+                </li>
+
+            </ul>
+        </div>
+    `;
+}
+
+window.tableStoreDashboardActionEvent = {
+
+    'click .btn-edit': (e, value, obj, index) => {
+        StoreDashboard.edit({ id: obj.ItemId });
+    }
+
+}
+window.tableItemHistorySLNo = (v, obj, index) => {
+    return index + 1;
+};
+window.tableItemHistoryDate = (v, obj) => {
+    return moment(obj.Date).format('DD-MMM-YYYY');
+};
+window.tableItemHistoryCreatedAt = (v, obj) => {
+    return moment(obj.CreatedAt).format('DD-MMM-YYYY HH:mm');
+};
+window.tableItemHistorySerial = (value, obj) => {
+
+    if (!obj.SerialNo) return '';
+
+    let serials = obj.SerialNo
+        .split(',')
+        .map(x => x.trim())
+        .filter(x => x.length > 0);
+
+    return `
+        <ul class="mb-0 ps-3">
+            ${serials.map(s => `<li>${s}</li>`).join('')}
+        </ul>
+    `;
+};
+window.tableItemHistoryQtyIn = (v) => {
+    return `<span class="text-success">${v}</span>`;
+}
+
+window.tableItemHistoryQtyOut = (v) => {
+    return `<span class="text-danger">${v}</span>`;
+}

@@ -41,9 +41,9 @@
                         <button type="button" id="btnPrint" class="btn btn-sm btn-filter btn-outline-secondary" title="Print">
                             <span class="fa fa-print"></span>
                         </button> 
-                        @* <button type="button" id="btnExport" class="btn btn-sm btn-filter btn-outline-primary" title="Export To Excel">
+                         <button type="button" id="btnExport" class="btn btn-sm btn-filter btn-outline-primary" title="Export To Excel">
                             <span class="fa fa-file-excel"></span>
-                        </button> *@
+                        </button> 
                     </div>
                 </div>
             </div>
@@ -55,10 +55,11 @@
                         <thead>
                             <tr>
                                 <th data-sortable="false" data-formatter="tableStoreDashboardSLNo" class="text-center">#</th> 
-                                <th data-sortable="true" data-field="ItemGroupDesc"> Material </th>
-                                <th data-sortable="true" data-field="ItemSubGroupDesc"> Material Type </th>
-                                <th data-sortable="true" data-field="ItemDesc"> Make </th>                            
-                               <th data-sortable="true" data-field="TotalQty"> Qty </th>
+                                <th data-sortable="true" data-field="ItemGroupDesc"> Item Group </th>
+                                <th data-sortable="true" data-field="ItemSubGroupDesc"> Item Sub Group </th>
+                                <th data-sortable="true" data-field="ItemDesc"> Item </th>                            
+                                <th data-sortable="true" data-field="TotalQty"> Qty </th>
+                                <th data-formatter="tableStoreDashboardAction"data-events="tableStoreDashboardActionEvent"class="not-print text-center"><i class="fa-solid fa-list-check"></i></th>
                                
                             </tr>
                         </thead>
@@ -69,6 +70,201 @@
         </form>
     </div>
 </div>  
+
+@* <div id="modalItemHistory" class="modal fade" data-bs-backdrop="static" tabindex="-1">
+
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <span class="modal-title">Item Full History</span>
+
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+
+                    <button type="button" class="btn btn-danger rounded-5"
+                            data-bs-dismiss="modal">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+
+
+            <div class="modal-body p-2">
+
+                <div class="table-responsive">
+
+                    <table id="tableItemHistory"
+                           class="table table-bordered table-hover table-default"
+                           data-unique-id="VoucherId">
+
+                        <thead>
+                            <tr>
+                                <th data-formatter="tableItemHistorySLNo" class="text-center">#</th>
+
+                                <th data-field="Date"
+                                    data-formatter="tableItemHistoryDate"
+                                    data-sortable="true">
+                                    Date
+                                </th>
+
+                                <th data-field="Type" data-sortable="true">Type</th>
+
+                                <th data-field="No" data-sortable="true">Voucher</th>
+
+                                <th data-field="StoreDesc">Store</th>
+
+                                <th data-field="Party">Party</th>
+
+                                <th data-field="Unit">Unit</th>
+                                <th data-field="SerialNo"
+                                    data-formatter="tableItemHistorySerial"
+                                    data-escape="false">
+                                    Serial No
+                                </th>
+                                <th data-field="QtyIn" class="text-success text-center">IN</th>
+                                <th data-field="QtyOut" class="text-danger text-center">OUT</th>
+                                <th data-field="Balance" class="text-center">Balance</th>
+                                <th data-field="CreatedBy">Created By</th>
+                                <th data-field="CreatedAt"
+                                    data-formatter="tableItemHistoryCreatedAt">
+                                    Created At
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> *@
+
+<div id="modalItemHistory" class="modal fade">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen">
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <div class="item-header">
+
+                    <div class="item-title" id="historyItemName"></div>
+
+                    <div class="item-meta">
+                        <span class="dot">•</span>
+                        <span id="historyItemGroup"></span>
+                        <span class="dot">•</span>
+                        <span id="historyItemSubGroup"></span>
+                    </div>
+
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+
+                    <button type="button" class="btn btn-danger rounded-5" data-bs-dismiss="modal">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+
+            </div>
+
+            <div class="modal-body">
+                <div class="card shadow-sm">
+                <table id="tableItemHistory"
+                       class="table table-bordered table-hover"
+                       border="1"
+                       data-unique-id="VoucherId">
+
+                    <thead>
+                        <tr>
+                            <th data-formatter="tableItemHistorySLNo">#</th>
+                            <th data-sortable="true" data-field="Date" data-formatter="tableItemHistoryDate">Date</th>
+                            <th data-sortable="true" data-field="Type">Type</th>
+                            <th data-sortable="true" data-field="No">Voucher</th>
+                            <th data-sortable="true" data-field="StoreDesc">Store</th>
+                            <th data-sortable="true" data-field="Party">Party</th>
+                            <th data-sortable="true" data-field="Unit">Unit</th>
+                            <th data-sortable="true" data-field="SerialNo" data-formatter="tableItemHistorySerial" data-escape="false">Serial No</th>
+                            <th data-sortable="true" data-field="QtyIn" class="text-success">IN</th>
+                            <th data-sortable="true" data-field="QtyOut" class="text-danger">OUT</th>
+                            <th data-sortable="true" data-field="Balance">Balance</th>
+                            <th data-sortable="true" data-field="CreatedBy">Created By</th>
+                            <th data-sortable="true" data-field="CreatedAt" data-formatter="tableItemHistoryCreatedAt">Created At</th>
+                        </tr>
+                    </thead>
+
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+
+
+
+
+
+
+@* <div id="modalItemHistory" class="modal fade">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">
+                    Item History /
+                    <span id="historyItemGroup"></span> /
+                    <span id="historyItemSubGroup"></span> /
+                    <span id="historyItemName"></span>
+                </span>
+
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-5" data-bs-dismiss="modal">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-body">
+
+               
+
+    <table id="tableItemHistory"
+           class="table table-bordered table-hover"
+           border="1"
+           data-unique-id="VoucherId">
+
+        <thead>
+            <tr>
+                <th data-formatter="tableItemHistorySLNo">#</th>
+                <th data-field="Date" data-formatter="tableItemHistoryDate">Date</th>
+                <th data-field="Type">Type</th>
+                <th data-field="No">Voucher</th>
+                <th data-field="StoreDesc">Store</th>
+                <th data-field="Party">Party</th>
+                <th data-field="Unit">Unit</th>
+                <th data-field="SerialNo" data-formatter="tableItemHistorySerial" data-escape="false">Serial No</th>
+                <th data-field="QtyIn" class="text-success">IN</th>
+                <th data-field="QtyOut" class="text-danger">OUT</th>
+                <th data-field="Balance">Balance</th>
+                <th data-field="CreatedBy">Created By</th>
+                <th data-field="CreatedAt" data-formatter="tableItemHistoryCreatedAt">Created At</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+            </div>
+            </div>
+            </div> *@
 @section Scripts {
     <script src="~/script/StoreDashboard.js" asp-append-version="true"></script>
     <script type="text/javascript">
