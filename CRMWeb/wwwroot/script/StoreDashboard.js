@@ -5,6 +5,8 @@
     static itemSubGroup = [];
     static storeDesc = [];
     static store = [];
+    static historyItemId = 0;
+    static historyStoreId = 0;
     static init() {
 
         StoreDashboard.getViewOption();
@@ -151,6 +153,50 @@
             }
         });
 
+        $('#btnHistorySearch').on('click', () => {
+
+            StoreDashboard.getHistory({
+                method: 'GetItemHistory'
+            });
+
+        });
+
+
+        $('#btnHistoryPrint').on('click', () => {
+
+            StoreDashboard.getHistory({
+                method: 'PrintItemHistory',
+                onSuccess: (response) => {
+
+                    Table.add({
+                        id: '#tableItemHistory',
+                        data: response.data,
+                        isPrint: true
+                    });
+
+                }
+            });
+
+        });
+
+
+        $('#btnHistoryExport').on('click', () => {
+
+            StoreDashboard.getHistory({
+                method: 'ExportItemHistory',
+                onSuccess: (response) => {
+
+                    Export.Base64ToExcel({
+                        base64: response.base64,
+                        fileName: 'ItemHistory'
+                    });
+
+                }
+            });
+
+        });
+
+
     }
     static getViewOption() {
         Data.get({
@@ -162,9 +208,6 @@
                 StoreDashboard.store = response.data.Store;
                 Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
                 Dropdown.bind({ id: '#ListStoreId', data: response.data.Store, value: 'Id', text: 'Description' });
-
-
-                Dropdown.bind
 
             }
         });
@@ -283,44 +326,74 @@
 
         let storeId = $('#ListStoreId').val();
 
+        StoreDashboard.historyItemId = id;
+        StoreDashboard.historyStoreId = storeId;
+
+        StoreDashboard.getHistoryOption();
+
+        StoreDashboard.getHistory({
+            method: 'GetItemHistory'
+        });
+
+    }
+    static getHistoryOption() {
+
         Data.get({
-            url: `StoreDashboard/GetItemHistory?itemId=${id}&storeId=${storeId}`,
+            url: 'StoreDashboard/GetHistoryViewOption',
+            onSuccess: (response) => {
+
+                Dropdown.bind({
+                    id: '#HistoryVoucherType',
+                    data: response.data.VoucherType,
+                    value: 'Value',
+                    text: 'Description'
+                });
+
+            }
+        });
+
+    }
+    static getHistory({ method = 'GetItemHistory', onSuccess }) {
+
+        let obj = {
+            ItemId: StoreDashboard.historyItemId,
+            StoreId: StoreDashboard.historyStoreId,
+            SerialNo: $('#HistorySerialNo').val(),
+            VoucherType: $('#HistoryVoucherType').val(),
+            DateRange: $('#HistoryDateRange').val()
+        };
+
+        Data.get({
+                url: `StoreDashboard/${method}?itemId=${obj.ItemId}&storeId=${obj.StoreId}`,
+            data: obj,
             onSuccess: (response) => {
 
                 let data = response.data;
-                let d = data[0];
-
-                $('#historyItemGroup').text(d.ItemGroup || '');
-                $('#historyItemSubGroup').text(d.ItemSubGroup || '');
-                $('#historyItemName').text(d.ItemName || '');
-                $('#historyItemGroupBadge').text(d.ItemGroup || '');
-                $('#historyItemSubGroupBadge').text(d.ItemSubGroup || '');
-                $('#historyItemNameBadge').text(d.ItemName || '');
 
                 if (data && data.length > 0) {
 
-                    let group = data[0].ItemGroup || '';
-                    let subGroup = data[0].ItemSubGroup || '';
-                    let item = data[0].ItemName || '';
+                    let d = data[0];
 
-                    // 🔹 Update modal header
-                    $('#modalItemHistory .modal-title')
-                        .text(`Item History / ${group} / ${subGroup} / ${item}`);
+                    $('#historyItemGroup').text(d.ItemGroup || '');
+                    $('#historyItemSubGroup').text(d.ItemSubGroup || '');
+                    $('#historyItemName').text(d.ItemName || '');
 
+                    Table.remove({ id: '#tableItemHistory' });
+
+                    Table.add({
+                        id: '#tableItemHistory',
+                        data: data
+                    });
+
+                    if (!onSuccess)
+                        Modal.open({ id: '#modalItemHistory' });
+
+                    if (onSuccess)
+                        onSuccess(response);
                 }
-
-                Table.remove({ id: '#tableItemHistory' });
-
-                Table.add({
-                    id: '#tableItemHistory',
-                    data: data
-                });
-
-                Modal.open({
-                    id: '#modalItemHistory'
-                });
             }
         });
+
     }
 }
 window.tableStoreDashboardSLNo = (value, obj, index) => {

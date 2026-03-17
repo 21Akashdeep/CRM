@@ -138,18 +138,61 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
 
+        //[HttpGet]
+        //public async Task<IActionResult> GetItemHistory(int itemId, int storeId)
+        //{
+        //    Message objMsg = new Message();
+
+        //    try
+        //    {
+        //        var User = Util.RequestVerify(
+        //            new Request { HttpRequest = Request, ActionType = ActionType.View },
+        //            db,
+        //            ref objMsg
+        //        );
+
+        //        if (User == null) return Ok(objMsg);
+
+        //        objMsg = await RepoStoreDashboard.GetItemFullHistoryAsync(itemId, storeId);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Message.Exception(ref objMsg, ex);
+        //    }
+
+        //    return Ok(objMsg);
+        //}
+
         [HttpGet]
-        public async Task<IActionResult> GetItemHistory(int itemId, int storeId)
+        public async Task<IActionResult> GetHistoryViewOption()
         {
             Message objMsg = new Message();
-
             try
             {
                 var User = Util.RequestVerify(
                     new Request { HttpRequest = Request, ActionType = ActionType.View },
-                    db,
-                    ref objMsg
-                );
+                    db, ref objMsg);
+
+                if (User == null) return Ok(objMsg);
+
+                objMsg = await RepoStoreDashboard.GetHistoryViewOptionAsync();
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetItemHistory(int itemId, int storeId)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(
+                    new Request { HttpRequest = Request, ActionType = ActionType.View },
+                    db, ref objMsg);
 
                 if (User == null) return Ok(objMsg);
 
@@ -159,7 +202,48 @@ namespace CRMApi.Controllers
             {
                 Message.Exception(ref objMsg, ex);
             }
+            return Ok(objMsg);
+        }
 
+        [HttpGet]
+        public async Task<IActionResult> PrintItemHistory(int itemId, int storeId)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(
+                    new Request { HttpRequest = Request, ActionType = ActionType.Print },
+                    db, ref objMsg);
+
+                if (User == null) return Ok(objMsg);
+
+                objMsg = await RepoStoreDashboard.PrintItemHistoryAsync(itemId, storeId);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportItemHistory(int itemId, int storeId)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(
+                    new Request { HttpRequest = Request, ActionType = ActionType.Export },
+                    db, ref objMsg);
+
+                if (User == null) return Ok(objMsg);
+
+                objMsg = await RepoStoreDashboard.ExportItemHistoryAsync(itemId, storeId);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
             return Ok(objMsg);
         }
     }
