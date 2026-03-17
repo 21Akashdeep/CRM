@@ -8,6 +8,7 @@ namespace CRMApi.Repository
     {
         private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
+       
         public RepoVoucher(DBCRM _db)
         {
             db = _db;
@@ -62,6 +63,7 @@ namespace CRMApi.Repository
                 from vci in db.VoucherItem
                 join vc in db.Voucher on vci.VoucherId equals vc.Id
                 join itm in db.Item on vci.ItemId equals itm.Id
+               
                 join st in db.Store on vci.StoreId equals st.Id
                 join sts in db.Setting on new { Category = App.SettingName.Status, Value = vci.Status.ToString() } equals new { sts.Category, sts.Value }
                 join cby in db.User on vci.CreatedBy equals cby.Id
@@ -251,6 +253,63 @@ namespace CRMApi.Repository
             {
                 Message.Exception(ref objMsg, ex);
             }
+            return objMsg;
+        }
+        public async Task<Message> GetItemDetailsAsync(Voucher obj, User User)
+        {
+            Message objMsg = new Message();
+
+            obj ??= new Voucher();
+            obj.ListStatus = obj.ListStatus.Any() ? obj.ListStatus : App.ActiveStatus;
+            //var voucher = await db.Voucher.Where(x => obj.ListStatus.Contains(x.Status)).ToListAsync();
+
+            //if(obj.Id > 0)
+            //{
+            //    voucher = voucher.Where(x => x.Id == obj.Id).ToList();
+            //}
+
+            var dbVoucherItemQuery = db.VoucherItem
+                .Where(vci => obj.ListStatus.Contains(vci.Status))
+                .AsQueryable();
+
+           
+                var voucherItemDetails = await (
+
+                    from vci in dbVoucherItemQuery
+                    join vc in db.Voucher on vci.VoucherId equals vc.Id
+                    join it in db.Item on vci.ItemId equals it.Id
+                    join ut in db.Unit on it.UnitId equals ut.Id
+                    join isg in db.ItemSubGroup on it.ItemSubGroupId equals isg.Id
+                    join ig in db.ItemGroup on it.ItemGroupId equals ig.Id
+
+                    where vc.Date <= obj.ToDate
+                          && vci.StoreId == obj.StoreId                       
+                          && obj.ListStatus.Contains(vc.Status)
+
+                    group new { vci, it, ut } by new
+                    {
+                        vci.ItemId,
+                        it.Description,
+                       unitDesc = ut.Description,
+                       
+                    }
+                    into g
+
+                    where g.Sum(x => x.vci.Qty) > 0
+
+                    select new
+                    {
+                        ItemId = g.Key.ItemId,
+                        ItemDesc = g.Key.Description,
+                        UnitDesc = g.Key.unitDesc,
+                        Qty = g.Sum(x => x.vci.Qty)
+                        
+                    }
+
+                ).ToListAsync();
+
+                objMsg.data = voucherItemDetails;
+                
             return objMsg;
         }
         public async Task<Message> UpdateAsync(Voucher obj, User User)

@@ -172,7 +172,7 @@
                             <table id="tableGdnItem" class="table table-bordered table-hover table-default line-item" data-search="false">
                                 <thead>
                                     <tr>
-                                        <th colspan="5">
+                                        <th colspan="7">
                                             Gdn Item
                                             <div class="btn-group float-end">
                                                 <button type="button" class="btn btn-sm btn-primary rounded-5 me-e" onclick="Gdn.addGdnItem()">
@@ -187,6 +187,8 @@
                                     <tr>
                                         <th data-formatter="tableGdnItemSlNo" class="text-center">#</th>
                                         <th class="desc" data-formatter="tableGdnItemDesc" data-events="tableGdnItemDescEvent">Description</th>
+                                        <th class="qty" data-formatter="tableItemUnitDesc" data-events="tableGdnItemDescEvent">Unit</th>
+                                        <th class="qty" data-formatter="tableItemBalQty" data-events="tableGdnItemDescEvent">Avalaible Qty</th>
                                         <th class="qty" data-formatter="tableTaskSerialNo" data-events="tableGdnSerialNoDescEvent">SerialNo</th>
                                         <th class="qty" data-formatter="tableGdnExpiryOn" data-events="tableGdnExpiryOnEvent">ExpiryOn</th>
                                         <th class="qty" data-formatter="tableGdnItemQty" data-events="tableGdnItemQtyEvent">Qty</th>

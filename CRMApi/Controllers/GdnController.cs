@@ -99,14 +99,35 @@ namespace CRMApi.Controllers
                 if (User == null) return Ok(objMsg);
 
                 obj.Type = "DeliveryNote";   // GDN Type
-                objMsg = await RepoVoucher.AddAsync(obj, User);
+                objMsg = await RepoGdn.AddAsync(obj, User);
             }
             catch (Exception ex)
             {
                 Message.Exception(ref objMsg, ex);
             }
             return Ok(objMsg);
-        }   
+        }
+        [HttpPost]
+        public async Task<IActionResult> getItem([FromBody] Voucher obj)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(
+                    new Request { HttpRequest = Request, ActionType = ActionType.Export },
+                    db, ref objMsg);
+
+                if (User == null) return Ok(objMsg);
+
+                
+                objMsg = await RepoGdn.GetItemDetailsAsync(obj, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
         [HttpGet]
         public async Task<IActionResult> Edit(int Id)
         {

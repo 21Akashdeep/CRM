@@ -8,6 +8,7 @@ namespace CRMApi.Services
         public string? statusText { get; set; }
         public dynamic data { get; set; } = new List<string>();
         public dynamic? obj { get; set; } = new { };
+        public dynamic? item { get; set; } = new { };
         public string? base64 { get; set; }
         public string? filePath { get; set; }
         public List<int> tranId { get; set; } = new List<int>();

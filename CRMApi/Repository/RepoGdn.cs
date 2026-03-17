@@ -15,10 +15,12 @@ namespace CRMApi.Repository
     {
         private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
+        private readonly RepoVoucher repoVoucher;
 
         public RepoGdn(DBCRM _db)
         {
             db = _db;
+            repoVoucher = new RepoVoucher(db);
         }
 
         public async Task<Message> GetViewOptionAsync()
@@ -62,10 +64,10 @@ namespace CRMApi.Repository
                     && !string.IsNullOrEmpty(x.No)
                     && x.Type == "DeliveryNote")
                       .Select(x => new
-                    {
-                       x.Id,
-                       x.No,
-                    }).ToListAsync();
+                      {
+                          x.Id,
+                          x.No,
+                      }).ToListAsync();
 
                 objMsg.data = Option;
                 Message.Success(ref objMsg, "Record found");
@@ -77,7 +79,7 @@ namespace CRMApi.Repository
             return objMsg;
         }
 
-        public async Task<Message> GetAddOptionAsync()
+        public async Task<Message> GetAddOptionAsync()  
         {
             Message objMsg = new Message();
             try
@@ -130,11 +132,11 @@ namespace CRMApi.Repository
                     join unt in db.Unit on itm.UnitId equals unt.Id
                     select new
                     {
-                        itm.Id,
+                       ItemId = itm.Id,
                         itm.Code,
                         itm.Name,
                         itm.Description,
-                        itm.UnitId,
+                        UnitId =itm.UnitId,
                         UnitDesc = unt.Description,
                     }
                 ).ToListAsync();
@@ -161,9 +163,80 @@ namespace CRMApi.Repository
         public async Task<List<Voucher>> ListAsync(Voucher? obj, User User)
         {
             obj ??= new Voucher();
-            obj.ListType = new List<string> {"DeliveryNote"};
+            obj.ListType = new List<string> { "DeliveryNote" };
             var voucher = await new RepoVoucher(db).ListAsync(obj, User);
             return voucher;
+        }
+        public async Task<Message> AddAsync(Voucher obj, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var voucherIData = await db.VoucherItem
+                    .Where(x => App.ActiveStatus.Contains(x.Status))
+                    .ToListAsync();
+
+                foreach (var item in obj.VoucherItem)
+                {
+                    var availableQty = voucherIData
+                   .Where(x => x.ItemId == item.ItemId
+                    && x.SerialNo == item.SerialNo
+                    && x.StoreId == obj.StoreId
+                    && x.CreatedAt >= obj.FromDate
+                    && x.CreatedAt <= obj.Date)
+                   .Sum(x => x.Qty);
+
+                    if (item.Qty > availableQty)
+                    {
+                        objMsg.status = Message.Type.error;
+                        objMsg.statusText = $"Qty for Serial No {item.SerialNo} cannot exceed available qty ({availableQty}).";
+                        return objMsg;
+                    }
+                }
+
+                obj.CreatedBy = User.Id;
+                obj.CreatedAt = DateTime.Now;
+                obj.UpdatedBy = User.Id;
+                obj.UpdatedAt = DateTime.Now;
+
+                obj.VoucherItem.ForEach(vi =>
+                {
+                    vi.Qty = -(vi.Qty);
+                    vi.StoreId = obj.StoreId;
+                    vi.CreatedBy = User.Id;
+                    vi.CreatedAt = DateTime.Now;
+                    vi.UpdatedBy = User.Id;
+                    vi.UpdatedAt = DateTime.Now;
+                });
+
+                db.Add(obj);
+
+                int result = await db.SaveChangesAsync();
+                Message.Add(ref objMsg, result);
+
+                if (objMsg.status == Message.Type.success)
+                {
+                    db.Entry(obj).Reload();
+
+                    foreach (var vi in obj.VoucherItem)
+                    {
+                        vi.VoucherId = obj.Id;
+                    }
+
+                    await db.SaveChangesAsync();
+
+                    objMsg.obj = (await ListAsync(new Voucher
+                    {
+                        ListId = new List<int> { obj.Id }
+                    }, User)).FirstOrDefault();
+                }
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+
+            return objMsg;
         }
 
         public async Task<Message> EditAsync(int Id, User User)
@@ -184,6 +257,7 @@ namespace CRMApi.Repository
                 }
 
                 objMsg.data = (await GetAddOptionAsync()).data;
+                
                 Message.Success(ref objMsg, "Record found");
             }
             catch (Exception ex)
@@ -231,14 +305,14 @@ namespace CRMApi.Repository
                     co.Date,
                     Party = co.PartyDesc,
                     co.ConName,
-                    Status= co.StatusDesc,
+                    Status = co.StatusDesc,
                     co.CreatedByName,
                     co.CreatedAt,
                     co.UpdatedByName,
                     co.UpdatedAt
                 }).ToList();
 
-                
+
                 DataTable objDataTable = Util.ListToDataTable(Gdn);
 
                 objCompany.SheetName = "GDN List";
@@ -254,5 +328,20 @@ namespace CRMApi.Repository
 
             return objMsg;
         }
+
+        public async Task<Message> GetItemDetailsAsync(Voucher obj, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                objMsg.data = await repoVoucher.GetItemDetailsAsync(obj, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
     }
 }
+

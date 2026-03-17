@@ -86,6 +86,10 @@
             Modal.close({ id: '#modalGdnItemScan' });
         });
 
+        $('#Gdn-Store').on('change', () => {
+            Gdn.getItemDetails();
+        });
+
         $('#Gdn-BtnSave').on('click', () => {
             if (!Field.isMandatory({ class: '.required' })) {
                 return;
@@ -152,7 +156,7 @@
     static newEntry() {
         Gdn.getAddOption({
             onSuccess: (response) => {
-                Gdn.item = response.data.Item;
+                //Gdn.item = response.data.Item;
                 Gdn.reasonCode = response.data.ReasonCode;
                 let store = response.data.Store;
                 let state = response.data.State;
@@ -172,8 +176,34 @@
         Dropdown.bind({ id: '#GdnScan-ItemId', data: Gdn.item, value: 'Id', text: 'Description' });
         $('#Gdn-ExpiryOn').val('');
     }
+    static getItemDetails() {
 
-    static addGdnItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, isScanned = false, callback } = { }) {
+        let obj = {
+            StoreId: $('#Gdn-Store').val(),
+            FromDate: DateTime.json($('#DateRange').val().split('|')[0]),
+            Todate: DateTime.json($('#DateRange').val().split('|')[1]) 
+
+        };
+
+        Data.post({
+            url: 'Gdn/getItem',
+            data: obj,
+            onSuccess: (response) => {
+
+                if (!response.data || response.data.length === 0)
+                    return;
+
+                Gdn.item = response.data.data;
+                
+            }
+        });
+    }
+
+    static addGdnItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, isScanned = false, callback } = {}) {
+
+        
+
+
         let obj = {
             GdnId: 0,
             ItemId: itemId,
@@ -185,6 +215,7 @@
             ExpiryOn: expiryOn,
             Qty: qty,
             Rate: 0,
+            BalQty: 0, 
             UnitDesc: null,
             Amount: 0,
             DiscountAmount: 0,
@@ -218,7 +249,7 @@
         let tfoot = `
             <tfoot>
                 <tr>
-                    <th class="text-right" colspan="4">Total</th>
+                    <th class="text-right" colspan="6">Total</th>
                     <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
                 </tr>
             </tfoot>
@@ -246,7 +277,7 @@
             url: `Gdn/Edit?Id=${id}`,
             onSuccess: (response) => {
                 let option = response.data;
-                Gdn.item = option.Item;
+                //Gdn.item = option.Item;
                 Gdn.reasonCode = response.data.ReasonCode;
                 let store = response.data.Store;
                 let state = response.data.State;
@@ -266,15 +297,17 @@
                 Modal.open({ id: '#modalGdn', title: title, action: action, obj: obj });
                 Table.add({ id: '#tableGdnItem', data: obj.VoucherItem, selectPick: true });
                 Gdn.sumOfTotalGdnItem();
-
-                setTimeout(() => {
-                    OnlineApi.pinCode({
-                        pinCode: obj.ConPincode,
-                        callback: (data) => {
-                            Dropdown.bind({ id: '#Gdn-ConPostOffice', data: data.obj.PostOfficeList, value: 'Name', text: 'Name', isEditable: true, initialValue: [obj.ConPostOffice] });
-                        }
-                    });
-                }, 100);
+                let pincode = $('#Gdn-ConPinCode').val();
+                if (pincode.length == 6) {
+                    setTimeout(() => {
+                        OnlineApi.pinCode({
+                            pinCode: obj.ConPincode,
+                            callback: (data) => {
+                                Dropdown.bind({ id: '#Gdn-ConPostOffice', data: data.obj.PostOfficeList, value: 'Name', text: 'Name', isEditable: true, initialValue: [obj.ConPostOffice] });
+                            }
+                        });
+                    }, 100);
+                }
             }
         });
     }
@@ -588,7 +621,7 @@ window.tableGdnItemSlNo = (value, obj, index) => {
 
 window.tableGdnItemDesc = (value, obj, index) => {
     return `
-        ${Dropdown.html({ id: `GdnItem_${index}`, className: 'gdn-item', data: Gdn.item, value: 'Id', text: 'Description', initialValue: [obj.ItemId], json: true, parent: '.modal' })}
+        ${Dropdown.html({ id: `GdnItem_${index}`, className: 'gdn-item', data: Gdn.item, value: 'ItemId', text: 'ItemDesc', initialValue: [obj.ItemId], json: true, parent: '.modal' })}
         <input type="text" id="GdnItemRemarks_${index}" class="form-control form-control-sm mb-0 mt-1 gdn-item-remarks" maxlength="100" placeholder="Remarks" value="${obj.Remarks ?? ""}">
     `;
 }
@@ -597,6 +630,12 @@ window.tableGdnItemDescEvent = {
     'change .gdn-item': (e, value, obj, index) => {
         obj.ItemId = !Field.isNullOrEmpty(e.currentTarget.value) ? parseInt(e.currentTarget.value) : 0;
         let itemJson = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
+        // find item from API result
+        let item = Gdn.item.find(x => x.ItemId == obj.ItemId);
+
+        // set balance qty
+        obj.BalQty = item ? item.Qty : 0;
+
         obj.UnitDesc = itemJson?.UnitDesc ?? null;
 
         obj.Rate = itemJson?.Rate ?? 0;
@@ -634,12 +673,38 @@ window.tableGdnItemQty = (value, obj, index) => {
 
 window.tableGdnItemQtyEvent = {
     'input .gdn-item-qty': (e, value, obj, index) => {
-        obj.Qty = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
+
+        let qty = parseFloat(e.currentTarget.value || 0);
+        let balQty = parseFloat(obj.BalQty || 0);
+
+        // minus qty check
+        if (qty < 0) {
+            Message.error({ statusText: 'Qty cannot be negative' });
+            e.currentTarget.value = obj.Qty || 0;
+            return;
+        }
+
+        // available qty check
+        if (qty > balQty) {
+            Message.error({ statusText: `Qty cannot be greater than available qty (${balQty})` });
+            e.currentTarget.value = obj.Qty || 0;
+            return;
+        }
+
+        obj.Qty = qty;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
-        Table.updateByIndex({ id: '#tableGdnItem', index: index, obj: obj, value: obj.Qty, event: e });
+
+        Table.updateByIndex({
+            id: '#tableGdnItem',
+            index: index,
+            obj: obj,
+            value: obj.Qty,
+            event: e
+        });
+
         Gdn.sumOfTotalGdnItem();
     }
-}
+};
 
 window.tableGdnItemAmount = (value, obj, index) => {
     return `
@@ -696,7 +761,13 @@ window.tableGdnStoreDescEvent = {
 window.tableTaskSerialNo = (value, obj, index) => {
     return `<input type="text" id="GdnSerialNo_${index}" class="form-control form-control-sm mb-0 gdn-item" value="${obj.SerialNo}" maxlength="150" />`;
 }
+window.tableItemUnitDesc = (value, obj, index) => {
+    return `<span id="GdnItemUnitDesc_${index}">${obj.UnitDesc ?? ''}</span>`;
+}
 
+window.tableItemBalQty = (value, obj, index) => {
+    return `<span id="GdnItemBalQty_${index}">${obj.BalQty ?? 0}</span>`;
+}
 window.tableGdnSerialNoDescEvent = {
     'input .gdn-item': (e, value, obj, index) => {
         obj.SerialNo = e.currentTarget.value || "";
@@ -739,234 +810,6 @@ window.tableGdnExpiryOnEvent = {
             index: index,
             obj: obj,
             value: obj.ExpiryOn,
-            event: e
-        });
-    }
-};
-window.tableRtnRefNoAndDate = (value, obj, index) => {
-    return `
-        <div>${obj.RefNo ?? ''}</div>
-        <div>${obj.RefDate ? moment(obj.RefDate).format('DD-MMM-YYYY') : ''}</div>
-    `;
-};
-
-window.tableRtnSlNo = (value, obj, index) => {
-    return index + 1;
-}
-
-window.tableRtnDate = (value, obj, index) => {
-    return moment(obj.Date).format('DD-MMM-YYYY');
-}
-
-window.tableRtnStatus = (value, obj, index) => {
-    return `<div class="${obj.StatusCss}">${obj.StatusDesc}</div>`;
-}
-
-window.tableRtnCreatedByAndAt = (value, obj, index) => {
-    return `
-        <div>${obj.CreatedByName}</div>
-        <div>${moment(obj.CreatedAt).format('DD-MMM-YYYY HH:mm')}</div>
-    `;
-}
-
-window.tableRtnUpdatedByAndAt = (value, obj, index) => {
-    return `
-        <div>${obj.UpdatedByName}</div>
-        <div>${DateTime.dateTime(obj.UpdatedAt)}</div>
-    `;
-}
-
-window.tableRtnAction = (value, obj, index) => {
-    let actionBtn = `
-        <div class="btn-group dropstart">            
-            <button class="btn btn-sm border-0" data-bs-toggle="dropdown"><i class="fa fa-ellipsis-v"></i></button>
-            <ul class="dropdown-menu dropdown-menu-lg-end mt-4">
-                ${obj.IsEdit ?
-            `<li>
-                        <a href="#" class="dropdown-item text-success-100 btn-edit" title="View / Edit">
-                            <span class="fa fa-edit text-success-100"></span>&nbsp;&nbsp;View / Edit
-                        </a>
-                    </li>` : ``
-        }
-                ${obj.IsDuplicate ?
-            `<li>
-                        <a href="#" class="dropdown-item text-primary-100 btn-duplicate" title="Duplicate">
-                            <span class="fa fa-copy text-primary-100"></span>&nbsp;&nbsp;Duplicate
-                        </a>
-                    </li>` : ``
-        }
-                ${obj.IsDelete ?
-            `<li>
-                        <a href="#" class="dropdown-item text-danger-100 btn-delete" title="Delete">
-                            <span class="fa fa-trash text-danger-100"></span>&nbsp;&nbsp;Delete
-                        </a>
-                    </li>` : ``
-        }
-                ${obj.IsEnable ?
-            `<li>
-                        <a href="#" class="dropdown-item text-success-100 btn-enable" title="Enable">
-                            <span class="fa fa-toggle-on text-success-100"></span>&nbsp;&nbsp;Enable
-                        </a>
-                    </li>` : ``
-        }
-         ${obj.IsPrint ?
-            `
-            <li>
-                <a href="#" class="dropdown-item text-primary-100 btn-print" title="Print">
-                    <span class="fa fa-print text-primary-100"></span>&nbsp;&nbsp;Print
-                </a>
-            </li>
-        ` : ``
-        }
-            </ul>
-        </div>
-    `;
-    return actionBtn;
-}
-
-window.tableRtnConAddress = (value, obj, index) => {
-    const parts = [
-        obj.ConAdd1,
-        obj.ConAdd2,
-        obj.ConPostOffice,
-        obj.ConPincode,
-        obj.ConStateName
-    ]
-        .filter(x => x && x.trim() !== "")
-        .map(x => x.trim());
-
-    if (parts.length === 0) return "";
-
-    let lines = [];
-    for (let i = 0; i < parts.length; i += 2) {
-        lines.push(parts.slice(i, i + 2).join(", "));
-    }
-
-    return lines.join("<br>");
-};
-
-window.tableRtnActionEvent = {
-    'click .btn-edit': (e, value, obj, index) => {
-        Rtn.edit({ id: obj.Id });
-    },
-    'click .btn-duplicate': (e, value, obj, index) => {
-        Rtn.edit({ id: obj.Id, action: 'Add' });
-    },
-    'click .btn-print': (e, value, obj, index) => {
-        Grn.print({ obj: { ListId: [obj.Id] } });
-    },
-    'click .btn-delete': (e, value, obj, index) => {
-        Rtn.delete({ id: obj.Id });
-    }
-}
-
-
-window.tableRtnItemSlNo = (value, obj, index) => {
-    return index + 1;
-}
-
-window.tableRtnItemDesc = (value, obj, index) => {
-    return `
-        ${Dropdown.html({ id: `RtnItem_${index}`, className: 'rtn-item', data: Rtn.item, value: 'Id', text: 'Description', initialValue: [obj.ItemId], json: true, parent: '.modal' })}
-        <input type="text" id="RtnItemRemarks_${index}" class="form-control form-control-sm mb-0 mt-1 rtn-item-remarks" maxlength="100" placeholder="Remarks" value="${obj.Remarks ?? ""}">
-    `;
-}
-
-window.tableRtnItemDescEvent = {
-    'change .rtn-item': (e, value, obj, index) => {
-        obj.ItemId = !Field.isNullOrEmpty(e.currentTarget.value) ? parseInt(e.currentTarget.value) : 0;
-        let itemJson = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
-        obj.UnitDesc = itemJson?.UnitDesc ?? null;
-
-        obj.Rate = itemJson?.Rate ?? 0;
-        obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
-
-        Table.updateByIndex({ id: '#tableRtnItem', index: index, obj: obj, value: obj.ItemId, event: e });
-        Rtn.sumOfTotalRtnItem();
-    },
-    'input .rtn-item-remarks': (e, value, obj, index) => {
-        obj.Remarks = e.currentTarget.value;
-        Table.updateByIndex({ id: '#tableRtnItem', index: index, obj: obj, value: obj.Remarks, event: e });
-    }
-}
-
-window.tableRtnItemRate = (value, obj, index) => {
-    return `
-        <input type="text" id="RtnItemRate_${index}" class="form-control form-control-sm text-right rtn-item-rate" value="${obj.Rate}" oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})">
-    `;
-}
-
-window.tableRtnItemRateEvent = {
-    'input .rtn-item-rate': (e, value, obj, index) => {
-        obj.Rate = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
-        obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
-        Table.updateByIndex({ id: '#tableRtnItem', index: index, obj: obj, value: obj.Rate, event: e });
-        Rtn.sumOfTotalRtnItem();
-    }
-}
-
-window.tableRtnItemQty = (value, obj, index) => {
-    return `
-        <input type="text" id="RtnItemQty_${index}" class="form-control form-control-sm text-right rtn-item-qty" value="${obj.Qty}" oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})">
-    `;
-}
-
-window.tableRtnItemQtyEvent = {
-    'input .rtn-item-qty': (e, value, obj, index) => {
-        obj.Qty = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
-        obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
-        Table.updateByIndex({ id: '#tableRtnItem', index: index, obj: obj, value: obj.Qty, event: e });
-        Rtn.sumOfTotalRtnItem();
-    }
-}
-
-window.tableRtnItemAmount = (value, obj, index) => {
-    return `
-        <input type="text" id="RtnItemAmt_${index}" class="form-control form-control-sm text-right rtn-item-amount" value="${obj.Amount}" oninput="this.value = _Number.validate({value: this.value, dp: 2, min: 0, max: 999999999999})">
-    `;
-}
-
-window.tableRtnItemAmountEvent = {
-    'input .rtn-item-amount': (e, value, obj, index) => {
-        obj.Amount = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
-        Table.updateByIndex({ id: '#tableRtnItem', index: index, obj: obj, value: obj.Amount, event: e });
-        Rtn.sumOfTotalRtnItem();
-    }
-}
-
-window.tableRtnReasonCodeDesc = (value, obj, index) => {
-    return `
-        ${Dropdown.html({ id: `RtnReasonCode_${index}`, className: 'rtn-item', data: Rtn.reasonCode, value: 'Value', text: 'Description', initialValue: [obj.ReasonCode], json: true, parent: '.modal' })}
-    `;
-}
-
-window.tableRtnReasonCodeDescEvent = {
-    'change .rtn-item': (e, value, obj, index) => {
-        obj.ReasonCode = e.currentTarget.value || "";
-        Table.updateByIndex({
-            id: '#tableRtnItem',
-            index: index,
-            obj: obj,
-            value: obj.ReasonCode,
-            event: e
-        });
-    }
-};
-
-window.tableRtnStoreDesc = (value, obj, index) => {
-    return `
-        ${Dropdown.html({ id: `RtnStore_${index}`, className: 'rtn-item', data: Rtn.store, value: 'Id', text: 'Description', initialValue: [obj.StoreId], json: true, parent: '.modal' })}
-    `;
-}
-
-window.tableRtnStoreDescEvent = {
-    'change .rtn-item': (e, value, obj, index) => {
-        obj.StoreId = !Field.isNullOrEmpty(e.currentTarget.value) ? parseInt(e.currentTarget.value) : 0;
-        Table.updateByIndex({
-            id: '#tableRtnItem',
-            index: index,
-            obj: obj,
-            value: obj.StoreId,
             event: e
         });
     }
@@ -1021,22 +864,6 @@ window.tableGdnItemQty = (value, obj, index) => {
     `;
 }
 
-window.tableGdnItemQtyEvent = {
-    'input .gdn-item-qty': (e, value, obj, index) => {
-        obj.Qty = e.currentTarget.value || '0';
-        obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
-
-        Table.updateByIndex({
-            id: '#tableGdnItem',
-            index: index,
-            obj: obj,
-            value: obj.Qty,
-            event: e
-        });
-
-        Gdn.sumOfTotalGdnItem();
-    }
-};
 
 window.tableGdnExpiryOn = (value, obj, index) => {
 
@@ -1084,7 +911,6 @@ window.tableGdnScanItemActionEvents = {
         Gdn.deleteItem({ id: obj.Id, index: index });
     }
 }
-
 window.tableGdnScanExpiryOn = (value, obj, index) => {
     let val = obj.ExpiryOn
         ? moment(obj.ExpiryOn, ['DD-MMM-YYYY', 'YYYY-MM-DD']).format('YYYY-MM-DD')

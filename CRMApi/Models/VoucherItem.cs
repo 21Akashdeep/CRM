@@ -86,6 +86,8 @@ namespace CRMApi.Models
 
         [NotMapped]
         public string? StoreDesc { get; set; }
+        [NotMapped]
+        public string? UnitDesc { get; set; }
 
         [NotMapped]
         public string CreatedByName { get; set; } = string.Empty;
