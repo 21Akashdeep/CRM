@@ -41,9 +41,9 @@
                         <button type="button" id="btnPrint" class="btn btn-sm btn-filter btn-outline-secondary" title="Print">
                             <span class="fa fa-print"></span>
                         </button> 
-                        @* <button type="button" id="btnExport" class="btn btn-sm btn-filter btn-outline-primary" title="Export To Excel">
+                         <button type="button" id="btnExport" class="btn btn-sm btn-filter btn-outline-primary" title="Export To Excel">
                             <span class="fa fa-file-excel"></span>
-                        </button> *@
+                        </button> 
                     </div>
                 </div>
             </div>
@@ -55,10 +55,11 @@
                         <thead>
                             <tr>
                                 <th data-sortable="false" data-formatter="tableStoreDashboardSLNo" class="text-center">#</th> 
-                                <th data-sortable="true" data-field="ItemGroupDesc"> Material </th>
-                                <th data-sortable="true" data-field="ItemSubGroupDesc"> Material Type </th>
-                                <th data-sortable="true" data-field="ItemDesc"> Make </th>                            
-                               <th data-sortable="true" data-field="TotalQty"> Qty </th>
+                                <th data-sortable="true" data-field="ItemGroupDesc"> Item Group </th>
+                                <th data-sortable="true" data-field="ItemSubGroupDesc"> Item Sub Group </th>
+                                <th data-sortable="true" data-field="ItemDesc"> Item </th>                            
+                                <th data-sortable="true" data-field="TotalQty"> Qty </th>
+                                <th data-formatter="tableStoreDashboardAction"data-events="tableStoreDashboardActionEvent"class="not-print text-center"><i class="fa-solid fa-list-check"></i></th>
                                
                             </tr>
                         </thead>
@@ -69,6 +70,111 @@
         </form>
     </div>
 </div>  
+
+<div id="modalItemHistory" class="modal fade">
+    <div class="modal-dialog modal-dialog-centered modal-fullscreen modal-dialog-scrollable">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <div>
+                    <div id="historyItemName" class="fw-bold"></div>
+                    <div class="text-muted">
+                        <span id="historyItemGroup"></span>
+                        •
+                        <span id="historyItemSubGroup"></span>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
+                        <span class="fa fa-minus"></span>
+                    </button>
+                    <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal" aria-label="Close">
+                        <span class="fa fa-remove"></span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-body"> 
+                <div class="row mb-1">
+
+                    @* <div class="col-md-3">
+                        <label>Date Range</label>
+                        <div class="input-group input-group-sm">
+                            <input id="HistoryDateRange"
+                                   type="text"
+                                   class="form-control"
+                                   readonly>
+                            <span class="input-group-text date-range-picker">
+                                <i class="fa fa-calendar"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>Voucher Type</label>
+                        <select id="HistoryVoucherType"
+                                class="select-pick"
+                                title="Nothing Selected"
+                                data-size="4"
+                                data-search="true"
+                                multiple>
+                        </select>
+                    </div> *@
+                    <div class="col-md-2">
+                        <div class="btn-group">
+                            @* <button type="button" id="btnHistorySearch" class="btn btn-sm btn-filter btn-outline-success" title="Search">
+                                <span class="fa fa-search"></span>
+                            </button> *@
+                            <button type="button" id="btnHistoryPrint" class="btn btn-sm btn-filter btn-outline-secondary" title="Print">
+                                <span class="fa fa-print"></span>
+                            </button>
+                            @* <button type="button" id="btnHistoryExport" class="btn btn-sm btn-filter btn-outline-primary" title="Export To Excel">
+                                <span class="fa fa-file-excel"></span>
+                            </button> *@
+                        </div>
+                    </div>
+                </div>
+                <hr />
+                <div class="modal-body">
+                    <div class="card shadow-sm">
+                        <table id="tableItemHistory"
+                               class="table table-bordered table-hover"
+                               border="1"
+                               data-unique-id="VoucherId">
+
+                            <thead>
+                                <tr>
+                                    <th data-formatter="tableItemHistorySLNo">#</th>
+                                    <th data-sortable="true" data-field="Date" data-formatter="tableItemHistoryDate">Date</th>
+                                    <th data-sortable="true" data-field="Type">Type</th>
+                                    <th data-sortable="true" data-field="No">Voucher</th>
+                                    <th data-sortable="true" data-field="StoreDesc">Store</th>
+                                    <th data-sortable="true" data-field="Party">Party</th>
+                                    <th data-sortable="true" data-field="Unit">Unit</th>
+                                    <th data-sortable="true" data-field="SerialNo" data-formatter="tableItemHistorySerial" data-escape="false">Serial No</th>
+                                    <th data-sortable="true" data-field="QtyIn" class="text-success">IN</th>
+                                    <th data-sortable="true" data-field="QtyOut" class="text-danger">OUT</th>
+                                    <th data-sortable="true" data-field="Balance">Balance</th>
+                                    <th data-sortable="true" data-field="CreatedBy">Created By</th>
+                                    <th data-sortable="true" data-field="CreatedAt" data-formatter="tableItemHistoryCreatedAt">Created At</th>
+                                </tr>
+                            </thead>
+
+                        </table>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
 @section Scripts {
     <script src="~/script/StoreDashboard.js" asp-append-version="true"></script>
     <script type="text/javascript">
