@@ -294,14 +294,17 @@
                 Modal.open({ id: '#modalGrn', title: title, action: action, obj: obj });
                 Table.add({ id: '#tableGrnItem', data: obj.VoucherItem, selectPick: true });
                 Grn.sumOfTotalGrnItem();
-                setTimeout(() => {
-                    OnlineApi.pinCode({
-                        pinCode: obj.ConPincode,
-                        callback: (data) => {                            
-                            Dropdown.bind({ id: '#Grn-ConPostOffice', data: data.obj.PostOfficeList, value: 'Name', text: 'Name', isEditable: true, initialValue: [obj.ConPostOffice] });
-                        }
-                    });
-                }, 100);
+                let pincode = $('#Gdn-ConPinCode').val();
+                if (pincode.length == 6) {
+                    setTimeout(() => {
+                        OnlineApi.pinCode({
+                            pinCode: obj.ConPincode,
+                            callback: (data) => {
+                                Dropdown.bind({ id: '#Grn-ConPostOffice', data: data.obj.PostOfficeList, value: 'Name', text: 'Name', isEditable: true, initialValue: [obj.ConPostOffice] });
+                            }
+                        });
+                    }, 100);
+                }
 
             }
         });
@@ -769,18 +772,25 @@ window.tableGrnBatchNoDescEvent = {
         });
     }
 };
-//window.tableGrnExpiryOn = (value, obj, index) => {
-//    return `<input type="date" id="GrnExpiryOn_${index}" class="form-control form-control-sm mb-0 grn-item" value="${obj.ExpiryOn ?? ""}"/>`;
-//}
+window.tableGrnExpiryOn = (value, obj) => {
+
+    let val = obj.ExpiryOn
+        ? moment(obj.ExpiryOn, ['DD-MMM-YYYY', 'YYYY-MM-DD']).format('YYYY-MM-DD')
+        : '';
+
+    return `
+        <input type="date"
+            class="form-control form-control-sm mb-0 Grn-item-expiry"
+            value="${val}">
+    `;
+};
 window.tableGrnExpiryOnEvent = {
-    'input .grn-item': (e, value, obj, index) => {
+    'input .Grn-item-expiry': (e, value, obj, index) => {
         obj.ExpiryOn = e.currentTarget.value || "";
         Table.updateByIndex({
             id: '#tableGrnItem',
-            index: index,
-            obj: obj,
-            value: obj.ExpiryOn,
-            event: e
+            index,
+            obj
         });
     }
 };
@@ -809,17 +819,7 @@ window.tableGrnScanItemActionEvents = {
     }
 }
 
-window.tableGrnExpiryOn = (value, obj, index) => {
-    let val = obj.ExpiryOn
-        ? moment(obj.ExpiryOn, ['DD-MMM-YYYY', 'YYYY-MM-DD']).format('YYYY-MM-DD')
-        : '';
 
-    return `
-        <input type="date"
-            class="form-control form-control-sm mb-0 grn-item-expiry"
-            value="${val}">
-    `;
-};
 
 //window.tableGrnExpiryOnEvent = {
 //    'input .grn-item-expiry': (e, value, obj, index) => {

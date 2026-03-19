@@ -27,6 +27,9 @@ select.select-pick {
     overflow: hidden;
     margin-bottom: 0;
 }
+.table .select-pick {
+    position: static !important;
+}
 .table .select-pick-toggle-btn {
     font-size: 12px !important;
     height: 28px;

@@ -107,7 +107,7 @@
                                    data-search="false">
                                 <thead>
                                     <tr>
-                                        <th colspan="6">
+                                        <th colspan="7">
                                             StockTransfer Item
                                             <div class="btn-group float-end">
                                                 <button type="button" class="btn btn-sm btn-primary rounded-5" onclick="StockTransfer.addStockTransferItem()"> <span class="fa fa-plus"></span>  </button>
@@ -119,6 +119,7 @@
                                     <tr>
                                         <th data-formatter="tableStockTransferItemSlNo" class="text-center">#</th>
                                         <th class="desc" data-formatter="tableStockTransferItemDesc" data-events="tableStockTransferItemDescEvent">Description </th>
+                                         <th class="qty" data-formatter="tableItemUnitDesc" data-events="tableStockTransferItemDescEvent">Unit</th> 
                                         <th class="qty" data-formatter="tableStockTransferExpiryOn" data-events="tableStockTransferExpiryOnEvent"> ExpiryOn </th>
                                         <th class="qty" data-formatter="tableTaskSerialNo" data-events="tableStockTransferSerialNoDescEvent">SerialNo </th>
                                         <th class="qty" data-formatter="tableStockTransferItemQty" data-events="tableStockTransferItemQtyEvent">Qty </th>
@@ -156,27 +157,8 @@
                             <div class="modal-body" style="min-height:75vh;">
                                 <form id="formStockTransferScanItem" autocomplete="off" onsubmit="return false;">
                                     <div class="row">
-                                        <div class="col-md-5">
-                                            <label>Item<span class="text-mandatory">*</span></label>
-                                            <select id="StockTransferScan-ItemId"
-                                                    class="select-pick scan-required"
-                                                    data-size="4"
-                                                    data-search="true"></select>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label>ExpiryOn</label>
-                                            <div class="input-group input-group-sm">
-                                                <input type="text"
-                                                       id="StockTransferScan-ItemExpiryOn"
-                                                       class="form-control form-control-sm scan-required"
-                                                       data-date-format="DD-MMM-YYYY"
-                                                       readonly />
-                                                <span class="input-group-text date-picker">
-                                                    <i class="fa fa-calendar"></i>
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
+                                                                           
+                                        <div class="col-md-6">
                                             <label>Scan</label>
                                             <input type="text"
                                                    id="StockTransferScan-ItemSerialNo"

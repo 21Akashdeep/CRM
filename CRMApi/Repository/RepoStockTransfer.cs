@@ -149,6 +149,7 @@ namespace CRMApi.Repository
                 from vci in db.VoucherItem
                 join vc in db.Voucher on vci.VoucherId equals vc.Id
                 join itm in db.Item on vci.ItemId equals itm.Id
+                join un in db.Unit on itm.UnitId equals un.Id
                 join st in db.Store on vci.StoreId equals st.Id
                 join sts in db.Setting on new { Category = App.SettingName.Status, Value = vci.Status.ToString() } equals new { sts.Category, sts.Value }
                 join cby in db.User on vci.CreatedBy equals cby.Id
@@ -162,6 +163,7 @@ namespace CRMApi.Repository
                     StoreDesc = st.Description,
                     ItemId = vci.ItemId,
                     ItemDesc = itm.Description,
+                    UnitDesc = un.Description,
                     VoucherDesc = vc.Type,
                     Remarks = vci.Remarks,
                     SerialNo = vci.SerialNo,
@@ -722,5 +724,19 @@ namespace CRMApi.Repository
 
             return objMsg;
         }
+        public async Task<Message> GetItemDetailsAsync(Voucher obj, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                objMsg.data = await RepoVoucher.GetStockItemAsync(obj, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
     }
 }
+

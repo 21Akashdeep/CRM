@@ -172,7 +172,7 @@
                             <table id="tableGdnItem" class="table table-bordered table-hover table-default line-item" data-search="false">
                                 <thead>
                                     <tr>
-                                        <th colspan="7">
+                                        <th colspan="6">
                                             Gdn Item
                                             <div class="btn-group float-end">
                                                 <button type="button" class="btn btn-sm btn-primary rounded-5 me-e" onclick="Gdn.addGdnItem()">
@@ -187,8 +187,7 @@
                                     <tr>
                                         <th data-formatter="tableGdnItemSlNo" class="text-center">#</th>
                                         <th class="desc" data-formatter="tableGdnItemDesc" data-events="tableGdnItemDescEvent">Description</th>
-                                        <th class="qty" data-formatter="tableItemUnitDesc" data-events="tableGdnItemDescEvent">Unit</th>
-                                        <th class="qty" data-formatter="tableItemBalQty" data-events="tableGdnItemDescEvent">Avalaible Qty</th>
+                                        <th class="qty" data-formatter="tableItemUnitDesc" data-events="tableGdnItemDescEvent">Unit</th>                                       
                                         <th class="qty" data-formatter="tableTaskSerialNo" data-events="tableGdnSerialNoDescEvent">SerialNo</th>
                                         <th class="qty" data-formatter="tableGdnExpiryOn" data-events="tableGdnExpiryOnEvent">ExpiryOn</th>
                                         <th class="qty" data-formatter="tableGdnItemQty" data-events="tableGdnItemQtyEvent">Qty</th>
@@ -222,19 +221,8 @@
                             </div>
                             <div class="modal-body" style="min-height:75vh;">
                                 <form id="formGdnScanItem" autocomplete="off" onsubmit="return false;">
-                                    <div class="row">
-                                        <div class="col-md-5">
-                                            <label>Item<span class="text-mandatory">*</span></label>
-                                            <select id="GdnScan-ItemId" name="ItemId" class="select-pick scan-required" data-size="4" data-search="true"></select>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label>ExpiryOn</label>
-                                            <div class="input-group input-group-sm">
-                                                <input type="text" id="GdnScan-ItemExpiryOn" name="ExpiryOn" class="form-control form-control-sm scan-required" data-date-format="DD-MMM-YYYY" readonly />
-                                                <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
+                                    <div class="row">                                       
+                                        <div class="col-md-6">
                                             <label>Scan</label>
                                             <input type="text" id="GdnScan-ItemSerialNo" name="Scan" class="form-control form-control-sm" />
                                         </div>
@@ -248,8 +236,7 @@
                                                 <thead>
                                                     <tr>
                                                         <th data-formatter="tableGdnItemSlNo" class="text-center">#</th>
-                                                        <th data-field="ItemDesc">Item</th>
-                                                        <th data-formatter="tableScanExpiry">Expiry</th>
+                                                        <th data-field="ItemDesc">Item</th>                                                     
                                                         <th data-formatter="tableScanSerial">Serial No</th>
                                                         <th data-formatter="tableScanQty" class="text-end">Qty</th>
                                                         <th data-formatter="tableGdnScanItemAction" data-events="tableGdnScanItemActionEvents" class="text-center">

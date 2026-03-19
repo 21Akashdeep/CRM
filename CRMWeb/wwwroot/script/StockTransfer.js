@@ -44,15 +44,15 @@
                 $('#StockTransfer-Scan').val('');
             }
         });
+        
+
         $('#StockTransferScan-ItemSerialNo').on('keydown', (e) => {
-
             if (e.key == 'Enter') {
-
                 if (!Field.isMandatory({ class: '.scan-required' })) {
                     return;
                 }
-
                 let serialNo = $('#StockTransferScan-ItemSerialNo').val();
+                let selectedItem = StockTransfer.item.filter(x => x.SerialNo == serialNo);
 
                 let countStockTransferItem =
                     $('#tableStockTransferItem')
@@ -71,24 +71,29 @@
                     return;
                 }
 
+                if (selectedItem.length == 0) {
+                    Message.error({ statusText: `Invalid SerialNo: (${serialNo})` });
+                    return;
+                }
+
                 StockTransfer.addStockTransferItem({
-                    itemId: $('#StockTransferScan-ItemId').val(),
-                    itemDesc: $('#StockTransferScan-ItemId option:selected').text(),
-                    expiryOn: $('#StockTransferScan-ItemExpiryOn').val(),
-                    serialNo: serialNo,
+
+                    itemId: selectedItem[0].ItemId,
+                    itemDesc: selectedItem[0].ItemDesc,
+                    expiryOn: selectedItem[0].ExpiryOn,
+                    serialNo: selectedItem[0].SerialNo,
+                    unitDesc: selectedItem[0].UnitDesc,
                     qty: 1,
                     isScanned: true,
                     callback: (obj) => {
-                        Table.add({
-                            id: '#tableStockTransferScanItem',
-                            data: obj,
-                            action: 'prepend'
-                        });
+                        Table.add({ id: '#tableStockTransferScanItem', data: obj, action: 'prepend' });
                         $('#StockTransferScan-ItemSerialNo').val('');
                     }
                 });
             }
         });
+
+
         $('#btnScanItemAdd').on('click', () => {
 
             let scanItems =
@@ -110,6 +115,11 @@
 
             Modal.close({ id: '#modalStockTransferItemScan' });
         });
+
+        $('#FromStoreId').on('change', () => {
+            StockTransfer.getItemDetails();
+        });
+
         $('#StockTransfer-BtnSave').on('click', () => {
             if (!Field.isMandatory({ class: '.required' })) {
                 return;
@@ -162,7 +172,6 @@
             onSuccess: (response) => {
                 StockTransfer.item = response.data.Item;
                 let store = response.data.Store;
-
                 Dropdown.bind({ id: '#FromStoreId', data: store, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#ToStoreId', data: store, value: 'Id', text: 'Description' });
                 Modal.open({ id: '#modalStockTransfer', title: 'StockTransfer / Add', action: 'Add' });
@@ -170,7 +179,34 @@
             }
         });
     }
+    static getItemDetails() {
+        let obj = {
+            StoreId: $('#FromStoreId').val(),
+            FromDate: DateTime.json($('#DateRange').val().split('|')[0]),
+            Todate: DateTime.json($('#DateRange').val().split('|')[1])
+
+        };
+        Data.post({
+            url: 'StockTransfer/getItem',
+            data: obj,
+            onSuccess: (response) => {
+                if (!response.data || response.data.length === 0)
+                    return;
+                StockTransfer.item = response.data.data;
+
+            }
+        });
+    }
     static scanner() {
+
+        let store = $('#FromStoreId').val();
+
+        if (!store || store.length == 0) {
+            Message.error({ statusText: 'First Select FromStore' });
+            return;
+        }
+
+
         Modal.open({
             id: '#modalStockTransferItemScan',
             title: 'StockTransfer / Scan Item'
@@ -185,10 +221,18 @@
 
         $('#StockTransferScan-ItemSerialNo').val('');
     }
-    static addStockTransferItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, isScanned = false, callback } = {}) {
+    static addStockTransferItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, unitDesc = null, isScanned = false, callback } = {}) {
+
+        let store = $('#FromStoreId').val();
+
+        if (!store || store.length == 0) {
+            Message.error({ statusText: 'First Select FromStore' });
+            return;
+        }
+
+
         let obj = {
             Id: 0,
-            StockTransferId: 0,
             ItemId: itemId,
             VoucherId: 0,
             StoreId: 0,
@@ -198,7 +242,8 @@
             ExpiryOn: expiryOn,
             Qty: qty,
             Rate: 0,
-            UnitDesc: null,
+            BalQty: 0,
+            UnitDesc: unitDesc,
             Amount: 0,
             DiscountAmount: 0,
             TotalAmount: 0,
@@ -228,7 +273,7 @@
         let tfoot = `
             <tfoot>
                 <tr>
-                    <th class="text-right" colspan="4">Total</th>
+                    <th class="text-right" colspan="5">Total</th>
                     <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
                 </tr>
             </tfoot>
@@ -262,6 +307,9 @@
                 obj.ToStoreId = obj.VoucherItem.filter(x => x.Qty >= 0)[0].StoreId;
                 let voucherItem = obj.VoucherItem.filter(x => x.Qty >= 0);
                 obj.Id = action == 'Edit' ? obj.Id : null;
+                setTimeout(() => {
+                    StockTransfer.getItemDetails();
+                }, 100);
                 let title = action === 'Edit' ? `StockTransfer / Edit (Code: ${obj.No})` : `StockTransfer / Add`;
                 Dropdown.bind({ id: '#FromStoreId', data: store, value: 'Id', text: 'Description'});
                 Dropdown.bind({ id: '#ToStoreId', data: store, value: 'Id', text: 'Description'});
@@ -602,7 +650,7 @@ window.tableStockTransferItemSlNo = (value, obj, index) => {
 }
 window.tableStockTransferItemDesc = (value, obj, index) => {
     return `
-        ${Dropdown.html({ id: `StockTransferItem_${index}`, className: 'StockTransfer-item', data: StockTransfer.item, value: 'Id', text: 'Description', initialValue: [obj.ItemId], json: true, parent: '.modal' })}
+        ${Dropdown.html({ id: `StockTransferItem_${index}`, className: 'StockTransfer-item', data: StockTransfer.item, value: 'Id', text: 'Description', subText: "SubText", initialValue: [obj.Id], json: true, parent: '.modal' })}
         <input type="text" id="StockTransferItemRemarks_${index}" class="form-control form-control-sm mb-0 mt-1 StockTransfer-item-remarks" maxlength="100" placeholder="Remarks" value="${obj.Remarks ?? ""}">
     `;
 }
@@ -610,8 +658,13 @@ window.tableStockTransferItemDescEvent = {
     'change .StockTransfer-item': (e, value, obj, index) => {
         obj.ItemId = !Field.isNullOrEmpty(e.currentTarget.value) ? parseInt(e.currentTarget.value) : 0;
         let itemJson = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
-        obj.UnitDesc = itemJson?.UnitDesc ?? null;
+        // find item from API result
+        let item = StockTransfer.item.find(x => x.ItemId == obj.ItemId);
 
+        // set balance qty
+        obj.BalQty = item ? item.Qty : 0;
+
+        obj.UnitDesc = itemJson?.UnitDesc ?? null;
         obj.Rate = itemJson?.Rate ?? 0;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
 
@@ -636,19 +689,63 @@ window.tableStockTransferItemRateEvent = {
         StockTransfer.sumOfTotalStockTransferItem();
     }
 }
+//window.tableStockTransferItemQty = (value, obj, index) => {
+//    return `
+//        <input type="text" id="StockTransferItemQty_${index}" class="form-control form-control-sm text-right StockTransfer-item-qty" value="${obj.Qty}" oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})">
+//    `;
+//}
+//window.tableStockTransferItemQtyEvent = {
+//    'input .StockTransfer-item-qty': (e, value, obj, index) => {
+//        obj.Qty = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
+//        obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
+//        Table.updateByIndex({ id: '#tableStockTransferItem', index: index, obj: obj, value: obj.Qty, event: e });
+//        StockTransfer.sumOfTotalStockTransferItem();
+//    }
+//}
+
 window.tableStockTransferItemQty = (value, obj, index) => {
     return `
         <input type="text" id="StockTransferItemQty_${index}" class="form-control form-control-sm text-right StockTransfer-item-qty" value="${obj.Qty}" oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})">
     `;
 }
+
 window.tableStockTransferItemQtyEvent = {
     'input .StockTransfer-item-qty': (e, value, obj, index) => {
-        obj.Qty = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
+
+        let qty = parseFloat(e.currentTarget.value || 0);
+        let balQty = parseFloat(obj.BalQty || 0);
+
+        // minus qty check
+        if (qty < 0) {
+            Message.error({ statusText: 'Qty cannot be negative' });
+            e.currentTarget.value = obj.Qty || 0;
+            return;
+        }
+
+        // available qty check
+        if (qty > balQty) {
+            Message.error({ statusText: `Qty cannot be greater than available qty (${balQty})` });
+            e.currentTarget.value = obj.Qty || 0;
+            return;
+        }
+
+        obj.Qty = qty;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
-        Table.updateByIndex({ id: '#tableStockTransferItem', index: index, obj: obj, value: obj.Qty, event: e });
+
+        Table.updateByIndex({
+            id: '#tableStockTransferItem',
+            index: index,
+            obj: obj,
+            value: obj.Qty,
+            event: e
+        });
+
         StockTransfer.sumOfTotalStockTransferItem();
     }
-}
+};
+
+
+
 window.tableStockTransferItemAmount = (value, obj, index) => {
     return `
         <input type="text" id="StockTransferItemAmt_${index}" class="form-control form-control-sm text-right StockTransfer-item-amount" value="${obj.Amount}" oninput="this.value = _Number.validate({value: this.value, dp: 2, min: 0, max: 999999999999})">
@@ -667,6 +764,10 @@ window.tableStockTransferReasonCodeDesc = (value, obj, index) => {
        
     `;
 }
+window.tableItemUnitDesc = (value, obj, index) => {
+    return `<span id="StockTransferItemUnitDesc_${index}">${obj.UnitDesc ?? ''}</span>`;
+}
+
 window.tableStockTransferReasonCodeDescEvent = {
     'change .StockTransfer-item': (e, value, obj, index) => {
         obj.ReasonCode = e.currentTarget.value || "";
@@ -725,21 +826,21 @@ window.tableStockTransferBatchNoDescEvent = {
         });
     }
 };
-window.tableStockTransferExpiryOn = (value, obj, index) => {
-    return `<input type="date" id="StockTransferExpiryOn_${index}" class="form-control form-control-sm mb-0 StockTransfer-item" value="${obj.ExpiryOn ?? ""}"/>`;
-}
-window.tableStockTransferExpiryOnEvent = {
-    'input .StockTransfer-item': (e, value, obj, index) => {
-        obj.ExpiryOn = e.currentTarget.value || "";
-        Table.updateByIndex({
-            id: '#tableStockTransferItem',
-            index: index,
-            obj: obj,
-            value: obj.ExpiryOn,
-            event: e
-        });
-    }
-};
+//window.tableStockTransferExpiryOn = (value, obj, index) => {
+//    return `<input type="date" id="StockTransferExpiryOn_${index}" class="form-control form-control-sm mb-0 StockTransfer-item" value="${obj.ExpiryOn ?? ""}"/>`;
+//}
+//window.tableStockTransferExpiryOnEvent = {
+//    'input .StockTransfer-item': (e, value, obj, index) => {
+//        obj.ExpiryOn = e.currentTarget.value || "";
+//        Table.updateByIndex({
+//            id: '#tableStockTransferItem',
+//            index: index,
+//            obj: obj,
+//            value: obj.ExpiryOn,
+//            event: e
+//        });
+//    }
+//};
 window.tableStockTransferItemAction = (value, obj, index) => {
     if (!obj.Id)
         return `<button type="button" class="btn btn-sm btn-danger rounded-5 btn-delete"><span class="fa fa-trash"></span></button>`;

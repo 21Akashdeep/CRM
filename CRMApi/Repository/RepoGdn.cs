@@ -183,10 +183,10 @@ namespace CRMApi.Repository
                     && x.SerialNo == item.SerialNo
                     && x.StoreId == obj.StoreId
                     && x.CreatedAt >= obj.FromDate
-                    && x.CreatedAt <= obj.Date)
+                    && x.CreatedAt.Date <= obj.Date.Date)
                    .Sum(x => x.Qty);
 
-                    if (item.Qty > availableQty)
+                    if (item.Qty >availableQty || item.Qty<0)
                     {
                         objMsg.status = Message.Type.error;
                         objMsg.statusText = $"Qty for Serial No {item.SerialNo} cannot exceed available qty ({availableQty}).";
@@ -334,7 +334,7 @@ namespace CRMApi.Repository
             Message objMsg = new Message();
             try
             {
-                objMsg.data = await repoVoucher.GetItemDetailsAsync(obj, User);
+                objMsg.data = await repoVoucher.GetStockItemAsync(obj, User);
             }
             catch (Exception ex)
             {
