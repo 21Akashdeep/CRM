@@ -173,7 +173,7 @@
     }
     static get({ method = 'Get', onSuccess }) {
         let obj = {
-            ListStatus: $('#ListStatus').val(),
+            ListStatus: $('#ListStatus').val(), 
             FromDate: DateTime.json($('#DateRange').val().split('|')[0]),
             ToDate: DateTime.json($('#DateRange').val().split('|')[1]),
             ListNo: $('#ListStockInNo').val()
@@ -182,7 +182,7 @@
             url: `StockIn/${method}`,
             data: obj,
             onSuccess: onSuccess
-        });
+        }); 
     }
     static newEntry() {
         StockIn.getAddOption({

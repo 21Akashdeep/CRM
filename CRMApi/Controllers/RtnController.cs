@@ -13,12 +13,12 @@ namespace CRMApi.Controllers
     {
         private readonly DBCRM db;
         private readonly RepoRtn RepoRtn;
-        private readonly RepoVoucher RepoVoucher;
+        private readonly VoucherRepo RepoVoucher;
         public RtnController(DBCRM _db)
         {
             db = _db;
             RepoRtn = new RepoRtn(db);
-            RepoVoucher = new RepoVoucher(db);
+            RepoVoucher = new VoucherRepo(db);
         }
         [HttpGet]
 

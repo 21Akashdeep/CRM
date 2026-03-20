@@ -287,6 +287,7 @@ nav {
     height: 28px;
     padding-left: 3px;
     padding-right: 3px;
+    font-size: var(--theme-font-size)
 }
 
 

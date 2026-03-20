@@ -101,7 +101,7 @@ namespace CRMApi.Repository
             {
                 obj.PartyId = obj.PartyId == 0 ? null : obj.PartyId;
                 obj.Type = "StockIn";
-                objMsg = await new RepoVoucher(db).AddAsync(obj, User);
+                objMsg = await new VoucherRepo(db).AddAsync(obj, User);
             }
             catch (Exception ex)
             {
@@ -114,7 +114,7 @@ namespace CRMApi.Repository
 
             obj ??= new Voucher();
             obj.ListType = new List<string> { "StockIn" };
-            var voucher = await new RepoVoucher(db).ListAsync(obj, User);
+            var voucher = await new VoucherRepo(db).ListAsync(obj, User);
             return voucher;
 
 
@@ -150,7 +150,7 @@ namespace CRMApi.Repository
             try
             {
                 obj.Type = "StockIn";
-                objMsg = objMsg = await new RepoVoucher(db).UpdateAsync(obj, User);
+                objMsg = objMsg = await new VoucherRepo(db).UpdateAsync(obj, User);
 
             }
             catch (Exception ex)
@@ -169,7 +169,7 @@ namespace CRMApi.Repository
             Message objMsg = new Message();
             try
             {
-                objMsg = await new RepoVoucher(db).DeleteItemAsync(id, user);
+                objMsg = await new VoucherRepo(db).DeleteItemAsync(id, user);
             }
             catch (Exception ex)
             {

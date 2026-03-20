@@ -126,7 +126,7 @@ namespace CRMApi.Repository
 
             obj ??= new Voucher();
             obj.ListType = new List<string> {"ReceiptNote"};
-            var voucher = await new RepoVoucher(db).ListAsync(obj, User);
+            var voucher = await new VoucherRepo(db).ListAsync(obj, User);
             return voucher;
            
            

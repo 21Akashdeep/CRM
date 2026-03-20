@@ -44,7 +44,7 @@
                     Message.error({ statusText: `Serial No. ${serialNo} already added in Scan List or Item List.` });
                     return;
                 }
-                StockOut.addStockOutItem({
+                StockOut.addStockOutItem({  
                     itemId: $('#StockOutScan-ItemId').val(),
                     itemDesc: $('#StockOutScan-ItemId option:selected').text(),
                     expiryOn: $('#StockOutScan-ItemExpiryOn').val(),
@@ -70,6 +70,10 @@
             StockOut.sumOfTotalStockOutItem();
 
             Modal.close({ id: '#modalStockOutItemScan' });
+        });
+
+        $('#StockOut-StoreId').on('change', () => {
+            StockOut.getItemDetails();
         });
 
         $('#StockOut-BtnSave').on('click', () => {
@@ -132,12 +136,44 @@
         });
     }
     static scanner() {
+        let store = $('#StockOut-StoreId').val();
+
+        if (!store || store.length == 0) {
+            Message.error({ statusText: 'First Select Store' });
+            return;
+        }
         Modal.open({ id: '#modalStockOutItemScan', title: 'StockOut / Scan Item' });
         Dropdown.bind({ id: '#StockOutScan-ItemId', data: StockOut.item, value: 'Id', text: 'Description' });
         $('#StockOut-ExpiryOn,#StockOutScan-ItemSerialNo').val('');
 
     }
+    static getItemDetails() {
+        let obj = {
+            StoreId: $('#StockOut-StoreId').val(),
+            FromDate: DateTime.json($('#DateRange').val().split('|')[0]),
+            Todate: DateTime.json($('#DateRange').val().split('|')[1])
+
+        };
+        Data.post({
+            url: 'StockOut/getItem',
+            data: obj,
+            onSuccess: (response) => {
+                if (!response.data || response.data.length === 0)
+                    return;
+                StockOut.item = response.data.data;
+
+            }
+        });
+    }
     static addStockOutItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, isScanned = false, callback } = {}) {
+
+        let store = $('#StockOut-StoreId').val();
+
+        if (!store || store.length == 0) {
+            Message.error({ statusText: 'First Select Store' });
+            return;
+        }
+
         let obj = {
             Id: 0,
             ItemId: itemId,
@@ -527,7 +563,7 @@ window.tableStockOutItemSlNo = (value, obj, index) => {
 }
 window.tableStockOutItemDesc = (value, obj, index) => {
     return `
-        ${Dropdown.html({ id: `StockOutItem_${index}`, className: 'StockOut-item', data: StockOut.item, value: 'Id', text: 'Description', initialValue: [obj.ItemId], json: true, parent: '.modal' })}
+        ${Dropdown.html({ id: `StockOutItem_${index}`, className: 'StockOut-item', data: StockOut.item, value: 'ItemId', text: 'Description', subText: "SubText", initialValue: [obj.ItemId], json: true, parent: '.modal' })}
         <input type="text" id="StockOutItemRemarks_${index}" class="form-control form-control-sm mb-0 mt-1 StockOut-item-remarks" maxlength="100" placeholder="Remarks" value="${obj.Remarks ?? ""}">
     `;
 }

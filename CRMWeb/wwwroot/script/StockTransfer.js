@@ -273,7 +273,7 @@
         let tfoot = `
             <tfoot>
                 <tr>
-                    <th class="text-right" colspan="5">Total</th>
+                    <th class="text-right" colspan="4">Total</th>
                     <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
                 </tr>
             </tfoot>
@@ -650,7 +650,7 @@ window.tableStockTransferItemSlNo = (value, obj, index) => {
 }
 window.tableStockTransferItemDesc = (value, obj, index) => {
     return `
-        ${Dropdown.html({ id: `StockTransferItem_${index}`, className: 'StockTransfer-item', data: StockTransfer.item, value: 'Id', text: 'Description', subText: "SubText", initialValue: [obj.Id], json: true, parent: '.modal' })}
+        ${Dropdown.html({ id: `StockTransferItem_${index}`, className: 'StockTransfer-item', data: StockTransfer.item, value: 'ItemId', text: 'Description', subText: "SubText", initialValue: [obj.ItemId], json: true, parent: '.modal' })}
         <input type="text" id="StockTransferItemRemarks_${index}" class="form-control form-control-sm mb-0 mt-1 StockTransfer-item-remarks" maxlength="100" placeholder="Remarks" value="${obj.Remarks ?? ""}">
     `;
 }
@@ -703,9 +703,30 @@ window.tableStockTransferItemRateEvent = {
 //    }
 //}
 
+//window.tableStockTransferItemQty = (value, obj, index) => {
+//    return `
+//        <input type="text" id="StockTransferItemQty_${index}" class="form-control form-control-sm text-right StockTransfer-item-qty" value="${obj.Qty}" oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})">
+//    `;
+//}
+
 window.tableStockTransferItemQty = (value, obj, index) => {
     return `
-        <input type="text" id="StockTransferItemQty_${index}" class="form-control form-control-sm text-right StockTransfer-item-qty" value="${obj.Qty}" oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})">
+        <div class="d-flex border rounded overflow-hidden" style="height:32px;">
+            
+            <!-- Qty Input -->
+            <input type="text" id="StockTransferItemQty_${index}"
+                class="form-control form-control-sm text-end border-0 rounded-0 StockTransfer-item-qty" 
+                value="${obj.Qty}" 
+                style="flex: 2;"
+                oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})">
+
+            <!-- Unit Box -->
+            <div class="d-flex align-items-center justify-content-center bg-light border-start px-2" 
+                 style="flex: 1; min-width:50px;">
+                ${obj.UnitDesc ?? ''}
+            </div>
+
+        </div>
     `;
 }
 

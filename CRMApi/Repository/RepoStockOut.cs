@@ -1,4 +1,5 @@
-﻿using CRMApi.Models;
+﻿using CRMApi.Dto;
+using CRMApi.Models;
 using CRMApi.Repository;
 using CRMApi.Services;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -15,9 +16,11 @@ namespace CRMApi.Repository
     {
         private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
+        private readonly VoucherRepo repoVoucher;
         public RepoStockOut(DBCRM _db)
         {
             db = _db;
+            repoVoucher = new VoucherRepo(db);
         }
         public async Task<Message> GetViewOptionAsync()
         {
@@ -104,7 +107,7 @@ namespace CRMApi.Repository
                 {
                     item.Qty = -(item.Qty);
                 }
-                objMsg = await new RepoVoucher(db).AddAsync(obj, User);
+                objMsg = await new VoucherRepo(db).AddAsync(obj, User);
             }
             catch (Exception ex)
             {
@@ -117,7 +120,7 @@ namespace CRMApi.Repository
 
             obj ??= new Voucher();
             obj.ListType = new List<string> { "StockOut" };
-            var voucher = await new RepoVoucher(db).ListAsync(obj, User);
+            var voucher = await new VoucherRepo(db).ListAsync(obj, User);
             return voucher;
 
 
@@ -158,7 +161,7 @@ namespace CRMApi.Repository
                     if(item.Qty >= 0)
                     item.Qty = -(item.Qty);
                 }
-                objMsg = objMsg = await new RepoVoucher(db).UpdateAsync(obj, User);
+                objMsg = objMsg = await new VoucherRepo(db).UpdateAsync(obj, User);
 
             }
             catch (Exception ex)
@@ -229,6 +232,20 @@ namespace CRMApi.Repository
                 Message.Exception(ref objMsg, ex);
             }
 
+            return objMsg;
+        }
+
+        public async Task<Message> GetItemDetailsAsync(StockItemFltrDto obj, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                objMsg.data = await repoVoucher.StockItemAsync(obj, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
             return objMsg;
         }
     }

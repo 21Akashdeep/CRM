@@ -1,4 +1,5 @@
-﻿using CRMApi.Models;
+﻿using CRMApi.Dto;
+using CRMApi.Models;
 using CRMApi.Repository;
 using CRMApi.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -13,13 +14,13 @@ namespace CRMApi.Controllers
     {
         private readonly DBCRM db;
         private readonly RepoGdn RepoGdn;
-        private readonly RepoVoucher RepoVoucher;
+        private readonly VoucherRepo RepoVoucher;
 
         public GdnController(DBCRM _db)
         {
             db = _db;
             RepoGdn = new RepoGdn(db);
-            RepoVoucher = new RepoVoucher(db);
+            RepoVoucher = new VoucherRepo(db);
         }
 
         [HttpGet]
@@ -65,7 +66,7 @@ namespace CRMApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Get(Voucher obj)
+        public async Task<IActionResult> Get(Dto.GdnFltrDto obj)
         {
             Message objMsg = new Message();
             try
@@ -108,7 +109,7 @@ namespace CRMApi.Controllers
             return Ok(objMsg);
         }
         [HttpPost]
-        public async Task<IActionResult> getItem([FromBody] Voucher obj)
+        public async Task<IActionResult> getItem([FromBody] StockItemFltrDto obj)
         {
             Message objMsg = new Message();
             try
@@ -118,9 +119,9 @@ namespace CRMApi.Controllers
                     db, ref objMsg);
 
                 if (User == null) return Ok(objMsg);
-
                 
-                objMsg = await RepoGdn.GetItemDetailsAsync(obj, User);
+
+                objMsg = await RepoGdn.GetStockItemAsync(obj, User);
             }
             catch (Exception ex)
             {
@@ -153,7 +154,7 @@ namespace CRMApi.Controllers
                 var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
                 if (User == null) return Ok(objMsg);
                 obj.Type = "DeliveryNote";
-                objMsg = await RepoVoucher.UpdateAsync(obj, User);
+                objMsg = await RepoGdn.UpdateAsync(obj, User);
             }
             catch (Exception ex)
             {
@@ -179,7 +180,7 @@ namespace CRMApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Print(Voucher obj)
+        public async Task<IActionResult> Print(GdnFltrDto obj)
         {
             Message objMsg = new Message();
             try
@@ -200,7 +201,7 @@ namespace CRMApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Export(Voucher obj)
+        public async Task<IActionResult> Export(GdnFltrDto obj)
         {
             Message objMsg = new Message();
             try

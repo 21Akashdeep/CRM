@@ -1,4 +1,5 @@
-﻿using CRMApi.Models;
+﻿using CRMApi.Dto;
+using CRMApi.Models;
 using CRMApi.Repository;
 using CRMApi.Services;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -18,12 +19,12 @@ namespace CRMApi.Repository
     {
         private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
-        private readonly RepoVoucher RepoVoucher;
+        private readonly VoucherRepo RepoVoucher;
         public RepoStockTransfer(DBCRM _db)
         {
             db = _db;
 
-            RepoVoucher = new RepoVoucher(_db);
+            RepoVoucher = new VoucherRepo(_db);
         }
         public async Task<Message> GetViewOptionAsync()
         {
@@ -75,7 +76,7 @@ namespace CRMApi.Repository
                     join unt in db.Unit on itm.UnitId equals unt.Id
                     select new
                     {
-                        itm.Id,
+                       ItemId = itm.Id,
                         itm.Code,
                         itm.Name,
                         itm.Description,
@@ -211,8 +212,10 @@ namespace CRMApi.Repository
                     ConPostOffice = voucher.ConPostOffice,
                     ConStateCode = voucher.ConStateCode,
                     ConStateName = voucher.ConStateName,
-                    RefDate = voucher.RefDate,
-                    RefNo = voucher.RefNo,
+                    ChallanDate = voucher.ChallanDate,
+                    ChallanNo = voucher.ChallanNo,
+                    InvoiceDate = voucher.InvoiceDate,
+                    InvoiceNo = voucher.InvoiceNo,
                     ListVoucherId = voucher.ListVoucherId,
                     EwayNo = voucher.EwayNo,
                     EwayDate = voucher.EwayDate,
@@ -724,12 +727,12 @@ namespace CRMApi.Repository
 
             return objMsg;
         }
-        public async Task<Message> GetItemDetailsAsync(Voucher obj, User User)
+        public async Task<Message> GetItemDetailsAsync(StockItemFltrDto obj, User User)
         {
             Message objMsg = new Message();
             try
             {
-                objMsg.data = await RepoVoucher.GetStockItemAsync(obj, User);
+                objMsg.data = await RepoVoucher.StockItemAsync(obj, User);
             }
             catch (Exception ex)
             {

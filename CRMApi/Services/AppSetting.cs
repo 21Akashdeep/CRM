@@ -26,8 +26,8 @@
         public AprvRole AprvRole { get; set; } = new AprvRole();
         public Regexp Regexp { get; set; } = new Regexp();
         public RefType RefType { get; set; } = new RefType();
+        public VoucherType VoucherType { get; set; } = new VoucherType();
 
-        
 
 
 

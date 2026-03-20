@@ -141,9 +141,7 @@
                     }
                     return x;
                 });
-            let obj = Data.serializeToObject({ formId: '#formGrn' });
-            let state = Dropdown.itemJson({ id: '#Grn-ConStateName' });
-            obj.ConStateCode = state ? state.Code : '';
+            let obj = Data.serializeToObject({ formId: '#formGrn' });            
             obj.VoucherItem = GrnItem;
             if (!obj.Id) {
                 Grn.add(obj);
@@ -162,7 +160,7 @@
             onSuccess: (response) => {
                 Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
                 Dropdown.bind({ id: '#ListCustomerId', data: response.data.Customer, value: 'Id', text: 'Name' });
-                Dropdown.bind({ id: '#ListGrnNo', data: response.data.GrnNo, value: 'Id', text: 'No' })
+                Dropdown.bind({ id: '#ListGrnNo', data: response.data.GrnNo, value: 'Id', text: 'No' });
             }
         });
     }
@@ -194,10 +192,7 @@
                 Dropdown.bind({ id: '#Grn-ConStateName', data: state, value: 'Name', text: 'Name', initialValue: [state.Name], json: true });
                 Dropdown.bind({ id: '#Grn-StoreId', data: store, value: 'Id', text: 'Description' });
                 Modal.open({ id: '#modalGrn', title: 'Grn / Add', action: 'Add' });
-                $('#Grn-RefDate,#Grn-EwayDate').val('');
-                
-                
-
+                $('#Grn-ChallanDate,#Grn-EwayDate,#Grn-InvoiceDate').val('');
             }
         });
     }
@@ -406,7 +401,7 @@
                     <td>${moment(obj.Date).format('DD-MMM-YYYY')}</td>
                     <td>${obj.StoreDesc || '-'}</td>
                     <td>${obj.PartyDesc || '-'}</td>
-                    <td>${obj.RefNo || '-'}</td>                
+                    <td>${obj.ChallanNo || '-'}</td>                
                     <td>${obj.Remarks || '-'}</td>
                     <td>${obj.CreatedByName}</td>
                 </tr>
@@ -515,10 +510,10 @@
         });
     }
 }
-window.tableGrnRefNoAndDate = (value, obj, index) => {
+window.tableGrnChallanNoAndDate = (value, obj, index) => {
     return `
-        <div>${obj.RefNo ?? ''}</div>
-        <div>${obj.RefDate ? moment(obj.RefDate).format('DD-MMM-YYYY') : ''}</div>
+        <div>${obj.ChallanNo ?? ''}</div>
+        <div>${obj.ChallanDate ? moment(obj.ChallanDate).format('DD-MMM-YYYY') : ''}</div>
     `;
 };
 window.tableGrnSlNo = (value, obj, index) => {

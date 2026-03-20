@@ -1,4 +1,5 @@
-﻿using CRMApi.Models;
+﻿using CRMApi.Dto;
+using CRMApi.Models;
 using CRMApi.Repository;
 using CRMApi.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -13,12 +14,12 @@ namespace CRMApi.Controllers
     {
         private readonly DBCRM db;
         private readonly RepoStockOut RepoStockOut;
-        private readonly RepoVoucher RepoVoucher;
+        private readonly VoucherRepo RepoVoucher;
         public StockOutController(DBCRM _db)
         {
             db = _db;
             RepoStockOut = new RepoStockOut(db);
-            RepoVoucher = new RepoVoucher(db);
+            RepoVoucher = new VoucherRepo(db);
         }
         [HttpGet]
         public async Task<IActionResult> GetViewOption()
@@ -62,6 +63,28 @@ namespace CRMApi.Controllers
                 if (User == null) return Ok(objMsg);
                 objMsg.data = await RepoStockOut.ListAsync(obj, User);
                 Message.Get(ref objMsg, "");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> getItem([FromBody] StockItemFltrDto obj)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(
+                    new Request { HttpRequest = Request, ActionType = ActionType.Export },
+                    db, ref objMsg);
+
+                if (User == null) return Ok(objMsg);
+
+
+                objMsg = await RepoStockOut.GetItemDetailsAsync(obj, User);
             }
             catch (Exception ex)
             {

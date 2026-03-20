@@ -10,8 +10,7 @@ namespace CRMApi.Models
         [StringLength(16)] public string No { get; set; } = string.Empty;
         public DateTime Date { get; set; }
         public int? PartyId { get; set; }
-        [NotMapped] public int StateId { get; set; }
-        [NotMapped] public int StoreId { get; set; }
+        public int StoreId { get; set; }
         [NotMapped] public int FromStoreId { get; set; }
         [NotMapped] public int ToStoreId { get; set; }
         [NotMapped] public int DeleteItemId { get; set; }
@@ -25,9 +24,12 @@ namespace CRMApi.Models
         [StringLength(100)] public string? ConPostOffice { get; set; }
         [StringLength(3)] public string? ConStateCode { get; set; }
         [StringLength(100)] public string? ConStateName { get; set; }
-
-        [StringLength(50)] public string? RefNo { get; set; }
-        public DateTime? RefDate { get; set; }
+        [StringLength(50)] public string? ChallanNo { get; set; }
+        public DateTime? ChallanDate { get; set; }
+        [StringLength(50)] public string? InvoiceNo { get; set; }
+        public DateTime? InvoiceDate { get; set; }
+        [StringLength(50)] public string? PoNo { get; set; }
+        public DateTime? PoDate { get; set; }
         public string? ListVoucherId { get; set; }
         [StringLength(12)] public string? EwayNo { get; set; }
         public DateTime? EwayDate { get; set; }

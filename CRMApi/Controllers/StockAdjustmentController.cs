@@ -13,12 +13,12 @@ namespace CRMApi.Controllers
     {
         private readonly DBCRM db;
         private readonly RepoStockAdjustment RepoStockAdjustment;
-        private readonly RepoVoucher RepoVoucher;
+        private readonly VoucherRepo RepoVoucher;
         public StockAdjustmentController(DBCRM _db)
         {
             db = _db;
             RepoStockAdjustment = new RepoStockAdjustment(db);
-            RepoVoucher = new RepoVoucher(db);
+            RepoVoucher = new VoucherRepo(db);
         }
         [HttpGet]
         public async Task<IActionResult> GetViewOption()

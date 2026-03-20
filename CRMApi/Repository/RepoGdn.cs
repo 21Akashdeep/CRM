@@ -1,6 +1,8 @@
-﻿using CRMApi.Models;
+﻿using CRMApi.Dto;
+using CRMApi.Models;
 using CRMApi.Repository;
 using CRMApi.Services;
+using DocumentFormat.OpenXml.Math;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
@@ -15,12 +17,12 @@ namespace CRMApi.Repository
     {
         private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
-        private readonly RepoVoucher repoVoucher;
+        private readonly VoucherRepo repoVoucher;
 
         public RepoGdn(DBCRM _db)
         {
             db = _db;
-            repoVoucher = new RepoVoucher(db);
+            repoVoucher = new VoucherRepo(db);
         }
 
         public async Task<Message> GetViewOptionAsync()
@@ -160,12 +162,108 @@ namespace CRMApi.Repository
             return objMsg;
         }
 
-        public async Task<List<Voucher>> ListAsync(Voucher? obj, User User)
+        public async Task<List<GdnDto>> ListAsync(GdnFltrDto? obj, User User)
         {
-            obj ??= new Voucher();
-            obj.ListType = new List<string> { "DeliveryNote" };
-            var voucher = await new RepoVoucher(db).ListAsync(obj, User);
-            return voucher;
+            obj ??= new GdnFltrDto();
+            obj.ListStatus = obj.ListStatus.Any() ? obj.ListStatus : App.ActiveStatus;                        
+
+            var dbGdn = (
+                from vc in db.Voucher
+                join pr in db.Party on vc.PartyId equals pr.Id
+                join st in db.Store on vc.StoreId equals st.Id
+                join sts in db.Setting on new { Category = App.SettingName.Status, Value = vc.Status.ToString() } equals new { sts.Category, sts.Value }
+                join cby in db.User on vc.CreatedBy equals cby.Id
+                join uby in db.User on vc.UpdatedBy equals uby.Id
+                where
+                       vc.Type == App.VoucherType.DeliveryNote &&
+                       (obj.FromDate == DateTime.MinValue || vc.Date.Date >= obj.FromDate.Date) &&
+                       (obj.ToDate == DateTime.MinValue || vc.Date.Date <= obj.ToDate.Date) &&
+                       (!obj.ListPartyId.Any() || obj.ListPartyId.Contains(vc.PartyId ?? 0)) &&
+                        obj.ListStatus.Contains(vc.Status) &&
+                       (!obj.ListId.Any() || obj.ListId.Contains(vc.Id))
+                select new GdnDto
+                {
+                    Id = vc.Id,
+                    No = vc.No,
+                    Type = vc.Type,
+                    Date = vc.Date,
+                    StoreId = vc.StoreId,
+                    StoreDesc = st.Description,
+                    PartyId = vc.PartyId,
+                    PartyDesc = pr.Description,
+                    ConName = vc.ConName,
+                    ConAdd1 = vc.ConAdd1,
+                    ConAdd2 = vc.ConAdd2,
+                    ConPincode = vc.ConPincode,
+                    ConPostOffice = vc.ConPostOffice,
+                    ConStateCode = vc.ConStateCode,
+                    ConStateName = vc.ConStateName,
+                    PoDate = vc.PoDate,
+                    PoNo = vc.PoNo,
+                    ListVoucherId = vc.ListVoucherId,
+                    EwayNo = vc.EwayNo,
+                    EwayDate = vc.EwayDate,
+                    Remarks = vc.Remarks,
+                    Status = vc.Status,
+                    StatusDesc = sts.Description,
+                    StatusCss = sts.StatusCss,
+                    CreatedBy = vc.CreatedBy,
+                    CreatedByName = cby.CreatedByName,
+                    CreatedAt = vc.CreatedAt,
+                    UpdatedBy = vc.UpdatedBy,
+                    UpdatedByName = uby.UpdatedByName,
+                    UpdatedAt = vc.UpdatedAt,                    
+                    IsEdit = true,
+                    IsPrint = true,
+                    IsDelete = vc.Status == App.Status.Enable ? true : false,
+                }
+            ).ToList();
+
+            var listVoucherId = dbGdn.Select(x => x.Id).ToList();
+            var dbGdnItem = await (
+                from vci in db.VoucherItem
+                join vc in db.Voucher on vci.VoucherId equals vc.Id
+                join itm in db.Item on vci.ItemId equals itm.Id
+                join un in db.Unit on itm.UnitId equals un.Id
+                join st in db.Store on vci.StoreId equals st.Id
+                join sts in db.Setting on new { Category = App.SettingName.Status, Value = vci.Status.ToString() } equals new { sts.Category, sts.Value }
+                join cby in db.User on vci.CreatedBy equals cby.Id
+                join uby in db.User on vci.UpdatedBy equals uby.Id
+                where 
+                    listVoucherId.Contains(vci.VoucherId) &&
+                    obj.ListStatus.Contains(vci.Status)
+                select new GdnItemDto
+                {
+                    Id = vci.Id,
+                    VoucherId = vci.VoucherId,
+                    StoreId = vci.StoreId,
+                    StoreDesc = st.Description,
+                    ItemId = vci.ItemId,
+                    ItemDesc = itm.Description,
+                    VoucherDesc = vc.Type,
+                    Remarks = vci.Remarks,
+                    SerialNo = vci.SerialNo,
+                    BatchNo = vci.BatchNo,
+                    ExpiryOn = vci.ExpiryOn,
+                    Qty = vci.Qty,                 
+                    UnitDesc = un.Description,                  
+                    Status = vci.Status,
+                    StatusDesc = sts.Description,
+                    StatusCss = sts.CssClass ?? "",
+                    CreatedBy = vci.CreatedBy,
+                    CreatedByName = cby.Name,
+                    CreatedAt = vci.CreatedAt,
+                    UpdatedBy = vci.UpdatedBy,
+                    UpdatedByName = uby.Name,
+                    UpdatedAt = uby.UpdatedAt
+                }
+            ).ToListAsync();
+            var gdnItemLookup = dbGdnItem.ToLookup(x => x.VoucherId);
+            foreach (var row in dbGdn)
+            {
+                  row.GdnItem =   gdnItemLookup[row.Id].ToList();
+            }
+            return dbGdn;
         }
         public async Task<Message> AddAsync(Voucher obj, User User)
         {
@@ -225,7 +323,7 @@ namespace CRMApi.Repository
 
                     await db.SaveChangesAsync();
 
-                    objMsg.obj = (await ListAsync(new Voucher
+                    objMsg.obj = (await ListAsync(new GdnFltrDto
                     {
                         ListId = new List<int> { obj.Id }
                     }, User)).FirstOrDefault();
@@ -239,25 +337,47 @@ namespace CRMApi.Repository
             return objMsg;
         }
 
-        public async Task<Message> EditAsync(int Id, User User)
+        public async Task<Message> EditAsync(int Id, User user)
         {
             Message objMsg = new Message();
             try
             {
-                objMsg.obj = (await ListAsync(new Voucher
+                var gdn = (await ListAsync(new GdnFltrDto
                 {
                     ListId = new List<int> { Id },
                     ListStatus = new List<int>(App.ActiveStatus) { App.Status.Delete }
-                }, User)).FirstOrDefault();
-
-                if (objMsg.obj == null)
+                }, user)).FirstOrDefault();
+                if (gdn == null) 
                 {
-                    Message.Error(ref objMsg, "Voucher was not found for edit.");
+                    Message.Error(ref objMsg, "Gdn was not found for edit.");
                     return objMsg;
                 }
+                var listGdnItemId = gdn.GdnItem.Select(x => x.Id).ToList();
+                var dbStockItem = await repoVoucher.StockItemAsync(new StockItemFltrDto
+                {
+                    ListNotContainId = listGdnItemId,
+                    ListStoreId = new List<int> { gdn.StoreId },                     
+                    ToDate = gdn.Date
+                }, user);
+                var stockItem = dbStockItem.Select(x => new GdnItemDto
+                {
+                    ItemId = x.ItemId,
+                    ItemDesc = x.ItemDesc,
+                    UnitDesc = x.UnitDesc,
+                    StoreId = x.StoreId,
+                    StoreDesc = x.StoreDesc,
+                    SerialNo = x.SerialNo,
+                    ExpiryOn = x.ExpiryOn,
+                    Qty = x.Qty,
+                    ItemSubDesc = x.ItemSubDesc,
+                }).ToList();
 
-                objMsg.data = (await GetAddOptionAsync()).data;
-                
+                objMsg.data = new
+                {
+                    Gdn = gdn,
+                    StockItem = stockItem,
+                    AddOption = (await GetAddOptionAsync()).data
+                };
                 Message.Success(ref objMsg, "Record found");
             }
             catch (Exception ex)
@@ -267,7 +387,94 @@ namespace CRMApi.Repository
             return objMsg;
         }
 
-        public async Task<Message> PrintAsync(Voucher obj, User User)
+        public async Task<Message> UpdateAsync(Voucher obj, User User)
+        {
+            Message objMsg = new Message();
+            var storeid = obj.StoreId;
+            try
+            {
+                var voucher = await db.Voucher.Include(v => v.VoucherItem).FirstOrDefaultAsync(x => App.ActiveStatus.Contains(x.Status) && x.Id == obj.Id);
+
+                if (voucher == null)
+                {
+                    Message.Error(ref objMsg, "Voucher was not found for update");
+                    return objMsg;
+                }
+                voucher.Type = obj.Type;
+                voucher.No = obj.No;
+                voucher.PartyId = obj.PartyId;
+                voucher.Date = obj.Date;
+                voucher.Remarks = obj.Remarks;
+                voucher.ConAdd1 = obj.ConAdd1;
+                voucher.ConAdd2 = obj.ConAdd2;
+                voucher.ConName = obj.ConName;
+                voucher.ConPincode = obj.ConPincode;
+                voucher.ConPostOffice = obj.ConPostOffice;
+                voucher.ConStateCode = obj.ConStateCode;
+                voucher.ConStateName = obj.ConStateName;
+                voucher.PoDate = obj.PoDate;
+                voucher.PoNo = obj.PoNo;
+                voucher.EwayNo = obj.EwayNo;
+                voucher.EwayDate = obj.EwayDate;
+                voucher.UpdatedBy = User.Id;
+                voucher.UpdatedAt = DateTime.Now;
+                foreach (var vi in voucher.VoucherItem)
+                {
+                    var item = obj.VoucherItem.FirstOrDefault(x => x.Id == vi.Id);
+                    if (item == null)
+                    {
+                        vi.Status = App.Status.ItemDelete;
+                    }
+                    else
+                    {
+                        vi.ExpiryOn = item.ExpiryOn;
+                        vi.StoreId = storeid;
+                        vi.ItemId = item.ItemId;
+                        vi.SerialNo = item.SerialNo;
+                        vi.BatchNo = item.BatchNo;
+                        vi.Qty = item.Qty;
+                        vi.Rate = item.Rate;
+                        vi.Amount = item.Amount;
+                        vi.Remarks = item.Remarks;
+                        vi.Status = voucher.Status;
+                    }
+                    vi.UpdatedBy = User.Id;
+                    vi.UpdatedAt = DateTime.Now;
+                }
+                db.Update(voucher);
+
+                var newItem = obj.VoucherItem.Where(x => x.Id == 0).ToList();
+                foreach (var vi in newItem)
+                {
+                    vi.StoreId = storeid;
+                    vi.Qty = -(vi.Qty);
+                    vi.VoucherId = voucher.Id;
+                    vi.Status = voucher.Status;
+                    vi.CreatedBy = User.Id;
+                    vi.CreatedAt = DateTime.Now;
+                    vi.UpdatedBy = User.Id;
+                    vi.UpdatedAt = DateTime.Now;
+                }
+                db.AddRange(newItem);
+                // await db.SaveChangesAsync();
+                Message.Update(ref objMsg, (await db.SaveChangesAsync()));
+
+                if (objMsg.status == Message.Type.success)
+                {
+                    objMsg.obj = (await ListAsync(
+                    new GdnFltrDto { ListId = new List<int> { obj.Id } },
+                    User)).FirstOrDefault();
+                }
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+
+            return objMsg;
+        }
+
+        public async Task<Message> PrintAsync(GdnFltrDto obj, User User)
         {
             Message objMsg = new Message();
             try
@@ -282,7 +489,7 @@ namespace CRMApi.Repository
             return objMsg;
         }
 
-        public async Task<Message> ExportAsync(Voucher obj, User User)
+        public async Task<Message> ExportAsync(GdnFltrDto obj, User User)
         {
             Message objMsg = new Message();
             try
@@ -329,12 +536,12 @@ namespace CRMApi.Repository
             return objMsg;
         }
 
-        public async Task<Message> GetItemDetailsAsync(Voucher obj, User User)
+        public async Task<Message> GetStockItemAsync(StockItemFltrDto obj, User User)
         {
             Message objMsg = new Message();
             try
             {
-                objMsg.data = await repoVoucher.GetStockItemAsync(obj, User);
+                objMsg.data = await repoVoucher.StockItemAsync(obj, User);
             }
             catch (Exception ex)
             {

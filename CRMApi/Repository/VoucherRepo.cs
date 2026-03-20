@@ -1,15 +1,16 @@
-﻿using CRMApi.Models;
+﻿using CRMApi.Dto;
+using CRMApi.Models;
 using CRMApi.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace CRMApi.Repository
 {
-    public class RepoVoucher
+    public class VoucherRepo
     {
         private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
-       
-        public RepoVoucher(DBCRM _db)
+
+        public VoucherRepo(DBCRM _db)
         {
             db = _db;
         }
@@ -19,14 +20,14 @@ namespace CRMApi.Repository
             obj.ListStatus = obj.ListStatus.Any() ? obj.ListStatus : App.ActiveStatus;
             var dbVoucherQuery = db.Voucher.Where(grn => obj.ListStatus.Contains(grn.Status)).AsQueryable();
             //Add Filter
-            if(obj.Id >0)
+            if (obj.Id > 0)
             {
                 dbVoucherQuery = dbVoucherQuery.Where(x => x.Id == obj.Id);
             }
-                if(obj.ListType.Any())
+            if (obj.ListType.Any())
                 dbVoucherQuery = dbVoucherQuery.Where(vc => obj.ListType.Contains(vc.Type));
             if (obj.ListId.Any())
-                dbVoucherQuery = dbVoucherQuery.Where(grn => obj.ListId.Contains(grn.Id));  
+                dbVoucherQuery = dbVoucherQuery.Where(grn => obj.ListId.Contains(grn.Id));
             if (obj.ListNo.Any())
                 dbVoucherQuery = dbVoucherQuery.Where(vc => obj.ListNo.Contains(vc.Id));
             if (obj.FromDate != DateTime.MinValue)
@@ -35,27 +36,27 @@ namespace CRMApi.Repository
                 dbVoucherQuery = dbVoucherQuery.Where(grn => grn.Date.Date <= obj.ToDate.Date);
             if (obj.ListPartyId.Any())
             {
-              dbVoucherQuery = dbVoucherQuery.Where(grn =>grn.PartyId.HasValue && obj.ListPartyId.Contains(grn.PartyId.Value)
-                );
+                dbVoucherQuery = dbVoucherQuery.Where(grn => grn.PartyId.HasValue && obj.ListPartyId.Contains(grn.PartyId.Value)
+                  );
             }
 
 
             var dbVoucher = await (
                 from vc in dbVoucherQuery
-                join par in db.Party on vc.PartyId equals par.Id into partyJoin
-                from par in partyJoin.DefaultIfEmpty()
+                join st in db.Store on vc.StoreId equals st.Id
+                join par in db.Party on vc.PartyId equals par.Id
                 join sts in db.Setting on new { Category = App.SettingName.Status, Value = vc.Status.ToString() } equals new { sts.Category, sts.Value }
                 join cby in db.User on vc.CreatedBy equals cby.Id
                 join uby in db.User on vc.UpdatedBy equals uby.Id
                 select new
                 {
                     Voucher = vc,
-                    PartyDesc = par != null ? par.Description : null,
+                    StoreDesc = st.Description,
+                    PartyDesc = par.Description,
                     StatusDesc = sts.Description,
                     StatusCss = sts.CssClass,
                     CreatedByName = cby.Name,
                     UpdatedByName = uby.Name
-                    
                 }
             ).ToListAsync();
 
@@ -111,13 +112,10 @@ namespace CRMApi.Repository
                     No = voucher.No,
                     Type = voucher.Type,
                     Date = voucher.Date,
+                    StoreId = voucher.StoreId,
+                    StoreDesc = x.StoreDesc,
                     PartyId = voucher.PartyId,
                     PartyDesc = x.PartyDesc,
-                    //StoreDesc = dbVoucherItem[0].StoreDesc,
-                    StoreDesc = VoucherItemLookup[voucher.Id].Select(x => x.StoreDesc).FirstOrDefault(),
-                    ItemName = item.Where(i => !string.IsNullOrEmpty(i.ItemDesc)).Select(i => i.ItemDesc!)
-                    .Distinct().ToList(),
-                    TotalQty = item.Count(),
                     ConName = voucher.ConName,
                     ConAdd1 = voucher.ConAdd1,
                     ConAdd2 = voucher.ConAdd2,
@@ -125,8 +123,10 @@ namespace CRMApi.Repository
                     ConPostOffice = voucher.ConPostOffice,
                     ConStateCode = voucher.ConStateCode,
                     ConStateName = voucher.ConStateName,
-                    RefDate = voucher.RefDate,
-                    RefNo = voucher.RefNo,
+                    ChallanDate = voucher.ChallanDate,
+                    ChallanNo = voucher.ChallanNo,
+                    InvoiceDate = voucher.InvoiceDate,
+                    InvoiceNo = voucher.InvoiceNo,
                     ListVoucherId = voucher.ListVoucherId,
                     EwayNo = voucher.EwayNo,
                     EwayDate = voucher.EwayDate,
@@ -148,8 +148,8 @@ namespace CRMApi.Repository
             }
             ).ToList();
             return Voucher;
-            }
-        public async Task<List<VoucherItem>> ListItemAsync(Voucher? obj,User User)  
+        }
+        public async Task<List<VoucherItem>> ListItemAsync(Voucher? obj, User User)
         {
             obj ??= new Voucher();
             obj.ListStatus = obj.ListStatus.Any() ? obj.ListStatus : App.ActiveStatus;
@@ -199,11 +199,11 @@ namespace CRMApi.Repository
                     UpdatedBy = vci.UpdatedBy,
                     UpdatedByName = uby.Name,
                     UpdatedAt = vci.UpdatedAt,
-                    IsEdit = vci.Status == App.Status.Enable ? true : false,                 
+                    IsEdit = vci.Status == App.Status.Enable ? true : false,
                     IsDelete = vci.Status == App.Status.Enable ? true : false,
                     IsEnable = vci.Status == App.Status.Delete ? true : false,
 
-                  
+
 
                 }).ToListAsync();
 
@@ -231,9 +231,9 @@ namespace CRMApi.Repository
                 db.Add(obj);
 
                 int result = await db.SaveChangesAsync();
-                Message.Add(ref objMsg, result);   
+                Message.Add(ref objMsg, result);
 
-              
+
                 if (objMsg.status == Message.Type.success)
                 {
                     db.Entry(obj).Reload();
@@ -256,51 +256,51 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public async Task<Message> GetStockItemAsync(Voucher obj, User User)
-        {
-            Message objMsg = new Message();
-            try 
-            {
-                obj ??= new Voucher();
-                obj.ListStatus = obj.ListStatus.Any() ? obj.ListStatus : App.ActiveStatus;
+        //public async Task<Message> GetStockItemAsync(Voucher obj, User User)
+        //{
+        //    Message objMsg = new Message();
+        //    try
+        //    {
+        //        obj ??= new Voucher();
+        //        obj.ListStatus = obj.ListStatus.Any() ? obj.ListStatus : App.ActiveStatus;
 
-                var voucherItemDetails = await (
-                    from vci in db.VoucherItem
-                    join vc in db.Voucher on vci.VoucherId equals vc.Id
-                    join it in db.Item on vci.ItemId equals it.Id
-                    join ut in db.Unit on it.UnitId equals ut.Id
-                    join isg in db.ItemSubGroup on it.ItemSubGroupId equals isg.Id
-                    join ig in db.ItemGroup on it.ItemGroupId equals ig.Id
-                    where vc.Date <= obj.ToDate && vci.StoreId == obj.StoreId && obj.ListStatus.Contains(vci.Status) && obj.ListStatus.Contains(vc.Status)
-                    group new { vci, it, ut } by new { vci.StoreId, vci.SerialNo, vci.ItemId, ItemDesc = it.Description, UnitDesc = ut.Description } into g
-                    where g.Sum(x => x.vci.Qty) > 0
-                    select new
-                    {
-                        g.Key.StoreId,
-                        g.Key.SerialNo,
-                        g.Key.ItemId,
-                        g.Key.ItemDesc,
-                        Description = $"{g.Key.ItemDesc} (Bal. Qty : {g.Sum(x => x.vci.Qty).ToString("#.000")} {g.Key.UnitDesc})",
-                        g.Key.UnitDesc,
-                        Qty = g.Sum(x => x.vci.Qty),
-                        SubText = $"{g.Sum(x => x.vci.Qty).ToString("#.000")} {g.Key.UnitDesc}"
-                    }
-                ).ToListAsync();
-                objMsg.data = voucherItemDetails;
-                Message.Get(ref objMsg);
-            } 
-            catch (Exception ex)
-            {
-                Message.Exception(ref objMsg, ex);
-            }
-            return objMsg;
-        }
+        //        var voucherItemDetails = await (
+        //            from vci in db.VoucherItem
+        //            join vc in db.Voucher on vci.VoucherId equals vc.Id
+        //            join it in db.Item on vci.ItemId equals it.Id
+        //            join ut in db.Unit on it.UnitId equals ut.Id
+        //            join isg in db.ItemSubGroup on it.ItemSubGroupId equals isg.Id
+        //            join ig in db.ItemGroup on it.ItemGroupId equals ig.Id
+        //            where vc.Date <= obj.ToDate && vci.StoreId == obj.StoreId && obj.ListStatus.Contains(vci.Status) && obj.ListStatus.Contains(vc.Status)
+        //            group new { vci, it, ut } by new { vci.StoreId, vci.SerialNo, vci.ItemId, ItemDesc = it.Description, UnitDesc = ut.Description } into g
+        //            where g.Sum(x => x.vci.Qty) > 0
+        //            select new
+        //            {
+        //                g.Key.StoreId,
+        //                g.Key.SerialNo,
+        //                g.Key.ItemId,
+        //                g.Key.ItemDesc,
+        //                Description = $"{g.Key.ItemDesc} (Bal. Qty : {g.Sum(x => x.vci.Qty).ToString("#.000")} {g.Key.UnitDesc})",
+        //                g.Key.UnitDesc,
+        //                Qty = g.Sum(x => x.vci.Qty),
+        //                SubText = $"Serial No. : {g.Key.SerialNo}"
+        //            }
+        //        ).ToListAsync();
+        //        objMsg.data = voucherItemDetails;
+        //        Message.Get(ref objMsg);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Message.Exception(ref objMsg, ex);
+        //    }
+        //    return objMsg;
+        //}
         public async Task<Message> UpdateAsync(Voucher obj, User User)
         {
             Message objMsg = new Message();
             var storeid = obj.StoreId;
             try
-            {
+            {                                   
                 var voucher = await db.Voucher.Include(v => v.VoucherItem).FirstOrDefaultAsync(x => App.ActiveStatus.Contains(x.Status) && x.Id == obj.Id);
 
                 if (voucher == null)
@@ -320,10 +320,12 @@ namespace CRMApi.Repository
                 voucher.ConPostOffice = obj.ConPostOffice;
                 voucher.ConStateCode = obj.ConStateCode;
                 voucher.ConStateName = obj.ConStateName;
-                voucher.RefNo = obj.RefNo;
-                voucher.RefDate = obj.RefDate;
+                voucher.ChallanNo = obj.ChallanNo;
+                voucher.ChallanDate = obj.ChallanDate;
+                voucher.InvoiceNo = obj.InvoiceNo;
+                voucher.InvoiceDate = obj.InvoiceDate;
                 voucher.EwayNo = obj.EwayNo;
-                voucher.EwayDate = obj.EwayDate;                
+                voucher.EwayDate = obj.EwayDate;
                 voucher.UpdatedBy = User.Id;
                 voucher.UpdatedAt = DateTime.Now;
                 foreach (var vi in voucher.VoucherItem)
@@ -331,7 +333,7 @@ namespace CRMApi.Repository
                     var item = obj.VoucherItem.FirstOrDefault(x => x.Id == vi.Id);
                     if (item == null)
                     {
-                        vi.Status = App.Status.ItemDelete; 
+                        vi.Status = App.Status.ItemDelete;
                     }
                     else
                     {
@@ -342,7 +344,7 @@ namespace CRMApi.Repository
                         vi.BatchNo = item.BatchNo;
                         vi.Qty = item.Qty;
                         vi.Rate = item.Rate;
-                        vi.Amount =item.Amount;
+                        vi.Amount = item.Amount;
                         vi.Remarks = item.Remarks;
                         vi.Status = voucher.Status;
                     }
@@ -360,13 +362,13 @@ namespace CRMApi.Repository
                     vi.CreatedBy = User.Id;
                     vi.CreatedAt = DateTime.Now;
                     vi.UpdatedBy = User.Id;
-                    vi.UpdatedAt = DateTime.Now;                    
+                    vi.UpdatedAt = DateTime.Now;
                 }
                 db.AddRange(newItem);
-               // await db.SaveChangesAsync();
+                // await db.SaveChangesAsync();
                 Message.Update(ref objMsg, (await db.SaveChangesAsync()));
 
-                if (objMsg.status == Message.Type.success) 
+                if (objMsg.status == Message.Type.success)
                 {
                     objMsg.obj = (await ListAsync(
                     new Voucher { ListId = new List<int> { obj.Id } },
@@ -380,13 +382,13 @@ namespace CRMApi.Repository
 
             return objMsg;
         }
-        public async Task<Message> DeleteAsync(int Id,User User)
+        public async Task<Message> DeleteAsync(int Id, User User)
         {
             Message objMsg = new Message();
             try
             {
                 var Voucher = await db.Voucher
-                    .Include(vc => vc.VoucherItem.Where(vi=> App.ActiveStatus.Contains(vi.Status)))
+                    .Include(vc => vc.VoucherItem.Where(vi => App.ActiveStatus.Contains(vi.Status)))
                     .FirstOrDefaultAsync(vc => App.ActiveStatus.Contains(vc.Status) && vc.Id == Id);
                 if (Voucher == null)
                 {
@@ -402,7 +404,7 @@ namespace CRMApi.Repository
                     vi.UpdatedBy = User.Id;
                     vi.UpdatedAt = DateTime.Now;
                 });
-                db.Update(Voucher);                
+                db.Update(Voucher);
                 Message.Delete(ref objMsg, (await db.SaveChangesAsync()));
                 if (objMsg.status == Message.Type.success)
                 {
@@ -410,7 +412,7 @@ namespace CRMApi.Repository
                     {
                         ListId = new List<int> { Voucher.Id },
                         ListStatus = new List<int> { App.Status.Delete }
-                    }, User)).FirstOrDefault();                   
+                    }, User)).FirstOrDefault();
                 }
             }
             catch (Exception ex)
@@ -434,7 +436,7 @@ namespace CRMApi.Repository
                 voucherItem.UpdatedBy = user.Id;
                 voucherItem.UpdatedAt = DateTime.Now;
                 db.Update(voucherItem);
-                Message.Delete(ref objMsg, (await db.SaveChangesAsync()));                
+                Message.Delete(ref objMsg, (await db.SaveChangesAsync()));
             }
             catch (Exception ex)
             {
@@ -450,7 +452,7 @@ namespace CRMApi.Repository
             try
             {
                 var voucher = await db.Voucher
-                    .Include(v => v.VoucherItem.Where(vi=> vi.Status == App.Status.Delete))
+                    .Include(v => v.VoucherItem.Where(vi => vi.Status == App.Status.Delete))
                     .FirstOrDefaultAsync(v => v.Id == id && v.Status == App.Status.Delete);
                 if (voucher == null)
                 {
@@ -465,9 +467,9 @@ namespace CRMApi.Repository
                     vi.Status = App.Status.Enable;
                     vi.UpdatedBy = user.Id;
                     vi.UpdatedAt = DateTime.Now;
-                }                
+                }
                 Message.Enable(ref objMsg, (await db.SaveChangesAsync()));
-                if (objMsg.status == Message.Type.success) 
+                if (objMsg.status == Message.Type.success)
                 {
                     //Assing Voucher in objMsg.obj
                 }
@@ -477,6 +479,38 @@ namespace CRMApi.Repository
                 Message.Exception(ref objMsg, ex);
             }
             return objMsg;
+        }
+        public async Task<List<StockItemDto>> StockItemAsync(StockItemFltrDto obj, User user)
+        {
+            obj.ListStatus = obj.ListStatus.Any() ? obj.ListStatus : App.ActiveStatus;
+            var voucherItem = await (
+                    from vci in db.VoucherItem
+                    join vc in db.Voucher on vci.VoucherId equals vc.Id
+                    join it in db.Item on vci.ItemId equals it.Id
+                    join ut in db.Unit on it.UnitId equals ut.Id
+                    join isg in db.ItemSubGroup on it.ItemSubGroupId equals isg.Id
+                    join ig in db.ItemGroup on it.ItemGroupId equals ig.Id
+                    where 
+                        (!obj.ListNotContainId.Any() || !obj.ListNotContainId.Contains(vci.Id)) &&
+                        vc.Date <= obj.ToDate && 
+                        obj.ListStoreId.Contains(vci.StoreId) && 
+                        obj.ListStatus.Contains(vci.Status) && 
+                        obj.ListStatus.Contains(vc.Status)
+                    group new { vci, it, ut } by new { vci.ItemId, ItemDesc = it.Description, UnitDesc = ut.Description, vci.StoreId, vci.SerialNo} into g
+                    where g.Sum(x => x.vci.Qty) > 0
+                    select new StockItemDto
+                    {
+                        ItemId = g.Key.ItemId,
+                        ItemDesc = $"{g.Key.ItemDesc} (Bal. Qty : {g.Sum(x => x.vci.Qty).ToString("#.000")} {g.Key.UnitDesc})",
+                        ItemSubDesc = $"Serial No. : {g.Key.SerialNo}",
+                        UnitDesc = g.Key.UnitDesc,
+                        StoreId = g.Key.StoreId,
+                        SerialNo = g.Key.SerialNo,
+                        Qty = g.Sum(x => x.vci.Qty),
+                        
+                    }
+                ).ToListAsync();
+            return voucherItem;
         }
     }
 }

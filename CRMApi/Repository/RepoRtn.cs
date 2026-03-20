@@ -173,7 +173,7 @@ namespace CRMApi.Repository
         {
             obj ??= new Voucher();
             obj.ListType = new List<string> {"ReturnNote"};
-            var voucher = await new RepoVoucher(db).ListAsync(obj, User);
+            var voucher = await new VoucherRepo(db).ListAsync(obj, User);
             return voucher;
         }
         public async Task<Message> GetGdnItemAsync(List<int> ListGdnId, User User)
@@ -320,7 +320,7 @@ namespace CRMApi.Repository
             try
             {
 
-                objMsg = await  new RepoVoucher(db).DeleteItemAsync(obj.DeleteItemId, user);
+                objMsg = await  new VoucherRepo(db).DeleteItemAsync(obj.DeleteItemId, user);
                 objMsg.data = await ListAsync(obj, user);
 
             }

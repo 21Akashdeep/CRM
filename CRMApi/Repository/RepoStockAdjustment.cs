@@ -113,7 +113,7 @@ namespace CRMApi.Repository
                 obj.Type = "StockAdjustment";
 
                 // Note: For Adjustment, we keep the user-defined Qty (could be + or -)
-                objMsg = await new RepoVoucher(db).AddAsync(obj, User);
+                objMsg = await new VoucherRepo(db).AddAsync(obj, User);
             }
             catch (Exception ex)
             {
@@ -126,7 +126,7 @@ namespace CRMApi.Repository
         {
             obj ??= new Voucher();
             obj.ListType = new List<string> { "StockAdjustment" };
-            var voucher = await new RepoVoucher(db).ListAsync(obj, User);
+            var voucher = await new VoucherRepo(db).ListAsync(obj, User);
             return voucher;
         }
 
@@ -162,7 +162,7 @@ namespace CRMApi.Repository
             try
             {
                 obj.Type = "StockAdjustment";
-                objMsg = await new RepoVoucher(db).UpdateAsync(obj, User);
+                objMsg = await new VoucherRepo(db).UpdateAsync(obj, User);
             }
             catch (Exception ex)
             {

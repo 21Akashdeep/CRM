@@ -1,4 +1,5 @@
-﻿using CRMApi.Models;
+﻿using CRMApi.Dto;
+using CRMApi.Models;
 using CRMApi.Repository;
 using CRMApi.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -13,12 +14,12 @@ namespace CRMApi.Controllers
     {
         private readonly DBCRM db;
         private readonly RepoStockTransfer RepoStockTransfer;
-        private readonly RepoVoucher RepoVoucher;
+        private readonly VoucherRepo RepoVoucher;
         public StockTransferController(DBCRM _db)
         {
             db = _db;
             RepoStockTransfer = new RepoStockTransfer(db);
-            RepoVoucher = new RepoVoucher(db);
+            RepoVoucher = new VoucherRepo(db);
         }
         [HttpGet]
         public async Task<IActionResult> GetViewOption()
@@ -87,7 +88,7 @@ namespace CRMApi.Controllers
         //    return Ok(objMsg);
         //}
         [HttpPost]
-        public async Task<IActionResult> getItem([FromBody] Voucher obj)
+        public async Task<IActionResult> getItem([FromBody] StockItemFltrDto obj)
         {
             Message objMsg = new Message();
             try
