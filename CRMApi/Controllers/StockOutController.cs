@@ -72,7 +72,7 @@ namespace CRMApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> getItem([FromBody] StockItemFltrDto obj)
+        public async Task<IActionResult> getStockItem([FromBody] StockItemFltrDto obj)
         {
             Message objMsg = new Message();
             try
@@ -84,7 +84,28 @@ namespace CRMApi.Controllers
                 if (User == null) return Ok(objMsg);
 
 
-                objMsg = await RepoStockOut.GetItemDetailsAsync(obj, User);
+                objMsg = await RepoStockOut.GetStockItemAsync(obj, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
+        [HttpPost]
+        public async Task<IActionResult> getStockItemWithSerialNo([FromBody] StockItemFltrDto obj)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(
+                    new Request { HttpRequest = Request, ActionType = ActionType.Export },
+                    db, ref objMsg);
+
+                if (User == null) return Ok(objMsg);
+
+
+                objMsg = await RepoStockOut.GetStockItemWithSerialNoAsync(obj, User);
             }
             catch (Exception ex)
             {

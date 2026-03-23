@@ -50,15 +50,8 @@
                         <thead>
                             <tr>
                                 <th data-sortable="false" data-formatter="tableStockOutSlNo" class="text-center">#</th>
-                                <th data-sortable="true" data-formatter="tableStockOutDate">Date</th>
                                 <th data-sortable="true" data-field="No">Number</th>
-                                @* <th data-sortable="true" data-field="PartyDesc">Party</th>
-                                <th data-sortable="true" data-field="ConName">Consignee Name </th> *@
-                                @* <th data-sortable="true" data-formatter="tableStockOutConAddress" class="text-nowrap">Consignee Address</th>
-                                <th data-sortable="true" data-formatter="tableStockOutRefNoAndDate" class="text-nowrap">Ref No / Date </th>
-                                <th data-sortable="true" data-field="Remarks">Remarks</th> *@
-                                <th data-formatter="tabelItemName">Items</th>
-                                <th data-sortable="true" data-field="TotalQty"> Qty </th>
+                                <th data-sortable="true" data-field="StoreDesc">From Store</th>                             
                                 <th data-sortable="false" data-formatter="tableStockOutCreatedByAndAt" class="text-nowrap">Created By & At</th>
                                 <th data-sortable="false" data-formatter="tableStockOutUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
                                 <th data-sortable="false" data-formatter="tableStockOutStatus" class="Status text-center">Status</th>
@@ -111,13 +104,13 @@
                             <table id="tableStockOutItem" class="table table-bordered table-hover table-default line-item" data-search="false">
                                 <thead>
                                     <tr>
-                                        <th colspan="6">
+                                        <th colspan="5">
                                             StockOut Item
                                             <div class="btn-group float-end">
                                                 <button type="button" class="btn btn-sm btn-primary rounded-5 me-e" onclick="StockOut.addStockOutItem()">
                                                     <span class="fa fa-plus"></span>
                                                 </button>
-                                                <button type="button" class="btn btn-sm btn-success rounded-5" onclick=" StockOut.scanner()">
+                                                <button type="button" class="btn btn-sm btn-success rounded-5" onclick=" StockOut.scanItem()">
                                                     <span class="fa fa-qrcode"></span>
                                                 </button>
                                             </div>
@@ -126,11 +119,9 @@
                                     <tr>
                                         <th data-formatter="tableStockOutItemSlNo" class="text-center">#</th>
                                         <th class="desc" data-formatter="tableStockOutItemDesc" data-events="tableStockOutItemDescEvent">Description</th>
-                                        <th class="qty" data-formatter="tableTaskSerialNo" data-events="tableStockOutSerialNoDescEvent">SerialNo</th>
-                                        <th class="qty" data-formatter="tableStockOutExpiryOn" data-events="tableStockOutExpiryOnEvent">ExpiryOn</th>
-                                        <th class="qty" data-formatter="tableStockOutItemQty" data-events="tableStockOutItemQtyEvent">Qty</th>
-                                        <th class="qty" data-formatter="tableStockItemAction" data-events="tableStockOutItemActionEvents">Remove</th>
-                                    </tr>
+                                        <th class="qty" data-field="SerialNo">SerialNo</th>
+                                        <th class="qty" data-formatter="tableStockOutItemExpiryOn">ExpiryOn</th>
+                                        <th class="qty" data-formatter="tableStockOutItemQty" data-events="tableStockOutItemQtyEvent">Qty</th>                                   
                                 </thead>
                                 <tbody>
                                 </tbody>
@@ -162,18 +153,7 @@
                             <div class="modal-body" style="min-height:75vh;">
                                 <form id="formStockOutScanItem" autocomplete="off" onsubmit="return false;">
                                     <div class="row">
-                                        <div class="col-md-5">
-                                            <label>Item<span class="text-mandatory">*</span></label>
-                                            <select id="StockOutScan-ItemId" name="ItemId" class="select-pick scan-required" data-size="4" data-search="true"></select>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label>ExpiryOn</label>
-                                            <div class="input-group input-group-sm">
-                                                <input type="text" id="StockOutScan-ItemExpiryOn" name="ExpiryOn" class="form-control form-control-sm scan-required" data-date-format="DD-MMM-YYYY" readonly />
-                                                <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-6">
                                             <label>Scan</label>
                                             <input type="text" id="StockOutScan-ItemSerialNo" name="Scan" class="form-control form-control-sm" />
                                         </div>
@@ -188,12 +168,11 @@
                                                     <tr>
                                                         <th data-formatter="tableStockOutItemSlNo" class="text-center">#</th>
                                                         <th data-field="ItemDesc">Item</th>
-                                                        <th data-formatter="tableScanExpiry">Expiry</th>
                                                         <th data-formatter="tableScanSerial">Serial No</th>
                                                         <th data-formatter="tableScanQty" class="text-end">Qty</th>
                                                         <th data-formatter="tableStockOutScanItemAction" data-events="tableStockOutScanItemActionEvents" class="text-center">
                                                             <i class="fa-solid fa-list-check"></i>
-                                                        </th>
+                                                        </th>                                                       
                                                     </tr>
                                                 </thead>
                                                 <tbody></tbody>
