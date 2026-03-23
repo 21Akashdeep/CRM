@@ -149,7 +149,7 @@
     }
     static getItemDetails() {
         let obj = {
-            StoreId: $('#StockOut-StoreId').val(),
+            ListStoreId: [$('#StockOut-StoreId').val()],
             FromDate: DateTime.json($('#DateRange').val().split('|')[0]),
             Todate: DateTime.json($('#DateRange').val().split('|')[1])
 
@@ -160,7 +160,7 @@
             onSuccess: (response) => {
                 if (!response.data || response.data.length === 0)
                     return;
-                StockOut.item = response.data.data;
+                StockOut.item = response.data;
 
             }
         });
@@ -360,7 +360,7 @@
                 <td>${moment(obj.Date).format('DD-MMM-YYYY')}</td>
                 <td>${obj.StoreDesc || '-'}</td>
                 <td>${obj.PartyDesc || '-'}</td>
-                <td>${obj.RefNo || '-'}</td>                
+                <td>${obj.ChallanNo || '-'}</td>                
                 <td>${obj.Remarks || '-'}</td>
                 <td>${obj.CreatedByName}</td>
             </tr>
@@ -451,10 +451,10 @@
         });
     }
 }
-window.tableStockOutRefNoAndDate = (value, obj, index) => {
+window.tableStockOutChallanNoAndDate = (value, obj, index) => {
     return `
-        <div>${obj.RefNo ?? ''}</div>
-        <div>${obj.RefDate ? moment(obj.RefDate).format('DD-MMM-YYYY') : ''}</div>
+        <div>${obj.ChallanNo ?? ''}</div>
+        <div>${obj.ChallanDate ? moment(obj.ChallanDate).format('DD-MMM-YYYY') : ''}</div>
     `;
 };
 window.tableStockOutSlNo = (value, obj, index) => {
@@ -520,28 +520,7 @@ window.tableStockOutAction = (value, obj, index) => {
         </div>
     `;
 }
-window.tableStockOutConAddress = (value, obj, index) => {
 
-    const parts = [
-        obj.ConAdd1,
-        obj.ConAdd2,
-        obj.ConPostOffice,
-        obj.ConPincode,
-        obj.ConStateName
-    ]
-        .filter(x => x && x.trim() !== "")
-        .map(x => x.trim());
-
-    if (parts.length === 0) return "";
-
-    // Break into lines (max 2–3 items per line for readability)
-    let lines = [];
-    for (let i = 0; i < parts.length; i += 2) {
-        lines.push(parts.slice(i, i + 2).join(", "));
-    }
-
-    return lines.join("<br>");
-};
 window.tableStockOutActionEvent = {
     'click .btn-edit': (e, value, obj, index) => {
         StockOut.edit({ id: obj.Id, action: 'Edit' });
@@ -563,7 +542,7 @@ window.tableStockOutItemSlNo = (value, obj, index) => {
 }
 window.tableStockOutItemDesc = (value, obj, index) => {
     return `
-        ${Dropdown.html({ id: `StockOutItem_${index}`, className: 'StockOut-item', data: StockOut.item, value: 'ItemId', text: 'Description', subText: "SubText", initialValue: [obj.ItemId], json: true, parent: '.modal' })}
+        ${Dropdown.html({ id: `StockOutItem_${index}`, className: 'StockOut-item', data: StockOut.item, value: 'SerialNo', text: 'ItemDesc', subText: "ItemSubDesc", initialValue: [obj.SerialNo], json: true, parent: '.modal' })}
         <input type="text" id="StockOutItemRemarks_${index}" class="form-control form-control-sm mb-0 mt-1 StockOut-item-remarks" maxlength="100" placeholder="Remarks" value="${obj.Remarks ?? ""}">
     `;
 }
@@ -690,9 +669,7 @@ window.tableStockOutBatchNoDescEvent = {
         });
     }
 };
-//window.tableStockOutExpiryOn = (value, obj, index) => {
-//    return `<input type="date" id="StockOutExpiryOn_${index}" class="form-control form-control-sm mb-0 StockOut-item" value="${obj.ExpiryOn ?? ""}"/>`;
-//}
+
 window.tableStockOutExpiryOn = (value, obj, index) => {
     let val = obj.ExpiryOn
         ? moment(obj.ExpiryOn, ['DD-MMM-YYYY', 'YYYY-MM-DD']).format('YYYY-MM-DD')
@@ -725,6 +702,8 @@ window.tableStockOutItemActionEvents = {
         StockOut.deleteItem({ id: obj.Id, index: index });
     }
 }
+
+//StockOutScanTable
 window.tableScanExpiry = (v, obj) => {
     return obj.ExpiryOn
         ? moment(obj.ExpiryOn).format('DD-MMM-YYYY')

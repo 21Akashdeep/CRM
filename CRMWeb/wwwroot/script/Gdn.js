@@ -1,8 +1,6 @@
 ﻿class Gdn {
     static item = [];
-    static reasonCode = [];
-    static store = [];
-    static stateList = [];
+    static itemWithSerialNo = [];        
     static init() {
         Gdn.getViewOption();
         $('#btnNewEntry').on('click', () => {
@@ -42,53 +40,53 @@
             });
         });
         $('#GdnScan-ItemSerialNo').on('keydown', (e) => {
-            if (e.key == 'Enter') {
-                if (!Field.isMandatory({ class: '.scan-required' })) {
-                    return;
+            if (e.key != 'Enter') return;
+            let item = Gdn.itemWithSerialNo.find(x => x.SerialNo == $('#GdnScan-ItemSerialNo').val());
+            if (!item) {
+                Message.error({ statusText: `Invalid Serial No. (${$('#GdnScan-ItemSerialNo').val()})` });
+                return;
+            }                      
+            Gdn.addGdnItem({
+                itemId: item.ItemId,
+                itemDesc: item.ItemDesc,
+                expiryOn: item.ExpiryOn,
+                serialNo: item.SerialNo,
+                unitDesc: item.UnitDesc,
+                qty:1,
+                isScanned: true,
+                callback: (obj) => {
+                    Table.add({ id: '#tableGdnScanItem', data: obj, action: 'prepend' });
+                    $('#GdnScan-ItemSerialNo').val('');
                 }
-                let serialNo = $('#GdnScan-ItemSerialNo').val();
-
-                let countGdnItem = $('#tableGdnItem').bootstrapTable('getData').filter(x => x.SerialNo == serialNo).length;
-                let countScanItem = $('#tableGdnScanItem').bootstrapTable('getData').filter(x => x.SerialNo == serialNo).length;
-                if (countGdnItem > 0 || countScanItem > 0) {
-                    Message.error({ statusText: `Serial No. ${serialNo} already added in Scan List or Item List.` });
-                    return;
-                }
-                let selectedItem = Gdn.item.filter(x => x.SerialNo == serialNo);
-
-                if (selectedItem.length == 0) {
-                    Message.error({ statusText: `Invalid SerialNo: (${serialNo})` });
-                    return;
-                }
-                
-                Gdn.addGdnItem({
-                    
-                    itemId: selectedItem[0].ItemId,
-                    itemDesc: selectedItem[0].ItemDesc,
-                    expiryOn: selectedItem[0].ExpiryOn,
-                    serialNo: selectedItem[0].SerialNo,
-                    unitDesc: selectedItem[0].UnitDesc,
-                    qty:1,
-                    isScanned: true,
-                    callback: (obj) => {
-                        Table.add({ id: '#tableGdnScanItem', data: obj, action: 'prepend' });
-                        $('#GdnScan-ItemSerialNo').val('');
-                    }
-                });
-            }
+            });            
         });       
-        $('#btnScanItemAdd').on('click', () => {
-            let scanItems = $('#tableGdnScanItem').bootstrapTable('getData');
-            if (scanItems.length === 0) {
+        $('#GdnScan-BtnAddItem').on('click', () => {
+            let scanItem = $('#tableGdnScanItem').bootstrapTable('getData');
+            if (scanItem.length === 0) {
                 Message.error({ statusText: 'No scanned items found' });
                 return;
-            }
-            Table.add({ id: '#tableGdnItem', data: scanItems, action: 'append', selectPick: true });
+            }            
+            Table.add({ id: '#tableGdnItem', data: scanItem, action: 'append', selectPick: true });
             Gdn.sumOfTotalGdnItem();
             Modal.close({ id: '#modalGdnItemScan' });
         });
-        $('#Gdn-Store').on('change', () => {
-            Gdn.getItemDetails();
+        $('#Gdn-StoreId').on('change', () => {
+
+            let obj = {
+                ListStoreId: [$('#Gdn-StoreId').val()],
+            };
+            Data.post({
+                url: 'Gdn/GetStockItem',
+                data: obj,
+                onSuccess: (response) => {
+                    if (response.status == Message.Type.success) {
+                        Gdn.item = response.data;
+                    }
+                    else {
+                        Message.show(response);
+                    }
+                }
+            });            
         });
         $('#Gdn-BtnSave').on('click', () => {
             if (!Field.isMandatory({ class: '.required' })) {
@@ -117,24 +115,20 @@
             onSuccess: (response) => {
                 Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
                 Dropdown.bind({ id: '#ListPartyId', data: response.data.Party, value: 'Id', text: 'Name' });
-              
                 Dropdown.bind({ id: '#ListNo', data: response.data.Number, value: 'Id', text: 'No' });
             }
         });
     }
-
     static getAddOption({ onSuccess }) {
         Data.get({ url: 'Gdn/GetAddOption', onSuccess: onSuccess });
     }
-
     static get({ method = 'Get', onSuccess }) {
         let obj = {
             ListStatus: $('#ListStatus').val(),
             Date: DateTime.json($('#Gdn-Date').val().split('|')[0]),
             FromDate: DateTime.json($('#DateRange').val().split('|')[0]),
             ToDate: DateTime.json($('#DateRange').val().split('|')[1]),
-            ListPartyId: $('#ListPartyId').val(),
-            //ListConName: $('#ListConName').val(),
+            ListPartyId: $('#ListPartyId').val(),            
             ListNo: $('#ListNo').val()
         };
         Data.post({
@@ -143,70 +137,50 @@
             onSuccess: onSuccess
         });
     }
-
     static newEntry() {
         Gdn.getAddOption({
-            onSuccess: (response) => {
-                //Gdn.item = response.data.Item;
-                Gdn.reasonCode = response.data.ReasonCode;
-                let store = response.data.Store;
-                let state = response.data.State;
-
-                Dropdown.bind({ id: '#Gdn-ConStateCode', data: state, value: 'Code', text: 'Code', initialValue: [Gdn.stateList.Code] });
-                Dropdown.bind({ id: '#Gdn-PartyId', data: response.data.Party, value: 'Id', text: 'Name' });
-                Dropdown.bind({ id: '#Gdn-Store', data: store, value: 'Id', text: 'Description' });
-                Dropdown.bind({ id: '#Gdn-ConStateName', data: state, value: 'Name', text: 'Name', initialValue: [state.Name] });
-
+            onSuccess: (response) => {                                                
+                Dropdown.bind({ id: '#Gdn-StoreId', data: response.data.Store, value: 'Id', text: 'Description' });
+                Dropdown.bind({ id: '#Gdn-PartyId', data: response.data.Party, value: 'Id', text: 'Name' });                
+                Dropdown.bind({ id: '#Gdn-ConStateName', data: response.data.State, value: 'Name', text: 'Name' });
                 Modal.open({ id: '#modalGdn', title: 'Gdn / Add', action: 'Add' });
                 $('#Gdn-PoDate, #Gdn-EwayDate').val('');
             }
         });
     }
-    static scanner() {
-        let store = $('#Gdn-Store').val();
-
-        if (!store || store.length == 0) {
-            Message.error({ statusText: 'First Select Store' });
+    static scanItem() {
+        if (Field.isNullOrEmpty($('#Gdn-StoreId').val())) {
+            Message.error({ statusText: 'Store is not selected!!!' });
             return;
         }
-
-        Modal.open({ id: '#modalGdnItemScan', title: 'Gdn / Scan Item' });
-        Dropdown.bind({ id: '#GdnScan-ItemId', data: Gdn.item, value: 'Id', text: 'Description' });
-        $('#Gdn-ExpiryOn').val('');
-    }
-    static getItemDetails() {
         let obj = {
-            ListStoreId: [$('#Gdn-Store').val()],
-            FromDate: DateTime.json($('#DateRange').val().split('|')[0]),
-            Todate: DateTime.json($('#DateRange').val().split('|')[1]) 
-
+            ListStoreId: [$('#Gdn-StoreId').val()],
         };
         Data.post({
-            url: 'Gdn/getItem',
+            url: 'Gdn/GetStockItemWithSerialNo',
             data: obj,
             onSuccess: (response) => {
-                if (!response.data || response.data.length === 0)
-                    return;
-                Gdn.item = response.data;
-                
+                if (response.status == Message.Type.success) {
+                    Modal.open({ id: '#modalGdnItemScan', title: 'Gdn / Scan Item' });
+                    Gdn.itemWithSerialNo = response.data;
+                }
+                else {
+                    Message.show(response);
+                }
             }
         });
     }
-
-    static addGdnItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, unitDesc = null, isScanned = false, callback } = {}) {
-
-        
-        let store = $('#Gdn-Store').val();
-
-        if (!store || store.length == 0) {
-            Message.error({ statusText: 'First Select Store' });
+    static addGdnItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, unitDesc = null, isScanned = false, callback } = {}) {        
+        if (Field.isNullOrEmpty($('#Gdn-StoreId').val())) {
+            Message.error({ statusText: 'Store is not select.' });
             return;
         }
         let obj = {
             Id: 0,
             ItemId: itemId,
             VoucherId: 0,
-            StoreId: 0,
+            StoreId: $('#Gdn-StoreId').val(),
+            StoreDesc: $('#Gdn-StoreId option:selected').text(),
             ItemDesc: itemDesc,
             SerialNo: serialNo,
             BatchNo: "",
@@ -227,6 +201,7 @@
             Remarks: null,
             IsScanned: isScanned
         };
+        console.log(obj);
         if (!callback) {
             Table.add({ id: '#tableGdnItem', data: obj, action: 'append', selectPick: true });
             Gdn.sumOfTotalGdnItem();
@@ -238,7 +213,6 @@
     static addGdnScanItem({ ItemId, SerialNo, ExpiryOn, Qty }) {
         Table.add({ id: '#tableGdnScanItem', data: { ItemId, SerialNo, ExpiryOn, Qty }, action: 'append' });
     }
-
     static sumOfTotalGdnItem() {
         let GdnItem = $('#tableGdnItem').bootstrapTable('getData').filter(x => x.ItemId > 0);
         let Qty = GdnItem.length == 0 ? 0 : GdnItem.map(x => Math.abs(parseFloat(x.Qty) || 0)).reduce((s, v) => s + v, 0);
@@ -255,7 +229,6 @@
         $('#tableGdnItem tfoot').remove();
         $('#tableGdnItem').append(tfoot);
     }
-
     static add(obj) {
         Data.post({
             url: 'Gdn/Add',
@@ -269,7 +242,6 @@
             }
         });
     }
-
     static edit({ id, action = 'Edit' }) {
         Data.get({
             url: `Gdn/Edit?Id=${id}`,
@@ -301,7 +273,6 @@
             }
        });
     }
-
     static update(obj) {
         Data.update({
             url: 'Gdn/Update',
@@ -315,7 +286,6 @@
             }
         });
     }
-
     static delete({ id }) {
         Message.confirm({
             msg: "Do you want to delete???",
@@ -330,7 +300,6 @@
             }
         });
     }
-
     static deleteOnSuccess = (response) => {
         Message.show(response);
         if (response.status == Message.Type.success) {
@@ -589,29 +558,29 @@ window.tableGdnItemSlNo = (value, obj, index) => {
     return index + 1;
 }
 window.tableGdnItemDesc = (value, obj, index) => {
-    return `
-        ${Dropdown.html({ id: `GdnItem_${index}`, className: 'gdn-item', data: Gdn.item, value: 'SerialNo', text: 'ItemDesc', subText: "ItemSubDesc", initialValue: [obj.SerialNo], json: true, parent: '.modal' })}
+     return `
+        ${Dropdown.html({ id: `GdnItem_${index}`, className: 'gdn-item', data: Gdn.item, value: 'ItemId', text: 'ItemDesc', initialValue: [obj.ItemId], json: true, parent: '.modal' })}
         <input type="text" id="GdnItemRemarks_${index}" class="form-control form-control-sm mb-0 mt-1 gdn-item-remarks" maxlength="100" placeholder="Remarks" value="${obj.Remarks ?? ""}">
     `;
 }
 window.tableGdnItemDescEvent = {
     'change .gdn-item': (e, value, obj, index) => {       
-        //obj.ItemId = !Field.isNullOrEmpty(e.currentTarget.value) ? parseInt(e.currentTarget.value) : 0;  
+        obj.ItemId = !Field.isNullOrEmpty(e.currentTarget.value) ? parseInt(e.currentTarget.value) : 0;  
         //Set Unit & Rate
         let itemJson = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
         obj.UnitDesc = itemJson?.UnitDesc ?? null;
         obj.UnitId = itemJson?.UnitId ?? 0;
         obj.Rate = itemJson?.Rate ?? 0;
         //setItemId
-        obj.ItemId = itemJson?.ItemId ?? 0;
+        //obj.ItemId = itemJson?.ItemId ?? 0;
         // Set Serial No. & BalQty
-        let item = Gdn.item.find(x => x.SerialNo == itemJson.SerialNo);
-        obj.SerialNo = item.SerialNo ?? 0;        
+        let item = Gdn.item.find(x => x.ItemId == obj.ItemId);      
+        item.SerialNo ? obj.SerialNo = item.SerialNo: obj.SerialNo = "N/A";
         obj.BalQty = item ? item.Qty : 0;  
         //Sum of Amount
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
         //Update Row Data
-        Table.updateByIndex({ id: '#tableGdnItem', index: index, obj: obj, value: obj.ItemId, event: e });
+        Table.updateByIndex({ id: '#tableGdnItem', index: index, obj: obj, value: obj.SerialNo, event: e });
         //Sum Total Amount
         Gdn.sumOfTotalGdnItem();
     },

@@ -277,8 +277,7 @@ namespace CRMApi.Repository
                 foreach (var item in obj.VoucherItem)
                 {
                     var availableQty = voucherIData
-                   .Where(x => x.ItemId == item.ItemId
-                    && x.SerialNo == item.SerialNo
+                   .Where(x => (x.SerialNo == item.SerialNo) || x.ItemId == item.ItemId 
                     && x.StoreId == obj.StoreId
                     && x.CreatedAt >= obj.FromDate
                     && x.CreatedAt.Date <= obj.Date.Date)
@@ -363,13 +362,10 @@ namespace CRMApi.Repository
                 {
                     ItemId = x.ItemId,
                     ItemDesc = x.ItemDesc,
-                    UnitDesc = x.UnitDesc,
-                    StoreId = x.StoreId,
-                    StoreDesc = x.StoreDesc,
+                    UnitDesc = x.UnitDesc,                    
                     SerialNo = x.SerialNo,
                     ExpiryOn = x.ExpiryOn,
-                    Qty = x.Qty,
-                    ItemSubDesc = x.ItemSubDesc,
+                    Qty = x.Qty,                    
                 }).ToList();
 
                 objMsg.data = new
@@ -535,13 +531,27 @@ namespace CRMApi.Repository
 
             return objMsg;
         }
-
         public async Task<Message> GetStockItemAsync(StockItemFltrDto obj, User User)
         {
             Message objMsg = new Message();
             try
             {
                 objMsg.data = await repoVoucher.StockItemAsync(obj, User);
+                Message.Success(ref objMsg, "Record found");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+        public async Task<Message> GetStockItemWithSerialNoAsync(StockItemFltrDto obj, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {                
+                objMsg.data = await repoVoucher.StockItemWithSerialNoAsync(obj, User);
+                Message.Success(ref objMsg, "Record found");
             }
             catch (Exception ex)
             {

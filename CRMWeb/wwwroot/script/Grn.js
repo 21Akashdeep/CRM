@@ -202,7 +202,7 @@
         $('#Grn-ExpiryOn,#GrnScan-ItemSerialNo').val('');
 
     }
-    static addGrnItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, isScanned = false, callback } = {}) {
+    static addGrnItem({ itemId = 0, itemDesc = null, serialNo = null, expiryOn = null, qty = 0, isScanned = false, callback } = {}) {
         let obj = {
             Id: 0,
             ItemId: itemId,
@@ -510,17 +510,12 @@
         });
     }
 }
-window.tableGrnChallanNoAndDate = (value, obj, index) => {
-    return `
-        <div>${obj.ChallanNo ?? ''}</div>
-        <div>${obj.ChallanDate ? moment(obj.ChallanDate).format('DD-MMM-YYYY') : ''}</div>
-    `;
-};
+//Table Grn
 window.tableGrnSlNo = (value, obj, index) => {
     return index + 1;
 }
 window.tableGrnDate = (value, obj, index) => {
-    return moment(obj.Date).format('DD-MMM-YYYY');
+    return !value ? '-' : moment(value).format('DD-MMM-YYYY');
 }
 window.tableGrnStatus = (value, obj, index) => {
     return `<div class="${obj.StatusCss}">${obj.StatusDesc}</div>`;
@@ -535,17 +530,6 @@ window.tableGrnUpdatedByAndAt = (value, obj, index) => {
     return `
         <div>${obj.UpdatedByName}</div>
         <div>${DateTime.dateTime(obj.UpdatedAt)}</div>
-    `;
-}
-window.tabelItemName = (value, obj, index) => {
-    if (!obj.ItemName || obj.ItemName.length === 0) {
-        return '-';
-    }
-
-    return `
-        <ol class="mb-0 ps-3">
-            ${obj.ItemName.map(name => `<li>${name}</li>`).join('')}
-        </ol>
     `;
 }
 window.tableGrnAction = (value, obj, index) => {
@@ -595,28 +579,6 @@ window.tableGrnAction = (value, obj, index) => {
     `;
     return actionBtn;
 }
-window.tableGrnConAddress = (value, obj, index) => {
-
-    const parts = [
-        obj.ConAdd1,
-        obj.ConAdd2,
-        obj.ConPostOffice,
-        obj.ConPincode,
-        obj.ConStateName
-    ]
-        .filter(x => x && x.trim() !== "")
-        .map(x => x.trim());
-
-    if (parts.length === 0) return "";
-
-    // Break into lines (max 2–3 items per line for readability)
-    let lines = [];
-    for (let i = 0; i < parts.length; i += 2) {
-        lines.push(parts.slice(i, i + 2).join(", "));
-    }
-
-    return lines.join("<br>");
-};
 window.tableGrnActionEvent = {
     'click .btn-edit': (e, value, obj, index) => {
         Grn.edit({ id: obj.Id, action: 'Edit' });
@@ -661,19 +623,6 @@ window.tableGrnItemDescEvent = {
         Table.updateByIndex({ id: '#tableGrnItem', index: index, obj: obj, value: obj.Remarks, event: e });
     }
 }
-window.tableGrnItemRate = (value, obj, index) => {
-    return `
-        <input type="text" id="GrnItemRate_${index}" class="form-control form-control-sm text-right grn-item-rate" value="${obj.Rate}" oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})">
-    `;
-}
-window.tableGrnItemRateEvent = {
-    'input .grn-item-rate': (e, value, obj, index) => {
-        obj.Rate = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
-        obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
-        Table.updateByIndex({ id: '#tableGrnItem', index: index, obj: obj, value: obj.Rate, event: e });
-        Grn.sumOfTotalGrnItem();
-    }
-}
 window.tableGrnItemQty = (value, obj, index) => {
     return `
         <input type="text" id="GrnItemQty_${index}" class="form-control form-control-sm text-right grn-item-qty" value="${obj.Qty}" oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})" ${obj.IsScanned ? 'disabled': ''}>
@@ -687,108 +636,10 @@ window.tableGrnItemQtyEvent = {
         Grn.sumOfTotalGrnItem();
     }
 }
-window.tableGrnItemAmount = (value, obj, index) => {
-    return `
-        <input type="text" id="GrnItemAmt_${index}" class="form-control form-control-sm text-right grn-item-amount" value="${obj.Amount}" oninput="this.value = _Number.validate({value: this.value, dp: 2, min: 0, max: 999999999999})">
-    `;
-}
-window.tableGrnItemAmountEvent = {
-    'input .grn-item-amount': (e, value, obj, index) => {
-        obj.Amount = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
-        Table.updateByIndex({ id: '#tableGrnItem', index: index, obj: obj, value: obj.Amount, event: e });
-        Grn.sumOfTotalGrnItem();
-    }
-}
-window.tableGrnReasonCodeDesc = (value, obj, index) => {
-    return `
-        ${Dropdown.html({ id: `GrnReasonCode_${index}`, className: 'grn-item', data: Grn.reasonCode, value: 'Value', text: 'Description', initialValue: [obj.ReasonCode], json: true, parent: '.modal' })}
-       
-    `;
-}
-window.tableGrnReasonCodeDescEvent = {
-    'change .grn-item': (e, value, obj, index) => {
-        obj.ReasonCode = e.currentTarget.value || "";
-        Table.updateByIndex({
-            id: '#tableGrnItem',
-            index: index,
-            obj: obj,
-            value: obj.ReasonCode,
-            event: e
-        });
-    }
+window.tableGrnExpiryOn = (value, obj) => {  
+    return `${!obj.ExpiryOn ? '-' : moment(obj.ExpiryOn).format('DD-MM-YYYY')}`;
 };
-window.tableGrnStoreDesc = (value, obj, index) => {
-    return `
-        ${Dropdown.html({ id: `GrnStore_${index}`, className: 'grn-item', data: Grn.store, value: 'Id', text: 'Description', initialValue: [obj.StoreId], json: true, parent: '.modal' })}
-       
-    `;
-}
-window.tableGrnStoreDescEvent = {
-    'change .grn-item': (e, value, obj, index) => {
-        obj.StoreId = !Field.isNullOrEmpty(e.currentTarget.value) ? parseInt(e.currentTarget.value) : 0;
-        Table.updateByIndex({
-            id: '#tableGrnItem',
-            index: index,
-            obj: obj,
-            value: obj.StoreId,
-            event: e
-        });
-    }
-};
-window.tableTaskSerialNo = (value, obj, index) => {
-    return `<input type="text" id="GrnSerialNo_${index}" class="form-control form-control-sm mb-0 grn-item" value="${obj.SerialNo}" maxlength="150" />  
-    `;
-}
-window.tableGrnSerialNoDescEvent = {
-    'input .grn-item': (e, value, obj, index) => {
-        obj.SerialNo = e.currentTarget.value || "";
-        Table.updateByIndex({
-            id: '#tableGrnItem',
-            index: index,
-            obj: obj,
-            value: obj.SerialNo,
-            event: e
-        });
-    }
-};
-window.tableTaskBatchNo = (value, obj, index) => {
-    return `<input type="text" id="GrnBatchNo_${index}" class="form-control form-control-sm mb-0 grn-item" value="${obj.BatchNo}" maxlength="150" />  
-    `;
-}
-window.tableGrnBatchNoDescEvent = {
-    'input .grn-item': (e, value, obj, index) => {
-        obj.BatchNo = e.currentTarget.value || "";
-        Table.updateByIndex({
-            id: '#tableGrnItem',
-            index: index,
-            obj: obj,
-            value: obj.BatchNo,
-            event: e
-        });
-    }
-};
-window.tableGrnExpiryOn = (value, obj) => {
-
-    let val = obj.ExpiryOn
-        ? moment(obj.ExpiryOn, ['DD-MMM-YYYY', 'YYYY-MM-DD']).format('YYYY-MM-DD')
-        : '';
-
-    return `
-        <input type="date"
-            class="form-control form-control-sm mb-0 Grn-item-expiry"
-            value="${val}">
-    `;
-};
-window.tableGrnExpiryOnEvent = {
-    'input .Grn-item-expiry': (e, value, obj, index) => {
-        obj.ExpiryOn = e.currentTarget.value || "";
-        Table.updateByIndex({
-            id: '#tableGrnItem',
-            index,
-            obj
-        });
-    }
-};
+// table Grn Item Scan
 window.tableScanItemDesc = (v, obj) => {
     let item = Grn.item.find(x => x.Id === obj.ItemId);
     return item?.Description ?? '';
@@ -813,19 +664,5 @@ window.tableGrnScanItemActionEvents = {
         Grn.deleteItem({ id: obj.Id, index: index });
     }
 }
-
-
-
-//window.tableGrnExpiryOnEvent = {
-//    'input .grn-item-expiry': (e, value, obj, index) => {
-//        obj.ExpiryOn = e.currentTarget.value;
-//        Table.updateByIndex({
-//            id: '#tableGrnItem',
-//            index,
-//            obj
-//        });
-//    }
-//};
-
 
 

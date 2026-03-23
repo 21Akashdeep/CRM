@@ -92,8 +92,7 @@
             </div>
             <div class="modal-body" style="min-height:75vh;">
                 <form id="formGdn" autocomplete="off" onsubmit="return false;">
-                    <input type="hidden" id="Id" name="Id" />  
-                    <input type="hidden" No="No" name="No" />
+                    <input type="hidden" id="Id" name="Id" />                      
                     <div class="row">
                         <div class="col-md-2">
                             <label>Date</label>
@@ -105,7 +104,7 @@
 
                         <div class="col-md-2">
                             <label>From Store<span class="text-mandatory">*</span></label>
-                            <select id="Gdn-Store" name="StoreId" class="select-pick required" data-search="true" data-size="4"></select>
+                            <select id="Gdn-StoreId" name="StoreId" class="select-pick required" data-search="true" data-size="4"></select>
                         </div>
 
                         <div class="col-md-4">
@@ -172,7 +171,7 @@
                                                 <button type="button" class="btn btn-sm btn-primary rounded-5 me-e" onclick="Gdn.addGdnItem()">
                                                     <span class="fa fa-plus"></span>
                                                 </button>
-                                                <button type="button" class="btn btn-sm btn-success rounded-5" onclick=" Gdn.scanner()">
+                                                <button type="button" class="btn btn-sm btn-success rounded-5" onclick=" Gdn.scanItem()">
                                                     <span class="fa fa-qrcode"></span>
                                                 </button>
                                             </div>
@@ -239,8 +238,6 @@
                                                 </thead>
                                                 <tbody></tbody>
                                             </table>
-
-
                                         </div>
                                     </div>
                                     <hr />
@@ -248,7 +245,7 @@
                             </div>
                             <div class="modal-footer justify-content-end">
                                 <button type="button"
-                                        class="btn btn-success rounded-5" id="btnScanItemAdd">
+                                        class="btn btn-success rounded-5" id="GdnScan-BtnAddItem">
                                     <span class="fa fa-add"></span>&nbsp;Add
                                 </button>
                             </div>

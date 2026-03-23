@@ -6,7 +6,6 @@ namespace CRMApi.Models
     public class GatePass
     {
         public int Id { get; set; }
-
         [MaxLength(20)] public string GatePassNo { get; set; } = string.Empty;
         [MaxLength(2)] public string Type { get; set; } = string.Empty;
         [NotMapped] public string TypeDesc { get; set; } = string.Empty;

@@ -64,7 +64,52 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
+        [HttpPost]
+        public async Task<IActionResult> GetStockItem([FromBody] StockItemFltrDto obj)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(
+                    new Request { HttpRequest = Request, ActionType = ActionType.Export },
+                    db, ref objMsg);
 
+                if (User == null) return Ok(objMsg);
+
+
+                objMsg = await RepoGdn.GetStockItemAsync(obj, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
+        [HttpPost]
+        public async Task<IActionResult> GetStockItemWithSerialNo([FromBody] StockItemFltrDto obj)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(
+                    new Request
+                    {
+                        HttpRequest = Request,
+                        ActionType = ActionType.Export
+                    },
+                    db, ref objMsg);
+
+                if (User == null) return Ok(objMsg);
+
+
+                objMsg = await RepoGdn.GetStockItemWithSerialNoAsync(obj, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
         [HttpPost]
         public async Task<IActionResult> Get(Dto.GdnFltrDto obj)
         {
@@ -108,27 +153,8 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
-        [HttpPost]
-        public async Task<IActionResult> getItem([FromBody] StockItemFltrDto obj)
-        {
-            Message objMsg = new Message();
-            try
-            {
-                var User = Util.RequestVerify(
-                    new Request { HttpRequest = Request, ActionType = ActionType.Export },
-                    db, ref objMsg);
-
-                if (User == null) return Ok(objMsg);
-                
-
-                objMsg = await RepoGdn.GetStockItemAsync(obj, User);
-            }
-            catch (Exception ex)
-            {
-                Message.Exception(ref objMsg, ex);
-            }
-            return Ok(objMsg);
-        }
+        
+        
         [HttpGet]
         public async Task<IActionResult> Edit(int Id)
         {
