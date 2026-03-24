@@ -1,5 +1,6 @@
 ﻿class StockOut {
     static item = [];
+    static itemWithSerialNo = [];
     static init() {
 
         StockOut.getViewOption();
@@ -33,31 +34,25 @@
             });
         });
         $('#StockOutScan-ItemSerialNo').on('keydown', (e) => {
-            if (e.key == 'Enter') {
-                if (!Field.isMandatory({ class: '.scan-required' })) {
-                    return;
-                }
-                let serialNo = $('#StockOutScan-ItemSerialNo').val();
-                let countStockOutItem = $('#tableStockOutItem').bootstrapTable('getData').filter(x => x.SerialNo == serialNo).length;
-                let countScanItem = $('#tableStockOutScanItem').bootstrapTable('getData').filter(x => x.SerialNo == serialNo).length;
-                if (countStockOutItem > 0 || countScanItem > 0) {
-                    Message.error({ statusText: `Serial No. ${serialNo} already added in Scan List or Item List.` });
-                    return;
-                }
-                StockOut.addStockOutItem({  
-                    itemId: $('#StockOutScan-ItemId').val(),
-                    itemDesc: $('#StockOutScan-ItemId option:selected').text(),
-                    expiryOn: $('#StockOutScan-ItemExpiryOn').val(),
-                    serialNo: serialNo,
-                    qty: 1,
-                    isScanned: true,
-                    callback: (obj) => {
-                        Table.add({ id: '#tableStockOutScanItem', data: obj, action: 'prepend' });
-                        $('#StockOutScan-ItemExpiryOn,#StockOutScan-ItemSerialNo').val('');
-
-                    }
-                });
+            if (e.key != 'Enter') return;
+            let item = StockOut.itemWithSerialNo.find(x => x.SerialNo == $('#StockOutScan-ItemSerialNo').val());
+            if (!item) {
+                Message.error({ statusText: `Invalid Serial No. (${$('#StockOutScan-ItemSerialNo').val()})` });
+                return;
             }
+            StockOut.addStockOutItem({
+                itemId: item.ItemId,
+                itemDesc: item.ItemDesc,
+                expiryOn: item.ExpiryOn,
+                serialNo: item.SerialNo,
+                unitDesc: item.UnitDesc,
+                qty: 1,
+                isScanned: true,
+                callback: (obj) => {
+                    Table.add({ id: '#tableStockOutScanItem', data: obj, action: 'prepend' });
+                    $('#StockOutScan-ItemSerialNo').val('');
+                }
+            });
         });
 
         $('#btnScanItemAdd').on('click', () => {
@@ -135,17 +130,27 @@
             }
         });
     }
-    static scanner() {
-        let store = $('#StockOut-StoreId').val();
-
-        if (!store || store.length == 0) {
-            Message.error({ statusText: 'First Select Store' });
+    static scanItem() {
+        if (Field.isNullOrEmpty($('#StockOut-StoreId').val())) {
+            Message.error({ statusText: 'Store is not selected!!!' });
             return;
         }
-        Modal.open({ id: '#modalStockOutItemScan', title: 'StockOut / Scan Item' });
-        Dropdown.bind({ id: '#StockOutScan-ItemId', data: StockOut.item, value: 'Id', text: 'Description' });
-        $('#StockOut-ExpiryOn,#StockOutScan-ItemSerialNo').val('');
-
+        let obj = {
+            ListStoreId: [$('#StockOut-StoreId').val()],
+        };
+        Data.post({
+            url: 'StockOut/getStockItemWithSerialNo',
+            data: obj,
+            onSuccess: (response) => {
+                if (response.status == Message.Type.success) {
+                    Modal.open({ id: '#modalStockOutItemScan', title: 'StockOut / Scan Item' });
+                    StockOut.itemWithSerialNo = response.data;
+                }
+                else {
+                    Message.show(response);
+                }
+            }
+        });
     }
     static getItemDetails() {
         let obj = {
@@ -155,7 +160,7 @@
 
         };
         Data.post({
-            url: 'StockOut/getItem',
+            url: 'StockOut/getStockItem',
             data: obj,
             onSuccess: (response) => {
                 if (!response.data || response.data.length === 0)
@@ -165,7 +170,7 @@
             }
         });
     }
-    static addStockOutItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, isScanned = false, callback } = {}) {
+    static addStockOutItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0,unitDesc = null, isScanned = false, callback } = {}) {
 
         let store = $('#StockOut-StoreId').val();
 
@@ -185,7 +190,7 @@
             ExpiryOn: expiryOn,
             Qty: qty,
             Rate: 0,
-            UnitDesc: null,
+            UnitDesc: unitDesc,
             Amount: 0,
             DiscountAmount: 0,
             TotalAmount: 0,
@@ -211,7 +216,7 @@
     }
     static sumOfTotalStockOutItem() {
         let StockOutItem = $('#tableStockOutItem').bootstrapTable('getData').filter(x => x.ItemId > 0);
-        let Qty = StockOutItem.length == 0 ? 0 : StockOutItem.map(x => parseFloat(x.Qty)).reduce((s, v) => s + v, 0);
+        let Qty = StockOutItem.length == 0 ? 0 : StockOutItem.map(x => Math.abs(parseFloat(x.Qty) || 0)).reduce((s, v) => s + v, 0);
         let Amount = StockOutItem.length == 0 ? 0 : StockOutItem.map(x => parseFloat(x.Amount)).reduce((s, v) => s + v, 0);
         let tfoot = `
             <tfoot>
@@ -243,17 +248,14 @@
             url: `StockOut/Edit?Id=${id}`,
             onSuccess: (response) => {
                 let option = response.data;
-                StockOut.item = option.Item;
-                let store = response.data.Store;
-                let state = response.data.State;
-                let obj = response.obj;
-                let StoreId = obj.VoucherItem[0].StoreId;
-                obj.StoreId = StoreId;
+                Dropdown.bind({ id: '#StockOut-StoreId', data: option.AddOption.Store, value: 'Id', text: 'Description' });
+                StockOut.item = option.StockItem;               
+                let obj = option.Voucher;                
                 obj.Id = action == 'Edit' ? obj.Id : null;
                 let title = action === 'Edit' ? `StockOut / Edit (Code: ${obj.No})` : `StockOut / Add`;
-                Dropdown.bind({ id: '#StockOut-StoreId', data: store, value: 'Id', text: 'Description' });
                 Modal.open({ id: '#modalStockOut', title: title, action: action, obj: obj });
                 Table.add({ id: '#tableStockOutItem', data: obj.VoucherItem, selectPick: true });
+                StockOut.getItemDetails();
                 StockOut.sumOfTotalStockOutItem();
 
 
@@ -315,7 +317,6 @@
                     Message.error(response);
                     return;
                 }
-
                 let reportTitle = 'Stock Out';
                 if (obj.FromDate && obj.TillDate) {
                     reportTitle += ` ${moment(obj.FromDate).format('DD-MMM-YYYY')} To ${moment(obj.TillDate).format('DD-MMM-YYYY')}`;
@@ -349,7 +350,6 @@
                 </tr>
             </thead>
             `);
-
                     table.push('<tbody>');
 
                     // ===== GRN Master Row =====
@@ -419,7 +419,6 @@
             </div>
             `);
                 });
-
                 // ===== Styles =====
                 let style = [];
                 style.push(`
@@ -520,7 +519,6 @@ window.tableStockOutAction = (value, obj, index) => {
         </div>
     `;
 }
-
 window.tableStockOutActionEvent = {
     'click .btn-edit': (e, value, obj, index) => {
         StockOut.edit({ id: obj.Id, action: 'Edit' });
@@ -535,26 +533,31 @@ window.tableStockOutActionEvent = {
         StockOut.delete({ id: obj.Id });
     }
 }
-
 //Table StockOut Item
 window.tableStockOutItemSlNo = (value, obj, index) => {
     return index + 1;
 }
 window.tableStockOutItemDesc = (value, obj, index) => {
     return `
-        ${Dropdown.html({ id: `StockOutItem_${index}`, className: 'StockOut-item', data: StockOut.item, value: 'SerialNo', text: 'ItemDesc', subText: "ItemSubDesc", initialValue: [obj.SerialNo], json: true, parent: '.modal' })}
+        ${Dropdown.html({ id: `StockOutItem_${index}`, className: 'StockOut-item', data: StockOut.item, value: 'ItemId', text: 'ItemDesc', initialValue: [obj.ItemId], json: true, parent: '.modal' })}
         <input type="text" id="StockOutItemRemarks_${index}" class="form-control form-control-sm mb-0 mt-1 StockOut-item-remarks" maxlength="100" placeholder="Remarks" value="${obj.Remarks ?? ""}">
     `;
 }
 window.tableStockOutItemDescEvent = {
     'change .StockOut-item': (e, value, obj, index) => {
         obj.ItemId = !Field.isNullOrEmpty(e.currentTarget.value) ? parseInt(e.currentTarget.value) : 0;
+        //Set Unit & Rate
         let itemJson = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
         obj.UnitDesc = itemJson?.UnitDesc ?? null;
-
-        obj.Rate = itemJson?.Rate ?? 0;
+        obj.UnitId = itemJson?.UnitId ?? 0;
+        obj.Rate = itemJson?.Rate ?? 0;       
+        // Set Serial No. & BalQty
+        let item = StockOut.item.find(x => x.ItemId == obj.ItemId);
+        item.SerialNo ? obj.SerialNo = item.SerialNo : obj.SerialNo = "N/A";
+        obj.BalQty = item ? item.Qty : 0;
+        //Sum of Amount
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
-
+        //Update Row Data
         Table.updateByIndex({ id: '#tableStockOutItem', index: index, obj: obj, value: obj.ItemId, event: e });
         StockOut.sumOfTotalStockOutItem();
     },
@@ -563,146 +566,49 @@ window.tableStockOutItemDescEvent = {
         Table.updateByIndex({ id: '#tableStockOutItem', index: index, obj: obj, value: obj.Remarks, event: e });
     }
 }
-window.tableStockOutItemRate = (value, obj, index) => {
-    return `
-        <input type="text" id="StockOutItemRate_${index}" class="form-control form-control-sm text-right StockOut-item-rate" value="${obj.Rate}" oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})">
-    `;
-}
-window.tableStockOutItemRateEvent = {
-    'input .StockOut-item-rate': (e, value, obj, index) => {
-        obj.Rate = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
-        obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
-        Table.updateByIndex({ id: '#tableStockOutItem', index: index, obj: obj, value: obj.Rate, event: e });
-        StockOut.sumOfTotalStockOutItem();
-    }
+window.tableStockOutItemExpiryOn = (value, obj, index) => {
+    return obj.ExpiryOn ? moment(obj.ExpiryOn).format("DD-MMM-YYYY") : "-";
 }
 window.tableStockOutItemQty = (value, obj, index) => {
     return `
-        <input type="text" id="StockOutItemQty_${index}" class="form-control form-control-sm text-right StockOut-item-qty" value="${obj.Qty}" oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})">
+        <div class="input-group">            
+            <input type="text" id="StockOutItemQty_${index}" class="form-control form-control-sm text-end stockout-item-qty" value="${Math.abs(obj.Qty)}" 
+            oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})"/>
+            <span class="input-group-text fw-bold">${obj.UnitDesc ?? 'NA'}</span>
+        </div>
     `;
 }
 window.tableStockOutItemQtyEvent = {
-    'input .StockOut-item-qty': (e, value, obj, index) => {
-        obj.Qty = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
+    'input .stockout-item-qty': (e, value, obj, index) => {
+
+        let qty = parseFloat(e.currentTarget.value || 0);
+        let balQty = parseFloat(obj.BalQty || 0);
+
+        // minus qty check
+        if (qty < 0) {
+            Message.error({ statusText: 'Qty cannot be negative' });
+            e.currentTarget.value = obj.Qty || 0;
+            return;
+        }
+        // available qty check
+        if (qty > balQty) {
+            Message.error({ statusText: `Qty cannot be greater than available qty (${balQty})` });
+            e.currentTarget.value = obj.Qty || 0;
+            return;
+        }
+        obj.Qty = qty;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
-        Table.updateByIndex({ id: '#tableStockOutItem', index: index, obj: obj, value: obj.Qty, event: e });
+
+        Table.updateByIndex({
+            id: '#tableStockOutItem',
+            index: index,
+            obj: obj,
+            value: obj.Qty,
+            event: e
+        });
         StockOut.sumOfTotalStockOutItem();
     }
 }
-window.tableStockOutItemAmount = (value, obj, index) => {
-    return `
-        <input type="text" id="StockOutItemAmt_${index}" class="form-control form-control-sm text-right StockOut-item-amount" value="${obj.Amount}" oninput="this.value = _Number.validate({value: this.value, dp: 2, min: 0, max: 999999999999})">
-    `;
-}
-window.tableStockOutItemAmountEvent = {
-    'input .StockOut-item-amount': (e, value, obj, index) => {
-        obj.Amount = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
-        Table.updateByIndex({ id: '#tableStockOutItem', index: index, obj: obj, value: obj.Amount, event: e });
-        StockOut.sumOfTotalStockOutItem();
-    }
-}
-window.tableStockOutReasonCodeDesc = (value, obj, index) => {
-    return `
-        ${Dropdown.html({ id: `StockOutReasonCode_${index}`, className: 'StockOut-item', data: StockOut.reasonCode, value: 'Value', text: 'Description', initialValue: [obj.ReasonCode], json: true, parent: '.modal' })}
-       
-    `;
-}
-window.tableStockOutReasonCodeDescEvent = {
-    'change .StockOut-item': (e, value, obj, index) => {
-        obj.ReasonCode = e.currentTarget.value || "";
-        Table.updateByIndex({
-            id: '#tableStockOutItem',
-            index: index,
-            obj: obj,
-            value: obj.ReasonCode,
-            event: e
-        });
-    }
-};
-window.tableStockOutStoreDesc = (value, obj, index) => {
-    return `
-        ${Dropdown.html({ id: `StockOutStore_${index}`, className: 'StockOut-item', data: StockOut.store, value: 'Id', text: 'Description', initialValue: [obj.StoreId], json: true, parent: '.modal' })}
-       
-    `;
-}
-window.tableStockOutStoreDescEvent = {
-    'change .StockOut-item': (e, value, obj, index) => {
-        obj.StoreId = !Field.isNullOrEmpty(e.currentTarget.value) ? parseInt(e.currentTarget.value) : 0;
-        Table.updateByIndex({
-            id: '#tableStockOutItem',
-            index: index,
-            obj: obj,
-            value: obj.StoreId,
-            event: e
-        });
-    }
-};
-window.tableTaskSerialNo = (value, obj, index) => {
-    return `<input type="text" id="StockOutSerialNo_${index}" class="form-control form-control-sm mb-0 StockOut-item" value="${obj.SerialNo}" maxlength="150" />  
-    `;
-}
-window.tableStockOutSerialNoDescEvent = {
-    'input .StockOut-item': (e, value, obj, index) => {
-        obj.SerialNo = e.currentTarget.value || "";
-        Table.updateByIndex({
-            id: '#tableStockOutItem',
-            index: index,
-            obj: obj,
-            value: obj.SerialNo,
-            event: e
-        });
-    }
-};
-window.tableTaskBatchNo = (value, obj, index) => {
-    return `<input type="text" id="StockOutBatchNo_${index}" class="form-control form-control-sm mb-0 StockOut-item" value="${obj.BatchNo}" maxlength="150" />  
-    `;
-}
-window.tableStockOutBatchNoDescEvent = {
-    'input .StockOut-item': (e, value, obj, index) => {
-        obj.BatchNo = e.currentTarget.value || "";
-        Table.updateByIndex({
-            id: '#tableStockOutItem',
-            index: index,
-            obj: obj,
-            value: obj.BatchNo,
-            event: e
-        });
-    }
-};
-
-window.tableStockOutExpiryOn = (value, obj, index) => {
-    let val = obj.ExpiryOn
-        ? moment(obj.ExpiryOn, ['DD-MMM-YYYY', 'YYYY-MM-DD']).format('YYYY-MM-DD')
-        : '';
-
-    return `
-        <input type="date"
-            class="form-control form-control-sm mb-0 StockOut-item-expiry"
-            value="${val}">
-    `;
-};
-window.tableStockOutExpiryOnEvent = {
-    'input .StockOut-item': (e, value, obj, index) => {
-        obj.ExpiryOn = e.currentTarget.value || "";
-        Table.updateByIndex({
-            id: '#tableStockOutItem',
-            index: index,
-            obj: obj,
-            value: obj.ExpiryOn,
-            event: e
-        });
-    }
-};
-window.tableStockOutItemAction = (value, obj, index) => {
-    if (!obj.Id)
-        return `<button type="button" class="btn btn-sm btn-danger rounded-5 btn-delete"><span class="fa fa-trash"></span></button>`;
-}
-window.tableStockOutItemActionEvents = {
-    'click .btn-delete': (e, value, obj, index) => {
-        StockOut.deleteItem({ id: obj.Id, index: index });
-    }
-}
-
 //StockOutScanTable
 window.tableScanExpiry = (v, obj) => {
     return obj.ExpiryOn
@@ -724,15 +630,17 @@ window.tableStockOutScanItemActionEvents = {
         StockOut.deleteScanItem({ id: obj.Id, index: index });
     }
 }
-window.tableStockItemAction = (value, obj, index) => {
-    if (!obj.Id)
-        return `<button type="button" class="btn btn-sm btn-danger rounded-5 btn-delete"><span class="fa fa-trash"></span></button>`;
-}
-window.tableStockOutItemActionEvents = {
-    'click .btn-delete': (e, value, obj, index) => {
-        StockOut.deleteItem({ id: obj.Id, index: index });
-    }
-}
+window.tableStockOutScanExpiryOn = (value, obj, index) => {
+    let val = obj.ExpiryOn
+        ? moment(obj.ExpiryOn, ['DD-MMM-YYYY', 'YYYY-MM-DD']).format('YYYY-MM-DD')
+        : '';
+
+    return `
+        <input type="date"
+            class="form-control form-control-sm mb-0 StockOut-item-expiry"
+            value="${val}">
+    `;
+};
 window.tabelItemName = (value, obj, index) => {
     if (!obj.ItemName || obj.ItemName.length === 0) {
         return '-';
