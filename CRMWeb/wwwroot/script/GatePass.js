@@ -232,11 +232,26 @@ window.tableGatePassLabourLicenseExpiryOn = (value, obj, index) => {
         : `<div class="full-fill"></div>`;
 };
 
+window.tableGatePassJntvtiCategory = (value, obj, index) => {
 
-
-
-
-
+    let category = obj.JntvtiCategory;
+    if (!category) {
+        return `<div class="full-fill">-</div>`;
+    }
+    let bgColor = "#6c757d";
+    let text = "-";
+    switch (category) {
+        case "P":bgColor = "#6f42c1";text = "Platinum";break;
+        case "G":bgColor = "#ffc107";text = "Gold";break;
+        case "S":bgColor = "#adb5bd";text = "Silver";break;
+    }
+    return `<div class="full-fill" style="
+                background-color:${bgColor}; color:white;
+                font-weight:bold;text-align:center;
+                padding:2px;border-radius:10px;">
+                ${text}
+            </div>`;
+};
 
 window.tableGatePassCreatedByAndAt = (value, obj, index) => {
     return `<div class="text-cell" style="font-size: 7pt;"><b>${obj.CreatedByName}</b><br>${moment(obj.CreatedAt).format('DD-MMM-YYYY HH:mm')}</div>`;

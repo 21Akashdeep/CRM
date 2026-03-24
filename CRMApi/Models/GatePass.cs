@@ -11,6 +11,7 @@ namespace CRMApi.Models
         [NotMapped] public string TypeDesc { get; set; } = string.Empty;
         public int EmployeeId { get; set; }
         [NotMapped] public string EmployeeDesc { get; set; } = string.Empty;
+        [NotMapped] public string? JntvtiCategory { get; set; }
         [MaxLength(200)] public string IdentifyMark { get; set; } = string.Empty;
         [MaxLength(20)] public string WorkOrderNo { get; set; } = string.Empty;
         public int CompanyId { get; set; }

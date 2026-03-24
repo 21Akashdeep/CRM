@@ -4,7 +4,7 @@
     Menu: sessionStorage.getItem('Menu') ? sessionStorage.getItem('Menu') : '',
     Api: sessionStorage.getItem('Api') ? JSON.parse(sessionStorage.getItem('Api')) : [],
     Company: sessionStorage.getItem('Company') ? JSON.parse(sessionStorage.getItem('Company')) : null,
-    Info: { Code: "CRM", Name: "CRM PORTAL", Desc: "CRM Portal", SubDesc: "Sign In", CountryId: 112 }
+    Info: { Code:"Pcats", Name: "Pcats Portal", Desc: "All-In-One Portal", SubDesc: "Sign In", CountryId: 112 }
 }
 
 const Util = {

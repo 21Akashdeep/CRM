@@ -134,6 +134,7 @@ namespace CRMApi.Repository
                     TypeDesc = st1 != null ? st1.Description : gp.Type,
                     EmployeeId = gp.EmployeeId,
                     EmployeeDesc = em != null ? em.Name : "-",
+                    JntvtiCategory = em != null ? em.JntvtiCategory : null,
                     ExpiryOn = gp.ExpiryOn,
                     Department = gp.Department,
                     IdentifyMark = gp.IdentifyMark,
@@ -477,13 +478,14 @@ namespace CRMApi.Repository
                     Company = gp.CompanyDesc ?? "",
                     SafetyPassNo = gp.SafetyPassNo ?? "",
                     WorkOrderNo=gp.WorkOrderNo ?? "",
-
                     IssuedOn = gp.IssuedOn.ToString("dd-MMM-yyyy"),
                     ExpiryOn = FormatDate(gp.ExpiryOn),
                     LabourLicenseExpiry = FormatDate(gp.LabourLicenseExpiryOn),
                     MedicalExpiry = FormatDate(gp.MedicalExpiryOn),
                     TrainingExpiry = FormatDate(gp.TrainingExpiryOn),
-
+                    JntvtiCategory = gp.JntvtiCategory == "P" ? "Platinum" :
+                    gp.JntvtiCategory == "G" ? "Gold" :
+                    gp.JntvtiCategory == "S" ? "Silver" : "",
 
                     //ExpiryOn = gp.ExpiryOn.ToString("dd-MMM-yyyy"),
                     //LabourLicenseExpiry = gp.LabourLicenseExpiryOn.ToString("dd-MMM-yyyy"),
@@ -571,6 +573,24 @@ namespace CRMApi.Repository
                                     cell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.Red;
                             }
                         }
+                    }
+
+                    int jntColIndex = dt.Columns.IndexOf("JntvtiCategory") + 1;
+
+                    for (int r = startRow; r <= endRow; r++)
+                    {
+                        var cell = ws.Cell(r, jntColIndex);
+                        string val = cell.GetString();
+
+                        if (val == "Platinum")
+                            cell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.FromHtml("#6f42c1");
+                        else if (val == "Gold")
+                            cell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.FromHtml("#ffc107");
+                        else if (val == "Silver")
+                            cell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.FromHtml("#adb5bd");
+
+                        cell.Style.Font.FontColor = ClosedXML.Excel.XLColor.White;
+                        cell.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
                     }
 
                     ws.Columns().AdjustToContents();
