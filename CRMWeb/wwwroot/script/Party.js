@@ -31,6 +31,19 @@
                 }
             });
         });
+        $('#Party_PinCode').on('input', () => {
+            let pinCode = $('#Party_PinCode').val();
+            if (pinCode.length == 6) {
+                OnlineApi.pinCode({
+                    pinCode: $('#Party_PinCode').val(),
+                    callback: (data) => {
+                        Dropdown.bind({ id: '#Party_PostOffice', data: data.obj.PostOfficeList, value: 'Name', text: 'Name', isEditable: true });
+                        Dropdown.set({ id: '#Party_AdminDivId', text: [data.obj.State] });
+                        $('#Party_District').val(data.obj.District || '');
+                    }
+                });
+            }
+        });
         $('#btnNewEntry').on('click', () => {
             Party.newEntry();
         });

@@ -57,10 +57,11 @@
                                 <th data-sortable="true" data-field="TypeDesc">Pass Type</th>
                                 <th data-sortable="true" data-field="GatePassNo">Pass No </th>
                                 <th data-sortable="true" data-field="IssuedOn" data-formatter="tableGatePassIssueOn">Issue On</th>
-                                <th data-sortable="true" data-field="ExpiryOn" data-formatter="tableGatePassExpiryOn">Expiry On</th>
+                                <th data-sortable="true" data-field="ExpiryOn" data-formatter="tableGatePassExpiryOn">Expiry On</th>    
                                 <th data-sortable="true" data-field="TrainingExpiryOn" data-formatter="tableGatePassTrainingExpiryOn">Training Expiry On</th>
                                 <th data-sortable="true" data-field="MedicalExpiryOn" data-formatter="tableGatePassMedicalExpiryOn">Medical Expiry On</th>
                                 <th data-sortable="true" data-field="LabourLicenseExpiryOn" data-formatter="tableGatePassLabourLicenseExpiryOn">Labour License Expiry On</th>
+                                <th data-formatter="tableGatePassJntvtiCategory">JNTVTI</th>
                                 <th data-sortable="true" data-field="CreatedAt" data-formatter="tableGatePassCreatedByAndAt" class="text-nowrap">Created By & At</th>
                                 <th data-sortable="true" data-field="UpdatedAt" data-formatter="tableGatePassUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
                                 <th data-formatter="tableGatePassStatus" class="text-nowrap text-center right-fix-2">Status</th>
@@ -77,14 +78,12 @@
     </div>
 </div>
 
-<!-- GatePass Add Modal -->
 <partial name="GatePassAdd.cshtml" />
-<!-- Hidden iframe used ONLY for printing -->
-<iframe id="printFrame"
+@* <iframe id="printFrame"
         name="printFrame"
         style="width:0;height:0;border:0;position:absolute;left:-9999px;">
 </iframe>
-
+ *@
 
 @section Scripts {
 
