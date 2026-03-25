@@ -53,8 +53,6 @@
                                 <th data-sortable="true" data-formatter="tableStockInDate">Date</th>
                                 <th data-sortable="true" data-field="No">Number</th>
                                 <th data-sortable="true" data-field="StoreDesc">To Store</th>
-                                <th data-formatter="tabelItemName">Items</th>
-                                <th data-sortable="true" data-field="TotalQty"> Qty </th>
                                 <th data-sortable="false" data-formatter="tableStockInCreatedByAndAt" class="text-nowrap">Created By & At</th>
                                 <th data-sortable="false" data-formatter="tableStockInUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
                                 <th data-sortable="false" data-formatter="tableStockInStatus" class="Status text-center">Status</th>
@@ -123,8 +121,8 @@
                                     <tr>
                                         <th data-formatter="tableStockInItemSlNo" class="text-center">#</th>
                                         <th class="desc" data-formatter="tableStockInItemDesc"data-events="tableStockInItemDescEvent">Description </th>
-                                        <th class="qty"data-formatter="tableStockInExpiryOn"data-events="tableStockInExpiryOnEvent"> ExpiryOn </th>
-                                        <th class="qty" data-formatter="tableTaskSerialNo"data-events="tableStockInSerialNoDescEvent">SerialNo </th>
+                                        <th class="qty" data-field="SerialNo">SerialNo</th>
+                                        <th class="qty" data-formatter="tableStockInExpiryOn">ExpiryOn</th>
                                         <th class="qty" data-formatter="tableStockInItemQty"data-events="tableStockInItemQtyEvent">Qty </th>
                                         <th class="qty"data-formatter="tableStockInItemAction"data-events="tableStockInItemActionEvents">Remove</th>
                                     </tr>

@@ -108,7 +108,6 @@
             }
         });
     }
-
     static getViewOption() {
         Data.get({
             url: 'Gdn/GetViewOption',
@@ -247,7 +246,7 @@
             url: `Gdn/Edit?Id=${id}`,
             onSuccess: (response) => {    
                 let option = response.data.AddOption;
-                Dropdown.bind({ id: '#Gdn-Store', data: option.Store, value: 'Id', text: 'Description' });
+                Dropdown.bind({ id: '#Gdn-StoreId', data: option.Store, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#Gdn-PartyId', data: option.Party, value: 'Id', text: 'Name' });
                 Dropdown.bind({ id: '#Gdn-ConStateName', data: option.State, value: 'Name', text: 'Name' });                
                 Gdn.item = response.data.StockItem;

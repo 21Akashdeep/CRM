@@ -44,7 +44,8 @@ namespace CRMApi.Repository
             var dbVoucher = await (
                 from vc in dbVoucherQuery
                 join st in db.Store on vc.StoreId equals st.Id
-                join par in db.Party on vc.PartyId equals par.Id
+                join par in db.Party on vc.PartyId equals par.Id into prj
+                from pr in prj.DefaultIfEmpty()
                 join sts in db.Setting on new { Category = App.SettingName.Status, Value = vc.Status.ToString() } equals new { sts.Category, sts.Value }
                 join cby in db.User on vc.CreatedBy equals cby.Id
                 join uby in db.User on vc.UpdatedBy equals uby.Id
@@ -52,7 +53,7 @@ namespace CRMApi.Repository
                 {
                     Voucher = vc,
                     StoreDesc = st.Description,
-                    PartyDesc = par.Description,
+                    PartyDesc = pr.Description,
                     StatusDesc = sts.Description,
                     StatusCss = sts.CssClass,
                     CreatedByName = cby.Name,

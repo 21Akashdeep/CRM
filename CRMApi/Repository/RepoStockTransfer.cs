@@ -200,7 +200,7 @@ namespace CRMApi.Repository
                     Date = voucher.Date,
                     PartyId = voucher.PartyId,
                     PartyDesc = x.PartyDesc,
-                    //StoreDesc = dbVoucherItem[0].StoreDesc,
+                    StoreId = voucher.StoreId,
                     StoreDesc = VoucherItemLookup[voucher.Id].Select(x => x.StoreDesc).FirstOrDefault(),
                     TotalQty = item.Where(i => !string.IsNullOrEmpty(i.ItemDesc) && i.Qty >= 0).Count(),
                     ItemName = item.Where(i => !string.IsNullOrEmpty(i.ItemDesc) && i.Qty >=0).Select(i => i.ItemDesc!)
@@ -253,7 +253,7 @@ namespace CRMApi.Repository
                     await using var transaction = await db.Database.BeginTransactionAsync();
 
                     try
-                    {
+                    {  
                         obj.CreatedBy = user.Id;
                         obj.CreatedAt = DateTime.Now;
                         obj.UpdatedBy = user.Id;
@@ -289,16 +289,38 @@ namespace CRMApi.Repository
                            Status = x.Status
                             }).ToListAsync();
 
-                        var stockTran = dbItems.Where(x => obj.VoucherItem.Any(vi => vi.SerialNo == x.SerialNo && vi.ItemId == x.ItemId)).ToList();
+                        var voucherItems = obj.VoucherItem.ToList();
 
-
-                        var stockMsg = await UpdateStockAsync(stockTran, obj.FromStoreId,obj.ToStoreId, user);
-                        if (stockMsg.status == Message.Type.error)
+                        foreach (var stockTrans in voucherItems)
                         {
-                            Message.Error(ref objMsg,
-                                "Stock transaction was not saved. The entire transaction has been rolled back.");
-                            await transaction.RollbackAsync();
-                            return;
+                            var stockMsg = new Message();
+                            if (string.IsNullOrEmpty(stockTrans.SerialNo) || stockTrans.SerialNo == "NA")
+                            {
+                                // Non-serial items → only those with no serial in DB
+                                var stockTran = dbItems
+                                    .Where(x => x.ItemId == stockTrans.ItemId &&
+                                                (x.SerialNo == null || x.SerialNo == "NA"))
+                                    .ToList();
+
+                                stockMsg = await UpdateStockWithOutSerialNoAsync(stockTran, obj.FromStoreId, obj.ToStoreId, user);
+                            }
+                            else
+                            {
+                                // Serial items → match exact serial
+                                var stockTran = dbItems
+                                    .Where(x => x.ItemId == stockTrans.ItemId &&
+                                                x.SerialNo == stockTrans.SerialNo)
+                                    .ToList();
+
+                                stockMsg = await UpdateStockWithSerialNoAsync(stockTran, obj.FromStoreId, obj.ToStoreId, user);
+                            }
+                            if (stockMsg.status == Message.Type.error)
+                            {
+                                Message.Error(ref objMsg,
+                                    "Stock transaction was not saved. The entire transaction has been rolled back.");
+                                    await transaction.RollbackAsync();
+                                    return;
+                            }
                         }
 
                         await transaction.CommitAsync();
@@ -323,7 +345,7 @@ namespace CRMApi.Repository
 
             return objMsg;
         }
-        public async Task<Message> UpdateStockAsync(List<VoucherItem> stockTran,int FromStoreId,int ToStoreId,User user)
+        public async Task<Message> UpdateStockWithSerialNoAsync(List<VoucherItem> stockTran,int FromStoreId,int ToStoreId,User user)
         {
             Message objMsg = new Message();
             try
@@ -382,49 +404,101 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        //public async Task<List<VoucherItem>> GetListItemAsync(Voucher? obj, User User)
-        //{
-        //    Message objMsg = new Message();
+        public async Task<Message> UpdateStockWithOutSerialNoAsync(List<VoucherItem> stockTran, int FromStoreId, int ToStoreId, User user)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var groupedItems = stockTran
+                    .GroupBy(x => new {x.ItemId, x.StoreId })
+                    .Select(g => new
+                    {                      
+                        g.Key.ItemId,
+                        g.Key.StoreId,
+                        TotalQty = g.Sum(x => x.Qty)
+                    })
+                    .ToList();
 
-           
-        //        obj ??= new Voucher();
-        //        obj.ListType = new List<String> { "ReceiptNote","ReturnNote","StockIn" };
+                var invalid = groupedItems.FirstOrDefault(x => x.TotalQty < 0);
+                if (invalid != null)
+                {
+                    Message.Error(
+                        ref objMsg,                       
+                        $"ItemId: {invalid.ItemId}, StoreId: {invalid.StoreId}, TotalQty: {invalid.TotalQty}");
 
-        //        var listVoucher = await new RepoVoucher(db).ListAsync(obj, User);
+                    return objMsg;
+                }
+                var finalStockTransferItem = stockTran
+                    .Where(x => x.Status == App.Status.Enable && x.Qty < 0)
+                    .ToList();
 
-        //        var vId = listVoucher.Where(x => x.Status == App.Status.Enable).Select(x => new
-        //        {
-        //            x.Id
-        //        }).ToList();
-                
-        //        var listVoucherItem = await new RepoVoucher(db).ListItemAsync(obj, User);
+                foreach (var vi in finalStockTransferItem)
+                {
+                    var newItem = new VoucherItem
+                    {
+                        VoucherId = vi.VoucherId,
+                        ItemId = vi.ItemId,
+                        SerialNo = vi.SerialNo,
+                        StoreId = ToStoreId,
+                        Qty = Math.Abs(vi.Qty),
+                        ExpiryOn = vi.ExpiryOn,
+                        Remarks = vi.Remarks,
+                        Status = App.Status.Enable,
+                        CreatedBy = user.Id,
+                        CreatedAt = DateTime.Now,
+                        UpdatedBy = user.Id,
+                        UpdatedAt = DateTime.Now
+                    };
 
+                    db.VoucherItem.Add(newItem);
+                }
 
-        //        //var ListVoucherItem = await 
-
-
-
-            
-            
-        //    return listVoucherItem;
-
-        //}
+                Message.Update(ref objMsg, await db.SaveChangesAsync());
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
         public async Task<Message> EditAsync(int Id, User User)
         {
             Message objMsg = new Message();
             try
             {
-                objMsg.obj = (await ListAsync(new Voucher
+                var voucher = (await ListAsync(new Voucher
                 {
                     ListId = new List<int> { Id },
                     ListStatus = new List<int>(App.ActiveStatus) { App.Status.Delete }
                 }, User)).FirstOrDefault();
-                if (objMsg.obj == null)
+                if (voucher == null)
                 {
-                    Message.Error(ref objMsg, "StockOut was not found for edit.");
+                    Message.Error(ref objMsg, "Gdn was not found for edit.");
                     return objMsg;
                 }
-                objMsg.data = (await GetAddOptionAsync()).data;
+                var listVoucherItemId = voucher.VoucherItem.Select(x => x.Id).ToList();
+                var dbStockItem = await RepoVoucher.StockItemAsync(new StockItemFltrDto
+                {
+                    ListNotContainId = listVoucherItemId,
+                    ListStoreId = new List<int> { voucher.StoreId },
+                    ToDate = voucher.Date
+                }, User);
+                var stockItem = dbStockItem.Select(x => new GdnItemDto
+                {
+                    ItemId = x.ItemId,
+                    ItemDesc = x.ItemDesc,
+                    UnitDesc = x.UnitDesc,
+                    SerialNo = x.SerialNo,
+                    ExpiryOn = x.ExpiryOn,
+                    Qty = x.Qty,
+                }).ToList();
+
+                objMsg.data = new
+                {
+                    Voucher = voucher,
+                    StockItem = stockItem,
+                    AddOption = (await GetAddOptionAsync()).data
+                };
                 Message.Success(ref objMsg, "Record found");
             }
             catch (Exception ex)
@@ -577,8 +651,6 @@ namespace CRMApi.Repository
 
                             return ;
                         }
-                       
-
                         foreach (var vi in newAdddedItem)
                         {
                             var newItem = new VoucherItem
@@ -733,6 +805,34 @@ namespace CRMApi.Repository
             try
             {
                 objMsg.data = await RepoVoucher.StockItemAsync(obj, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+        public async Task<Message> GetStockItemAsync(StockItemFltrDto obj, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                objMsg.data = await RepoVoucher.StockItemAsync(obj, User);
+                Message.Success(ref objMsg, "Record found");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+        public async Task<Message> GetStockItemWithSerialNoAsync(StockItemFltrDto obj, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                objMsg.data = await RepoVoucher.StockItemWithSerialNoAsync(obj, User);
+                Message.Success(ref objMsg, "Record found");
             }
             catch (Exception ex)
             {

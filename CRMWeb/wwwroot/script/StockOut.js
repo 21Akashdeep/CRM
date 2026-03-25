@@ -257,8 +257,6 @@
                 Table.add({ id: '#tableStockOutItem', data: obj.VoucherItem, selectPick: true });
                 StockOut.getItemDetails();
                 StockOut.sumOfTotalStockOutItem();
-
-
             }
         });
     }

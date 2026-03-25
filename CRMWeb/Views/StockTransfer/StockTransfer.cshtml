@@ -112,16 +112,16 @@
                                             <div class="btn-group float-end">
                                                 <button type="button" class="btn btn-sm btn-primary rounded-5" onclick="StockTransfer.addStockTransferItem()"> <span class="fa fa-plus"></span>  </button>
                                                 <span>&nbsp;&nbsp;</span>
-                                                <button type="button" class="btn btn-sm btn-success rounded-5" onclick="StockTransfer.scanner()"><span class="fa fa-qrcode"></span> </button>
+                                                <button type="button" class="btn btn-sm btn-success rounded-5" onclick="StockTransfer.scanItem()"><span class="fa fa-qrcode"></span> </button>
                                             </div>
                                         </th>
                                     </tr>
                                     <tr>
                                         <th data-formatter="tableStockTransferItemSlNo" class="text-center">#</th>
                                         <th class="desc" data-formatter="tableStockTransferItemDesc" data-events="tableStockTransferItemDescEvent">Description </th>                                      
-                                        <th class="qty" data-formatter="tableStockTransferExpiryOn" data-events="tableStockTransferExpiryOnEvent"> ExpiryOn </th>
-                                        <th class="qty" data-formatter="tableTaskSerialNo" data-events="tableStockTransferSerialNoDescEvent">SerialNo </th>
-                                        <th class="qty" data-formatter="tableStockTransferItemQty" data-events="tableStockTransferItemQtyEvent">Qty </th>
+                                        <th class="qty" data-field="SerialNo">SerialNo</th>
+                                        <th class="qty" data-formatter="tableStockTransferItemExpiryOn">ExpiryOn</th>
+                                        <th class="qty" data-formatter="tableStockTransferItemQty" data-events="tableStockTransferItemQtyEvent">Qty</th>
                                         <th class="qty" data-formatter="tableStockTransferItemAction" data-events="tableStockTransferItemActionEvents">Remove</th>
                                     </tr>
                                 </thead>
@@ -174,9 +174,8 @@
                                                     <tr>
                                                         <th data-formatter="tableStockTransferItemSlNo" class="text-center">#</th>
                                                         <th data-field="ItemDesc">Item</th>
-                                                        <th data-formatter="tableStockTransferScanExpiry">Expiry</th>
-                                                        <th data-formatter="tableStockTransferScanSerial">Serial No</th>
-                                                        <th data-formatter="tableStockTransferScanQty" class="text-end">Qty 1 </th>
+                                                        <th data-formatter="tableScanSerial">Serial No</th>
+                                                        <th data-formatter="tableScanQty" class="text-end">Qty</th>
                                                         <th data-formatter="tableStockTransferScanItemAction" data-events="tableStockTransferScanItemActionEvents"> Remove </th>
                                                     </tr>
                                                 </thead>

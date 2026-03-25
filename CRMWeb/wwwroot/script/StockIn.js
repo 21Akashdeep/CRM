@@ -626,6 +626,9 @@ window.tableStockInItemDesc = (value, obj, index) => {
         <input type="text" id="StockInItemRemarks_${index}" class="form-control form-control-sm mb-0 mt-1 StockIn-item-remarks" maxlength="100" placeholder="Remarks" value="${obj.Remarks ?? ""}">
     `;
 }
+window.tableStockInExpiryOn = (value, obj) => {
+    return `${!obj.ExpiryOn ? '-' : moment(obj.ExpiryOn).format('DD-MM-YYYY')}`;
+};
 window.tableStockInItemDescEvent = {
     'change .StockIn-item': (e, value, obj, index) => {
         obj.ItemId = !Field.isNullOrEmpty(e.currentTarget.value) ? parseInt(e.currentTarget.value) : 0;
@@ -681,24 +684,6 @@ window.tableStockInItemAmountEvent = {
         StockIn.sumOfTotalStockInItem();
     }
 }
-window.tableStockInReasonCodeDesc = (value, obj, index) => {
-    return `
-        ${Dropdown.html({ id: `StockInReasonCode_${index}`, className: 'StockIn-item', data: StockIn.reasonCode, value: 'Value', text: 'Description', initialValue: [obj.ReasonCode], json: true, parent: '.modal' })}
-       
-    `;
-}
-window.tableStockInReasonCodeDescEvent = {
-    'change .StockIn-item': (e, value, obj, index) => {
-        obj.ReasonCode = e.currentTarget.value || "";
-        Table.updateByIndex({
-            id: '#tableStockInItem',
-            index: index,
-            obj: obj,
-            value: obj.ReasonCode,
-            event: e
-        });
-    }
-};
 window.tableStockInStoreDesc = (value, obj, index) => {
     return `
         ${Dropdown.html({ id: `StockInStore_${index}`, className: 'StockIn-item', data: StockIn.store, value: 'Id', text: 'Description', initialValue: [obj.StoreId], json: true, parent: '.modal' })}
@@ -717,22 +702,6 @@ window.tableStockInStoreDescEvent = {
         });
     }
 };
-window.tableTaskSerialNo = (value, obj, index) => {
-    return `<input type="text" id="StockInSerialNo_${index}" class="form-control form-control-sm mb-0 StockIn-item" value="${obj.SerialNo}" maxlength="150" />  
-    `;
-}
-window.tableStockInSerialNoDescEvent = {
-    'input .StockIn-item': (e, value, obj, index) => {
-        obj.SerialNo = e.currentTarget.value || "";
-        Table.updateByIndex({
-            id: '#tableStockInItem',
-            index: index,
-            obj: obj,
-            value: obj.SerialNo,
-            event: e
-        });
-    }
-};
 window.tableStockInBatchNoDescEvent = {
     'input .StockIn-item': (e, value, obj, index) => {
         obj.BatchNo = e.currentTarget.value || "";
@@ -745,20 +714,8 @@ window.tableStockInBatchNoDescEvent = {
         });
     }
 };
-window.tableStockInExpiryOn = (value, obj, index) => {
-    return `<input type="date" id="StockInExpiryOn_${index}" class="form-control form-control-sm mb-0 StockIn-item" value="${obj.ExpiryOn ?? ""}"/>`;
-}
-window.tableStockInExpiryOnEvent = {
-    'input .StockIn-item': (e, value, obj, index) => {
-        obj.ExpiryOn = e.currentTarget.value || "";
-        Table.updateByIndex({
-            id: '#tableStockInItem',
-            index: index,
-            obj: obj,
-            value: obj.ExpiryOn,
-            event: e
-        });
-    }
+window.tableStockInExpiryOn = (value, obj) => {
+    return `${!obj.ExpiryOn ? '-' : moment(obj.ExpiryOn).format('DD-MM-YYYY')}`;
 };
 window.tableStockInItemAction = (value, obj, index) => {
     if(!obj.Id)
@@ -796,28 +753,7 @@ window.tableStockInScanItemActionEvents = {
         });
     }
 };
-window.tableStockInExpiryOn = (value, obj) => {
 
-    let val = obj.ExpiryOn
-        ? moment(obj.ExpiryOn, ['DD-MMM-YYYY', 'YYYY-MM-DD']).format('YYYY-MM-DD')
-        : '';
-
-    return `
-        <input type="date"
-            class="form-control form-control-sm mb-0 StockIn-item-expiry"
-            value="${val}">
-    `;
-};
-window.tableStockInExpiryOnEvent = {
-    'input .StockIn-item-expiry': (e, value, obj, index) => {
-        obj.ExpiryOn = e.currentTarget.value || "";
-        Table.updateByIndex({
-            id: '#tableStockInItem',
-            index,
-            obj
-        });
-    }
-};
 window.tableStockInItemAction = (value, obj, index) => {
     if (!obj.Id)
         return `
