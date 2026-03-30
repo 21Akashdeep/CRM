@@ -1,4 +1,5 @@
-﻿using CRMApi.Models;
+﻿using CRMApi.Dto;
+using CRMApi.Models;
 using CRMApi.Repository;
 using CRMApi.Services;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -13,10 +14,12 @@ namespace CRMApi.Repository
     {
         private readonly DBCRM db;
         private readonly AppSetting App = Util.AppSetting;
+        private readonly VoucherRepo RepoVoucher;
 
         public RepoStockAdjustment(DBCRM _db)
         {
             db = _db;
+            RepoVoucher = new VoucherRepo(db);
         }
 
         public async Task<Message> GetViewOptionAsync()
@@ -103,7 +106,6 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-
         public async Task<Message> AddAsync(Voucher obj, User User)
         {
             Message objMsg = new Message();
@@ -121,7 +123,6 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-
         public async Task<List<Voucher>> ListAsync(Voucher? obj, User User)
         {
             obj ??= new Voucher();
@@ -221,6 +222,34 @@ namespace CRMApi.Repository
                 objMsg.base64 = Util.DataTableToBase64(objDataTable, objCompany);
 
                 Message.Get(ref objMsg, "");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+        public async Task<Message> GetStockItemAsync(StockItemFltrDto obj, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                objMsg.data = await RepoVoucher.StockItemAsync(obj, User);
+                Message.Success(ref objMsg, "Record found");
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return objMsg;
+        }
+        public async Task<Message> GetStockItemWithSerialNoAsync(StockItemFltrDto obj, User User)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                objMsg.data = await RepoVoucher.StockItemWithSerialNoAsync(obj, User);
+                Message.Success(ref objMsg, "Record found");
             }
             catch (Exception ex)
             {

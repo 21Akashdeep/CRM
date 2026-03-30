@@ -479,7 +479,7 @@ namespace CRMApi.Repository
                 var listVoucherItemId = voucher.VoucherItem.Select(x => x.Id).ToList();
                 var dbStockItem = await RepoVoucher.StockItemAsync(new StockItemFltrDto
                 {
-                    ListNotContainId = listVoucherItemId,
+                    ListExcludeViId = listVoucherItemId,
                     ListStoreId = new List<int> { voucher.StoreId },
                     ToDate = voucher.Date
                 }, User);

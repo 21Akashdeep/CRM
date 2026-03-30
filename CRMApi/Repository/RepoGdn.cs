@@ -37,39 +37,29 @@ namespace CRMApi.Repository
                     .ToListAsync();
 
                 Option.Status = await db.Setting
-                    .Where(st => App.ActiveStatus.Contains(st.Status)
-                              && st.Name == App.SettingName.Status
-                              && ListStatus.Contains(st.Value))
-                    .Select(st => new
-                    {
-                        st.Value,
-                        st.Description
-                    }).ToListAsync();
+                .Where(st => App.ActiveStatus.Contains(st.Status)
+                            && st.Name == App.SettingName.Status
+                            && ListStatus.Contains(st.Value))
+                .Select(st => new
+                {
+                    st.Value,
+                    st.Description
+                }).ToListAsync();
                 Option.Party = await db.Party
-                    .Where(x => App.ActiveStatus.Contains(x.Status))
-                    .Select(x => new
-                    {
-                        x.Id,
-                        x.Name
-                    }).ToListAsync();
-
-                Option.ConName = await db.Voucher
-                    .Where(x => App.ActiveStatus.Contains(x.Status) && !string.IsNullOrEmpty(x.ConName))
-                    .Select(x => new
-                    {
-                        x.Id,
-                        x.ConName,
-                    }).ToListAsync();
+                .Where(x => App.ActiveStatus.Contains(x.Status))
+                .Select(x => new
+                {
+                    x.Id,
+                    x.Name
+                }).ToListAsync();
 
                 Option.Number = await db.Voucher
-                 .Where(x => App.ActiveStatus.Contains(x.Status)
-                    && !string.IsNullOrEmpty(x.No)
-                    && x.Type == "DeliveryNote")
-                      .Select(x => new
-                      {
-                          x.Id,
-                          x.No,
-                      }).ToListAsync();
+                .Where(x => App.ActiveStatus.Contains(x.Status) && x.Type == App.VoucherType.DeliveryNote)
+                .Select(x => new
+                {
+                    x.Id,
+                    x.No,
+                }).ToListAsync();
 
                 objMsg.data = Option;
                 Message.Success(ref objMsg, "Record found");
@@ -81,7 +71,7 @@ namespace CRMApi.Repository
             return objMsg;
         }
 
-        public async Task<Message> GetAddOptionAsync()  
+        public async Task<Message> GetAddOptionAsync()
         {
             Message objMsg = new Message();
             try
@@ -96,8 +86,8 @@ namespace CRMApi.Repository
                         par.Description
                     }).ToListAsync();
 
-                var Type = await db.Setting
-                    .Where(x => App.ActiveStatus.Contains(x.Status) && x.Name == App.SettingName.VoucherType)
+                var StockType = await db.Setting
+                    .Where(x => App.ActiveStatus.Contains(x.Status) && x.Name == App.SettingName.StockType)
                     .Select(x => new
                     {
                         x.Value,
@@ -113,14 +103,6 @@ namespace CRMApi.Repository
                         x.Name
                     }).ToListAsync();
 
-                var ReasonCode = await db.Setting
-                    .Where(x => App.ActiveStatus.Contains(x.Status) && x.Name == App.SettingName.ReasonCode)
-                    .Select(x => new
-                    {
-                        x.Value,
-                        x.Description
-                    }).ToListAsync();
-
                 var Store = await db.Store
                     .Where(x => App.ActiveStatus.Contains(x.Status))
                     .Select(x => new
@@ -129,30 +111,13 @@ namespace CRMApi.Repository
                         x.Description
                     }).ToListAsync();
 
-                var Item = await (
-                    from itm in db.Item
-                    join unt in db.Unit on itm.UnitId equals unt.Id
-                    select new
-                    {
-                       ItemId = itm.Id,
-                        itm.Code,
-                        itm.Name,
-                        itm.Description,
-                        UnitId =itm.UnitId,
-                        UnitDesc = unt.Description,
-                    }
-                ).ToListAsync();
-
                 objMsg.data = new
                 {
-                    State,
-                    Party,
-                    Type,
-                    Item,
-                    ReasonCode,
                     Store,
+                    StockType,
+                    Party,
+                    State
                 };
-
                 Message.Success(ref objMsg, "Record found");
             }
             catch (Exception ex)
@@ -238,6 +203,7 @@ namespace CRMApi.Repository
                     VoucherId = vci.VoucherId,
                     StoreId = vci.StoreId,
                     StoreDesc = st.Description,
+                    StockType = vci.StockType,
                     ItemId = vci.ItemId,
                     ItemDesc = itm.Description,
                     VoucherDesc = vc.Type,
@@ -270,20 +236,21 @@ namespace CRMApi.Repository
             Message objMsg = new Message();
             try
             {
-                var voucherIData = await db.VoucherItem
-                    .Where(x => App.ActiveStatus.Contains(x.Status))
-                    .ToListAsync();
+                var stockBalance = await repoVoucher.StockItemBalanceAsync(new StockItemFltrDto
+                {
+                    ToDate = obj.Date,
+                    ListItemId = obj.VoucherItem.Select(x => x.ItemId).ToList(),
+                    ListSerialNo = obj.VoucherItem.Select(x => x.SerialNo).ToList(),
+                    ListStoreId = new List<int> { obj.StoreId },
+                }, User);
 
                 foreach (var item in obj.VoucherItem)
                 {
-                    var availableQty = voucherIData
-                   .Where(x => (x.SerialNo == item.SerialNo) || x.ItemId == item.ItemId 
-                    && x.StoreId == obj.StoreId
-                    && x.CreatedAt >= obj.FromDate
-                    && x.CreatedAt.Date <= obj.Date.Date)
-                   .Sum(x => x.Qty);
+                    var availableQty = stockBalance
+                        .Where(x => x.ItemId == item.ItemId && x.SerialNo == item.SerialNo && x.StoreId == obj.StoreId)
+                        .Sum(x => x.Qty);
 
-                    if (item.Qty >availableQty || item.Qty<0)
+                    if (item.Qty > availableQty)
                     {
                         objMsg.status = Message.Type.error;
                         objMsg.statusText = $"Qty for Serial No {item.SerialNo} cannot exceed available qty ({availableQty}).";
@@ -335,7 +302,6 @@ namespace CRMApi.Repository
 
             return objMsg;
         }
-
         public async Task<Message> EditAsync(int Id, User user)
         {
             Message objMsg = new Message();
@@ -354,7 +320,7 @@ namespace CRMApi.Repository
                 var listGdnItemId = gdn.GdnItem.Select(x => x.Id).ToList();
                 var dbStockItem = await repoVoucher.StockItemAsync(new StockItemFltrDto
                 {
-                    ListNotContainId = listGdnItemId,
+                    ListExcludeViId = listGdnItemId,
                     ListStoreId = new List<int> { gdn.StoreId },                     
                     ToDate = gdn.Date
                 }, user);
@@ -382,7 +348,6 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-
         public async Task<Message> UpdateAsync(Voucher obj, User User)
         {
             Message objMsg = new Message();
@@ -469,7 +434,6 @@ namespace CRMApi.Repository
 
             return objMsg;
         }
-
         public async Task<Message> PrintAsync(GdnFltrDto obj, User User)
         {
             Message objMsg = new Message();
@@ -484,7 +448,6 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-
         public async Task<Message> ExportAsync(GdnFltrDto obj, User User)
         {
             Message objMsg = new Message();

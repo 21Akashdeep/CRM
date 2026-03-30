@@ -27,11 +27,9 @@
         public Regexp Regexp { get; set; } = new Regexp();
         public RefType RefType { get; set; } = new RefType();
         public VoucherType VoucherType { get; set; } = new VoucherType();
-
-
-
-
+        public StockType StockType { get; set; } = new StockType();
     }
+    
     public class ConnectionStrings
     {
         public string? MySql { get; set; }
@@ -60,11 +58,9 @@
         public string TaskCategory { get; set; } = string.Empty;
         public string JntvtiCateGory {  get; set; } = string.Empty;
         public string PassType { get; set; } = string.Empty;
-
         public string VoucherType { get; set; } = string.Empty;
-
         public string ReasonCode { get; set; } = string.Empty;
-
+        public string StockType { get; set; } = string.Empty;
     }
     public class Status
     {
@@ -224,5 +220,10 @@
         public string Damage { get; set; } = string.Empty;
         public string Shortage { get; set; } = string.Empty;
         public string Correction { get; set; } = string.Empty;
+    }
+    public class StockType
+    {
+        public string New { get; set; } = null!;
+        public string Old { get; set; } = null!;
     }
 }

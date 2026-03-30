@@ -106,7 +106,11 @@
                             <label>From Store<span class="text-mandatory">*</span></label>
                             <select id="Gdn-StoreId" name="StoreId" class="select-pick required" data-search="true" data-size="4"></select>
                         </div>
-
+                        <div class="col-md-2">
+                            <label>Stock Type<span class="text-mandatory">*</span></label> 
+                            <select id="Gdn-StockType" name="StockType" class="select-pick required" data-search="true" data-size="4" multiple>
+                            </select>
+                        </div>
                         <div class="col-md-4">
                             <label>Party<span class="text-mandatory">*</span></label>
                             <select id="Gdn-PartyId" name="PartyId" class="select-pick required" data-size="4" data-search="true"></select>
@@ -154,10 +158,11 @@
                             <label>Consignee Post Office</label>
                             <input type="text" id="Gdn-ConPostOffice" name="ConPostOffice" class="form-control form-control-sm" maxlength="10" data-alpha-lg-num="true" />
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <label>Consignee State</label>
                             <select id="Gdn-ConStateName" name="ConStateName" class="select-pick " data-search="true" data-size="4"></select>
                         </div>
+                       
                     </div>
                     <hr />
                     <div class="row">

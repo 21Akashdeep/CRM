@@ -104,7 +104,7 @@
                             <table id="tableStockOutItem" class="table table-bordered table-hover table-default line-item" data-search="false">
                                 <thead>
                                     <tr>
-                                        <th colspan="5">
+                                        <th colspan="7">
                                             StockOut Item
                                             <div class="btn-group float-end">
                                                 <button type="button" class="btn btn-sm btn-primary rounded-5 me-e" onclick="StockOut.addStockOutItem()">
@@ -121,7 +121,9 @@
                                         <th class="desc" data-formatter="tableStockOutItemDesc" data-events="tableStockOutItemDescEvent">Description</th>
                                         <th class="qty" data-field="SerialNo">SerialNo</th>
                                         <th class="qty" data-formatter="tableStockOutItemExpiryOn">ExpiryOn</th>
-                                        <th class="qty" data-formatter="tableStockOutItemQty" data-events="tableStockOutItemQtyEvent">Qty</th>                                   
+                                        <th class="qty" data-formatter="tableStockOutItemQty" data-events="tableStockOutItemQtyEvent">Qty</th>
+                                        <th class="qty" data-formatter="tableStockOutIsReturnable" data-events="tableStockOutIsReturnableEvent">Is Returnable</th>
+                                        <th class="qty" data-formatter="tableStockOutIsReturned" data-events="tableStockOutIsReturnedEvent">Is Returned</th>
                                 </thead>
                                 <tbody>
                                 </tbody>

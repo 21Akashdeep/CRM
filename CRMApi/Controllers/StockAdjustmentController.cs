@@ -1,4 +1,5 @@
-﻿using CRMApi.Models;
+﻿using CRMApi.Dto;
+using CRMApi.Models;
 using CRMApi.Repository;
 using CRMApi.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -69,7 +70,52 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
+        [HttpPost]
+        public async Task<IActionResult> GetStockItem([FromBody] StockItemFltrDto obj)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(
+                    new Request { HttpRequest = Request, ActionType = ActionType.Export },
+                    db, ref objMsg);
 
+                if (User == null) return Ok(objMsg);
+
+
+                objMsg = await RepoStockAdjustment.GetStockItemAsync(obj, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
+        [HttpPost]
+        public async Task<IActionResult> GetStockItemWithSerialNo([FromBody] StockItemFltrDto obj)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(
+                    new Request
+                    {
+                        HttpRequest = Request,
+                        ActionType = ActionType.Export
+                    },
+                    db, ref objMsg);
+
+                if (User == null) return Ok(objMsg);
+
+
+                objMsg = await RepoStockAdjustment.GetStockItemWithSerialNoAsync(obj, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] Voucher obj)
         {

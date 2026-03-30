@@ -79,11 +79,19 @@ namespace CRMApi.Repository
 
                     }
                 ).ToListAsync();
+                var StockType = await db.Setting
+                    .Where(x => App.ActiveStatus.Contains(x.Status) && x.Name == App.SettingName.StockType)
+                    .Select(x => new
+                    {
+                        x.Value,
+                        x.Description
+                    }).ToListAsync();
                 objMsg.data = new
                 {
                    
                     Item,
                     Store,
+                    StockType
                 };
                 Message.Success(ref objMsg, "Record found");
             }
@@ -100,7 +108,7 @@ namespace CRMApi.Repository
             try
             {
                 obj.PartyId = obj.PartyId == 0 ? null : obj.PartyId;
-                obj.Type = "StockIn";
+                obj.Type = App.VoucherType.StockIn;
                 objMsg = await new VoucherRepo(db).AddAsync(obj, User);
             }
             catch (Exception ex)

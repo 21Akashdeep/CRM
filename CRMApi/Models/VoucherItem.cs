@@ -8,7 +8,6 @@ namespace CRMApi.Models
 
         [Key]
         public int Id { get; set; }
-
         // Foreign Keys
         public int VoucherId { get; set; }
         public int ItemId { get; set; }
@@ -59,19 +58,15 @@ namespace CRMApi.Models
         public decimal GrossAmount { get; set; } = 0;
         [MaxLength(100)] public string? ImageUrl { get; set; }
         public string? ReasonCode { get; set; }
-        [NotMapped]public string? ReasonDesc { get; set; }
-
-        [MaxLength(200)]
-        public string? Remarks { get; set; }
-
+        [NotMapped] public string? ReasonDesc { get; set; }
+        [MaxLength(200)] public string? Remarks { get; set; }
         public bool IsScanned { get; set; }
-
-        // Status
+        public string StockType { get; set; } = "N";
+        public bool IsReturnable { get; set; }
+        public bool IsReturned { get; set; }
         public int Status { get; set; } = 1;
-
         public int CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-
         public int UpdatedBy { get; set; }
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
         [NotMapped] public string? VoucherNo { get; set; }

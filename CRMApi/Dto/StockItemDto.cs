@@ -13,6 +13,10 @@ namespace CRMApi.Dto
         //public string? StoreDesc { get; set; }        
         public string? SerialNo { get; set; }
         public DateTime? ExpiryOn { get; set; }
-        public decimal Qty { get; set; }        
+        public decimal Qty { get; set; }
+        public string? StockType { get; set; }
+        public int StoreId { get; set; }
+        public bool IsReturnable { get; set; }
+        public bool IsReturned { get; set; }
     }
 }

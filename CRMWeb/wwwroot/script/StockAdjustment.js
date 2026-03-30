@@ -1,5 +1,6 @@
 ﻿class StockAdjustment {
     static item = [];
+    static itemWithSerialNo = [];
     static reasonCode = [];
     static init() {
 
@@ -57,7 +58,6 @@
                     callback: (obj) => {
                         Table.add({ id: '#tableStockAdjustmentScanItem', data: obj, action: 'prepend' });
                         $('#StockAdjustmentScan-ItemExpiryOn,#StockAdjustmentScan-ItemSerialNo').val('');
-
                     }
                 });
             }
@@ -71,10 +71,26 @@
             }
             Table.add({ id: '#tableStockAdjustmentItem', data: scanItems, action: 'append', selectPick: true });
             StockAdjustment.sumOfTotalStockAdjustmentItem();
-
             Modal.close({ id: '#modalStockAdjustmentItemScan' });
         });
+        $('#StockAdjustment-StoreId').on('change', () => {
 
+            let obj = {
+                ListStoreId: [$('#StockAdjustment-StoreId').val()],
+            };
+            Data.post({
+                url: 'StockAdjustment/GetStockItem',
+                data: obj,
+                onSuccess: (response) => {
+                    if (response.status == Message.Type.success) {
+                        Gdn.item = response.data;
+                    }
+                    else {
+                        Message.show(response);
+                    }
+                }
+            });
+        });
         $('#StockAdjustment-BtnSave').on('click', () => {
             if (!Field.isMandatory({ class: '.required' })) {
                 return;
@@ -141,7 +157,13 @@
         $('#StockAdjustment-ExpiryOn,#StockAdjustmentScan-ItemSerialNo').val('');
 
     }
-    static addStockAdjustmentItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0,reasonCode="",reasonCodeDesc ="", isScanned = false, callback } = {}) {
+    static addStockAdjustmentItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, reasonCode = "", reasonCodeDesc = "", unitDesc = null, isScanned = false, callback } = {}) {
+
+        if (Field.isNullOrEmpty($('#StockAdjustment-StoreId').val())) {
+            Message.error({ statusText: 'Store is not select.' });
+            return;
+        }
+
         let obj = {
             Id: 0,
             ItemId: itemId,
@@ -153,6 +175,7 @@
             ExpiryOn: expiryOn,
             Qty: qty,
             Rate: 0,
+            UnitDesc:unitDesc,
             UnitDesc: null,
             Amount: 0,
             DiscountAmount: 0,
@@ -526,25 +549,31 @@ window.tableStockAdjustmentActionEvent = {
         StockAdjustment.delete({ id: obj.Id });
     }
 }
-
-
 //Table StockAdjustment Item
 window.tableStockAdjustmentItemSlNo = (value, obj, index) => {
     return index + 1;
 }
 window.tableStockAdjustmentItemDesc = (value, obj, index) => {
     return `
-        ${Dropdown.html({ id: `StockAdjustmentItem_${index}`, className: 'StockAdjustment-item', data: StockAdjustment.item, value: 'Id', text: 'Description', initialValue: [obj.ItemId], json: true, parent: '.modal' })}
+        ${Dropdown.html({ id: `StockAdjustmentItem_${index}`, className: 'StockAdjustment-item', data: StockAdjustment.item, value: 'ItemId', text: 'ItemDesc', initialValue: [obj.ItemId], json: true, parent: '.modal' })}
         <input type="text" id="StockAdjustmentItemRemarks_${index}" class="form-control form-control-sm mb-0 mt-1 StockAdjustment-item-remarks" maxlength="100" placeholder="Remarks" value="${obj.Remarks ?? ""}">
     `;
 }
 window.tableStockAdjustmentItemDescEvent = {
     'change .StockAdjustment-item': (e, value, obj, index) => {
         obj.ItemId = !Field.isNullOrEmpty(e.currentTarget.value) ? parseInt(e.currentTarget.value) : 0;
+        //Set Unit & Rate
         let itemJson = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
         obj.UnitDesc = itemJson?.UnitDesc ?? null;
-
+        obj.UnitId = itemJson?.UnitId ?? 0;
         obj.Rate = itemJson?.Rate ?? 0;
+       
+        //obj.ItemId = itemJson?.ItemId ?? 0;
+        // Set Serial No. & BalQty
+        let item = StockAdjustment.item.find(x => x.ItemId == obj.ItemId);
+        item.SerialNo ? obj.SerialNo = item.SerialNo : obj.SerialNo = "N/A";
+        obj.BalQty = item ? item.Qty : 0;
+        //Sum of Amount
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
 
         Table.updateByIndex({ id: '#tableStockAdjustmentItem', index: index, obj: obj, value: obj.ItemId, event: e });
@@ -578,18 +607,6 @@ window.tableStockAdjustmentItemQtyEvent = {
         obj.Qty = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
         Table.updateByIndex({ id: '#tableStockAdjustmentItem', index: index, obj: obj, value: obj.Qty, event: e });
-        StockAdjustment.sumOfTotalStockAdjustmentItem();
-    }
-}
-window.tableStockAdjustmentItemAmount = (value, obj, index) => {
-    return `
-        <input type="text" id="StockAdjustmentItemAmt_${index}" class="form-control form-control-sm text-right StockAdjustment-item-amount" value="${obj.Amount}" oninput="this.value = _Number.validate({value: this.value, dp: 2, min: 0, max: 999999999999})">
-    `;
-}
-window.tableStockAdjustmentItemAmountEvent = {
-    'input .StockAdjustment-item-amount': (e, value, obj, index) => {
-        obj.Amount = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
-        Table.updateByIndex({ id: '#tableStockAdjustmentItem', index: index, obj: obj, value: obj.Amount, event: e });
         StockAdjustment.sumOfTotalStockAdjustmentItem();
     }
 }
@@ -629,61 +646,6 @@ window.tableStockAdjustmentStoreDescEvent = {
         });
     }
 };
-window.tableTaskSerialNo = (value, obj, index) => {
-    return `<input type="text" id="StockAdjustmentSerialNo_${index}" class="form-control form-control-sm mb-0 StockAdjustment-item" value="${obj.SerialNo}" maxlength="150" />  
-    `;
-}
-window.tableStockAdjustmentSerialNoDescEvent = {
-    'input .StockAdjustment-item': (e, value, obj, index) => {
-        obj.SerialNo = e.currentTarget.value || "";
-        Table.updateByIndex({
-            id: '#tableStockAdjustmentItem',
-            index: index,
-            obj: obj,
-            value: obj.SerialNo,
-            event: e
-        });
-    }
-};
-window.tableTaskBatchNo = (value, obj, index) => {
-    return `<input type="text" id="StockAdjustmentBatchNo_${index}" class="form-control form-control-sm mb-0 StockAdjustment-item" value="${obj.BatchNo}" maxlength="150" />  
-    `;
-}
-window.tableStockAdjustmentBatchNoDescEvent = {
-    'input .StockAdjustment-item': (e, value, obj, index) => {
-        obj.BatchNo = e.currentTarget.value || "";
-        Table.updateByIndex({
-            id: '#tableStockAdjustmentItem',
-            index: index,
-            obj: obj,
-            value: obj.BatchNo,
-            event: e
-        });
-    }
-};
-window.tableStockAdjustmentExpiryOn = (value, obj, index) => {
-    let val = obj.ExpiryOn
-        ? moment(obj.ExpiryOn, ['DD-MMM-YYYY', 'YYYY-MM-DD']).format('YYYY-MM-DD')
-        : '';
-
-    return `
-        <input type="date"
-            class="form-control form-control-sm mb-0 StockAdjustment-item-expiry"
-            value="${val}">
-    `;
-};
-window.tableStockAdjustmentExpiryOnEvent = {
-    'input .StockAdjustment-item': (e, value, obj, index) => {
-        obj.ExpiryOn = e.currentTarget.value || "";
-        Table.updateByIndex({
-            id: '#tableStockAdjustmentItem',
-            index: index,
-            obj: obj,
-            value: obj.ExpiryOn,
-            event: e
-        });
-    }
-};
 window.tableStockAdjustmentItemAction = (value, obj, index) => {
     if (!obj.Id)
         return `<button type="button" class="btn btn-sm btn-danger rounded-5 btn-delete"><span class="fa fa-trash"></span></button>`;
@@ -693,6 +655,11 @@ window.tableStockAdjustmentItemActionEvents = {
         StockAdjustment.deleteItem({ id: obj.Id, index: index });
     }
 }
+window.tableStockAdjustmentExpiryOn = (value, obj) => {
+    return `${!obj.ExpiryOn ? '-' : moment(obj.ExpiryOn).format('DD-MM-YYYY')}`;
+};
+
+ //Table Scan Item
 window.tableScanExpiry = (v, obj) => {
     return obj.ExpiryOn
         ? moment(obj.ExpiryOn).format('DD-MMM-YYYY')
@@ -722,12 +689,6 @@ window.tableStockAdjustmentItemActionEvents = {
         StockAdjustment.deleteItem({ id: obj.Id, index: index });
     }
 }
-
-
-
-
-
-
 window.tableStockAdjustmentReasonCodeDesc = (value, obj, index) => {
     return `
         ${Dropdown.html({ id: `StockAdjustmentReasonCode_${index}`, className: 'StockAdjustment-reasoncode', data: StockAdjustment.reasonCode, value: 'Value', text:'Description', initialValue: [obj.ReasonCode], json: true, parent: '.modal' })}       
@@ -760,42 +721,3 @@ window.tabelItemName = (value, obj, index) => {
         </ol>
     `;
 }
-
-
-
-
-
-
-//window.tableScanReasonCode = (value, obj, index) => {
-//    return Dropdown.html({
-//        id: `ScanReasonCode_${index}`, className: 'StockAdjustment-scan-item-reason',
-//        data: StockAdjustment.reasonCode,value: 'Value',
-//        text: 'Description',initialValue: [obj.ReasonCode ?? ''], 
-//        json: true, parent: '.modal'
-//    });
-//}
-
-
-//window.tableScanReasonCodeEvent = {
-//    'change .StockAdjustment-scan-item-reason': (e, value, obj, index) => {
-//        obj.ReasonCode = e.currentTarget.value || "";
-
-//        Table.updateByIndex({ id: '#tableStockAdjustmentScanItem',index: index,
-//            obj: obj,
-//            value: obj.ReasonCode,
-//            event: e
-//        });
-//    }
-//};
-//window.tableStockAdjustmentReasonCode = (value, obj, index) => {
-//    const data = StockAdjustment.reasonCode || [];
-
-//    return Dropdown.html({
-//        id: `StockAdjustmentReasonCode_${index}`,className: 'StockAdjustment-reason-item',data: data,value: 'Value', text: 'Description',initialValue: [obj.ReasonCode || ""],  json: true,parent: '.modal'});
-//};
-//window.tableStockAdjustmentReasonCodeEvent = {
-//    'change .StockAdjustment-reason-item': (e, value, obj, index) => {
-//        obj.ReasonCode = e.currentTarget.value || "";
-//        Table.updateByIndex({ id: '#tableStockAdjustmentItem', index: index, obj: obj, value: obj.ReasonCode,event: e});
-//    }
-//};

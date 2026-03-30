@@ -106,6 +106,7 @@ namespace CRMApi.Controllers
 
 
                 objMsg = await RepoStockOut.GetStockItemWithSerialNoAsync(obj, User);
+
             }
             catch (Exception ex)
             {

@@ -1,10 +1,9 @@
 ﻿class StockOut {
     static item = [];
     static itemWithSerialNo = [];
+    static mode = 'Add';
     static init() {
-
         StockOut.getViewOption();
-
         $('#btnNewEntry').on('click', () => {
             StockOut.newEntry();
         });
@@ -121,9 +120,9 @@
     static newEntry() {
         StockOut.getAddOption({
             onSuccess: (response) => {
+                StockOut.mode = 'Add';
                 StockOut.item = response.data.Item;
                 let store = response.data.Store;
-
                 Dropdown.bind({ id: '#StockOut-StoreId', data: store, value: 'Id', text: 'Description' });
                 Modal.open({ id: '#modalStockOut', title: 'StockOut / Add', action: 'Add' });
                 $('#StockOut-RefDate,#StockOut-EwayDate').val('');
@@ -170,7 +169,7 @@
             }
         });
     }
-    static addStockOutItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0,unitDesc = null, isScanned = false, callback } = {}) {
+    static addStockOutItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, unitDesc = null, isScanned = false, isReturnable = false, callback } = {}) {
 
         let store = $('#StockOut-StoreId').val();
 
@@ -201,7 +200,8 @@
             ImageUrl: null,
             ReasonCode: null,
             Remarks: null,
-            IsScanned: isScanned
+            IsScanned: isScanned,
+            IsReturnable :isReturnable
         };
         if (!callback) {
             Table.add({ id: '#tableStockOutItem', data: obj, action: 'append', selectPick: true });
@@ -221,7 +221,7 @@
         let tfoot = `
             <tfoot>
                 <tr>
-                    <th class="text-right" colspan="4">Total</th>
+                    <th class="text-right" colspan="6">Total</th>
                     <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
                 </tr>
             </tfoot>
@@ -247,10 +247,12 @@
         Data.get({
             url: `StockOut/Edit?Id=${id}`,
             onSuccess: (response) => {
+                
                 let option = response.data;
                 Dropdown.bind({ id: '#StockOut-StoreId', data: option.AddOption.Store, value: 'Id', text: 'Description' });
                 StockOut.item = option.StockItem;               
-                let obj = option.Voucher;                
+                let obj = option.Voucher;
+                StockOut.mode = action;
                 obj.Id = action == 'Edit' ? obj.Id : null;
                 let title = action === 'Edit' ? `StockOut / Edit (Code: ${obj.No})` : `StockOut / Add`;
                 Modal.open({ id: '#modalStockOut', title: title, action: action, obj: obj });
@@ -607,6 +609,52 @@ window.tableStockOutItemQtyEvent = {
         StockOut.sumOfTotalStockOutItem();
     }
 }
+window.tableStockOutIsReturnable = (value, obj, index) => {
+    let isYes = value === true || value === "true" || value === 1;
+    if (StockOut.mode === 'Edit') {
+        return `<span>${obj.IsReturnable}</span>`;
+    }
+    return `
+        <select class="form-control form-control-sm table-isreturnable-select">
+            <option value="false" ${obj.IsReturnable == 0 ? "selected" : ""}>No</option>
+            <option value="true" ${obj.IsReturnable == 1 ? "selected" : ""}>Yes</option>
+        </select>`;
+};
+window.tableStockOutIsReturnableEvent = {
+    'change .table-isreturnable-select': (e, value, obj, index) => {
+        if (StockOut.mode === 'Edit') return;
+        let newValue = e.currentTarget.value === "true";
+        obj.IsReturnable = newValue;
+        Table.updateByIndex({
+            id: '#tableStockOutItem',
+            index: index,
+            obj: obj
+        });
+    }
+};
+window.tableStockOutIsReturned = (value, obj, index) => {
+    let isYes = value === true || value === "true" || value === 1;
+    if (StockOut.mode === 'Add') {
+        return `<span>-</span>`;
+    }
+    return `
+        <select class="form-control form-control-sm table-isreturned-select">
+            <option value="false" ${obj.IsReturned == 0 ? "selected" : ""}>No</option>
+            <option value="true" ${obj.IsReturned == 1 ? "selected" : ""}>Yes</option>
+        </select>`;
+};
+window.tableStockOutIsReturnedEvent = {
+    'change .table-isreturned-select': (e, value, obj, index) => {
+        if (StockOut.mode === 'Add') return;
+        let newValue = e.currentTarget.value === "true";
+        obj.IsReturned = newValue;
+        Table.updateByIndex({
+            id: '#tableStockOutItem',
+            index: index,
+            obj: obj
+        });
+    }
+};
 //StockOutScanTable
 window.tableScanExpiry = (v, obj) => {
     return obj.ExpiryOn

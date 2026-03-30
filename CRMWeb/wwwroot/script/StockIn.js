@@ -148,7 +148,8 @@
                     }
                     return x;
                 });
-            let obj = Data.serializeToObject({ formId: '#formStockIn' });          
+
+            let obj = Data.serializeToObject({ formId: '#formStockIn' });
             obj.VoucherItem = StockInItem;
             
             if (!obj.Id) {
@@ -191,6 +192,7 @@
                 let store = response.data.Store;
                             
                 Dropdown.bind({ id: '#StockIn-StoreId', data: store, value: 'Id', text: 'Description' });
+                Dropdown.bind({ id: '#StockIn-StockType', data: response.data.StockType, value: 'Value', text: 'Description' });
                 Modal.open({ id: '#modalStockIn', title: 'StockIn / Add', action: 'Add' });
                 $('#StockIn-RefDate,#StockIn-EwayDate').val('');
             }
@@ -289,6 +291,7 @@
                 obj.Id = action == 'Edit' ? obj.Id : null;
                 let title = action === 'Edit' ? `StockIn / Edit (Code: ${obj.No})` : `StockIn / Add`;            
                 Dropdown.bind({ id: '#StockIn-StoreId', data: store, value: 'Id', text: 'Description' });
+                Dropdown.bind({ id: '#StockIn-StockType', data: option.StockType, value: 'Value', text: 'Description' });
                 Modal.open({ id: '#modalStockIn', title: title, action: action, obj: obj });
                 Table.add({ id: '#tableStockInItem', data: obj.VoucherItem, selectPick: true });
                 StockIn.sumOfTotalStockInItem();
@@ -637,7 +640,7 @@ window.tableStockInItemDescEvent = {
 
         obj.Rate = itemJson?.Rate ?? 0;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
-
+        obj.StockType = $('#StockIn-StockType').val().toString();
         Table.updateByIndex({ id: '#tableStockInItem', index: index, obj: obj, value: obj.ItemId, event: e });
         StockIn.sumOfTotalStockInItem();
     },

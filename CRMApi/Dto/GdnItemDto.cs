@@ -14,6 +14,7 @@ namespace CRMApi.Dto
         public int StoreId { get; set; }
         public string? StoreDesc { get; set; }               
         public string? SerialNo { get; set; }
+        public string? StockType { get; set; }
         public DateTime? ExpiryOn { get; set; }
         public decimal Qty { get; set; }
         public string? Remarks { get; set; }
