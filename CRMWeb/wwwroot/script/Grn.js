@@ -65,7 +65,6 @@
                 });
             }
         });
-
         Party.initAdd();
         Party.addOnSuccess = (response) => {
             let obj = response.obj;

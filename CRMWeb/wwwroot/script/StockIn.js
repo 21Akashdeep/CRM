@@ -31,7 +31,30 @@
                     Export.Base64ToExcel({ base64: response.base64, fileName: 'StockIn' });
                 }
             });
-        });        
+        });     
+        Party.initAdd();
+        Party.addOnSuccess = (response) => {
+            let obj = response.obj;
+            Modal.close({ id: '#modalParty' });
+            StockIn.getAddOption({
+                onSuccess: (response) => {
+                    Dropdown.bind({ id: '#StockIn-PartyId', data: response.data.Party, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
+                    Field.triggerOnChange('#StockIn-PartyId');
+                }
+            });
+        }
+        Party.updateOnSuccess = (response) => {
+            let obj = response.obj;
+            Modal.close({ id: '#modalParty' });
+            setTimeout(() => {
+                StockIn.getAddOption({
+                    onSuccess: (response) => {
+                        Dropdown.bind({ id: '#StockIn-PartyId', data: response.data.Party, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
+                        Field.triggerOnChange('#StockIn-PartyId');
+                    }
+                });
+            }, 500);
+        }
         $('#StockIn-Scan').on('keydown', (e) => {
             if (e.key == "Enter") {
                 try {
@@ -193,6 +216,7 @@
                             
                 Dropdown.bind({ id: '#StockIn-StoreId', data: store, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#StockIn-StockType', data: response.data.StockType, value: 'Value', text: 'Description' });
+                Dropdown.bind({ id: '#StockIn-PartyId', data: response.data.Party, value: 'Id', text: 'Description' });
                 Modal.open({ id: '#modalStockIn', title: 'StockIn / Add', action: 'Add' });
                 $('#StockIn-RefDate,#StockIn-EwayDate').val('');
             }
@@ -213,7 +237,7 @@
 
         $('#StockInScan-ItemSerialNo').val('');
     }
-    static addStockInItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, isScanned = false, callback } = {}) {
+    static addStockInItem({ itemId = 0, itemDesc = null, serialNo = null, expiryOn = null, qty = 0, isScanned = false, callback } = {}) {
         let obj = {
             Id:0,
             StockInId: 0,
@@ -292,6 +316,7 @@
                 let title = action === 'Edit' ? `StockIn / Edit (Code: ${obj.No})` : `StockIn / Add`;            
                 Dropdown.bind({ id: '#StockIn-StoreId', data: store, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#StockIn-StockType', data: option.StockType, value: 'Value', text: 'Description' });
+                Dropdown.bind({ id: '#StockIn-PartyId', data: option.Party, value: 'Id', text: 'Description' });
                 Modal.open({ id: '#modalStockIn', title: title, action: action, obj: obj });
                 Table.add({ id: '#tableStockInItem', data: obj.VoucherItem, selectPick: true });
                 StockIn.sumOfTotalStockInItem();

@@ -86,12 +86,20 @@ namespace CRMApi.Repository
                         x.Value,
                         x.Description
                     }).ToListAsync();
+                var Party = await db.Party.Where(x => App.ActiveStatus.Contains(x.Status)).Select(x => new
+                {
+                    x.Id,
+                    x.Description
+
+                }).ToListAsync();
+              
                 objMsg.data = new
                 {
                    
                     Item,
                     Store,
-                    StockType
+                    StockType,
+                    Party
                 };
                 Message.Success(ref objMsg, "Record found");
             }

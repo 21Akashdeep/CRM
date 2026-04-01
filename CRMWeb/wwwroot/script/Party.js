@@ -31,6 +31,29 @@
                 }
             });
         });
+        Location.initAdd();
+        Location.addOnSuccess = (response) => {
+            let obj = response.obj;
+            Modal.close({ id: '#modalLocation' });
+            Party.getAddOption({
+                onSuccess: (response) => {
+                    Dropdown.bind({ id: '#Party-LocationId', data: response.data.Location, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
+                    Field.triggerOnChange('#Party-LocationId');
+                }
+            });
+        }
+        Location.updateOnSuccess = (response) => {
+            let obj = response.obj;
+            Modal.close({ id: '#modalLocation' });
+            setTimeout(() => {
+                Party.getAddOption({
+                    onSuccess: (response) => {
+                        Dropdown.bind({ id: '#Party-LocationId', data: response.data.Location, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
+                        Field.triggerOnChange('#Party-LocationId');
+                    }
+                });
+            }, 500);
+        }
         $('#Party_PinCode').on('input', () => {
             let pinCode = $('#Party_PinCode').val();
             if (pinCode.length == 6) {

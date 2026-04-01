@@ -39,6 +39,29 @@
                 }
             });
         });
+        Party.initAdd();
+        Party.addOnSuccess = (response) => {
+            let obj = response.obj;
+            Modal.close({ id: '#modalParty' });
+            Task.getAddOption({
+                onSuccess: (response) => {
+                    Dropdown.bind({ id: '#Task-PartyDesc', data: response.data.Party, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
+                    Field.triggerOnChange('#Task-PartyId');
+                }
+            });
+        }
+        Party.updateOnSuccess = (response) => {
+            let obj = response.obj;
+            Modal.close({ id: '#modalParty' });
+            setTimeout(() => {
+                Task.getAddOption({
+                    onSuccess: (response) => {
+                        Dropdown.bind({ id: '#Task-PartyDesc', data: response.data.Party, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
+                        Field.triggerOnChange('#Task-PartyId');
+                    }
+                });
+            }, 500);
+        }
         $('#btnNewEntry').on('click', () => {
             Task.newEntry();
         });

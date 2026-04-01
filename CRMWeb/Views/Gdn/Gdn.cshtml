@@ -60,6 +60,7 @@
                                 <th data-sortable="true" data-field="StoreDesc">From Store</th>
                                 <th data-sortable="false" data-formatter="tableGdnPoNoAndDate">Po No.<br />& Date</th>
                                 <th data-sortable="true" data-field="PartyDesc">Party</th>
+                                <th data-sortable="true" data-field="Remarks">Remarks</th>
                                 <th data-sortable="false" data-formatter="tableGdnCreatedByAndAt" class="text-nowrap">Created By & At</th>
                                 <th data-sortable="false" data-formatter="tableGdnUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
                                 <th data-sortable="false" data-formatter="tableGdnStatus" class="Status text-center">Status</th>
@@ -113,7 +114,7 @@
                         </div>
                         <div class="col-md-4">
                             <label>Party<span class="text-mandatory">*</span></label>
-                            <select id="Gdn-PartyId" name="PartyId" class="select-pick required" data-size="4" data-search="true"></select>
+                            <select id="Gdn-PartyId" name="PartyId" class="select-pick required" data-size="4" data-search="true" data-addFn="Party.newEntry" data-editFn="Party.edit"></select>
                         </div>
 
                         <div class="col-md-2">
@@ -170,7 +171,7 @@
                             <table id="tableGdnItem" class="table table-bordered table-hover table-default line-item" data-search="false">
                                 <thead>
                                     <tr>
-                                        <th colspan="5">
+                                        <th colspan="6">
                                             Gdn Item
                                             <div class="btn-group float-end">
                                                 <button type="button" class="btn btn-sm btn-primary rounded-5 me-e" onclick="Gdn.addGdnItem()">
@@ -188,6 +189,7 @@
                                         <th class="qty" data-field="SerialNo">SerialNo</th>
                                         <th class="qty" data-formatter="tableGdnItemExpiryOn">ExpiryOn</th>
                                         <th class="qty" data-formatter="tableGdnItemQty" data-events="tableGdnItemQtyEvent">Qty</th>
+                                        <th class="qty" data-formatter="tableGdnItemAction" data-events="tableGdnItemActionEvents">Remove</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -220,7 +222,7 @@
                                 <form id="formGdnScanItem" autocomplete="off" onsubmit="return false;">
                                     <div class="row">                                       
                                         <div class="col-md-6">
-                                            <label>Scan</label>
+                                            <label>Scan SerialNo</label>
                                             <input type="text" id="GdnScan-ItemSerialNo" name="Scan" class="form-control form-control-sm" />
                                         </div>
                                     </div>
@@ -268,7 +270,14 @@
     </div>
 </div>
 
+<partial name="../Party/PartyAdd.cshtml" />
+<partial name="../Item/ItemAdd.cshtml" />
+
 @section Scripts {
+    <script src="~/script/ItemSubGroup.js"></script>
+    <script src="~/script/ItemGroup.js"></script>
+    <script src="~/script/Item.js" asp-append-version="true"></script>
+    <script src="~/script/Party.js" asp-append-version="true"></script>
     <script src="~/script/Gdn.js" asp-append-version="true"></script>
     <script type="text/javascript">
         $(() => {

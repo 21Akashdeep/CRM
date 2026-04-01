@@ -98,7 +98,12 @@
                         </div>
                         <div class="col-md-2">
                             <label>Stock Type<span class="text-mandatory">*</span></label>
-                            <select id="StockIn-StockType" name="StockType" class="select-pick required" data-search="true" data-size="4" multiple>
+                            <select id="StockIn-StockType" name="StockType" class="select-pick required" data-search="true" data-size="4">
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Party<span class="text-mandatory">*</span></label>
+                            <select id="StockIn-PartyId" name="PartyId" class="select-pick complaint-required" data-search='true' data-size="4" data-addFn="Party.newEntry" data-editFn="Party.edit">
                             </select>
                         </div>
                        
@@ -228,13 +233,14 @@
         </div>
     </div>
 </div>
-
+<partial name="../Party/PartyAdd.cshtml" />
 <partial name="../Item/ItemAdd.cshtml" />
 
 @section Scripts {
     <script src="~/script/ItemSubGroup.js"></script>
     <script src="~/script/ItemGroup.js"></script>
     <script src="~/script/Item.js" asp-append-version="true"></script>
+    <script src="~/script/Party.js" asp-append-version="true"></script>
     <script src="~/script/StockIn.js" asp-append-version="true"></script>
     <script type="text/javascript">
         $(() => {

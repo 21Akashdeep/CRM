@@ -183,7 +183,7 @@
     {
 
         public string  NewTask { get; set; } = null!;
-        public string Complete { get; set; } = null!;
+        public string OfficeWork { get; set; } = null!;
         public string Service { get; set; } = null!;
 
     }
@@ -217,9 +217,9 @@
     public class  ReasonCode 
     {     
        public string Other { get; set; } = string.Empty;
-        public string Damage { get; set; } = string.Empty;
-        public string Shortage { get; set; } = string.Empty;
-        public string Correction { get; set; } = string.Empty;
+        public string Scrap { get; set; } = string.Empty;
+        public string Shortage { get; set; } = string.Empty;       
+        public string Repair { get; set; } = string.Empty;
     }
     public class StockType
     {

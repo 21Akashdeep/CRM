@@ -26,7 +26,7 @@
                         </div>                       
                         <div class="col-md-4">
                             <label>Party<span class="text-mandatory">*</span></label>
-                            <select id="Task-PartyDesc" name="PartyId" class="select-pick Task-required" data-search="true" data-size="4"></select>
+                            <select id="Task-PartyDesc" name="PartyId" class="select-pick Task-required" data-search="true" data-size="4" data-addFn="Party.newEntry" data-editFn="Party.edit"></select>
                         </div>
                         <div class="col-md-2">
                             <label>Category<span class="text-mandatory">*</span></label>
@@ -100,26 +100,6 @@
                             <textarea type="text" id="Remarks" name="Remarks" class="form-control form-control-sm"></textarea>
                         </div>                        
                     </div>
-                    @* <div class="row">
-                        <div class="col-md-6" >
-                            <table id="tableTaskAssignTo" class="table table-bordered table-hover table-default" data-search="false" data-checkbox-header="false">
-                                <thead>
-                                    <tr>
-                                        <th colspan="3">Task Assing To</th>
-                                    </tr>
-                                    <tr>
-                                        <th data-formatter="tableTaskAssignTo"
-                                            data-events="tableTaskAssignToEvent"
-                                            class="text-center"></th>
-
-                                        <th data-field="UserName">User Name</th>
-                                        <th data-field="LocationDesc">Location</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div> *@
                 </form>
                 <div id="modalTaskAssignTo" class="modal fade" tabindex="-1">
                     <div class="modal-dialog modal-lg modal-dialog-scrollable">

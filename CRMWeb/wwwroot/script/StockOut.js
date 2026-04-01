@@ -634,7 +634,7 @@ window.tableStockOutIsReturnableEvent = {
 };
 window.tableStockOutIsReturned = (value, obj, index) => {
     let isYes = value === true || value === "true" || value === 1;
-    if (StockOut.mode === 'Add') {
+    if (StockOut.mode === 'Add' || obj.IsReturnable == false) {
         return `<span>-</span>`;
     }
     return `

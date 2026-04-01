@@ -32,6 +32,29 @@
                 }
             });
         });
+        Party.initAdd();
+        Party.addOnSuccess = (response) => {
+            let obj = response.obj;
+            Modal.close({ id: '#modalParty' });
+            Gdn.getAddOption({
+                onSuccess: (response) => {
+                    Dropdown.bind({ id: '#Gdn-PartyId', data: response.data.Party, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
+                    Field.triggerOnChange('#Gdn-PartyId');
+                }
+            });
+        }
+        Party.updateOnSuccess = (response) => {
+            let obj = response.obj;
+            Modal.close({ id: '#modalParty' });
+            setTimeout(() => {
+                Gdn.getAddOption({
+                    onSuccess: (response) => {
+                        Dropdown.bind({ id: '#Gdn-PartyId', data: response.data.Party, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
+                        Field.triggerOnChange('#Gdn-PartyId');
+                    }
+                });
+            }, 500);
+        }
         $('#Gdn-StockType').on('change', () => {
 
             let store = $('#Gdn-StoreId').val()|| 0;
@@ -223,7 +246,7 @@
         let tfoot = `
             <tfoot>
                 <tr>
-                    <th class="text-right" colspan="4">Total</th>
+                    <th class="text-right" colspan="5">Total</th>
                     <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
                 </tr>
             </tfoot>
@@ -309,8 +332,11 @@
             Table.updateById({ id: "#tableGdn", objId: response.obj.Id, obj: response.obj });
         }
     }
-    static deleteItem({ id, index }) {
+    static deleteScanItem({ id, index }) {
         Table.remove({ id: '#tableGdnScanItem', value: [index] });
+    }
+    static deleteItem({ id, index }) {
+        Table.remove({ id: '#tableGdnItem', value: [index] });
     }
     static print({ obj }) {
         Data.post({
@@ -641,6 +667,15 @@ window.tableGdnItemQtyEvent = {
         Gdn.sumOfTotalGdnItem();
     }
 };
+window.tableGdnItemAction = (value, obj, index) => {
+    if (!obj.Id)
+        return `<button type="button" class="btn btn-sm btn-danger rounded-5 btn-delete"><span class="fa fa-trash"></span></button>`;
+}
+window.tableGdnItemActionEvents = {
+    'click .btn-delete': (e, value, obj, index) => {
+        Gdn.deleteItem({ id: obj.Id, index: index });
+    }
+}
 
 
 //Table Scan
@@ -661,7 +696,7 @@ window.tableGdnScanItemAction = (value, obj, index) => {
 }
 window.tableGdnScanItemActionEvents = {
     'click .btn-delete': (e, value, obj, index) => {
-        Gdn.deleteItem({ id: obj.Id, index: index });
+        Gdn.deleteScanItem({ id: obj.Id, index: index });
     }
 }
 window.tableGdnScanExpiryOn = (value, obj, index) => {

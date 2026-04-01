@@ -79,9 +79,11 @@
 </div>
 <!-- Api Add Modal -->
 <partial name="PartyAdd.cshtml" />
+<partial name="../Location/LocationAdd.cshtml" />
 @section Scripts {
 
     <script src="~/script/Party.js" asp-append-version="true"></script>
+    <script src="~/script/Location.js" asp-append-version="true"></script>
     <script type="text/javascript">
         $(()=> {
             Party.init();

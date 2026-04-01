@@ -73,8 +73,13 @@
 </div>
 <!-- Api Add Modal -->
 <partial name="TaskAdd.cshtml" />
+<partial name="../Party/PartyAdd.cshtml" />
+<partial name="../Item/ItemAdd.cshtml" />
 @section Scripts {
-
+    <script src="~/script/ItemSubGroup.js"></script>
+    <script src="~/script/ItemGroup.js"></script>
+    <script src="~/script/Item.js" asp-append-version="true"></script>
+    <script src="~/script/Party.js" asp-append-version="true"></script>
     <script src="~/script/Task.js" asp-append-version="true"></script>
     <script type="text/javascript">
         $(()=> {

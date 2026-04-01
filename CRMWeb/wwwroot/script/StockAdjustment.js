@@ -62,7 +62,6 @@
                 });
             }
         });
-
         $('#btnScanItemAdd').on('click', () => {
             let scanItems = $('#tableStockAdjustmentScanItem').bootstrapTable('getData');
             if (scanItems.length === 0) {
@@ -155,14 +154,8 @@
         Dropdown.bind({ id: '#StockAdjustmentScan-ItemId', data: StockAdjustment.item, value: 'Id', text: 'Description' });
         Dropdown.bind({ id: '#StockAdjustmentScan-ReasonCode', data: StockAdjustment.reasonCode, value: 'Value', text: 'Description' });
         $('#StockAdjustment-ExpiryOn,#StockAdjustmentScan-ItemSerialNo').val('');
-
     }
-    static addStockAdjustmentItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, reasonCode = "", reasonCodeDesc = "", unitDesc = null, isScanned = false, callback } = {}) {
-
-        if (Field.isNullOrEmpty($('#StockAdjustment-StoreId').val())) {
-            Message.error({ statusText: 'Store is not select.' });
-            return;
-        }
+    static addStockAdjustmentItem({ itemId = 0, itemDesc = null, serialNo =null, expiryOn = null, qty = 0, reasonCode = "", reasonCodeDesc = "", unitDesc = null, isScanned = false, callback } = {}) {
 
         let obj = {
             Id: 0,
@@ -566,16 +559,14 @@ window.tableStockAdjustmentItemDescEvent = {
         let itemJson = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
         obj.UnitDesc = itemJson?.UnitDesc ?? null;
         obj.UnitId = itemJson?.UnitId ?? 0;
-        obj.Rate = itemJson?.Rate ?? 0;
-       
+        obj.Rate = itemJson?.Rate ?? 0;      
         //obj.ItemId = itemJson?.ItemId ?? 0;
         // Set Serial No. & BalQty
         let item = StockAdjustment.item.find(x => x.ItemId == obj.ItemId);
-        item.SerialNo ? obj.SerialNo = item.SerialNo : obj.SerialNo = "N/A";
+        
         obj.BalQty = item ? item.Qty : 0;
         //Sum of Amount
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
-
         Table.updateByIndex({ id: '#tableStockAdjustmentItem', index: index, obj: obj, value: obj.ItemId, event: e });
         StockAdjustment.sumOfTotalStockAdjustmentItem();
     },
