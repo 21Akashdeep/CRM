@@ -171,7 +171,11 @@
                     }
                     return x;
                 });
-
+            let ZeroQtyItem = StockInItem.filter(x => x.Qty == 0);
+            if (ZeroQtyItem.length != 0) {
+                Message.error({ statusText: 'Qty Zero Input in Any Item!!!' });
+                return;
+            }
             let obj = Data.serializeToObject({ formId: '#formStockIn' });
             obj.VoucherItem = StockInItem;
             
@@ -279,7 +283,7 @@
         let tfoot = `
             <tfoot>
                 <tr>
-                    <th class="text-right" colspan="4">Total</th>
+                    <th class="text-right" colspan="5">Total</th>
                     <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
                 </tr>
             </tfoot>

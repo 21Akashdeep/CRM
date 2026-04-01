@@ -89,9 +89,25 @@
 
             Modal.close({ id: '#modalStockTransferItemScan' });
         });
+        $('#StockTransfer-StockType').on('change', () => {
 
-        $('#FromStoreId').on('change', () => {
-            StockTransfer.getItemDetails();
+            let store = $('#FromStoreId').val() || 0;
+            let stockType = [$('#StockTransfer-StockType').val()] || 0;
+            if (store == 0 || stockType == 0) {
+                Message.error({ statusText: 'Select Both From Store And StockType!!!' });
+                return;
+            }
+            let obj = {
+                ListStoreId: [$('#FromStoreId').val()],
+                ListStockType: stockType
+            };
+            Data.post({
+                url: 'StockTransfer/GetStockItem',
+                data: obj,
+                onSuccess: (response) => {
+                    StockTransfer.item = response.data;
+                }
+            });
         });
 
         $('#StockTransfer-BtnSave').on('click', () => {
@@ -105,6 +121,11 @@
                     }
                     return x;
                 });
+            let ZeroQtyItem = StockTransferItem.filter(x => x.Qty == 0);
+            if (ZeroQtyItem.length != 0) {
+                Message.error({ statusText: 'Qty Zero Input in Any Item!!!' });
+                return;
+            }
             let obj = Data.serializeToObject({ formId: '#formStockTransfer' });
             obj.StoreId = obj.ToStoreId;
             obj.VoucherItem = StockTransferItem;
@@ -149,6 +170,7 @@
                 let store = response.data.Store;
                 Dropdown.bind({ id: '#FromStoreId', data: store, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#ToStoreId', data: store, value: 'Id', text: 'Description' });
+                Dropdown.bind({ id: '#StockTransfer-StockType', data: response.data.StockType, value: 'Value', text: 'Description' });
                 Modal.open({ id: '#modalStockTransfer', title: 'StockTransfer / Add', action: 'Add' });
                 $('#StockTransfer-RefDate,#StockTransfer-EwayDate').val('');
             }
@@ -173,12 +195,15 @@
         });
     }
     static scanItem() {
-        if (Field.isNullOrEmpty($('#FromStoreId').val())) {
-            Message.error({ statusText: 'Store is not selected!!!' });
+        let store = $('#FromStoreId').val() || 0;
+        let stockType = [$('#StockTransfer-StockType').val()] || 0;
+        if (store == 0 || stockType == 0) {
+            Message.error({ statusText: 'Select Both From Store And StockType!!!' });
             return;
         }
         let obj = {
             ListStoreId: [$('#FromStoreId').val()],
+            ListStockType: stockType
         };
         Data.post({
             url: 'StockTransfer/getStockItemWithSerialNo',
@@ -194,15 +219,14 @@
             }
         });
     }
-    static addStockTransferItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, unitDesc = null, isScanned = false, callback } = {}) {
+    static addStockTransferItem({ itemId = 0, itemDesc = null, serialNo = null, expiryOn = null, qty = 0, unitDesc = null, isScanned = false, callback } = {}) {
 
-        let store = $('#FromStoreId').val();
-
-        if (!store || store.length == 0) {
-            Message.error({ statusText: 'First Select FromStore' });
+        let store = $('#FromStoreId').val() || 0;
+        let stockType = $('#StockTransfer-StockType').val() || 0;
+        if (store == 0 || stockType == 0) {
+            Message.error({ statusText: 'First Select FromStore And StockType' });
             return;
         }
-
 
         let obj = {
             Id: 0,
@@ -279,6 +303,7 @@
                 //Stocktransfer.item =      
                 Dropdown.bind({ id: '#FromStoreId', data: store, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#ToStoreId', data: store, value: 'Id', text: 'Description' });
+                Dropdown.bind({ id: '#StockTransfer-StockType', data: option.StockType, value: 'Value', text: 'Description' });
                 obj.FromStoreId = obj.VoucherItem.filter(x => x.Qty < 0)[0].StoreId;
                 obj.ToStoreId = obj.VoucherItem.filter(x => x.Qty >= 0)[0].StoreId;
                 let voucherItem = obj.VoucherItem.filter(x => x.Qty >= 0);
@@ -635,7 +660,6 @@ window.tableStockTransferItemDescEvent = {
         obj.Rate = itemJson?.Rate ?? 0;
         // Set Serial No. & BalQty
         let item = StockTransfer.item.find(x => x.ItemId == obj.ItemId);
-        item.SerialNo ? obj.SerialNo = item.SerialNo : obj.SerialNo = "N/A";
         obj.BalQty = item ? item.Qty : 0;
         //Sum of Amount
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);

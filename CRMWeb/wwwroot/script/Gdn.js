@@ -124,6 +124,11 @@
                 Message.error({ statusText: 'Gdn Item not found.<br>Add atleast one Gdn Item.' });
                 return;
             }
+            let ZeroQtyItem = gdnItem.filter(x => x.Qty == 0);
+            if (ZeroQtyItem.length != 0) {
+                Message.error({ statusText: 'Qty Zero Input in Any Item!!!' });
+                return;
+            }
             let obj = Data.serializeToObject({ formId: '#formGdn' });                           
             obj.VoucherItem = gdnItem;
             obj.NetAmount = gdnItem.reduce((sum, x) => sum + (Number(x.Amount) || 0), 0).toFixed(2);
@@ -140,7 +145,7 @@
             url: 'Gdn/GetViewOption',
             onSuccess: (response) => {
                 Dropdown.bind({ id: '#ListStatus', data: response.data.Status, value: 'Value', text: 'Description' });
-                Dropdown.bind({ id: '#ListPartyId', data: response.data.Party, value: 'Id', text: 'Name' });
+                Dropdown.bind({ id: '#ListPartyId', data: response.data.Party, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#ListNo', data: response.data.Number, value: 'Id', text: 'No' });
             }
         });
@@ -273,7 +278,7 @@
             onSuccess: (response) => {    
                 let option = response.data.AddOption;
                 Dropdown.bind({ id: '#Gdn-StoreId', data: option.Store, value: 'Id', text: 'Description' });
-                Dropdown.bind({ id: '#Gdn-PartyId', data: option.Party, value: 'Id', text: 'Name' });
+                Dropdown.bind({ id: '#Gdn-PartyId', data: option.Party, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#Gdn-StockType', data: option.StockType, value: 'Value', text: 'Description' });
                 Dropdown.bind({ id: '#Gdn-ConStateName', data: option.State, value: 'Name', text: 'Name' });                
                 Gdn.item = response.data.StockItem;

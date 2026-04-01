@@ -51,9 +51,10 @@
                             <tr>
                                 <th data-sortable="false" data-formatter="tableStockOutSlNo" class="text-center">#</th>
                                 <th data-sortable="true" data-field="No">Number</th>
-                                <th data-sortable="true" data-field="StoreDesc">From Store</th>                             
-                                <th data-sortable="false" data-formatter="tableStockOutCreatedByAndAt" class="text-nowrap">Created By & At</th>
-                                <th data-sortable="false" data-formatter="tableStockOutUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
+                                <th data-sortable="true" data-field="StoreDesc">From Store</th> 
+                                <th data-sortable="true" data-field="Remarks">Remarks</th>
+                                <th data-sortable="true" data-formatter="tableStockOutCreatedByAndAt" class="text-nowrap">Created By & At</th>
+                                <th data-sortable="true" data-formatter="tableStockOutUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
                                 <th data-sortable="false" data-formatter="tableStockOutStatus" class="Status text-center">Status</th>
                                 <th data-formatter="tableStockOutAction" data-events="tableStockOutActionEvent" class="not-print text-center"><i class="fa-solid fa-list-check"></i></th>
                             </tr>
@@ -95,7 +96,12 @@
                         <div class="col-md-2">
                             <label>From Store<span class="text-mandatory">*</span></label>
                             <select id="StockOut-StoreId" name="StoreId" class="select-pick required" data-search="true" data-size="4"></select>
-                        </div>                       
+                        </div> 
+                        <div class="col-md-2">
+                            <label>Stock Type<span class="text-mandatory">*</span></label>
+                            <select id="StockOut-StockType" name="StockType" class="select-pick required" data-search="true" data-size="4">
+                            </select>
+                        </div>
 
                     </div>
                     <hr />

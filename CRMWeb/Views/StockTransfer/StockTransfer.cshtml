@@ -50,8 +50,9 @@
                                 <th data-sortable="true" data-field="StoreDesc">To Store</th>
                                 <th data-formatter="tabelItemName">Items</th>
                                 <th data-sortable="true" data-field="TotalQty"> Qty </th>
-                                <th data-sortable="false" data-formatter="tableStockTransferCreatedByAndAt" class="text-nowrap">Created By & At</th>
-                                <th data-sortable="false" data-formatter="tableStockTransferUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
+                                <th data-sortable="true" data-field="Remarks">Remarks</th>
+                                <th data-sortable="true" data-formatter="tableStockTransferCreatedByAndAt" class="text-nowrap">Created By & At</th>
+                                <th data-sortable="true" data-formatter="tableStockTransferUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
                                 <th data-sortable="false" data-formatter="tableStockTransferStatus" class="Status text-center">Status</th>
                                 <th data-formatter="tableStockTransferAction" data-events="tableStockTransferActionEvent" class="not-print text-center"><i class="fa-solid fa-list-check"></i></th>
                             </tr>
@@ -95,6 +96,11 @@
                         </div>
                         <div class="col-md-2">
                             <label>To Store<span class="text-mandatory">*</span></label> <select id="ToStoreId" name="ToStoreId" class="select-pick required" data-search="true" data-size="4"></select>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Stock Type<span class="text-mandatory">*</span></label>
+                            <select id="StockTransfer-StockType" name="StockType" class="select-pick required" data-search="true" data-size="4">
+                            </select>
                         </div>
                        
 

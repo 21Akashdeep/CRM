@@ -101,6 +101,11 @@
                     }
                     return x;
                 });
+            let ZeroQtyItem = StockAdjustmentItem.filter(x => x.Qty == 0);
+            if (ZeroQtyItem.length != 0) {
+                Message.error({ statusText: 'Qty Zero Input in Any Item!!!' });
+                return;
+            }
             let obj = Data.serializeToObject({ formId: '#formStockAdjustment' });
             obj.VoucherItem = StockAdjustmentItem;
 

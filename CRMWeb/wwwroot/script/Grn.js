@@ -140,6 +140,11 @@
                     }
                     return x;
                 });
+            let ZeroQtyItem = GrnItem.filter(x => x.Qty == 0);
+            if (ZeroQtyItem.length != 0) {
+                Message.error({ statusText: 'Qty Zero Input in Any Item!!!' });
+                return;
+            }
             let obj = Data.serializeToObject({ formId: '#formGrn' });            
             obj.VoucherItem = GrnItem;
             if (!obj.Id) {
@@ -187,7 +192,7 @@
                 Grn.item = response.data.Item;
                 let store = response.data.Store;
                 let state = response.data.State;
-                Dropdown.bind({ id: '#Grn-PartyId', data: response.data.Party, value: 'Id', text: 'Name' });
+                Dropdown.bind({ id: '#Grn-PartyId', data: response.data.Party, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#Grn-ConStateName', data: state, value: 'Name', text: 'Name', initialValue: [state.Name], json: true });
                 Dropdown.bind({ id: '#Grn-StoreId', data: store, value: 'Id', text: 'Description' });
                 Modal.open({ id: '#modalGrn', title: 'Grn / Add', action: 'Add' });
@@ -244,7 +249,7 @@
         let tfoot = `
             <tfoot>
                 <tr>
-                    <th class="text-right" colspan="4">Total</th>
+                    <th class="text-right" colspan="5">Total</th>
                     <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
                 </tr>
             </tfoot>
@@ -282,7 +287,7 @@
                 let title = action === 'Edit' ? `Grn / Edit (Code: ${obj.No})` : `Grn / Add`;
                 
                 Dropdown.bind({ id: '#Grn-ConStateName', data: state, value: 'Name', text: 'Name', initialValue: [state.Name] });
-                Dropdown.bind({ id: '#Grn-PartyId', data: response.data.Party, value: 'Id', text: 'Name' });
+                Dropdown.bind({ id: '#Grn-PartyId', data: response.data.Party, value: 'Id', text: 'Description' });
                               
                 Dropdown.bind({ id: '#Grn-StoreId', data: store, value: 'Id', text: 'Description' });
                 Modal.open({ id: '#modalGrn', title: title, action: action, obj: obj });
@@ -344,6 +349,9 @@
         }
     }
     static deleteItem({ id, index }) {
+        Table.remove({ id: '#tableGrnItem', value: [index] });
+    }
+    static deleteScanItem({ id, index }) {
         Table.remove({ id: '#tableGrnScanItem', value: [index] });
     }
     static print({ obj }) {
@@ -592,6 +600,18 @@ window.tableGrnActionEvent = {
         Grn.delete({ id: obj.Id });
     }
 }
+window.tableGrnChalanNoAndDate = (value, obj, index) => {
+    return `
+        <div>${obj.ChallanNo || '-'}</div>
+        <div>${obj.ChallanDate ? moment(obj.ChallanDate).format('DD-MMM-YYYY HH:mm') : '-'}</div>
+    `;
+}
+window.tableGrnInvoiceNoAndDate = (value, obj, index) => {
+    return `
+        <div>${obj.InvoiceNo || '-'}</div>
+        <div>${obj.InvoiceDate ? moment(obj.InvoiceDate).format('DD-MMM-YYYY HH:mm') : '-'}</div>
+    `;
+}
 
 //Table Grn Item
 window.tableGrnItemSlNo = (value, obj, index) => {
@@ -638,6 +658,15 @@ window.tableGrnItemQtyEvent = {
 window.tableGrnExpiryOn = (value, obj) => {  
     return `${!obj.ExpiryOn ? '-' : moment(obj.ExpiryOn).format('DD-MM-YYYY')}`;
 };
+window.tableGrnItemAction = (value, obj, index) => {
+    if (!obj.Id)
+        return `<button type="button" class="btn btn-sm btn-danger rounded-5 btn-delete"><span class="fa fa-trash"></span></button>`;
+}
+window.tableGrnItemActionEvents = {
+    'click .btn-delete': (e, value, obj, index) => {
+        Grn.deleteItem({ id: obj.Id, index: index });
+    }
+}
 // table Grn Item Scan
 window.tableScanItemDesc = (v, obj) => {
     let item = Grn.item.find(x => x.Id === obj.ItemId);
@@ -660,7 +689,7 @@ window.tableGrnScanItemAction = (value, obj, index) => {
 }
 window.tableGrnScanItemActionEvents = {
     'click .btn-delete': (e, value, obj, index) => {
-        Grn.deleteItem({ id: obj.Id, index: index });
+        Grn.deleteScanItem({ id: obj.Id, index: index });
     }
 }
 

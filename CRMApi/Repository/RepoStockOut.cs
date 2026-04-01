@@ -82,11 +82,19 @@ namespace CRMApi.Repository
 
                     }
                 ).ToListAsync();
+                var StockType = await db.Setting
+                    .Where(x => App.ActiveStatus.Contains(x.Status) && x.Name == App.SettingName.StockType)
+                    .Select(x => new
+                    {
+                        x.Value,
+                        x.Description
+                    }).ToListAsync();
                 objMsg.data = new
                 {
 
                     Item,
                     Store,
+                    StockType
                 };
                 Message.Success(ref objMsg, "Record found");
             }
@@ -131,12 +139,12 @@ namespace CRMApi.Repository
                     Remarks = vc.Remarks,
                     Status = vc.Status,
                     StatusDesc = sts.Description,
-                    StatusCss = sts.StatusCss,
+                    StatusCss = sts.CssClass,
                     CreatedBy = vc.CreatedBy,
-                    CreatedByName = cby.CreatedByName,
+                    CreatedByName = cby.Name,
                     CreatedAt = vc.CreatedAt,
                     UpdatedBy = vc.UpdatedBy,
-                    UpdatedByName = uby.UpdatedByName,
+                    UpdatedByName = uby.Name,
                     UpdatedAt = vc.UpdatedAt,
                     IsEdit = true,
                     IsPrint = true,

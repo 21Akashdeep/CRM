@@ -224,6 +224,6 @@
     public class StockType
     {
         public string New { get; set; } = null!;
-        public string Old { get; set; } = null!;
+        public string Used { get; set; } = null!;
     }
 }

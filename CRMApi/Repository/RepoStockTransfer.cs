@@ -85,11 +85,19 @@ namespace CRMApi.Repository
 
                     }
                 ).ToListAsync();
+                var StockType = await db.Setting
+                    .Where(x => App.ActiveStatus.Contains(x.Status) && x.Name == App.SettingName.StockType)
+                    .Select(x => new
+                    {
+                        x.Value,
+                        x.Description
+                    }).ToListAsync();
                 objMsg.data = new
                 {
 
                     Item,
                     Store,
+                    StockType
                 };
                 Message.Success(ref objMsg, "Record found");
             }
@@ -386,6 +394,7 @@ namespace CRMApi.Repository
                         Qty = Math.Abs(vi.Qty),
                         ExpiryOn = vi.ExpiryOn,
                         Remarks = vi.Remarks,
+                        StockType = vi.StockType,
                         Status = App.Status.Enable,
                         CreatedBy = user.Id,
                         CreatedAt = DateTime.Now,
@@ -443,6 +452,7 @@ namespace CRMApi.Repository
                         Qty = Math.Abs(vi.Qty),
                         ExpiryOn = vi.ExpiryOn,
                         Remarks = vi.Remarks,
+                        StockType = vi.StockType,
                         Status = App.Status.Enable,
                         CreatedBy = user.Id,
                         CreatedAt = DateTime.Now,

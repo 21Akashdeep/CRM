@@ -57,14 +57,13 @@
                                 <th data-sortable="false" data-formatter="tableGrnSlNo" class="text-center">#</th>
                                 <th data-sortable="true" data-field="Date" data-formatter="tableGrnDate">Date</th>                    
                                 <th data-sortable="true" data-field="No">Number</th>
-                                <th data-sortable="true" data-field="PartyDesc">Party</th>                              
-                                <th data-sortable="true" data-field="StoreDesc">From Store </th> 
-                                <th data-sortable="true" data-field="ChallanNo">Challan No. </th>
-                                <th data-sortable="true" data-field="ChallanDate" data-formatter="tableGrnDate">Challan Date </th>
-                                <th data-sortable="true" data-field="InvoiceNo">Invoice No. </th>
-                                <th data-sortable="true" data-field="InvoiceDate" data-formatter="tableGrnDate">Invoice Date </th>
-                                <th data-sortable="false" data-formatter="tableGrnCreatedByAndAt" class="text-nowrap">Created By & At</th>
-                                <th data-sortable="false" data-formatter="tableGrnUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
+                                <th data-sortable="true" data-field="PartyDesc">Party Name</th>                              
+                                <th data-sortable="true" data-field="StoreDesc">To Store </th>
+                                <th data-sortable="true" data-formatter="tableGrnChalanNoAndDate" class="text-nowrap">Challan No & Date</th>
+                                <th data-sortable="true" data-formatter="tableGrnInvoiceNoAndDate" class="text-nowrap">Invoice No & Date</th>
+                                <th data-sortable="true" data-field="Remarks">Remarks </th>
+                                <th data-sortable="true" data-formatter="tableGrnCreatedByAndAt" class="text-nowrap">Created By & At</th>
+                                <th data-sortable="true" data-formatter="tableGrnUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
                                 <th data-sortable="false" data-formatter="tableGrnStatus" class="Status text-center">Status</th>
                                 <th data-formatter="tableGrnAction" data-events="tableGrnActionEvent" class="not-print text-center"><i class="fa-solid fa-list-check"></i></th>
                             </tr>
@@ -178,7 +177,7 @@
                             <table id="tableGrnItem" class="table table-bordered table-hover table-default line-item" data-search="false">
                                 <thead>
                                     <tr>
-                                        <th colspan="5">
+                                        <th colspan="6">
                                             Grn Item
                                             <div class="btn-group float-end">
                                                 <button type="button" class="btn btn-sm btn-primary rounded-5 me-e" onclick="Grn.addGrnItem()">
@@ -196,6 +195,7 @@
                                         <th class="qty" data-field="SerialNo" >SerialNo</th>                                     
                                         <th class="qty" data-formatter="tableGrnExpiryOn" >ExpiryOn</th>
                                         <th class="qty" data-formatter="tableGrnItemQty" data-events="tableGrnItemQtyEvent">Qty</th>
+                                        <th class="qty" data-formatter="tableGrnItemAction" data-events="tableGrnItemActionEvents">Remove</th>
                                     </tr>
                                 </thead>
                                 <tbody>

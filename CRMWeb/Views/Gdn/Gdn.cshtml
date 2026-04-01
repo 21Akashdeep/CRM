@@ -59,10 +59,10 @@
                                 <th data-sortable="true" data-field="No">Number</th>
                                 <th data-sortable="true" data-field="StoreDesc">From Store</th>
                                 <th data-sortable="false" data-formatter="tableGdnPoNoAndDate">Po No.<br />& Date</th>
-                                <th data-sortable="true" data-field="PartyDesc">Party</th>
+                                <th data-sortable="true" data-field="PartyDesc">Party Name</th>
                                 <th data-sortable="true" data-field="Remarks">Remarks</th>
-                                <th data-sortable="false" data-formatter="tableGdnCreatedByAndAt" class="text-nowrap">Created By & At</th>
-                                <th data-sortable="false" data-formatter="tableGdnUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
+                                <th data-sortable="true" data-formatter="tableGdnCreatedByAndAt" class="text-nowrap">Created By & At</th>
+                                <th data-sortable="true" data-formatter="tableGdnUpdatedByAndAt" class="text-nowrap">Updated By & At</th>
                                 <th data-sortable="false" data-formatter="tableGdnStatus" class="Status text-center">Status</th>
                                 <th data-formatter="tableGdnAction" data-events="tableGdnActionEvent" class="not-print text-center">
                                     <i class="fa-solid fa-list-check"></i>
@@ -93,7 +93,8 @@
             </div>
             <div class="modal-body" style="min-height:75vh;">
                 <form id="formGdn" autocomplete="off" onsubmit="return false;">
-                    <input type="hidden" id="Id" name="Id" />                      
+                    <input type="hidden" id="Id" name="Id" />
+                    <input type="hidden" id="No" name="No" />
                     <div class="row">
                         <div class="col-md-2">
                             <label>Date</label>

@@ -65,9 +65,25 @@
 
             Modal.close({ id: '#modalStockOutItemScan' });
         });
+        $('#StockOut-StockType').on('change', () => {
 
-        $('#StockOut-StoreId').on('change', () => {
-            StockOut.getItemDetails();
+            let store = $('#StockOut-StoreId').val() || 0;
+            let stockType = [$('#StockOut-StockType').val()] || 0;
+            if (store == 0 || stockType == 0) {
+                Message.error({ statusText: 'Store is not selected!!!' });
+                return;
+            }
+            let obj = {
+                ListStoreId: [$('#StockOut-StoreId').val()],
+                ListStockType: stockType
+            };
+            Data.post({
+                url: 'StockOut/GetStockItem',
+                data: obj,
+                onSuccess: (response) => {
+                    StockOut.item = response.data;
+                }
+            });
         });
 
         $('#StockOut-BtnSave').on('click', () => {
@@ -81,6 +97,11 @@
                     }
                     return x;
                 });
+            let ZeroQtyItem = StockOutItem.filter(x => x.Qty == 0);
+            if (ZeroQtyItem.length != 0) {
+                Message.error({ statusText: 'Qty Zero Input in Any Item!!!' });
+                return;
+            }
             let obj = Data.serializeToObject({ formId: '#formStockOut' });
             obj.VoucherItem = StockOutItem;
 
@@ -124,6 +145,7 @@
                 StockOut.item = response.data.Item;
                 let store = response.data.Store;
                 Dropdown.bind({ id: '#StockOut-StoreId', data: store, value: 'Id', text: 'Description' });
+                Dropdown.bind({ id: '#StockOut-StockType', data: response.data.StockType, value: 'Value', text: 'Description' });
                 Modal.open({ id: '#modalStockOut', title: 'StockOut / Add', action: 'Add' });
                 $('#StockOut-RefDate,#StockOut-EwayDate').val('');
             }
@@ -171,11 +193,11 @@
     }
     static addStockOutItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, unitDesc = null, isScanned = false, isReturnable = false, callback } = {}) {
 
-        let store = $('#StockOut-StoreId').val();
-
-        if (!store || store.length == 0) {
-            Message.error({ statusText: 'First Select Store' });
-            return;
+        let store = $('#StockOut-StoreId').val() || 0;
+        let stockType = $('#StockOut-StockType').val() || 0;
+        if (store == 0 || stockType == 0) {
+            Message.error({ statusText: 'Select Both Store And StockType!!!' });
+            return;       
         }
 
         let obj = {
