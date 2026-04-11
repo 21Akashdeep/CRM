@@ -1,5 +1,7 @@
 ﻿class StockIn {
     static item = [];
+    static unit = [];
+    static conFator;
     static init() {
 
         StockIn.getViewOption();
@@ -133,33 +135,7 @@
 
             Modal.close({ id: '#modalStockInItemScan' });
         });
-        Item.initAdd();
-        Item.addOnSuccess = (response) => {
-            let obj = response.obj;
-            Modal.close({ id: '#modalItem' });
-            StockIn.getAddOption({
-                onSuccess: (response) => {
-                    StockIn.item = response.data.Item;
-                    StockIn.refreshStockInItemDropdowns();
-                    Field.triggerOnChange('#StockIn-ItemId');
-                }
-            });
-        };
-
-        Item.updateOnSuccess = (response) => {
-            let obj = response.obj;
-            Modal.close({ id: '#modalItem' });
-
-            setTimeout(() => {
-                StockIn.getAddOption({
-                    onSuccess: (response) => {
-                        StockIn.item = response.data.Item;
-                        StockIn.refreshStockInItemDropdowns();
-                        Field.triggerOnChange('#StockIn-ItemId');
-                    }
-                });
-            }, 500);
-        };
+        
         $('#StockIn-BtnSave').on('click', () => {
             if (!Field.isMandatory({ class: '.required' })) {
                 return;
@@ -212,6 +188,7 @@
             onSuccess: onSuccess
         }); 
     }
+
     static newEntry() {
         StockIn.getAddOption({
             onSuccess: (response) => {
@@ -253,6 +230,7 @@
             BatchNo: "",
             ExpiryOn: expiryOn,
             Qty: qty,
+            BaseQty:qty,
             Rate: 0,
             UnitDesc: null,
             Amount: 0,
@@ -283,13 +261,21 @@
         let tfoot = `
             <tfoot>
                 <tr>
-                    <th class="text-right" colspan="5">Total</th>
+                    <th class="text-right" colspan="6">Total</th>
                     <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
                 </tr>
             </tfoot>
         `;
         $('#tableStockInItem tfoot').remove();
         $('#tableStockInItem').append(tfoot);
+    }
+    static getUnit(id, callback) {
+        Data.get({
+            url: `StockIn/getUnit?Id=${id}`,
+            onSuccess: (response) => {
+                callback(response.data);
+            }
+        });
     }
     static add(obj) {
         Data.post({
@@ -650,6 +636,23 @@ window.tableStockInItemSlNo = (value, obj, index) => {
     return index + 1;
 }
 window.tableStockInItemDesc = (value, obj, index) => {
+    setTimeout(() => {
+        if (!obj.UnitList && obj.ItemId) {
+            StockIn.getUnit(obj.ItemId, (unitList) => {
+                obj.UnitList = unitList;
+
+                let selected = unitList[0];
+                obj.UnitId = selected?.UnitId || 0;
+                obj.UnitDesc = selected?.UnitDesc || null;
+
+                Table.updateByIndex({
+                    id: '#tableStockInItem',
+                    index: index,
+                    obj: obj
+                });
+            });
+        }
+    }, 0);
     return `
         ${Dropdown.html({
             id: `StockInItem_${index}`, className: 'StockIn-item', data: StockIn.item, value: 'Id', text: 'Description', initialValue: [obj.ItemId], json: true, parent: '.modal', search: true,
@@ -666,7 +669,20 @@ window.tableStockInItemDescEvent = {
         obj.ItemId = !Field.isNullOrEmpty(e.currentTarget.value) ? parseInt(e.currentTarget.value) : 0;
         let itemJson = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
         obj.UnitDesc = itemJson?.UnitDesc ?? null;
+        StockIn.getUnit(obj.ItemId, (unitList) => {
 
+            obj.UnitList = unitList;
+            obj.UnitId = unitList?.[0]?.Id || 0;
+            obj.UnitDesc = unitList?.[0]?.UnitDesc || null;
+
+            Table.updateByIndex({
+                id: '#tableStockInItem',
+                index: index,
+                obj: obj,
+                event: e
+            });
+
+        });
         obj.Rate = itemJson?.Rate ?? 0;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
         obj.StockType = $('#StockIn-StockType').val().toString();
@@ -676,6 +692,35 @@ window.tableStockInItemDescEvent = {
     'input .StockIn-item-remarks': (e, value, obj, index) => {
         obj.Remarks = e.currentTarget.value;
         Table.updateByIndex({ id: '#tableStockInItem', index: index, obj: obj, value: obj.Remarks, event: e });
+    }
+}
+window.tableStockInItemUnitDesc = (value, obj, index) => {
+    return `
+        ${Dropdown.html({
+        id: `StockInUnit_${index}`,
+        className: 'stockin-unit',
+        data: obj.UnitList || [],
+        value: 'UnitId',
+        text: 'UnitDesc',
+        initialValue: [obj.UnitId],
+        json: true,
+        parent: '.modal'
+    })}
+    `;
+}
+window.tableStockInItemUnitDescEvent = {
+    'change .stockin-unit': (e, value, obj, index) => {
+        obj.UnitId = parseInt(e.currentTarget.value) || 0;
+        let unitJson = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
+        obj.UnitDesc = unitJson?.UnitDesc || null;
+        Table.updateByIndex({
+            id: '#tableStockInItem',
+            index: index,
+            obj: obj,
+            event: e
+        });
+
+        Gdn.sumOfTotalGdnItem();
     }
 }
 window.tableStockInItemRate = (value, obj, index) => {
@@ -699,6 +744,10 @@ window.tableStockInItemQty = (value, obj, index) => {
 window.tableStockInItemQtyEvent = {
     'input .StockIn-item-qty': (e, value, obj, index) => {
         obj.Qty = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
+        let unitId = $(`#StockInUnit_${index}`).val();
+        let selectedUnit = obj.UnitList?.find(x => x.UnitId == unitId);
+        let cf = selectedUnit?.ConversionFactor || 1;
+        obj.BaseQty = obj.Qty * cf;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
         Table.updateByIndex({ id: '#tableStockInItem', index: index, obj: obj, value: obj.Qty, event: e });
         StockIn.sumOfTotalStockInItem();

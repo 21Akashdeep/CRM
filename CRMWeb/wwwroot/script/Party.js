@@ -31,6 +31,7 @@
                 }
             });
         });
+        console.log("Location Save Click");
         Location.initAdd();
         Location.addOnSuccess = (response) => {
             let obj = response.obj;

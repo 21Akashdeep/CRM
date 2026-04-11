@@ -7,7 +7,9 @@ namespace CRMApi.Models
     {
         public int Id { get; set; }
         [MaxLength(16)] public string Code { get; set; } = string.Empty;
+        public string? Make { get; set; }
         [MaxLength(100)] public string Name { get; set; } = string.Empty;
+        public string? Model { get; set; }
         [MaxLength(200)] public string Description { get; set; } = string.Empty;
         public int ItemGroupId { get; set; }
         [NotMapped] public string ItemGroupDesc { get; set; } = string.Empty;
@@ -28,6 +30,7 @@ namespace CRMApi.Models
         [NotMapped] public string UpdatedByName { get; set; } = string.Empty;
         public int UpdatedBy { get; set; }
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
+        public List<ItemUnit> ItemUnit { get; set; } = new List<ItemUnit>();
         [NotMapped] public List<int> ListId { get; set; } = new List<int>();
         [NotMapped] public List<int> ListItemGroupId { get; set; } = new List<int>();
         [NotMapped] public List<int> ListItemSubGroupId { get; set; } = new List<int>();

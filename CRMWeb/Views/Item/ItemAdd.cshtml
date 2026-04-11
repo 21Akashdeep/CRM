@@ -1,12 +1,12 @@
 ﻿<div id="modalItem" class="modal fade" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <span class="modal-title">Item / Add</span>
                 <div class="btn-group">
                     <button type="button" class="btn btn-primary rounded-5 me-2" data-bs-minimize="toggle">
                         <span class="fa fa-minus"></span>
-                    </button>
+                    </button>                                                                                         
                     <button type="button" class="btn btn-danger rounded-5 me-2" data-bs-dismiss="modal">
                         <span class="fa fa-remove"></span>
                     </button>
@@ -14,36 +14,76 @@
             </div>
             <div class="modal-body" style="min-height:75vh;">
                 <form id="formItem">
-                    <div class="row">                        
-                        <div class="col-md-12">
+                    <div class="row"> 
+                        <div class="col-md-4">
                             <label>Name<span class="text-mandatory">*</span></label>
-                            <input type="hidden" id="Item_Id" name="Id" />
                             <input type="text" id="Item_Name" name="Name" autocomplete="off" class="form-control form-control-sm item-required" maxlength="100" />
                         </div>
-                        <div class="col-md-12">
+                        <div class="col-md-2">
+                            <label>Make<span class="text-mandatory">*</span></label>
+                            <input type="hidden" id="Item_Id" name="Id" />
+                            <input type="text" id="Item_Make" name="Make" autocomplete="off" class="form-control form-control-sm item-required" maxlength="100" />
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <label>Model<span class="text-mandatory">*</span></label>
+                            <input type="text" id="Item_Model" name="Model" autocomplete="off" class="form-control form-control-sm item-required" maxlength="100" />
+                        </div>
+                        <div class="col-md-4">
                             <label>Description<span class="text-mandatory">*</span></label>
                             <input type="text" id="Item_Description" name="Description" autocomplete="off" class="form-control form-control-sm Item-required" maxlength="200" />
                         </div>
-                        <div class="col-md-12">
+                        <div class="col-md-2">
                             <label>Group<span class="text-mandatory">*</span></label>
                             <select id="Item_ItemGroupId" name="ItemGroupId" class="form-control form-control-sm select-pick item-required" data-search="true" data-size="4" data-action="true" data-addFn="ItemGroup.fill" data-editFn="ItemGroup.edit">
                             </select>
                         </div>
-                        <div class="col-md-12">
+                        <div class="col-md-2">
                             <label>Sub Group<span class="text-mandatory">*</span></label>
                             <select id="Item_ItemSubGroupId" name="ItemSubGroupId" class="form-control form-control-sm select-pick item-required" data-search="true" data-size="4" data-action="true" data-addFn="ItemSubGroup.fill" data-editFn="ItemSubGroup.edit">
                             </select>
                         </div>
-                        <div class="col-md-12">
-                            <label>Unit<span class="text-mandatory">*</span></label>
+                       
+                        <div class="col-md-2">
+                            <label>HSN Code</label>
+                            <input type="text" id="Item_HsnCode" name="HsnCode" autocomplete="off" class="form-control form-control-sm" maxlength="8" data-num="true" data-decimal-place="0" />
+                        </div> 
+                        <div class="col-md-2">
+                            <label>Base Unit<span class="text-mandatory">*</span></label>
                             <select id="Item_UnitId" name="UnitId" class="form-control form-control-sm select-pick item-required" data-search="true" data-size="4">
                             </select>
                         </div>
-                        <div class="col-md-12">
-                            <label>HSN Code</label>
-                            <input type="text" id="Item_HsnCode" name="HsnCode" autocomplete="off" class="form-control form-control-sm" maxlength="8" data-num="true" data-decimal-place="0" />
-                        </div>                                  
                     </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-6 item-unit-table">
+                            <table id="tableItemUnit" class="table table-bordered table-hover table-default line-item" data-search="false">
+                                <thead>
+                                    <tr>
+                                        <th colspan="4">
+                                             Item Unit
+                                            <div class="btn-group float-end">
+                                                <button type="button" class="btn btn-sm btn-primary rounded-5 me-e" onclick="Item.addItemUnit()">
+                                                    <span class="fa fa-plus"></span>
+                                                </button>
+                                                
+                                            </div>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th data-formatter="tableItemUnitSlNo" class="text-center">#</th>
+                                        <th data-formatter="tableItemUnitDesc" data-events="tableItemUnitDescEvent" style="min-width:400px">Description</th>
+                                        <th data-formatter="tableItemUnitValuePerUnit" data-events="tableItemUnitValuePerUnitEvent" class="qty">Value</th>
+                                        <th class="text-center" data-formatter="tableItemUnitAction" data-events="tableItemUnitActionEvents">
+                                            <i class="fa fa-list-check"></i>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <hr />
                 </form>
             </div>
             <div class="modal-footer">

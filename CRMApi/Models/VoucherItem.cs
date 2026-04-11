@@ -35,6 +35,7 @@ namespace CRMApi.Models
         [Column(TypeName = "decimal(18,6)")]
         public decimal Amount { get; set; } = 0;
 
+        public decimal BaseQty { get; set; }
         // Discount
         [Column(TypeName = "decimal(18,6)")]
         public decimal DiscountRate { get; set; } = 0;

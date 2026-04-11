@@ -1,5 +1,7 @@
 ﻿class Grn {
     static item = [];
+    static unit = [];
+    static conFator;
     static init() {
         Grn.getViewOption();
         $('#btnSearch').on('click', () => {
@@ -56,6 +58,7 @@
                     expiryOn: $('#GrnScan-ItemExpiryOn').val(),
                     serialNo: serialNo,
                     qty: 1,
+                    baseQty:1,
                     isScanned: true,
                     callback: (obj) => {
                         Table.add({ id: '#tableGrnScanItem', data: obj, action: 'prepend' });
@@ -88,18 +91,7 @@
                 });
             }, 500);
         }
-        Item.initAdd();
-        Item.addOnSuccess = (response) => {
-            let obj = response.obj;
-            Modal.close({ id: '#modalItem' });
-            Grn.getAddOption({
-                onSuccess: (response) => {
-                    Grn.item = response.data.Item;
-                    Grn.refreshGrnItemDropdowns();
-                    Field.triggerOnChange('#Grn-ItemId');
-                }
-            });
-        };
+       
 
         Item.updateOnSuccess = (response) => {
             let obj = response.obj;
@@ -154,8 +146,6 @@
                 Grn.update(obj);
             }
         });
-
-
     }
 
     static getViewOption() {
@@ -185,8 +175,7 @@
             onSuccess: onSuccess
         });
     }
-    static newEntry() {
-       
+    static newEntry() {      
         Grn.getAddOption({
             onSuccess: (response) => {
                 Grn.item = response.data.Item;
@@ -206,7 +195,7 @@
         $('#Grn-ExpiryOn,#GrnScan-ItemSerialNo').val('');
 
     }
-    static addGrnItem({ itemId = 0, itemDesc = null, serialNo = null, expiryOn = null, qty = 0, isScanned = false, callback } = {}) {
+    static addGrnItem({ itemId = 0, itemDesc = null, serialNo = null, expiryOn = null, qty = 0, baseQty = 0, isScanned = false, callback } = {}) {
         let obj = {
             Id: 0,
             ItemId: itemId,
@@ -217,6 +206,7 @@
             BatchNo: "",
             ExpiryOn: expiryOn,
             Qty: qty,
+            BaseQty: baseQty,
             Rate: 0,
             UnitDesc: null,
             Amount: 0,
@@ -249,13 +239,21 @@
         let tfoot = `
             <tfoot>
                 <tr>
-                    <th class="text-right" colspan="5">Total</th>
+                    <th class="text-right" colspan="6">Total</th>
                     <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
                 </tr>
             </tfoot>
         `;
         $('#tableGrnItem tfoot').remove();
         $('#tableGrnItem').append(tfoot);
+    }
+    static getUnit(id, callback) {
+        Data.get({
+            url: `Grn/getUnit?Id=${id}`,
+            onSuccess: (response) => {
+                callback(response.data);
+            }
+        });
     }
     static add(obj) {
         Data.post({
@@ -293,7 +291,7 @@
                 Modal.open({ id: '#modalGrn', title: title, action: action, obj: obj });
                 Table.add({ id: '#tableGrnItem', data: obj.VoucherItem, selectPick: true });
                 Grn.sumOfTotalGrnItem();
-                let pincode = $('#Gdn-ConPinCode').val();
+                let pincode = $('#Grn-ConPinCode').val();
                 if (pincode.length == 6) {
                     setTimeout(() => {
                         OnlineApi.pinCode({
@@ -618,6 +616,22 @@ window.tableGrnItemSlNo = (value, obj, index) => {
     return index + 1;
 }
 window.tableGrnItemDesc = (value, obj, index) => {
+    setTimeout(() => {
+        if (!obj.UnitList && obj.ItemId) {
+            Grn.getUnit(obj.ItemId, (unitList) => {
+                obj.UnitList = unitList;
+                let selected = unitList[0];
+                obj.UnitId = selected?.UnitId || 0;
+                obj.UnitDesc = selected?.UnitDesc || null;
+
+                Table.updateByIndex({
+                    id: '#tableGrnItem',
+                    index: index,
+                    obj: obj
+                });
+            });
+        }
+    }, 0);
     return `
         ${Dropdown.html({
             id: `GrnItem_${index}`, className: 'grn-item', data: Grn.item, value: 'Id', text: 'Description', initialValue: [obj.ItemId], json: true, parent: '.modal', search: true,
@@ -630,6 +644,20 @@ window.tableGrnItemDescEvent = {
         obj.ItemId = !Field.isNullOrEmpty(e.currentTarget.value) ? parseInt(e.currentTarget.value) : 0;
         let itemJson = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
         obj.UnitDesc = itemJson?.UnitDesc ?? null;
+        Grn.getUnit(obj.ItemId, (unitList) => {
+
+            obj.UnitList = unitList;
+            obj.UnitId = unitList?.[0]?.Id || 0;
+            obj.UnitDesc = unitList?.[0]?.UnitDesc || null;
+
+            Table.updateByIndex({
+                id: '#tableGrnItem',
+                index: index,
+                obj: obj,
+                event: e
+            });
+
+        });
 
         obj.Rate = itemJson?.Rate ?? 0;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
@@ -642,6 +670,35 @@ window.tableGrnItemDescEvent = {
         Table.updateByIndex({ id: '#tableGrnItem', index: index, obj: obj, value: obj.Remarks, event: e });
     }
 }
+window.tableGrnItemUnitDesc = (value, obj, index) => {
+    return `
+        ${Dropdown.html({
+        id: `GrnUnit_${index}`,
+        className: 'Grn-unit',
+        data: obj.UnitList || [],
+        value: 'UnitId',
+        text: 'UnitDesc',
+        initialValue: [obj.UnitId],
+        json: true,
+        parent: '.modal'
+    })}
+    `;
+}
+window.tableGrnItemUnitDescEvent = {
+    'change .Grn-unit': (e, value, obj, index) => {
+        obj.UnitId = parseInt(e.currentTarget.value) || 0;
+        let unitJson = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
+        obj.UnitDesc = unitJson?.UnitDesc || null;
+        Table.updateByIndex({
+            id: '#tableGrnItem',
+            index: index,
+            obj: obj,
+            event: e
+        });
+
+        Grn.sumOfTotalGrnItem();
+    }
+}
 window.tableGrnItemQty = (value, obj, index) => {
     return `
         <input type="text" id="GrnItemQty_${index}" class="form-control form-control-sm text-right grn-item-qty" value="${obj.Qty}" oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})" ${obj.IsScanned ? 'disabled': ''}>
@@ -650,6 +707,10 @@ window.tableGrnItemQty = (value, obj, index) => {
 window.tableGrnItemQtyEvent = {
     'input .grn-item-qty': (e, value, obj, index) => {
         obj.Qty = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
+        let unitId = $(`#GrnUnit_${index}`).val();
+        let selectedUnit = obj.UnitList?.find(x => x.UnitId == unitId);
+        let cf = selectedUnit?.ConversionFactor || 1;
+        obj.BaseQty = obj.Qty * cf;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
         Table.updateByIndex({ id: '#tableGrnItem', index: index, obj: obj, value: obj.Qty, event: e });
         Grn.sumOfTotalGrnItem();

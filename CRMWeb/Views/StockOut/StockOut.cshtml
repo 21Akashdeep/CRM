@@ -102,6 +102,11 @@
                             <select id="StockOut-StockType" name="StockType" class="select-pick required" data-search="true" data-size="4">
                             </select>
                         </div>
+                        <div class="col-md-4">
+                            <label>Party<span class="text-mandatory">*</span></label>
+                            <select id="StockOut-PartyId" name="PartyId" class="select-pick complaint-required" data-search='true' data-size="4" data-addFn="Party.newEntry" data-editFn="Party.edit">
+                            </select>
+                        </div>
 
                     </div>
                     <hr />
@@ -110,7 +115,7 @@
                             <table id="tableStockOutItem" class="table table-bordered table-hover table-default line-item" data-search="false">
                                 <thead>
                                     <tr>
-                                        <th colspan="7">
+                                        <th colspan="8">
                                             StockOut Item
                                             <div class="btn-group float-end">
                                                 <button type="button" class="btn btn-sm btn-primary rounded-5 me-e" onclick="StockOut.addStockOutItem()">
@@ -124,7 +129,8 @@
                                     </tr>
                                     <tr>
                                         <th data-formatter="tableStockOutItemSlNo" class="text-center">#</th>
-                                        <th class="desc" data-formatter="tableStockOutItemDesc" data-events="tableStockOutItemDescEvent">Description</th>
+                                        <th  data-formatter="tableStockOutItemDesc" data-events="tableStockOutItemDescEvent">Description</th>
+                                        <th class="qty" data-formatter="tableStockOutItemUnitDesc" data-events="tableStockOutItemUnitDescEvent">Unit</th>
                                         <th class="qty" data-field="SerialNo">SerialNo</th>
                                         <th class="qty" data-formatter="tableStockOutItemExpiryOn">ExpiryOn</th>
                                         <th class="qty" data-formatter="tableStockOutItemQty" data-events="tableStockOutItemQtyEvent">Qty</th>
@@ -210,11 +216,12 @@
     </div>
 </div>
 
-
+<partial name="../Party/PartyAdd.cshtml" />
 
 
 @section Scripts {
     <script src="~/script/StockOut.js" asp-append-version="true"></script>
+    <script src="~/script/Party.js" asp-append-version="true"></script>
     <script type="text/javascript">
         $(() => {
             StockOut.init();

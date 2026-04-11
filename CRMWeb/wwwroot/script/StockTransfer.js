@@ -1,6 +1,8 @@
 ﻿class StockTransfer {
     static item = [];
     static itemWithSerialNo = [];
+    static unit = [];
+    static conFator;
     static init() {
 
         StockTransfer.getViewOption();
@@ -60,6 +62,7 @@
                 unitDesc: item.UnitDesc,
                 qty: 1,
                 isScanned: true,
+                baseQty:1,
                 callback: (obj) => {
                     Table.add({ id: '#tableStockTransferScanItem', data: obj, action: 'prepend' });
                     $('#StockTransferScan-ItemSerialNo').val('');
@@ -163,6 +166,14 @@
             onSuccess: onSuccess
         });
     }
+    static getUnit(id, callback) {
+        Data.get({
+            url: `StockTransfer/getUnit?Id=${id}`,
+            onSuccess: (response) => {
+                callback(response.data);
+            }
+        });
+    }
     static newEntry() {
         StockTransfer.getAddOption({
             onSuccess: (response) => {
@@ -219,7 +230,7 @@
             }
         });
     }
-    static addStockTransferItem({ itemId = 0, itemDesc = null, serialNo = null, expiryOn = null, qty = 0, unitDesc = null, isScanned = false, callback } = {}) {
+    static addStockTransferItem({ itemId = 0, itemDesc = null, serialNo = null, expiryOn = null, qty = 0, baseQty = 0, unitDesc = null, isScanned = false, callback } = {}) {
 
         let store = $('#FromStoreId').val() || 0;
         let stockType = $('#StockTransfer-StockType').val() || 0;
@@ -238,6 +249,7 @@
             BatchNo: "",
             ExpiryOn: expiryOn,
             Qty: qty,
+            BaseQty: baseQty,
             Rate: 0,
             BalQty: 0,
             UnitDesc: unitDesc,
@@ -270,7 +282,7 @@
         let tfoot = `
             <tfoot>
                 <tr>
-                    <th class="text-right" colspan="5">Total</th>
+                    <th class="text-right" colspan="6">Total</th>
                     <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
                 </tr>
             </tfoot>
@@ -645,6 +657,23 @@ window.tableStockTransferItemSlNo = (value, obj, index) => {
     return index + 1;
 }
 window.tableStockTransferItemDesc = (value, obj, index) => {
+    setTimeout(() => {
+        if (!obj.UnitList && obj.ItemId) {
+            StockTransfer.getUnit(obj.ItemId, (unitList) => {
+                obj.UnitList = unitList;
+
+                let selected = unitList[0];
+                obj.UnitId = selected?.UnitId || 0;
+                obj.UnitDesc = selected?.UnitDesc || null;
+
+                Table.updateByIndex({
+                    id: '#tableStockTransferItem',
+                    index: index,
+                    obj: obj
+                });
+            });
+        }
+    }, 0);
     return `
         ${Dropdown.html({ id: `StockTransferItem_${index}`, className: 'StockTransfer-item', data: StockTransfer.item, value: 'ItemId', text: 'ItemDesc', initialValue: [obj.ItemId], json: true, parent: '.modal' })}
         <input type="text" id="StockTransferItemRemarks_${index}" class="form-control form-control-sm mb-0 mt-1 StockTransfer-item-remarks" maxlength="100" placeholder="Remarks" value="${obj.Remarks ?? ""}">
@@ -658,6 +687,21 @@ window.tableStockTransferItemDescEvent = {
         obj.UnitDesc = itemJson?.UnitDesc ?? null;
         obj.UnitId = itemJson?.UnitId ?? 0;
         obj.Rate = itemJson?.Rate ?? 0;
+        //Unit
+        StockTransfer.getUnit(obj.ItemId, (unitList) => {
+
+            obj.UnitList = unitList;
+            obj.UnitId = unitList?.[0]?.Id || 0;
+            obj.UnitDesc = unitList?.[0]?.UnitDesc || null;
+
+            Table.updateByIndex({
+                id: '#tableStockTransferItem',
+                index: index,
+                obj: obj,
+                event: e
+            });
+
+        });
         // Set Serial No. & BalQty
         let item = StockTransfer.item.find(x => x.ItemId == obj.ItemId);
         obj.BalQty = item ? item.Qty : 0;
@@ -670,6 +714,35 @@ window.tableStockTransferItemDescEvent = {
     'input .StockTransfer-item-remarks': (e, value, obj, index) => {
         obj.Remarks = e.currentTarget.value;
         Table.updateByIndex({ id: '#tableStockTransferItem', index: index, obj: obj, value: obj.Remarks, event: e });
+    }
+}
+window.tableStockTransferItemUnitDesc = (value, obj, index) => {
+    return `
+        ${Dropdown.html({
+        id: `stockTransferUnit_${index}`,
+        className: 'stocktransfer-unit',
+        data: obj.UnitList || [],
+        value: 'UnitId',
+        text: 'UnitDesc',
+        initialValue: [obj.UnitId],
+        json: true,
+        parent: '.modal'
+    })}
+    `;
+}
+window.tableStockTransferItemUnitDescEvent = {
+    'change .stocktransfer-unit': (e, value, obj, index) => {
+        obj.UnitId = parseInt(e.currentTarget.value) || 0;
+        let unitJson = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
+        obj.UnitDesc = unitJson?.UnitDesc || null;
+        Table.updateByIndex({
+            id: '#tableStockTransferItem',
+            index: index,
+            obj: obj,
+            event: e
+        });
+
+        StockTransfer.sumOfTotalStockTransferItem();
     }
 }
 window.tableStockTransferItemQty = (value, obj, index) => {
@@ -703,6 +776,10 @@ window.tableStockTransferItemQtyEvent = {
         }
 
         obj.Qty = qty;
+        let unitId = $(`#stockTransferUnit_${index}`).val();
+        let selectedUnit = obj.UnitList?.find(x => x.UnitId == unitId);
+        let cf = selectedUnit?.ConversionFactor || 1;
+        obj.BaseQty = qty * cf;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
 
         Table.updateByIndex({
@@ -728,7 +805,6 @@ window.tableStockTransferItemActionEvents = {
         StockTransfer.deleteItem({ id: obj.Id, index: index });
     }
 }
-
   //StockTransfer Scan Item
 window.tableScanExpiry = (v, obj) => {
     return obj.ExpiryOn

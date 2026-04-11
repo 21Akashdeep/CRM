@@ -117,7 +117,7 @@
                                    data-search="false">
                                 <thead>
                                     <tr>
-                                        <th colspan="6">
+                                        <th colspan="7">
                                             StockIn Item
                                             <div class="btn-group float-end">
                                                 <button type="button" class="btn btn-sm btn-primary rounded-5" onclick="StockIn.addStockInItem()"> <span class="fa fa-plus"></span>  </button>
@@ -128,11 +128,12 @@
                                     </tr>
                                     <tr>
                                         <th data-formatter="tableStockInItemSlNo" class="text-center">#</th>
-                                        <th class="desc" data-formatter="tableStockInItemDesc"data-events="tableStockInItemDescEvent">Description </th>
+                                        <th data-formatter="tableStockInItemDesc"data-events="tableStockInItemDescEvent">Description </th>
+                                        <th class="qty" data-formatter="tableStockInItemUnitDesc" data-events="tableStockInItemUnitDescEvent">Unit </th>
                                         <th class="qty" data-field="SerialNo">SerialNo</th>
                                         <th class="qty" data-formatter="tableStockInExpiryOn">ExpiryOn</th>
                                         <th class="qty" data-formatter="tableStockInItemQty"data-events="tableStockInItemQtyEvent">Qty </th>
-                                        <th class="qty"data-formatter="tableStockInItemAction"data-events="tableStockInItemActionEvents">Remove</th>
+                                        <th data-formatter="tableStockInItemAction" data-events="tableStockInItemActionEvents"><i class="fa fa-list-check"></i></th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>

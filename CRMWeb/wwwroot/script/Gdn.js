@@ -3,6 +3,8 @@
     static itemWithSerialNo = []; 
     static newitem = [];
     static newitemwithserialno = [];
+    static unit = [];
+    static conFator;
     static init() {
         Gdn.getViewOption();
         $('#btnNewEntry').on('click', () => {
@@ -97,14 +99,18 @@
                 expiryOn: item.ExpiryOn,
                 serialNo: item.SerialNo,
                 unitDesc: item.UnitDesc,
-                qty:1,
+                qty: 1,
+                baseQty:1,
                 isScanned: true,
                 callback: (obj) => {
                     Table.add({ id: '#tableGdnScanItem', data: obj, action: 'prepend' });
                     $('#GdnScan-ItemSerialNo').val('');
                 }
             });            
-        });       
+        });
+
+       
+
         $('#GdnScan-BtnAddItem').on('click', () => {
             let scanItem = $('#tableGdnScanItem').bootstrapTable('getData');
             if (scanItem.length === 0) {
@@ -170,7 +176,7 @@
     }
     static newEntry() {
         Gdn.getAddOption({
-            onSuccess: (response) => {                                                
+            onSuccess: (response) => {
                 Dropdown.bind({ id: '#Gdn-StoreId', data: response.data.Store, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#Gdn-StockType', data: response.data.StockType, value: 'Value', text: 'Description' });
                 Dropdown.bind({ id: '#Gdn-PartyId', data: response.data.Party, value: 'Id', text: 'Name' });                
@@ -200,7 +206,15 @@
             }
         });
     }
-    static addGdnItem({ itemId = 0, itemDesc = null, serialNo = null, expiryOn = null, qty = 0, unitDesc = null, isScanned = false, callback } = {}) {        
+    static getUnit(id, callback) {
+        Data.get({
+            url: `Gdn/getUnit?Id=${id}`,
+            onSuccess: (response) => {
+                callback(response.data); 
+            }
+        });
+    }
+    static addGdnItem({ itemId = 0, itemDesc = null, serialNo = null, expiryOn = null, qty = 0, baseQty = 0, unitDesc = null, isScanned = false, callback } = {}) {        
         if (Field.isNullOrEmpty($('#Gdn-StoreId').val()) && Field.isNullOrEmpty($('#Gdn-StockType').val()) ) {
             Message.error({ statusText: 'Please Select Both Store And StockType.' });
             return;
@@ -218,6 +232,7 @@
             Qty: qty,
             Rate: 0,
             BalQty: 0,
+            BaseQty: baseQty,
             UnitDesc: unitDesc,
             Amount: 0,
             DiscountAmount: 0,
@@ -251,7 +266,7 @@
         let tfoot = `
             <tfoot>
                 <tr>
-                    <th class="text-right" colspan="5">Total</th>
+                    <th class="text-right" colspan="6">Total</th>
                     <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
                 </tr>
             </tfoot>
@@ -282,7 +297,7 @@
                 Dropdown.bind({ id: '#Gdn-StockType', data: option.StockType, value: 'Value', text: 'Description' });
                 Dropdown.bind({ id: '#Gdn-ConStateName', data: option.State, value: 'Name', text: 'Name' });                
                 Gdn.item = response.data.StockItem;
-
+                Gdn.unit = response.data.Unit;
                 let obj = response.data.Gdn;                
                 obj.Id = action == 'Edit' ? obj.Id : null;
                 let title = action == 'Edit' ? `Gdn / Edit (Code: ${obj.No})` : `Gdn / Add`;                
@@ -359,9 +374,9 @@
                 }
 
                 let printContent = [];
-                let grnList = Array.isArray(response.data) ? response.data : [];
+                let GdnList = Array.isArray(response.data) ? response.data : [];
 
-                grnList.forEach((obj, index) => {
+                GdnList.forEach((obj, index) => {
                     let table = [];
                     table.push('<table class="table table-bordered">');
 
@@ -389,7 +404,7 @@
 
                     table.push('<tbody>');
 
-                    // ===== GRN Master Row =====
+                    // ===== Gdn Master Row =====
                     table.push(`
                 <tr>
                     <td class="text-center">${index + 1}</td>
@@ -403,7 +418,7 @@
                 </tr>
                 `);
 
-                    // ===== GRN Items =====
+                    // ===== Gdn Items =====
                     let items = obj.GdnItem || [];
 
                     table.push(`
@@ -424,12 +439,12 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                ${items.map((row, idx) => `
+                                ${items.map((row, idx) => ` note
                                     <tr>
                                         <td class="text-center">${idx + 1}</td>
                                         <td>${row.ItemDesc}</td>                                     
                                         <td>${row.ExpiryOn ? moment(row.ExpiryOn).format('DD-MMM-YYYY') : '-'}</td> 
-                                         <td>${row.SerialNo}</td>
+                                         <td>${row.SerialNo ? row.SerialNo:"-"}</td>
                                         <td class="text-right">${Math.abs(row.Qty)}</td>
                                     </tr>
                                 `).join('')}
@@ -595,6 +610,24 @@ window.tableGdnItemSlNo = (value, obj, index) => {
     return index + 1;
 }
 window.tableGdnItemDesc = (value, obj, index) => {
+    setTimeout(() => {
+        if (!obj.UnitList && obj.ItemId) {
+            Gdn.getUnit(obj.ItemId, (unitList) => {
+                obj.UnitList = unitList;
+
+                let selected = unitList[0];
+                obj.UnitId = selected?.UnitId || 0;
+                obj.UnitDesc = selected?.UnitDesc || null;
+
+                Table.updateByIndex({
+                    id: '#tableGdnItem',
+                    index: index,
+                    obj: obj
+                });
+            });
+        }
+    }, 0);
+
     return `
         ${Dropdown.html({ id: `GdnItem_${index}`, className: 'gdn-item', data: Gdn.item, value: 'ItemId', text: 'ItemDesc', initialValue: [obj.ItemId], json: true, parent: '.modal' })}
         <input type="text" id="GdnItemRemarks_${index}" class="form-control form-control-sm mb-0 mt-1 gdn-item-remarks" maxlength="100" placeholder="Remarks" value="${obj.Remarks ?? ""}">
@@ -603,14 +636,24 @@ window.tableGdnItemDesc = (value, obj, index) => {
 window.tableGdnItemDescEvent = {
     'change .gdn-item': (e, value, obj, index) => {       
         obj.ItemId = !Field.isNullOrEmpty(e.currentTarget.value) ? parseInt(e.currentTarget.value) : 0;  
-        //Set Unit & Rate
         let itemJson = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
         obj.UnitDesc = itemJson?.UnitDesc ?? null;
         obj.UnitId = itemJson?.UnitId ?? 0;
         obj.Rate = itemJson?.Rate ?? 0;
-        //setItemId
-        //obj.ItemId = itemJson?.ItemId ?? 0;
-        // Set Serial No. & BalQty
+        Gdn.getUnit(obj.ItemId, (unitList) => {
+
+            obj.UnitList = unitList;
+            obj.UnitId = unitList?.[0]?.Id || 0;
+            obj.UnitDesc = unitList?.[0]?.UnitDesc || null;
+
+            Table.updateByIndex({
+                id: '#tableGdnItem',
+                index: index,
+                obj: obj,
+                event: e
+            });
+
+        });
         let item = Gdn.item.find(x => x.ItemId == obj.ItemId);      
         /*item.SerialNo ? obj.SerialNo = item.SerialNo: obj.SerialNo = "N/A";*/
         obj.BalQty = item ? item.Qty : 0;  
@@ -626,6 +669,36 @@ window.tableGdnItemDescEvent = {
         Table.updateByIndex({ id: '#tableGdnItem', index: index, obj: obj, value: obj.Remarks, event: e });
     }
 }
+window.tableGdnItemUnitDesc = (value, obj, index) => {
+    return `
+        ${Dropdown.html({
+        id: `gdnUnit_${index}`,
+        className: 'gdn-unit',
+        data: obj.UnitList || [],   
+        value: 'UnitId',
+        text: 'UnitDesc',
+        initialValue: [obj.UnitId],
+        json: true,
+        parent: '.modal'
+    })}
+    `;
+}
+window.tableGdnItemUnitDescEvent = {
+    'change .gdn-unit': (e, value, obj, index) => {
+        obj.UnitId = parseInt(e.currentTarget.value) || 0;
+        let unitJson = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
+        obj.UnitDesc = unitJson?.UnitDesc || null;
+        Table.updateByIndex({
+            id: '#tableGdnItem',
+            index: index,
+            obj: obj,
+            event: e
+        });
+
+        Gdn.sumOfTotalGdnItem();
+    }
+}
+
 window.tableGdnItemExpiryOn = (value, obj, index) => {
     return obj.ExpiryOn ? moment(obj.ExpiryOn).format("DD-MMM-YYYY") : "-";
 }
@@ -659,6 +732,10 @@ window.tableGdnItemQtyEvent = {
         }
 
         obj.Qty = qty;
+        let unitId = $(`#gdnUnit_${index}`).val();
+        let selectedUnit = obj.UnitList?.find(x => x.UnitId == unitId);
+        let cf = selectedUnit?.ConversionFactor || 1;
+        obj.BaseQty = qty * cf;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
 
         Table.updateByIndex({

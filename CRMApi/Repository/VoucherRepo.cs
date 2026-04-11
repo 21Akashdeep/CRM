@@ -301,6 +301,7 @@ namespace CRMApi.Repository
                         vi.SerialNo = item.SerialNo;
                         vi.BatchNo = item.BatchNo;
                         vi.Qty = item.Qty;
+                        vi.BaseQty = item.BaseQty;
                         vi.Rate = item.Rate;
                         vi.Amount = item.Amount;
                         vi.Remarks = item.Remarks;
@@ -455,11 +456,11 @@ namespace CRMApi.Repository
                         obj.ListStatus.Contains(vci.Status) && 
                         obj.ListStatus.Contains(vc.Status)
                     group new { vci, it, ut } by new { vci.ItemId, ItemDesc = it.Description, UnitDesc = ut.Description, vci.StockType, vci.IsReturnable, vci.IsReturned} into g
-                    where g.Sum(x => x.vci.Qty) > 0
+                    where g.Sum(x => x.vci.BaseQty) > 0
                     select new StockItemDto
                     {
                         ItemId = g.Key.ItemId,
-                        ItemDesc = $"{g.Key.ItemDesc} (Bal. Qty : {g.Sum(x => x.vci.Qty).ToString("#.000")} {g.Key.UnitDesc})",                        
+                        ItemDesc = $"{g.Key.ItemDesc} (Bal. Qty : {g.Sum(x => x.vci.BaseQty).ToString("#.000")} {g.Key.UnitDesc})",                        
                         UnitDesc = g.Key.UnitDesc,                     
                         Qty = g.Sum(x => x.vci.Qty),
                         StockType = g.Key.StockType,
@@ -491,14 +492,14 @@ namespace CRMApi.Repository
                         obj.ListStatus.Contains(vc.Status) &&
                         !string.IsNullOrWhiteSpace(vci.SerialNo)
                     group new { vci, it, ut } by new { vci.ItemId, ItemDesc = it.Description, UnitDesc = ut.Description, vci.SerialNo,vci.StockType, vci.IsReturnable, vci.IsReturned } into g
-                    where g.Sum(x => x.vci.Qty) > 0
+                    where g.Sum(x => x.vci.BaseQty) > 0
                     select new StockItemDto
                     {
                         ItemId = g.Key.ItemId,
                         ItemDesc = g.Key.ItemDesc,
                         UnitDesc = g.Key.UnitDesc,
                         SerialNo = g.Key.SerialNo,
-                        Qty = g.Sum(x => x.vci.Qty),
+                        Qty = g.Sum(x => x.vci.BaseQty),
                         StockType = g.Key.StockType,
                         IsReturnable = g.Key.IsReturnable,
                         IsReturned = g.Key.IsReturned
@@ -527,14 +528,49 @@ namespace CRMApi.Repository
                         obj.ListStatus.Contains(vci.Status) &&
                         obj.ListStatus.Contains(vc.Status)
                     group new { vci, it, ut } by new { vci.ItemId, ItemDesc = it.Description, UnitDesc = ut.Description, SerialNo = vci.SerialNo,vci.StoreId, vci.StockType } into g
-                    where g.Sum(x => x.vci.Qty) > 0
+                    where g.Sum(x => x.vci.BaseQty) > 0
                     select new StockItemDto
                     {
                         ItemId = g.Key.ItemId,
                         ItemDesc = g.Key.ItemDesc,
                         UnitDesc = g.Key.UnitDesc,
                         SerialNo = g.Key.SerialNo,
-                        Qty = g.Sum(x => x.vci.Qty),
+                        BaseQty = g.Sum(x => x.vci.BaseQty),
+                        StockType = g.Key.StockType,
+                        StoreId = g.Key.StoreId
+                    }
+                ).ToListAsync();
+            return voucherItem;
+        }
+        public async Task<List<StockItemDto>> StockItemBalanceAsync1(StockItemFltrDto obj, User user)
+        {
+            obj.ListStatus = obj.ListStatus.Any() ? obj.ListStatus : App.ActiveStatus;
+            obj.ToDate = obj.ToDate == DateTime.MinValue ? DateTime.Now.Date : obj.ToDate.Date;
+            var voucherItem = await (
+                    from vci in db.VoucherItem
+                    join vc in db.Voucher on vci.VoucherId equals vc.Id
+                    join it in db.Item on vci.ItemId equals it.Id
+                    join ut in db.Unit on it.UnitId equals ut.Id
+                    join isg in db.ItemSubGroup on it.ItemSubGroupId equals isg.Id
+                    join ig in db.ItemGroup on it.ItemGroupId equals ig.Id
+                    where
+                        vc.Date.Date <= obj.ToDate.Date &&
+                        (!obj.ListExcludeViId.Any() || !obj.ListExcludeViId.Contains(vci.Id)) &&
+                        (!obj.ListItemId.Any() || obj.ListItemId.Contains(vci.ItemId)) &&
+                        (!obj.ListSerialNo.Any() || obj.ListSerialNo.Contains(vci.SerialNo)) &&
+                        obj.ListStoreId.Contains(vci.StoreId) &&
+                        (!obj.ListStockType.Any() || obj.ListStockType.Contains(vci.StockType)) &&
+                        obj.ListStatus.Contains(vci.Status) &&
+                        obj.ListStatus.Contains(vc.Status)
+                    group new { vci, it, ut } by new { vci.ItemId, ItemDesc = it.Description, UnitDesc = ut.Description, SerialNo = vci.SerialNo, vci.StoreId, vci.StockType } into g
+                    where g.Sum(x => x.vci.BaseQty) > 0
+                    select new StockItemDto
+                    {
+                        ItemId = g.Key.ItemId,
+                        ItemDesc = g.Key.ItemDesc,
+                        UnitDesc = g.Key.UnitDesc,
+                        SerialNo = g.Key.SerialNo,
+                        BaseQty = g.Sum(x => x.vci.BaseQty),
                         StockType = g.Key.StockType,
                         StoreId = g.Key.StoreId
                     }

@@ -177,7 +177,7 @@
                             <table id="tableGrnItem" class="table table-bordered table-hover table-default line-item" data-search="false">
                                 <thead>
                                     <tr>
-                                        <th colspan="6">
+                                        <th colspan="7">
                                             Grn Item
                                             <div class="btn-group float-end">
                                                 <button type="button" class="btn btn-sm btn-primary rounded-5 me-e" onclick="Grn.addGrnItem()">
@@ -191,11 +191,12 @@
                                     </tr>
                                     <tr>
                                         <th data-formatter="tableGrnItemSlNo" class="text-center">#</th>
-                                        <th class="desc" data-formatter="tableGrnItemDesc" data-events="tableGrnItemDescEvent">Description</th>
+                                        <th data-formatter="tableGrnItemDesc" data-events="tableGrnItemDescEvent">Description</th>
+                                        <th class="qty" data-formatter="tableGrnItemUnitDesc" data-events="tableGrnItemUnitDescEvent">Unit</th>
                                         <th class="qty" data-field="SerialNo" >SerialNo</th>                                     
                                         <th class="qty" data-formatter="tableGrnExpiryOn" >ExpiryOn</th>
                                         <th class="qty" data-formatter="tableGrnItemQty" data-events="tableGrnItemQtyEvent">Qty</th>
-                                        <th class="qty" data-formatter="tableGrnItemAction" data-events="tableGrnItemActionEvents">Remove</th>
+                                        <th class="qty" data-formatter="tableGrnItemAction" data-events="tableGrnItemActionEvents"><i class="fa fa-list-check"></i></th>
                                     </tr>
                                 </thead>
                                 <tbody>

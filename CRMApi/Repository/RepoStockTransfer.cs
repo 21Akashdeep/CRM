@@ -270,6 +270,7 @@ namespace CRMApi.Repository
                         {
                             vi.StoreId = obj.FromStoreId;
                             vi.Qty = -(vi.Qty);
+                            vi.BaseQty = -(vi.BaseQty);
                             vi.CreatedBy = user.Id;
                             vi.CreatedAt = DateTime.Now;
                             vi.UpdatedBy = user.Id;
@@ -289,6 +290,7 @@ namespace CRMApi.Repository
                          {
                            SerialNo = x.SerialNo,
                            Qty = x.Qty,
+                           BaseQty = x.BaseQty,
                            VoucherId = x.VoucherId,
                            ItemId = x.ItemId,
                            StoreId = x.StoreId,
@@ -353,6 +355,35 @@ namespace CRMApi.Repository
 
             return objMsg;
         }
+        public async Task<Message> getUnit(int Id, User user)
+        {
+            Message objMsg = new Message();
+
+            try
+            {
+                var unit = await (
+                from itu in db.ItemUnit
+                join un in db.Unit on itu.UnitId equals un.Id
+                where App.ActiveStatus.Contains(itu.Status)
+                && itu.ItemId == Id
+                select new
+                {
+                    itu.ItemId,
+                    UnitId = itu.UnitId,
+                    UnitDesc = un.Description,
+                    itu.ValuePerUnit,
+                    itu.ConversionFactor
+                }).ToListAsync();
+
+                objMsg.data = unit;
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+
+            return objMsg;
+        }
         public async Task<Message> UpdateStockWithSerialNoAsync(List<VoucherItem> stockTran,int FromStoreId,int ToStoreId,User user)
         {
             Message objMsg = new Message();
@@ -365,7 +396,7 @@ namespace CRMApi.Repository
                         g.Key.SerialNo,
                         g.Key.ItemId,
                         g.Key.StoreId,
-                        TotalQty = g.Sum(x => x.Qty)
+                        TotalQty = g.Sum(x => x.BaseQty)
                     })
                     .ToList();
 
@@ -380,7 +411,7 @@ namespace CRMApi.Repository
                     return objMsg; 
                 }
                 var finalStockTransferItem = stockTran
-                    .Where(x => x.Status == App.Status.Enable && x.Qty < 0)
+                    .Where(x => x.Status == App.Status.Enable && x.BaseQty < 0)
                     .ToList();
 
                 foreach (var vi in finalStockTransferItem)
@@ -392,6 +423,7 @@ namespace CRMApi.Repository
                         SerialNo = vi.SerialNo,
                         StoreId = ToStoreId,
                         Qty = Math.Abs(vi.Qty),
+                        BaseQty = Math.Abs(vi.BaseQty),
                         ExpiryOn = vi.ExpiryOn,
                         Remarks = vi.Remarks,
                         StockType = vi.StockType,
@@ -424,7 +456,7 @@ namespace CRMApi.Repository
                     {                      
                         g.Key.ItemId,
                         g.Key.StoreId,
-                        TotalQty = g.Sum(x => x.Qty)
+                        TotalQty = g.Sum(x => x.BaseQty)
                     })
                     .ToList();
 
@@ -438,7 +470,7 @@ namespace CRMApi.Repository
                     return objMsg;
                 }
                 var finalStockTransferItem = stockTran
-                    .Where(x => x.Status == App.Status.Enable && x.Qty < 0)
+                    .Where(x => x.Status == App.Status.Enable && x.BaseQty < 0)
                     .ToList();
 
                 foreach (var vi in finalStockTransferItem)
@@ -450,6 +482,7 @@ namespace CRMApi.Repository
                         SerialNo = vi.SerialNo,
                         StoreId = ToStoreId,
                         Qty = Math.Abs(vi.Qty),
+                        BaseQty = Math.Abs(vi.BaseQty),
                         ExpiryOn = vi.ExpiryOn,
                         Remarks = vi.Remarks,
                         StockType = vi.StockType,
@@ -608,6 +641,7 @@ namespace CRMApi.Repository
                                 SerialNo = vi.SerialNo,
                                 StoreId = obj.FromStoreId,
                                 Qty = -(vi.Qty),
+                                BaseQty = -(vi.BaseQty),
                                 ExpiryOn = vi.ExpiryOn,
                                 Remarks = vi.Remarks,
                                 Status = App.Status.Enable,
@@ -634,6 +668,7 @@ namespace CRMApi.Repository
                         {
                             SerialNo = x.SerialNo,
                             Qty = x.Qty,
+                            BaseQty = x.BaseQty,
                             VoucherId = x.VoucherId,
                             ItemId = x.ItemId,
                             StoreId = x.StoreId,
@@ -648,7 +683,7 @@ namespace CRMApi.Repository
                         g.Key.SerialNo,
                         g.Key.ItemId,
                         g.Key.StoreId,
-                        TotalQty = g.Sum(x => x.Qty)
+                        TotalQty = g.Sum(x => x.BaseQty)
                         }).ToList();
 
                         var invalid = groupedItems.FirstOrDefault(x => x.TotalQty < 0);
@@ -670,6 +705,7 @@ namespace CRMApi.Repository
                                 SerialNo = vi.SerialNo,
                                 StoreId = obj.ToStoreId,
                                 Qty = vi.Qty,
+                                BaseQty = vi.BaseQty,
                                 ExpiryOn = vi.ExpiryOn,
                                 Remarks = vi.Remarks,
                                 Status = App.Status.Enable,
@@ -709,7 +745,6 @@ namespace CRMApi.Repository
 
             return objMsg;
         }
-
         public async Task<Message> DeleteItemAsync(int id, User user)
         {
             Message objMsg = new Message();

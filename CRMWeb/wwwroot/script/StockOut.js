@@ -1,6 +1,8 @@
 ﻿class StockOut {
     static item = [];
     static itemWithSerialNo = [];
+    static unit = [];
+    static conFator;
     static mode = 'Add';
     static init() {
         StockOut.getViewOption();
@@ -85,6 +87,29 @@
                 }
             });
         });
+        Party.initAdd();
+        Party.addOnSuccess = (response) => {
+            let obj = response.obj;
+            Modal.close({ id: '#modalParty' });
+            StockOut.getAddOption({
+                onSuccess: (response) => {
+                    Dropdown.bind({ id: '#StockOut-PartyId', data: response.data.Party, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
+                    Field.triggerOnChange('#StockOut-PartyId');
+                }
+            });
+        }
+        Party.updateOnSuccess = (response) => {
+            let obj = response.obj;
+            Modal.close({ id: '#modalParty' });
+            setTimeout(() => {
+                StockOut.getAddOption({
+                    onSuccess: (response) => {
+                        Dropdown.bind({ id: '#StockOut-PartyId', data: response.data.Party, value: 'Id', text: 'Description', json: true, initialValue: [obj.Id] });
+                        Field.triggerOnChange('#StockOut-PartyId');
+                    }
+                });
+            }, 500);
+        }
 
         $('#StockOut-BtnSave').on('click', () => {
             if (!Field.isMandatory({ class: '.required' })) {
@@ -146,6 +171,7 @@
                 let store = response.data.Store;
                 Dropdown.bind({ id: '#StockOut-StoreId', data: store, value: 'Id', text: 'Description' });
                 Dropdown.bind({ id: '#StockOut-StockType', data: response.data.StockType, value: 'Value', text: 'Description' });
+                Dropdown.bind({ id: '#StockOut-PartyId', data: response.data.Party, value: 'Id', text: 'Description' });
                 Modal.open({ id: '#modalStockOut', title: 'StockOut / Add', action: 'Add' });
                 $('#StockOut-RefDate,#StockOut-EwayDate').val('');
             }
@@ -210,6 +236,7 @@
             BatchNo: "",
             ExpiryOn: expiryOn,
             Qty: qty,
+            BaseQty:qty,
             Rate: 0,
             UnitDesc: unitDesc,
             Amount: 0,
@@ -243,7 +270,7 @@
         let tfoot = `
             <tfoot>
                 <tr>
-                    <th class="text-right" colspan="6">Total</th>
+                    <th class="text-right" colspan="7">Total</th>
                     <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
                 </tr>
             </tfoot>
@@ -265,13 +292,21 @@
             }
         });
     }
+    static getUnit(id, callback) {
+        Data.get({
+            url: `StockOut/getUnit?Id=${id}`,
+            onSuccess: (response) => {
+                callback(response.data);
+            }
+        });
+    }
     static edit({ id, action = 'Edit' }) {
         Data.get({
             url: `StockOut/Edit?Id=${id}`,
-            onSuccess: (response) => {
-                
+            onSuccess: (response) => {               
                 let option = response.data;
                 Dropdown.bind({ id: '#StockOut-StoreId', data: option.AddOption.Store, value: 'Id', text: 'Description' });
+                Dropdown.bind({ id: '#StockOut-PartyId', data: option.AddOption.Party, value: 'Id', text: 'Description' });
                 StockOut.item = option.StockItem;               
                 let obj = option.Voucher;
                 StockOut.mode = action;
@@ -560,6 +595,23 @@ window.tableStockOutItemSlNo = (value, obj, index) => {
     return index + 1;
 }
 window.tableStockOutItemDesc = (value, obj, index) => {
+    setTimeout(() => {
+        if (!obj.UnitList && obj.ItemId) {
+            StockOut.getUnit(obj.ItemId, (unitList) => {
+                obj.UnitList = unitList;
+
+                let selected = unitList[0];
+                obj.UnitId = selected?.UnitId || 0;
+                obj.UnitDesc = selected?.UnitDesc || null;
+
+                Table.updateByIndex({
+                    id: '#tableStockOutItem',
+                    index: index,
+                    obj: obj
+                });
+            });
+        }
+    }, 0);
     return `
         ${Dropdown.html({ id: `StockOutItem_${index}`, className: 'StockOut-item', data: StockOut.item, value: 'ItemId', text: 'ItemDesc', initialValue: [obj.ItemId], json: true, parent: '.modal' })}
         <input type="text" id="StockOutItemRemarks_${index}" class="form-control form-control-sm mb-0 mt-1 StockOut-item-remarks" maxlength="100" placeholder="Remarks" value="${obj.Remarks ?? ""}">
@@ -572,10 +624,24 @@ window.tableStockOutItemDescEvent = {
         let itemJson = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
         obj.UnitDesc = itemJson?.UnitDesc ?? null;
         obj.UnitId = itemJson?.UnitId ?? 0;
-        obj.Rate = itemJson?.Rate ?? 0;       
+        obj.Rate = itemJson?.Rate ?? 0;
+        //GetUnit
+        StockOut.getUnit(obj.ItemId, (unitList) => {
+
+            obj.UnitList = unitList;
+            obj.UnitId = unitList?.[0]?.Id || 0;
+            obj.UnitDesc = unitList?.[0]?.UnitDesc || null;
+
+            Table.updateByIndex({
+                id: '#tableStockOutItem',
+                index: index,
+                obj: obj,
+                event: e
+            });
+
+        });
         // Set Serial No. & BalQty
         let item = StockOut.item.find(x => x.ItemId == obj.ItemId);
-        item.SerialNo ? obj.SerialNo = item.SerialNo : obj.SerialNo = "N/A";
         obj.BalQty = item ? item.Qty : 0;
         //Sum of Amount
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
@@ -586,6 +652,35 @@ window.tableStockOutItemDescEvent = {
     'input .StockOut-item-remarks': (e, value, obj, index) => {
         obj.Remarks = e.currentTarget.value;
         Table.updateByIndex({ id: '#tableStockOutItem', index: index, obj: obj, value: obj.Remarks, event: e });
+    }
+}
+window.tableStockOutItemUnitDesc = (value, obj, index) => {
+    return `
+        ${Dropdown.html({
+        id: `StockOutUnit_${index}`,
+        className: 'stockout-unit',
+        data: obj.UnitList || [],
+        value: 'UnitId',
+        text: 'UnitDesc',
+        initialValue: [obj.UnitId],
+        json: true,
+        parent: '.modal'
+    })}
+    `;
+}
+window.tableStockOutItemUnitDescEvent = {
+    'change .stockout-unit': (e, value, obj, index) => {
+        obj.UnitId = parseInt(e.currentTarget.value) || 0;
+        let unitJson = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
+        obj.UnitDesc = unitJson?.UnitDesc || null;
+        Table.updateByIndex({
+            id: '#tableStockOutItem',
+            index: index,
+            obj: obj,
+            event: e
+        });
+
+        StockOut.sumOfTotalStockOutItem();
     }
 }
 window.tableStockOutItemExpiryOn = (value, obj, index) => {
@@ -619,6 +714,10 @@ window.tableStockOutItemQtyEvent = {
             return;
         }
         obj.Qty = qty;
+        let unitId = $(`#StockOutUnit_${index}`).val();
+        let selectedUnit = obj.UnitList?.find(x => x.UnitId == unitId);
+        let cf = selectedUnit?.ConversionFactor || 1;
+        obj.BaseQty = qty * cf;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
 
         Table.updateByIndex({

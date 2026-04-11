@@ -142,7 +142,7 @@
                         </div>
                         <div class="col-md-4">
                             <label>Consignee Name</label>
-                            <input type="text" id="Gdn-ConName" name="ConName" class="form-control form-control-sm " maxlength="25"" />
+                            <input type="text" id="Gdn-ConName" name="ConName" class="form-control form-control-sm " maxlength="25" />
                         </div>
                         <div class="col-md-4">
                             <label>Consignee Address 1</label>
@@ -172,7 +172,7 @@
                             <table id="tableGdnItem" class="table table-bordered table-hover table-default line-item" data-search="false">
                                 <thead>
                                     <tr>
-                                        <th colspan="6">
+                                        <th colspan="7">
                                             Gdn Item
                                             <div class="btn-group float-end">
                                                 <button type="button" class="btn btn-sm btn-primary rounded-5 me-e" onclick="Gdn.addGdnItem()">
@@ -186,11 +186,12 @@
                                     </tr>
                                     <tr>
                                         <th data-formatter="tableGdnItemSlNo" class="text-center">#</th>
-                                        <th class="desc" data-formatter="tableGdnItemDesc" data-events="tableGdnItemDescEvent">Description</th>
+                                        <th  data-formatter="tableGdnItemDesc" data-events="tableGdnItemDescEvent">Description</th>
+                                        <th class="qty" data-formatter="tableGdnItemUnitDesc" data-events="tableGdnItemUnitDescEvent">Unit</th>
                                         <th class="qty" data-field="SerialNo">SerialNo</th>
                                         <th class="qty" data-formatter="tableGdnItemExpiryOn">ExpiryOn</th>
                                         <th class="qty" data-formatter="tableGdnItemQty" data-events="tableGdnItemQtyEvent">Qty</th>
-                                        <th class="qty" data-formatter="tableGdnItemAction" data-events="tableGdnItemActionEvents">Remove</th>
+                                        <th  data-formatter="tableGdnItemAction" data-events="tableGdnItemActionEvents"> <i class="fa fa-list-check"></i></th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>

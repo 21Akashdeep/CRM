@@ -17,6 +17,7 @@ namespace CRMApi.Dto
         public string? StockType { get; set; }
         public DateTime? ExpiryOn { get; set; }
         public decimal Qty { get; set; }
+        public decimal? BaseQty { get; set; }
         public string? Remarks { get; set; }
         public string? BatchNo { get; set; }
         [NotMapped]

@@ -75,6 +75,7 @@ namespace CRMApi.Services
         public DbSet<Voucher> Voucher { get; set; }
         public DbSet<VoucherItem> VoucherItem { get; set; }
         public DbSet<Store> Store { get; set; }
+        public DbSet<ItemUnit> ItemUnit { get; set; }
     }
 
 }

@@ -113,7 +113,7 @@
                                    data-search="false">
                                 <thead>
                                     <tr>
-                                        <th colspan="6">
+                                        <th colspan="7">
                                             StockTransfer Item
                                             <div class="btn-group float-end">
                                                 <button type="button" class="btn btn-sm btn-primary rounded-5" onclick="StockTransfer.addStockTransferItem()"> <span class="fa fa-plus"></span>  </button>
@@ -124,7 +124,8 @@
                                     </tr>
                                     <tr>
                                         <th data-formatter="tableStockTransferItemSlNo" class="text-center">#</th>
-                                        <th class="desc" data-formatter="tableStockTransferItemDesc" data-events="tableStockTransferItemDescEvent">Description </th>                                      
+                                        <th  data-formatter="tableStockTransferItemDesc" data-events="tableStockTransferItemDescEvent">Description </th> 
+                                        <th class="qty" data-formatter="tableStockTransferItemUnitDesc" data-events="tableStockTransferItemUnitDescEvent">Unit </th>
                                         <th class="qty" data-field="SerialNo">SerialNo</th>
                                         <th class="qty" data-formatter="tableStockTransferItemExpiryOn">ExpiryOn</th>
                                         <th class="qty" data-formatter="tableStockTransferItemQty" data-events="tableStockTransferItemQtyEvent">Qty</th>

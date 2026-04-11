@@ -135,6 +135,35 @@ namespace CRMApi.Repository
 
 
         }
+        public async Task<Message> getUnit(int Id, User user)
+        {
+            Message objMsg = new Message();
+
+            try
+            {
+                var unit = await (
+                from itu in db.ItemUnit
+                join un in db.Unit on itu.UnitId equals un.Id
+                where App.ActiveStatus.Contains(itu.Status)
+                && itu.ItemId == Id
+                select new
+                {
+                    itu.ItemId,
+                    UnitId = itu.UnitId,
+                    UnitDesc = un.Description,
+                    itu.ValuePerUnit,
+                    itu.ConversionFactor
+                }).ToListAsync();
+
+                objMsg.data = unit;
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+
+            return objMsg;
+        }
         public async Task<Message> EditAsync(int Id, User User)
         {
             Message objMsg = new Message();

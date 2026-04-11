@@ -14,6 +14,7 @@ namespace CRMApi.Dto
         public string? SerialNo { get; set; }
         public DateTime? ExpiryOn { get; set; }
         public decimal Qty { get; set; }
+        public decimal BaseQty { get; set; }
         public string? StockType { get; set; }
         public int StoreId { get; set; }
         public bool IsReturnable { get; set; }
