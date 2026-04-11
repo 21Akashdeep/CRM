@@ -93,7 +93,6 @@
             <div class="modal-body" style="min-height:75vh;">
                 <form id="formGrn" autocomplete="off" onsubmit="return false;">
                     <input type="hidden" id="Id" name="Id" />
-                    <input type="hidden" id="No" name="No" />
                     <div class="row">
                         <div class="col-md-2">
                             <label>Date</label>
@@ -191,12 +190,12 @@
                                     </tr>
                                     <tr>
                                         <th data-formatter="tableGrnItemSlNo" class="text-center">#</th>
-                                        <th data-formatter="tableGrnItemDesc" data-events="tableGrnItemDescEvent">Description</th>
+                                        <th class ="desc" data-formatter="tableGrnItemDesc" data-events="tableGrnItemDescEvent">Description</th>
                                         <th class="qty" data-formatter="tableGrnItemUnitDesc" data-events="tableGrnItemUnitDescEvent">Unit</th>
-                                        <th class="qty" data-field="SerialNo" >SerialNo</th>                                     
-                                        <th class="qty" data-formatter="tableGrnExpiryOn" >ExpiryOn</th>
+                                        <th  data-field="SerialNo" >SerialNo</th>                                     
+                                        <th  data-formatter="tableGrnExpiryOn" >ExpiryOn</th>
                                         <th class="qty" data-formatter="tableGrnItemQty" data-events="tableGrnItemQtyEvent">Qty</th>
-                                        <th class="qty" data-formatter="tableGrnItemAction" data-events="tableGrnItemActionEvents"><i class="fa fa-list-check"></i></th>
+                                        <th  data-formatter="tableGrnItemAction" data-events="tableGrnItemActionEvents"><i class="fa fa-list-check"></i></th>
                                     </tr>
                                 </thead>
                                 <tbody>

@@ -94,7 +94,6 @@
             <div class="modal-body" style="min-height:75vh;">
                 <form id="formGdn" autocomplete="off" onsubmit="return false;">
                     <input type="hidden" id="Id" name="Id" />
-                    <input type="hidden" id="No" name="No" />
                     <div class="row">
                         <div class="col-md-2">
                             <label>Date</label>
@@ -186,10 +185,10 @@
                                     </tr>
                                     <tr>
                                         <th data-formatter="tableGdnItemSlNo" class="text-center">#</th>
-                                        <th  data-formatter="tableGdnItemDesc" data-events="tableGdnItemDescEvent">Description</th>
+                                        <th  class ="desc" data-formatter="tableGdnItemDesc" data-events="tableGdnItemDescEvent">Description</th>
                                         <th class="qty" data-formatter="tableGdnItemUnitDesc" data-events="tableGdnItemUnitDescEvent">Unit</th>
-                                        <th class="qty" data-field="SerialNo">SerialNo</th>
-                                        <th class="qty" data-formatter="tableGdnItemExpiryOn">ExpiryOn</th>
+                                        <th  data-field="SerialNo">SerialNo</th>
+                                        <th  data-formatter="tableGdnItemExpiryOn">ExpiryOn</th>
                                         <th class="qty" data-formatter="tableGdnItemQty" data-events="tableGdnItemQtyEvent">Qty</th>
                                         <th  data-formatter="tableGdnItemAction" data-events="tableGdnItemActionEvents"> <i class="fa fa-list-check"></i></th>
                                     </tr>

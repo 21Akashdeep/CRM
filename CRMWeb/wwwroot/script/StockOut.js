@@ -236,6 +236,7 @@
             BatchNo: "",
             ExpiryOn: expiryOn,
             Qty: qty,
+            ConversionFactor:0,
             BaseQty:qty,
             Rate: 0,
             UnitDesc: unitDesc,
@@ -270,8 +271,9 @@
         let tfoot = `
             <tfoot>
                 <tr>
-                    <th class="text-right" colspan="7">Total</th>
-                    <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
+                    <th class="text-right" colspan="6">Total</th>
+                    <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>
+                     <th class="text-right"></th>
                 </tr>
             </tfoot>
         `;
@@ -718,6 +720,7 @@ window.tableStockOutItemQtyEvent = {
         let selectedUnit = obj.UnitList?.find(x => x.UnitId == unitId);
         let cf = selectedUnit?.ConversionFactor || 1;
         obj.BaseQty = qty * cf;
+        obj.ConversionFactor = cf;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
 
         Table.updateByIndex({

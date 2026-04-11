@@ -61,6 +61,8 @@
                 serialNo: item.SerialNo,
                 unitDesc: item.UnitDesc,
                 qty: 1,
+                baseQty: 1,
+                conversionFactor:1,
                 isScanned: true,
                 baseQty:1,
                 callback: (obj) => {
@@ -230,7 +232,7 @@
             }
         });
     }
-    static addStockTransferItem({ itemId = 0, itemDesc = null, serialNo = null, expiryOn = null, qty = 0, baseQty = 0, unitDesc = null, isScanned = false, callback } = {}) {
+    static addStockTransferItem({ itemId = 0, itemDesc = null, serialNo = null, expiryOn = null, qty = 0, baseQty = 0, conversionFactor = 0, unitDesc = null, isScanned = false, callback } = {}) {
 
         let store = $('#FromStoreId').val() || 0;
         let stockType = $('#StockTransfer-StockType').val() || 0;
@@ -249,6 +251,7 @@
             BatchNo: "",
             ExpiryOn: expiryOn,
             Qty: qty,
+            ConversionFactor: conversionFactor,
             BaseQty: baseQty,
             Rate: 0,
             BalQty: 0,
@@ -282,8 +285,9 @@
         let tfoot = `
             <tfoot>
                 <tr>
-                    <th class="text-right" colspan="6">Total</th>
-                    <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
+                    <th class="text-right" colspan="5">Total</th>
+                    <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th> 
+                    <th class="text-right"></th>
                 </tr>
             </tfoot>
         `;
@@ -780,6 +784,7 @@ window.tableStockTransferItemQtyEvent = {
         let selectedUnit = obj.UnitList?.find(x => x.UnitId == unitId);
         let cf = selectedUnit?.ConversionFactor || 1;
         obj.BaseQty = qty * cf;
+        obj.ConversionFactor = cf;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
 
         Table.updateByIndex({

@@ -230,6 +230,7 @@
             BatchNo: "",
             ExpiryOn: expiryOn,
             Qty: qty,
+            ConversionFactor :0,
             Rate: 0,
             BalQty: 0,
             BaseQty: baseQty,
@@ -260,14 +261,15 @@
     }
     static sumOfTotalGdnItem() {
         let GdnItem = $('#tableGdnItem').bootstrapTable('getData').filter(x => x.ItemId > 0);
-        let Qty = GdnItem.length == 0 ? 0 : GdnItem.map(x => Math.abs(parseFloat(x.Qty) || 0)).reduce((s, v) => s + v, 0);
+        let Qty =  GdnItem.map(x => Math.abs(parseFloat(x.Qty) || 0)).reduce((s, v) => s + v, 0);
         let Amount = GdnItem.length == 0 ? 0 : GdnItem.map(x => parseFloat(x.Amount)).reduce((s, v) => s + v, 0);
 
         let tfoot = `
             <tfoot>
                 <tr>
-                    <th class="text-right" colspan="6">Total</th>
-                    <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
+                    <th class="text-right" colspan="5">Total</th>
+                    <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>
+                    <th class="text-right"></th>
                 </tr>
             </tfoot>
         `;
@@ -736,6 +738,7 @@ window.tableGdnItemQtyEvent = {
         let selectedUnit = obj.UnitList?.find(x => x.UnitId == unitId);
         let cf = selectedUnit?.ConversionFactor || 1;
         obj.BaseQty = qty * cf;
+        obj.ConversionFactor = cf;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
 
         Table.updateByIndex({

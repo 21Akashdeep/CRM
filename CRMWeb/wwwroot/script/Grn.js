@@ -206,6 +206,7 @@
             BatchNo: "",
             ExpiryOn: expiryOn,
             Qty: qty,
+            ConversionFactor:0,
             BaseQty: baseQty,
             Rate: 0,
             UnitDesc: null,
@@ -234,13 +235,14 @@
     }
     static sumOfTotalGrnItem() {
         let GrnItem = $('#tableGrnItem').bootstrapTable('getData').filter(x => x.ItemId > 0);
-        let Qty = GrnItem.length == 0 ? 0 : GrnItem.map(x => parseFloat(x.Qty)).reduce((s, v) => s + v, 0);
+        let Qty =  GrnItem.map(x => parseFloat(x.Qty)).reduce((s, v) => s + v, 0);
         let Amount = GrnItem.length == 0 ? 0 : GrnItem.map(x => parseFloat(x.Amount)).reduce((s, v) => s + v, 0);
         let tfoot = `
             <tfoot>
                 <tr>
-                    <th class="text-right" colspan="6">Total</th>
-                    <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
+                    <th class="text-right" colspan="5">Total</th>
+                    <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th> 
+                    <th class="text-right"></th>
                 </tr>
             </tfoot>
         `;
@@ -711,6 +713,7 @@ window.tableGrnItemQtyEvent = {
         let selectedUnit = obj.UnitList?.find(x => x.UnitId == unitId);
         let cf = selectedUnit?.ConversionFactor || 1;
         obj.BaseQty = obj.Qty * cf;
+        obj.ConversionFactor = cf;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
         Table.updateByIndex({ id: '#tableGrnItem', index: index, obj: obj, value: obj.Qty, event: e });
         Grn.sumOfTotalGrnItem();

@@ -364,6 +364,7 @@ namespace CRMApi.Repository
                         vi.BatchNo = item.BatchNo;
                         vi.Qty = item.Qty;
                         vi.BaseQty = item.BaseQty;
+                        vi.ConversionFactor = item.ConversionFactor;
                         vi.Rate = item.Rate;
                         vi.Amount = item.Amount;
                         vi.Remarks = item.Remarks;

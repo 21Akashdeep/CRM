@@ -309,10 +309,10 @@ namespace CRMApi.Repository
                                 // Non-serial items → only those with no serial in DB
                                 var stockTran = dbItems
                                     .Where(x => x.ItemId == stockTrans.ItemId &&
-                                                (x.SerialNo == null || x.SerialNo == "NA"))
+                                                (x.SerialNo == null ))
                                     .ToList();
 
-                                stockMsg = await UpdateStockWithOutSerialNoAsync(stockTran, obj.FromStoreId, obj.ToStoreId, user);
+                                stockMsg = await UpdateStockWithOutSerialNoAsync(stockTran,stockTrans, obj.FromStoreId, obj.ToStoreId, user);
                             }
                             else
                             {
@@ -322,7 +322,7 @@ namespace CRMApi.Repository
                                                 x.SerialNo == stockTrans.SerialNo)
                                     .ToList();
 
-                                stockMsg = await UpdateStockWithSerialNoAsync(stockTran, obj.FromStoreId, obj.ToStoreId, user);
+                                stockMsg = await UpdateStockWithSerialNoAsync(stockTran,stockTrans, obj.FromStoreId, obj.ToStoreId, user);
                             }
                             if (stockMsg.status == Message.Type.error)
                             {
@@ -384,7 +384,7 @@ namespace CRMApi.Repository
 
             return objMsg;
         }
-        public async Task<Message> UpdateStockWithSerialNoAsync(List<VoucherItem> stockTran,int FromStoreId,int ToStoreId,User user)
+        public async Task<Message> UpdateStockWithSerialNoAsync(List<VoucherItem> stockTran,VoucherItem vi,int FromStoreId,int ToStoreId,User user)
         {
             Message objMsg = new Message();
             try
@@ -413,29 +413,25 @@ namespace CRMApi.Repository
                 var finalStockTransferItem = stockTran
                     .Where(x => x.Status == App.Status.Enable && x.BaseQty < 0)
                     .ToList();
-
-                foreach (var vi in finalStockTransferItem)
+                var newItem = new VoucherItem
                 {
-                    var newItem = new VoucherItem
-                    {
-                        VoucherId = vi.VoucherId,
-                        ItemId = vi.ItemId,
-                        SerialNo = vi.SerialNo,
-                        StoreId = ToStoreId,
-                        Qty = Math.Abs(vi.Qty),
-                        BaseQty = Math.Abs(vi.BaseQty),
-                        ExpiryOn = vi.ExpiryOn,
-                        Remarks = vi.Remarks,
-                        StockType = vi.StockType,
-                        Status = App.Status.Enable,
-                        CreatedBy = user.Id,
-                        CreatedAt = DateTime.Now,
-                        UpdatedBy = user.Id,
-                        UpdatedAt = DateTime.Now
-                    };
-
-                    db.VoucherItem.Add(newItem);
-                }
+                    VoucherId = vi.VoucherId,
+                    ItemId = vi.ItemId,
+                    SerialNo = vi.SerialNo,
+                    StoreId = ToStoreId,
+                    Qty = Math.Abs(vi.Qty),
+                    ConversionFactor = vi.ConversionFactor,
+                    BaseQty = Math.Abs(vi.BaseQty),
+                    ExpiryOn = vi.ExpiryOn,
+                    Remarks = vi.Remarks,
+                    StockType = vi.StockType,
+                    Status = App.Status.Enable,
+                    CreatedBy = user.Id,
+                    CreatedAt = DateTime.Now,
+                    UpdatedBy = user.Id,
+                    UpdatedAt = DateTime.Now
+                };
+                db.VoucherItem.Add(newItem);
 
                 Message.Update(ref objMsg, await db.SaveChangesAsync());
             }
@@ -445,7 +441,7 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
-        public async Task<Message> UpdateStockWithOutSerialNoAsync(List<VoucherItem> stockTran, int FromStoreId, int ToStoreId, User user)
+        public async Task<Message> UpdateStockWithOutSerialNoAsync(List<VoucherItem> stockTran,VoucherItem vi, int FromStoreId, int ToStoreId, User user)
         {
             Message objMsg = new Message();
             try
@@ -473,28 +469,25 @@ namespace CRMApi.Repository
                     .Where(x => x.Status == App.Status.Enable && x.BaseQty < 0)
                     .ToList();
 
-                foreach (var vi in finalStockTransferItem)
+                var newItem = new VoucherItem
                 {
-                    var newItem = new VoucherItem
-                    {
-                        VoucherId = vi.VoucherId,
-                        ItemId = vi.ItemId,
-                        SerialNo = vi.SerialNo,
-                        StoreId = ToStoreId,
-                        Qty = Math.Abs(vi.Qty),
-                        BaseQty = Math.Abs(vi.BaseQty),
-                        ExpiryOn = vi.ExpiryOn,
-                        Remarks = vi.Remarks,
-                        StockType = vi.StockType,
-                        Status = App.Status.Enable,
-                        CreatedBy = user.Id,
-                        CreatedAt = DateTime.Now,
-                        UpdatedBy = user.Id,
-                        UpdatedAt = DateTime.Now
-                    };
-
-                    db.VoucherItem.Add(newItem);
-                }
+                    VoucherId = vi.VoucherId,
+                    ItemId = vi.ItemId,
+                    SerialNo = vi.SerialNo,
+                    StoreId = ToStoreId,
+                    Qty = Math.Abs(vi.Qty),
+                    ConversionFactor = vi.ConversionFactor,
+                    BaseQty = Math.Abs(vi.BaseQty),
+                    ExpiryOn = vi.ExpiryOn,
+                    Remarks = vi.Remarks,
+                    StockType = vi.StockType,
+                    Status = App.Status.Enable,
+                    CreatedBy = user.Id,
+                    CreatedAt = DateTime.Now,
+                    UpdatedBy = user.Id,
+                    UpdatedAt = DateTime.Now
+                };
+                db.VoucherItem.Add(newItem);
 
                 Message.Update(ref objMsg, await db.SaveChangesAsync());
             }
@@ -594,6 +587,7 @@ namespace CRMApi.Repository
                         SerialNo = vi.SerialNo,
                         StoreId = obj.ToStoreId,
                         Qty = Math.Abs(vi.Qty),
+
                         ExpiryOn = vi.ExpiryOn,
                         Remarks = vi.Remarks,
                         Status = App.Status.Enable,
@@ -641,6 +635,7 @@ namespace CRMApi.Repository
                                 SerialNo = vi.SerialNo,
                                 StoreId = obj.FromStoreId,
                                 Qty = -(vi.Qty),
+                                ConversionFactor = vi.ConversionFactor,
                                 BaseQty = -(vi.BaseQty),
                                 ExpiryOn = vi.ExpiryOn,
                                 Remarks = vi.Remarks,
@@ -668,6 +663,7 @@ namespace CRMApi.Repository
                         {
                             SerialNo = x.SerialNo,
                             Qty = x.Qty,
+                            ConversionFactor = x.ConversionFactor,
                             BaseQty = x.BaseQty,
                             VoucherId = x.VoucherId,
                             ItemId = x.ItemId,
@@ -705,6 +701,7 @@ namespace CRMApi.Repository
                                 SerialNo = vi.SerialNo,
                                 StoreId = obj.ToStoreId,
                                 Qty = vi.Qty,
+                                ConversionFactor = vi.ConversionFactor,
                                 BaseQty = vi.BaseQty,
                                 ExpiryOn = vi.ExpiryOn,
                                 Remarks = vi.Remarks,

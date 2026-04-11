@@ -412,7 +412,6 @@ namespace CRMApi.Repository
                     return objMsg;
                 }
                 voucher.Type = obj.Type;
-                voucher.No = obj.No;
                 voucher.PartyId = obj.PartyId;
                 voucher.Date = obj.Date;
                 voucher.Remarks = obj.Remarks;
@@ -444,6 +443,8 @@ namespace CRMApi.Repository
                         vi.SerialNo = item.SerialNo;
                         vi.BatchNo = item.BatchNo;
                         vi.Qty = item.Qty;
+                        vi.BaseQty = item.BaseQty;
+                        vi.ConversionFactor = item.ConversionFactor;
                         vi.Rate = item.Rate;
                         vi.Amount = item.Amount;
                         vi.Remarks = item.Remarks;

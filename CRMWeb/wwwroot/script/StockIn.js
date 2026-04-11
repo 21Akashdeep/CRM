@@ -230,6 +230,7 @@
             BatchNo: "",
             ExpiryOn: expiryOn,
             Qty: qty,
+            ConversionFactor:0,
             BaseQty:qty,
             Rate: 0,
             UnitDesc: null,
@@ -256,13 +257,14 @@
     }
     static sumOfTotalStockInItem() {
         let StockInItem = $('#tableStockInItem').bootstrapTable('getData').filter(x => x.ItemId > 0);
-        let Qty = StockInItem.length == 0 ? 0 : StockInItem.map(x => parseFloat(x.Qty)).reduce((s, v) => s + v, 0);
+        let Qty =  StockInItem.map(x => parseFloat(x.Qty)).reduce((s, v) => s + v, 0);
         let Amount = StockInItem.length == 0 ? 0 : StockInItem.map(x => parseFloat(x.Amount)).reduce((s, v) => s + v, 0);
         let tfoot = `
             <tfoot>
                 <tr>
-                    <th class="text-right" colspan="6">Total</th>
-                    <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
+                    <th class="text-right" colspan="5">Total</th>
+                    <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th> 
+                    <th class="text-right"></th>
                 </tr>
             </tfoot>
         `;
@@ -720,7 +722,7 @@ window.tableStockInItemUnitDescEvent = {
             event: e
         });
 
-        Gdn.sumOfTotalGdnItem();
+        StockIn.sumOfTotalStockInItem();
     }
 }
 window.tableStockInItemRate = (value, obj, index) => {
@@ -748,6 +750,7 @@ window.tableStockInItemQtyEvent = {
         let selectedUnit = obj.UnitList?.find(x => x.UnitId == unitId);
         let cf = selectedUnit?.ConversionFactor || 1;
         obj.BaseQty = obj.Qty * cf;
+        obj.ConversionFactor = cf;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
         Table.updateByIndex({ id: '#tableStockInItem', index: index, obj: obj, value: obj.Qty, event: e });
         StockIn.sumOfTotalStockInItem();

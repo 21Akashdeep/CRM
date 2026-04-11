@@ -18,6 +18,7 @@ namespace CRMApi.Dto
         public DateTime? ExpiryOn { get; set; }
         public decimal Qty { get; set; }
         public decimal? BaseQty { get; set; }
+        public decimal? ConversionFactor { get; set; }
         public string? Remarks { get; set; }
         public string? BatchNo { get; set; }
         [NotMapped]
