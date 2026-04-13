@@ -226,6 +226,7 @@
             StoreId: $('#Gdn-StoreId').val(),
             StoreDesc: $('#Gdn-StoreId option:selected').text(),
             ItemDesc: itemDesc,
+            UnitId: 0,
             SerialNo: serialNo,
             BatchNo: null,
             ExpiryOn: expiryOn,
@@ -739,6 +740,7 @@ window.tableGdnItemQtyEvent = {
         let cf = selectedUnit?.ConversionFactor || 1;
         obj.BaseQty = qty * cf;
         obj.ConversionFactor = cf;
+        obj.UnitId = unitId;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
 
         Table.updateByIndex({

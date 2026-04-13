@@ -11,6 +11,7 @@ namespace CRMApi.Models
         // Foreign Keys
         public int VoucherId { get; set; }
         public int ItemId { get; set; }
+        public int UnitId { get; set; }
         public int StoreId { get; set; }
 
         [NotMapped] public string? VoucherDesc { get; set; }

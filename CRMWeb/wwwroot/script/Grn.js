@@ -202,6 +202,7 @@
             VoucherId: 0,
             StoreId: 0,
             ItemDesc: itemDesc,
+            UnitId: 0,
             SerialNo: serialNo,
             BatchNo: null,
             ExpiryOn: expiryOn,
@@ -697,7 +698,6 @@ window.tableGrnItemUnitDescEvent = {
             obj: obj,
             event: e
         });
-
         Grn.sumOfTotalGrnItem();
     }
 }
@@ -715,6 +715,7 @@ window.tableGrnItemQtyEvent = {
         obj.BaseQty = obj.Qty * cf;
         obj.ConversionFactor = cf;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
+        obj.UnitId = unitId;
         Table.updateByIndex({ id: '#tableGrnItem', index: index, obj: obj, value: obj.Qty, event: e });
         Grn.sumOfTotalGrnItem();
     }

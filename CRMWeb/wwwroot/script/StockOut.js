@@ -232,6 +232,7 @@
             VoucherId: 0,
             StoreId: 0,
             ItemDesc: itemDesc,
+            UnitId : 0,
             SerialNo: serialNo,
             BatchNo: "",
             ExpiryOn: expiryOn,
@@ -721,6 +722,7 @@ window.tableStockOutItemQtyEvent = {
         let cf = selectedUnit?.ConversionFactor || 1;
         obj.BaseQty = qty * cf;
         obj.ConversionFactor = cf;
+        obj.UnitId = unitId;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
 
         Table.updateByIndex({
