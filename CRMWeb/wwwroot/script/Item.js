@@ -79,7 +79,6 @@
             }
         });
     }
-
     static getViewOption() {
         Data.get({
             url: 'Item/GetViewOption',
@@ -168,7 +167,7 @@
                 let baseunitId = baseUnit.find(x => x.IsBaseUnit === true)?.UnitId;
                 obj.UnitId = baseunitId;
                 obj.Id = action == 'Edit' ? obj.Id : null;
-                let title = action === 'Edit' ? `Item / Edit (Code: ${obj.No})` : `Item / Add`;
+                let title = action === 'Edit' ? `Item / Edit (Code: ${obj.Code})` : `Item / Add`;
                 
                 Dropdown.bind({ id: '#Item_ItemGroupId', data: response.data.ItemGroup, value: 'Id', text: 'Description', subText: 'SubText' });
                 Dropdown.bind({ id: '#Item_ItemSubGroupId', data: response.data.ItemSubGroup, value: 'Id', text: 'Description', subText: 'SubText' });

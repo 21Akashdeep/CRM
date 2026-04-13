@@ -49,7 +49,7 @@ namespace CRMApi.Repository
                 .Select(x => new
                 {
                     x.Id,
-                    x.Name
+                    x.Description
                 }).ToListAsync();
 
                 Option.Number = await db.Voucher

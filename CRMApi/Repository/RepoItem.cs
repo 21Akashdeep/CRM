@@ -159,7 +159,7 @@ namespace CRMApi.Repository
         public async Task<List<Item>> List(Item? obj, User User)
         {
             obj ??= new Item();
-            obj.ListStatus = obj.ListStatus.Any() ? obj.ListStatus : App.ActiveStatus;
+            obj.ListStatus = App.ActiveStatus;
 
             var dbItem = (
                 from itm in db.Item
@@ -355,20 +355,103 @@ namespace CRMApi.Repository
             }
             return objMsg;
         }
+        //public async Task<Message> UpdateAsync(Item obj, User User)
+        //{
+        //    Message objMsg = new Message();
+
+        //    try
+        //    {
+        //        var Item = await db.Item.Include(v => v.ItemUnit).FirstOrDefaultAsync(x => App.ActiveStatus.Contains(x.Status) && x.Id == obj.Id);
+        //        var  itemUnit  = await db.ItemUnit.Where(x => x.ItemId == obj.Id && App.ActiveStatus.Contains(x.Status)).ToListAsync();
+        //        itemUnit.ForEach(vi =>
+        //        {
+        //              vi.Status = App.Status.Delete;
+        //        });
+        //        db.UpdateRange(itemUnit);
+
+        //        obj.ItemUnit.ForEach( x =>
+        //        {
+        //            x.Id = 0;
+        //        });
+
+
+        //        if (Item == null)
+        //        {
+        //            Message.Error(ref objMsg, "Item was not found for update");
+        //            return objMsg;
+        //        }
+        //        Item.Name = obj.Name;
+        //        Item.Description = obj.Description;
+        //        Item.ItemGroupId = obj.ItemGroupId;
+        //        Item.ItemSubGroupId = obj.ItemSubGroupId;
+        //        Item.HsnCode = obj.HsnCode;
+        //        Item.UnitId = obj.UnitId;
+        //        Item.UpdatedBy = User.Id;
+        //        Item.UpdatedAt = DateTime.Now;
+        //        foreach (var vi in Item.ItemUnit)
+        //        {
+        //            var Unit = obj.ItemUnit.FirstOrDefault(x => x.Id == vi.Id);
+        //            if (Unit == null)
+        //            {
+        //                vi.Status = App.Status.Delete;
+        //            }
+        //            else
+        //            {
+        //                vi.ItemId = Unit.ItemId;
+        //                vi.UnitId = Unit.UnitId;
+        //                vi.ValuePerUnit = Unit.ValuePerUnit;
+        //                vi.ConversionFactor = Unit.ConversionFactor;
+        //                vi.IsBaseUnit = Unit.IsBaseUnit;
+        //                vi.IsSmallest = Unit.IsSmallest;
+        //                vi.Status = Item.Status;
+        //            }
+        //            vi.UpdatedBy = User.Id;
+        //            vi.UpdatedAt = DateTime.Now;
+        //        }
+        //        db.Update(Item);
+
+        //        var newUnit = obj.ItemUnit.Where(x => x.Id == 0).ToList();
+        //        foreach (var vi in newUnit)
+        //        {
+        //            vi.ItemId = Item.Id;
+        //            vi.Status = Item.Status;
+        //            vi.CreatedBy = User.Id;
+        //            vi.CreatedAt = DateTime.Now;
+        //            vi.UpdatedBy = User.Id;
+        //            vi.UpdatedAt = DateTime.Now;
+        //        }
+        //        db.AddRange(newUnit);
+        //        // await db.SaveChangesAsync();
+        //        Message.Update(ref objMsg, (await db.SaveChangesAsync()));
+
+        //        if (objMsg.status == Message.Type.success)
+        //        {
+        //            objMsg.obj = (await List(
+        //            new Item { ListId = new List<int> { obj.Id } },
+        //            User)).FirstOrDefault();
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Message.Exception(ref objMsg, ex);
+        //    }
+
+        //    return objMsg;
+        //}
         public async Task<Message> UpdateAsync(Item obj, User User)
         {
             Message objMsg = new Message();
-            
+
             try
             {
-                var Item = await db.Item.Include(v => v.ItemUnit).FirstOrDefaultAsync(x => App.ActiveStatus.Contains(x.Status) && x.Id == obj.Id);
+                var Item = await db.Item
+                    .FirstOrDefaultAsync(x => App.ActiveStatus.Contains(x.Status) && x.Id == obj.Id);
 
                 if (Item == null)
                 {
                     Message.Error(ref objMsg, "Item was not found for update");
                     return objMsg;
                 }
-                Item.Code = obj.Code;
                 Item.Name = obj.Name;
                 Item.Description = obj.Description;
                 Item.ItemGroupId = obj.ItemGroupId;
@@ -377,47 +460,41 @@ namespace CRMApi.Repository
                 Item.UnitId = obj.UnitId;
                 Item.UpdatedBy = User.Id;
                 Item.UpdatedAt = DateTime.Now;
-                foreach (var vi in Item.ItemUnit)
-                {
-                    var Unit = obj.ItemUnit.FirstOrDefault(x => x.Id == vi.Id);
-                    if (Unit == null)
-                    {
-                        vi.Status = App.Status.Delete;
-                    }
-                    else
-                    {
-                        vi.ItemId = Unit.ItemId;
-                        vi.UnitId = Unit.UnitId;
-                        vi.ValuePerUnit = Unit.ValuePerUnit;
-                        vi.ConversionFactor = Unit.ConversionFactor;
-                        vi.IsBaseUnit = Unit.IsBaseUnit;
-                        vi.IsSmallest = Unit.IsSmallest;
-                        vi.Status = Item.Status;
-                    }
-                    vi.UpdatedBy = User.Id;
-                    vi.UpdatedAt = DateTime.Now;
-                }
-                db.Update(Item);
 
-                var newUnit = obj.ItemUnit.Where(x => x.Id == 0).ToList();
-                foreach (var vi in newUnit)
+                var itemUnits = await db.ItemUnit
+                    .Where(x => x.ItemId == obj.Id)
+                    .ToListAsync();
+
+                itemUnits.ForEach(x =>
                 {
-                    vi.ItemId = Item.Id;
-                    vi.Status = Item.Status;
-                    vi.CreatedBy = User.Id;
-                    vi.CreatedAt = DateTime.Now;
-                    vi.UpdatedBy = User.Id;
-                    vi.UpdatedAt = DateTime.Now;
+                    x.Status = App.Status.Delete;
+                    x.UpdatedBy = User.Id;
+                    x.UpdatedAt = DateTime.Now;
+                });
+
+                if (obj.ItemUnit != null && obj.ItemUnit.Count > 0)
+                {
+                    foreach (var vi in obj.ItemUnit)
+                    {
+                        vi.Id = 0;
+                        vi.ItemId = Item.Id;
+                        vi.Status = Item.Status;
+                        vi.CreatedBy = User.Id;
+                        vi.CreatedAt = DateTime.Now;
+                        vi.UpdatedBy = User.Id;
+                        vi.UpdatedAt = DateTime.Now;
+                    }
+
+                    await db.ItemUnit.AddRangeAsync(obj.ItemUnit);
                 }
-                db.AddRange(newUnit);
-                // await db.SaveChangesAsync();
-                Message.Update(ref objMsg, (await db.SaveChangesAsync()));
+               
+                Message.Update(ref objMsg, await db.SaveChangesAsync());
 
                 if (objMsg.status == Message.Type.success)
                 {
                     objMsg.obj = (await List(
-                    new Item { ListId = new List<int> { obj.Id } },
-                    User)).FirstOrDefault();
+                        new Item { ListId = new List<int> { obj.Id } },
+                        User)).FirstOrDefault();
                 }
             }
             catch (Exception ex)
