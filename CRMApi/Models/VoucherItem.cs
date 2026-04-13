@@ -48,7 +48,8 @@ namespace CRMApi.Models
         public decimal TotalAmount { get; set; } = 0;
 
         // Tax
-        public string ListTax { get; set; } = "[]";
+        //public string ListTax { get; set; } = "[]";
+        public string? ListTax { get; set; }
 
         [Column(TypeName = "decimal(6,3)")]
         public decimal TaxRate { get; set; } = 0;

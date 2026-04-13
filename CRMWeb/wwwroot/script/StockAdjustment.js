@@ -82,7 +82,7 @@
                 data: obj,
                 onSuccess: (response) => {
                     if (response.status == Message.Type.success) {
-                        Gdn.item = response.data;
+                        StockAdjustment.item = response.data;
                     }
                     else {
                         Message.show(response);

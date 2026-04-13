@@ -548,7 +548,6 @@
         });
     }
 }
-
 window.tableStockTransferRefNoAndDate = (value, obj, index) => {
     return `
         <div>${obj.RefNo ?? ''}</div>
@@ -576,7 +575,6 @@ window.tableStockTransferUpdatedByAndAt = (value, obj, index) => {
         <div>${DateTime.dateTime(obj.UpdatedAt)}</div>
     `;
 }
-
 window.tableStockTransferAction = (value, obj, index) => {
     let actionBtn = [];
 
@@ -655,7 +653,6 @@ window.tableStockTransferActionEvent = {
         StockTransfer.delete({ id: obj.Id });
     }
 }
-
 //Table StockTransfer Item
 window.tableStockTransferItemSlNo = (value, obj, index) => {
     return index + 1;
@@ -758,7 +755,6 @@ window.tableStockTransferItemQty = (value, obj, index) => {
         </div>
     `;
 }
-
 window.tableStockTransferItemQtyEvent = {
     'input .stocktransfer-item-qty': (e, value, obj, index) => {
 
