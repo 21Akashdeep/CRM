@@ -490,14 +490,19 @@
                                     <td class="text-center">${idx + 1}</td>
                                     <td>${row.ItemDesc}</td>                                     
                                     <td>${row.ExpiryOn ? moment(row.ExpiryOn).format('DD-MMM-YYYY') : '-'}</td> 
-                                     <td>${row.SerialNo}</td>
-                                    <td class="text-right">${row.Qty}</td>
+                                     <td>${row.SerialNo ? row.SerialNo:'-'}</td>
+                                    <td class="text-right">${Math.abs(row.Qty)}</td>
                                 </tr>
                             `).join('')}
                             <tr>
                                 <th colspan="4" class="text-right">Total</th>
                                 <th class="text-right">
-                                    ${items.reduce((s, x) => s + Number(x.Qty || 0), 0)}
+                                    ${
+                                (() => {
+                                const uniqueUnits = Data.unique({ data: items, field: 'UnitId' });
+                                return uniqueUnits.length === 1
+                                ? items.reduce((s, x) => s + Number(x.Qty || 0), 0) : '';
+                               })() }
                                 </th>                                
                             </tr>
                         </tbody>
@@ -663,11 +668,6 @@ window.tableStockTransferItemDesc = (value, obj, index) => {
         if (!obj.UnitList && obj.ItemId) {
             StockTransfer.getUnit(obj.ItemId, (unitList) => {
                 obj.UnitList = unitList;
-
-                let selected = unitList[0];
-                obj.UnitId = selected?.UnitId || 0;
-                obj.UnitDesc = selected?.UnitDesc || null;
-
                 Table.updateByIndex({
                     id: '#tableStockTransferItem',
                     index: index,
@@ -762,6 +762,13 @@ window.tableStockTransferItemQtyEvent = {
         let qty = parseFloat(e.currentTarget.value || 0);   
         let balQty = parseFloat(obj.BalQty || 0);
 
+        let unitId = $(`#stockTransferUnit_${index}`).val();
+        let selectedUnit = obj.UnitList?.find(x => x.UnitId == unitId);
+        let cf = selectedUnit?.ConversionFactor || 1;
+        obj.BaseQty = qty * cf;
+        obj.ConversionFactor = cf;
+        let valuePerUnit = selectedUnit.ValuePerUnit;
+        let avQty = balQty * valuePerUnit; 
         // minus qty check
         if (qty < 0) {
             Message.error({ statusText: 'Qty cannot be negative' });
@@ -770,18 +777,12 @@ window.tableStockTransferItemQtyEvent = {
         }
 
         // available qty check
-        if (qty > balQty) {
-            Message.error({ statusText: `Qty cannot be greater than available qty (${balQty})` });
+        if (qty > avQty) {
+            Message.error({ statusText: `Qty cannot be greater than available qty (${avQty})` });
             e.currentTarget.value = obj.Qty || 0;
             return;
         }
-
         obj.Qty = qty;
-        let unitId = $(`#stockTransferUnit_${index}`).val();
-        let selectedUnit = obj.UnitList?.find(x => x.UnitId == unitId);
-        let cf = selectedUnit?.ConversionFactor || 1;
-        obj.BaseQty = qty * cf;
-        obj.ConversionFactor = cf;
         obj.UnitId = unitId;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
 

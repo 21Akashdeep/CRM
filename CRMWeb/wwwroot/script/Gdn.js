@@ -453,12 +453,15 @@
                                 `).join('')}
                                 <tr>
                                     <th colspan="4" class="text-right">Total</th>
-                                    <th class="text-right">
-                                       ${items.reduce((s, x) => {
-                                           let qty = parseFloat(x.Qty);
-                                           return s + (isNaN(qty) ? 0 : Math.abs(qty));
-                                       }, 0)}
-                                    </th>                                
+                                    <th class="text-right">                                 
+                                       ${
+                                  (() => {
+                                   const uniqueUnits = Data.unique({ data: items, field: 'UnitId' });
+                                    return uniqueUnits.length === 1
+                                    ? items.reduce((s, x) => {
+                                    let qty = parseFloat(x.Qty);
+                                    return s + (isNaN(qty) ? 0 : Math.abs(qty));
+                                    }, 0): '';})()}</th>                                
                                 </tr>
                             </tbody>
                         </table>
@@ -617,11 +620,6 @@ window.tableGdnItemDesc = (value, obj, index) => {
         if (!obj.UnitList && obj.ItemId) {
             Gdn.getUnit(obj.ItemId, (unitList) => {
                 obj.UnitList = unitList;
-
-                let selected = unitList[0];
-                obj.UnitId = selected?.UnitId || 0;
-                obj.UnitDesc = selected?.UnitDesc || null;
-
                 Table.updateByIndex({
                     id: '#tableGdnItem',
                     index: index,
@@ -721,26 +719,29 @@ window.tableGdnItemQtyEvent = {
         let balQty = parseFloat(obj.BalQty || 0);
 
         // minus qty check
-        if (qty < 0) {
-            Message.error({ statusText: 'Qty cannot be negative' });
-            e.currentTarget.value = obj.Qty || 0;
-            return;
-        }
-
-        // available qty check
-        if (qty > balQty) {
-            Message.error({ statusText: `Qty cannot be greater than available qty (${balQty})` });
-            e.currentTarget.value = obj.Qty || 0;
-            return;
-        }
-
-        obj.Qty = qty;
         let unitId = $(`#gdnUnit_${index}`).val();
         let selectedUnit = obj.UnitList?.find(x => x.UnitId == unitId);
         let cf = selectedUnit?.ConversionFactor || 1;
         obj.BaseQty = qty * cf;
         obj.ConversionFactor = cf;
         obj.UnitId = unitId;
+        let valPerUnit = selectedUnit.ValuePerUnit;
+        let avQty = balQty * valPerUnit;
+        obj.BaseQty = qty * cf; 
+        if (avQty < 0) {
+            Message.error({ statusText: 'Qty cannot be negative' });
+            e.currentTarget.value = obj.Qty || 0;
+            return;
+        }
+
+        // available qty check
+        if (qty > avQty) {
+            Message.error({ statusText: `Qty cannot be greater than available qty (${avQty})` });
+            e.currentTarget.value = obj.Qty || 0;
+            return;
+        }
+
+        obj.Qty = qty;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
 
         Table.updateByIndex({

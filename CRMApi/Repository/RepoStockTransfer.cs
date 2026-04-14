@@ -158,7 +158,7 @@ namespace CRMApi.Repository
                 from vci in db.VoucherItem
                 join vc in db.Voucher on vci.VoucherId equals vc.Id
                 join itm in db.Item on vci.ItemId equals itm.Id
-                join un in db.Unit on itm.UnitId equals un.Id
+                join un in db.Unit on vci.UnitId equals un.Id
                 join st in db.Store on vci.StoreId equals st.Id
                 join sts in db.Setting on new { Category = App.SettingName.Status, Value = vci.Status.ToString() } equals new { sts.Category, sts.Value }
                 join cby in db.User on vci.CreatedBy equals cby.Id
@@ -168,11 +168,12 @@ namespace CRMApi.Repository
                 {
                     Id = vci.Id,
                     VoucherId = vci.VoucherId,
-                    StoreId = vci.StoreId,
+                    StoreId = st.Id,
                     StoreDesc = st.Description,
                     ItemId = vci.ItemId,
                     ItemDesc = itm.Description,
                     UnitDesc = un.Description,
+                    UnitId = vci.UnitId,
                     VoucherDesc = vc.Type,
                     Remarks = vci.Remarks,
                     SerialNo = vci.SerialNo,
@@ -369,7 +370,7 @@ namespace CRMApi.Repository
                 select new
                 {
                     itu.ItemId,
-                    UnitId = itu.UnitId,
+                    UnitId = un.Id,
                     UnitDesc = un.Description,
                     itu.ValuePerUnit,
                     itu.ConversionFactor
@@ -515,10 +516,12 @@ namespace CRMApi.Repository
                     return objMsg;
                 }
                 var listVoucherItemId = voucher.VoucherItem.Select(x => x.Id).ToList();
+                var storeIds = voucher.VoucherItem
+                .Where(x => x.BaseQty >= 0).Select(x => x.StoreId).ToList().FirstOrDefault();
                 var dbStockItem = await RepoVoucher.StockItemAsync(new StockItemFltrDto
                 {
                     ListExcludeViId = listVoucherItemId,
-                    ListStoreId = new List<int> { voucher.StoreId },
+                    ListStoreId = new List<int> { storeIds },
                     ToDate = voucher.Date
                 }, User);
                 var stockItem = dbStockItem.Select(x => new GdnItemDto

@@ -164,7 +164,7 @@ namespace CRMApi.Repository
                 from vci in db.VoucherItem
                 join vc in db.Voucher on vci.VoucherId equals vc.Id
                 join itm in db.Item on vci.ItemId equals itm.Id
-                join un in db.Unit on itm.UnitId equals un.Id
+                join un in db.Unit on vci.UnitId equals un.Id
                 join st in db.Store on vci.StoreId equals st.Id
                 join sts in db.Setting on new { Category = App.SettingName.Status, Value = vci.Status.ToString() } equals new { sts.Category, sts.Value }
                 join cby in db.User on vci.CreatedBy equals cby.Id
@@ -179,6 +179,7 @@ namespace CRMApi.Repository
                     StoreId = vci.StoreId,
                     StoreDesc = st.Description,
                     ItemId = vci.ItemId,
+                    UnitId = vci.UnitId,
                     ItemDesc = itm.Description,
                     VoucherDesc = vc.Type,
                     Remarks = vci.Remarks,
@@ -496,7 +497,7 @@ namespace CRMApi.Repository
                             ItemId = g.Key.ItemId,
                             ItemDesc = $"{g.Key.ItemDesc} (Bal. Qty : {g.Sum(x => x.vci.BaseQty).ToString("#.000")} {g.Key.UnitDesc})",
                             UnitDesc = g.Key.UnitDesc,
-                            Qty = g.Sum(x => x.vci.Qty),
+                            Qty = g.Sum(x => x.vci.BaseQty),
                             StockType = g.Key.StockType,
                             IsReturnable = g.Key.IsReturnable,
                             IsReturned = g.Key.IsReturned

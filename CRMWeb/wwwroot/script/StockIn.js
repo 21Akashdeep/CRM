@@ -447,14 +447,19 @@
                                     <td class="text-center">${idx + 1}</td>
                                     <td>${row.ItemDesc}</td>                                     
                                     <td>${row.ExpiryOn ? moment(row.ExpiryOn).format('DD-MMM-YYYY') : '-'}</td> 
-                                     <td>${row.SerialNo}</td>
+                                     <td>${row.SerialNo ? row.SerialNo:'-'}</td>
                                     <td class="text-right">${row.Qty}</td>
                                 </tr>
                             `).join('')}
                             <tr>
                                 <th colspan="4" class="text-right">Total</th>
                                 <th class="text-right">
-                                    ${items.reduce((s, x) => s + Number(x.Qty || 0), 0)}
+                                    ${
+                             (() => {
+                            const uniqueUnits = Data.unique({ data: items, field: 'UnitId' });
+                            return uniqueUnits.length === 1
+                            ? items.reduce((s, x) => s + Number(x.Qty || 0), 0) : '';
+                        })() }
                                 </th>                                
                             </tr>
                         </tbody>
@@ -643,11 +648,6 @@ window.tableStockInItemDesc = (value, obj, index) => {
         if (!obj.UnitList && obj.ItemId) {
             StockIn.getUnit(obj.ItemId, (unitList) => {
                 obj.UnitList = unitList;
-
-                let selected = unitList[0];
-                obj.UnitId = selected?.UnitId || 0;
-                obj.UnitDesc = selected?.UnitDesc || null;
-
                 Table.updateByIndex({
                     id: '#tableStockInItem',
                     index: index,
