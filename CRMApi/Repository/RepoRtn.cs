@@ -191,6 +191,7 @@ namespace CRMApi.Repository
                     from vci in db.VoucherItem
                     join vc in db.Voucher on vci.VoucherId equals vc.Id
                     join itm in db.Item on vci.ItemId equals itm.Id
+                    join un in db.Unit on vci.UnitId equals un.Id
                     join st in db.Store on vci.StoreId equals st.Id
                     where ListGdnId.Contains(vc.Id)
                        && vc.Type == "DeliveryNote"
@@ -205,12 +206,15 @@ namespace CRMApi.Repository
                         ItemDesc = itm.Description,
                         StoreId = vci.StoreId,
                         StoreDesc = st.Description,
-
+                        UnitId = un.Id,
+                        UnitDesc = un.Description,
                         SerialNo = vci.SerialNo,
                         BatchNo = vci.BatchNo,
                         ExpiryOn = vci.ExpiryOn,
 
                         Qty = vci.Qty,
+                        ConversionFactor = vci.ConversionFactor,
+                        BaseQty = vci.BaseQty,
                         Rate = vci.Rate,
                         Amount = vci.Amount,
 
@@ -250,6 +254,8 @@ namespace CRMApi.Repository
 
                 obj.VoucherItem.ForEach(vi =>
                 {
+                    vi.Qty = -(vi.Qty);
+                    vi.BaseQty = -(vi.BaseQty);
                     vi.StoreId = obj.StoreId;
                     vi.CreatedBy = User.Id;
                     vi.CreatedAt = DateTime.Now;

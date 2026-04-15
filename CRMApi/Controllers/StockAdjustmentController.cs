@@ -70,6 +70,22 @@ namespace CRMApi.Controllers
             }
             return Ok(objMsg);
         }
+        [HttpGet]
+        public async Task<IActionResult> getUnit(int Id)
+        {
+            Message objMsg = new Message();
+            try
+            {
+                var User = Util.RequestVerify(new Request { HttpRequest = Request, ActionType = ActionType.View }, db, ref objMsg);
+                if (User == null) return Ok(objMsg);
+                objMsg = await RepoStockAdjustment.getUnit(Id, User);
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+            return Ok(objMsg);
+        }
         [HttpPost]
         public async Task<IActionResult> GetStockItem([FromBody] StockItemFltrDto obj)
         {

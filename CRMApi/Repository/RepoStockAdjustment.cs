@@ -91,12 +91,19 @@ namespace CRMApi.Repository
 
                    })
                    .ToListAsync();
-
+                var StockType = await db.Setting
+                   .Where(x => App.ActiveStatus.Contains(x.Status) && x.Name == App.SettingName.StockType)
+                   .Select(x => new
+                   {
+                       x.Value,
+                       x.Description
+                   }).ToListAsync();
                 objMsg.data = new
                 {
                     Item,
                     Store,
-                    ReasonCode
+                    ReasonCode,
+                    StockType
                 };
                 Message.Success(ref objMsg, "Record found");
             }
@@ -130,24 +137,74 @@ namespace CRMApi.Repository
             var voucher = await new VoucherRepo(db).ListAsync(obj, User);
             return voucher;
         }
+        public async Task<Message> getUnit(int Id, User user)
+        {
+            Message objMsg = new Message();
+
+            try
+            {
+                var unit = await (
+                from itu in db.ItemUnit
+                join un in db.Unit on itu.UnitId equals un.Id
+                where App.ActiveStatus.Contains(itu.Status)
+                && itu.ItemId == Id
+                select new
+                {
+                    itu.ItemId,
+                    UnitId = itu.UnitId,
+                    UnitDesc = un.Description,
+                    itu.ValuePerUnit,
+                    itu.ConversionFactor
+                }).ToListAsync();
+
+                objMsg.data = unit;
+            }
+            catch (Exception ex)
+            {
+                Message.Exception(ref objMsg, ex);
+            }
+
+            return objMsg;
+        }
 
         public async Task<Message> EditAsync(int Id, User User)
         {
             Message objMsg = new Message();
             try
             {
-                objMsg.obj = (await ListAsync(new Voucher
+                var voucher = (await ListAsync(new Voucher
                 {
                     ListId = new List<int> { Id },
                     ListStatus = new List<int>(App.ActiveStatus) { App.Status.Delete }
                 }, User)).FirstOrDefault();
-
-                if (objMsg.obj == null)
+                if (voucher == null)
                 {
-                    Message.Error(ref objMsg, "StockAdjustment was not found for edit.");
+                    Message.Error(ref objMsg, "StockOut was not found for edit.");
                     return objMsg;
                 }
-                objMsg.data = (await GetAddOptionAsync()).data;
+                var listVoucherItemId = voucher.VoucherItem.Select(x => x.Id).ToList();
+                var dbStockItem = await RepoVoucher.StockItemAsync(new StockItemFltrDto
+                {
+                    ListExcludeViId = listVoucherItemId,
+                    ListStoreId = new List<int> { voucher.StoreId },
+                    ToDate = voucher.Date
+                }, User);
+                var stockItem = dbStockItem.Select(x => new GdnItemDto
+                {
+                    ItemId = x.ItemId,
+                    ItemDesc = x.ItemDesc,
+                    UnitDesc = x.UnitDesc,
+                    SerialNo = x.SerialNo,
+                    ExpiryOn = x.ExpiryOn,
+                    Qty = x.Qty,
+                }).ToList();
+
+                objMsg.data = new
+                {
+                    Voucher = voucher,
+                    StockItem = stockItem,
+                    AddOption = (await GetAddOptionAsync()).data
+                };
                 Message.Success(ref objMsg, "Record found");
             }
             catch (Exception ex)

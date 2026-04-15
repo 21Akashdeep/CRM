@@ -52,8 +52,7 @@
                                 <th data-sortable="false" data-formatter="tableStockAdjustmentSlNo" class="text-center">#</th>
                                 <th data-sortable="true" data-formatter="tableStockAdjustmentDate">Date</th>
                                 <th data-sortable="true" data-field="No">Number</th>
-                                <th data-sortable="true" data-field="StoreDesc">To Store</th>
-                                <th data-formatter="tabelItemName">Items</th>
+                                <th data-sortable="true" data-field="StoreDesc">Store</th>
                                 <th data-sortable="true" data-field="TotalQty"> Qty </th>
                                 <th data-sortable="true" data-field="Remarks"> Remarks </th>
                                 <th data-sortable="true" data-formatter="tableStockAdjustmentCreatedByAndAt" class="text-nowrap">Created By & At</th>
@@ -100,6 +99,11 @@
                             <label>To Store<span class="text-mandatory">*</span></label>
                             <select id="StockAdjustment-StoreId" name="StoreId" class="select-pick required" data-search="true" data-size="4"></select>
                         </div>
+                        <div class="col-md-2">
+                            <label>Stock Type<span class="text-mandatory">*</span></label>
+                            <select id="StockAdjustment-StockType" name="StockType" class="select-pick required" data-search="true" data-size="4">
+                            </select>
+                        </div>
 
                     </div>
                     <hr />
@@ -108,7 +112,7 @@
                             <table id="tableStockAdjustmentItem" class="table table-bordered table-hover table-default " data-search="false">
                                 <thead>
                                     <tr>
-                                        <th colspan="7">
+                                        <th colspan="8">
                                             StockAdjustment Item
                                             <div class="btn-group float-end">
                                                 <button type="button" class="btn btn-sm btn-primary rounded-5 me-e" onclick="StockAdjustment.addStockAdjustmentItem()">
@@ -123,11 +127,12 @@
                                     <tr>
                                         <th data-formatter="tableStockAdjustmentItemSlNo" class="text-center">#</th>
                                         <th class="desc" data-formatter="tableStockAdjustmentItemDesc" data-events="tableStockAdjustmentItemDescEvent">Description</th>
+                                        <th class="qty" data-formatter="tableStockAdjustmentItemUnitDesc" data-events="tableStockAdjustmentItemUnitDescEvent">Unit</th>
                                         <th class="desc" data-formatter="tableStockAdjustmentReasonCodeDesc" data-events="tableStockAdjustmentReasonCodeDescEvent"> Reason Code</th>
                                         <th  data-field="SerialNo">SerialNo</th>
                                         <th  data-formatter="tableStockAdjustmentExpiryOn">ExpiryOn</th>
                                         <th  data-formatter="tableStockAdjustmentItemQty" data-events="tableStockAdjustmentItemQtyEvent">Qty</th>
-                                        <th data-formatter="tableStockItemAction" data-events="tableStockAdjustmentItemActionEvents">Remove</th>
+                                        <th data-formatter="tableStockItemAction" data-events="tableStockAdjustmentItemActionEvents"><i class="fa fa-list-check"></i></th>
                                     </tr>
                                 </thead>
                                 <tbody>

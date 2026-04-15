@@ -1,6 +1,8 @@
 ﻿class StockAdjustment {
     static item = [];
     static itemWithSerialNo = [];
+    static unit = [];
+    static conFator;
     static reasonCode = [];
     static init() {
 
@@ -72,21 +74,41 @@
             StockAdjustment.sumOfTotalStockAdjustmentItem();
             Modal.close({ id: '#modalStockAdjustmentItemScan' });
         });
-        $('#StockAdjustment-StoreId').on('change', () => {
+        //$('#StockAdjustment-StoreId').on('change', () => {
 
+        //    let obj = {
+        //        ListStoreId: [$('#StockAdjustment-StoreId').val()],
+        //    };
+        //    Data.post({
+        //        url: 'StockAdjustment/GetStockItem',
+        //        data: obj,
+        //        onSuccess: (response) => {
+        //            if (response.status == Message.Type.success) {
+        //                StockAdjustment.item = response.data;
+        //            }
+        //            else {
+        //                Message.show(response);
+        //            }
+        //        }
+        //    });
+        //});
+        $('#StockAdjustment-StockType').on('change', () => {
+
+            let store = $('#StockAdjustment-StoreId').val() || 0;
+            let stockType = [$('#StockAdjustment-StockType').val()] || 0;
+            if (store == 0 || stockType == 0) {
+                Message.error({ statusText: 'Store is not selected!!!' });
+                return;
+            }
             let obj = {
                 ListStoreId: [$('#StockAdjustment-StoreId').val()],
+                ListStockType: stockType
             };
             Data.post({
                 url: 'StockAdjustment/GetStockItem',
                 data: obj,
                 onSuccess: (response) => {
-                    if (response.status == Message.Type.success) {
-                        StockAdjustment.item = response.data;
-                    }
-                    else {
-                        Message.show(response);
-                    }
+                    StockAdjustment.item = response.data;
                 }
             });
         });
@@ -149,6 +171,7 @@
                 let store = response.data.Store;
                 StockAdjustment.reasonCode = response.data.ReasonCode;
                 Dropdown.bind({ id: '#StockAdjustment-StoreId', data: store, value: 'Id', text: 'Description' });
+                Dropdown.bind({ id: '#StockAdjustment-StockType', data: response.data.StockType, value: 'Value', text: 'Description' });
                 Modal.open({ id: '#modalStockAdjustment', title: 'StockAdjustment / Add', action: 'Add' });
                 $('#StockAdjustment-RefDate,#StockAdjustment-EwayDate').val('');
             }
@@ -160,7 +183,14 @@
         Dropdown.bind({ id: '#StockAdjustmentScan-ReasonCode', data: StockAdjustment.reasonCode, value: 'Value', text: 'Description' });
         $('#StockAdjustment-ExpiryOn,#StockAdjustmentScan-ItemSerialNo').val('');
     }
-    static addStockAdjustmentItem({ itemId = 0, itemDesc = null, serialNo =null, expiryOn = null, qty = 0, reasonCode = "", reasonCodeDesc = "", unitDesc = null, isScanned = false, callback } = {}) {
+    static addStockAdjustmentItem({ itemId = 0, itemDesc = null, serialNo = null, expiryOn = null, qty = 0, reasonCode = "", reasonCodeDesc = "", unitDesc = null, isScanned = false, callback } = {}) {
+
+        let store = $('#StockAdjustment-StoreId').val() || 0;
+        let stockType = $('#StockAdjustment-StockType').val() || 0;
+        if (store == 0 || stockType == 0) {
+            Message.error({ statusText: 'Select Both Store And StockType!!!' });
+            return;
+        }
 
         let obj = {
             Id: 0,
@@ -172,9 +202,12 @@
             BatchNo: "",
             ExpiryOn: expiryOn,
             Qty: qty,
+            ConversionFactor: 0,
+            BaseQty : qty,
             Rate: 0,
             UnitDesc:unitDesc,
             UnitDesc: null,
+            UnitId : 0,
             Amount: 0,
             DiscountAmount: 0,
             TotalAmount: 0,
@@ -207,7 +240,8 @@
             <tfoot>
                 <tr>
                     <th class="text-right" colspan="6">Total</th>
-                    <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th>                    
+                    <th class="text-right">${_Number.format({ num: Qty, dp: 3 })}</th> 
+                    <th class="text-right"></th>
                 </tr>
             </tfoot>
         `;
@@ -228,22 +262,29 @@
             }
         });
     }
+    static getUnit(id, callback) {
+        Data.get({
+            url: `StockAdjustment/getUnit?Id=${id}`,
+            onSuccess: (response) => {
+                callback(response.data);
+            }
+        });
+    }
     static edit({ id, action = 'Edit' }) {
         Data.get({
             url: `StockAdjustment/Edit?Id=${id}`,
             onSuccess: (response) => {
                 let option = response.data;
-                StockAdjustment.item = option.Item;
-                let store = response.data.Store;
-                let state = response.data.State;
-                let obj = response.obj;
+                StockAdjustment.item = option.StockItem;
+                let store = option.AddOption.Store;               
+                let obj = option.Voucher;
                 let StoreId = obj.VoucherItem[0].StoreId;
                 obj.StoreId = StoreId;
-               // obj.reasonCode = ReasonCode;
-
-                obj.Id = action == 'Edit' ? obj.Id : null;
+                StockAdjustment.reasonCode = option.AddOption.ReasonCode;
+                obj.Id = action == 'Edit' ? obj.Id : null;                                              
                 let title = action === 'Edit' ? `StockAdjustment / Edit (Code: ${obj.No})` : `StockAdjustment / Add`;
                 Dropdown.bind({ id: '#StockAdjustment-StoreId', data: store, value: 'Id', text: 'Description' });
+                Dropdown.bind({ id: '#StockAdjustment-StockType', data: option.AddOption.StockType, value: 'Value', text: 'Description' });
                 Modal.open({ id: '#modalStockAdjustment', title: title, action: action, obj: obj });
                 Table.add({ id: '#tableStockAdjustmentItem', data: obj.VoucherItem, selectPick: true });
                 StockAdjustment.sumOfTotalStockAdjustmentItem();
@@ -312,7 +353,6 @@
                 if (obj.FromDate && obj.TillDate) {
                     reportTitle += ` ${moment(obj.FromDate).format('DD-MMM-YYYY')} To ${moment(obj.TillDate).format('DD-MMM-YYYY')}`;
                 }
-
                 let printContent = [];
                 let grnList = Array.isArray(response.data) ? response.data : [];
 
@@ -382,9 +422,9 @@
                             ${items.map((row, idx) => `
                                 <tr>
                                     <td class="text-center">${idx + 1}</td>
-                                    <td>${row.ItemDesc}</td>                                     
-                                    <td>${row.ExpiryOn ? moment(row.ExpiryOn).format('DD-MMM-YYYY') : '-'}</td> 
-                                     <td>${row.SerialNo}</td>
+                                    <td>${row.ItemDesc?row.ItemDesc:'-'}</td>                                     
+                                    <td>${row.ExpiryOn?moment(row.ExpiryOn).format('DD-MMM-YYYY') : '-'}</td> 
+                                     <td>${row.SerialNo?row.SerialNo:'-'}</td>
                                     <td class="text-right">${row.Qty}</td>
                                 </tr>
                             `).join('')}
@@ -552,6 +592,18 @@ window.tableStockAdjustmentItemSlNo = (value, obj, index) => {
     return index + 1;
 }
 window.tableStockAdjustmentItemDesc = (value, obj, index) => {
+    setTimeout(() => {
+        if (!obj.UnitList && obj.ItemId) {
+            StockAdjustment.getUnit(obj.ItemId, (unitList) => {
+                obj.UnitList = unitList;
+                Table.updateByIndex({
+                    id: '#tableStockAdjustmentItem',
+                    index: index,
+                    obj: obj
+                });
+            });
+        }
+    }, 0);
     return `
         ${Dropdown.html({ id: `StockAdjustmentItem_${index}`, className: 'StockAdjustment-item', data: StockAdjustment.item, value: 'ItemId', text: 'ItemDesc', initialValue: [obj.ItemId], json: true, parent: '.modal' })}
         <input type="text" id="StockAdjustmentItemRemarks_${index}" class="form-control form-control-sm mb-0 mt-1 StockAdjustment-item-remarks" maxlength="100" placeholder="Remarks" value="${obj.Remarks ?? ""}">
@@ -564,7 +616,22 @@ window.tableStockAdjustmentItemDescEvent = {
         let itemJson = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
         obj.UnitDesc = itemJson?.UnitDesc ?? null;
         obj.UnitId = itemJson?.UnitId ?? 0;
-        obj.Rate = itemJson?.Rate ?? 0;      
+        obj.Rate = itemJson?.Rate ?? 0;  
+
+        StockAdjustment.getUnit(obj.ItemId, (unitList) => {
+
+            obj.UnitList = unitList;
+            obj.UnitId = unitList?.[0]?.Id || 0;
+            obj.UnitDesc = unitList?.[0]?.UnitDesc || null;
+
+            Table.updateByIndex({
+                id: '#tableStockAdjustmentItem',
+                index: index,
+                obj: obj,
+                event: e
+            });
+
+        });
         //obj.ItemId = itemJson?.ItemId ?? 0;
         // Set Serial No. & BalQty
         let item = StockAdjustment.item.find(x => x.ItemId == obj.ItemId);
@@ -595,14 +662,79 @@ window.tableStockAdjustmentItemRateEvent = {
 }
 window.tableStockAdjustmentItemQty = (value, obj, index) => {
     return `
-        <input type="text" id="StockAdjustmentItemQty_${index}" class="form-control form-control-sm text-right StockAdjustment-item-qty" value="${obj.Qty}" oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})">
+    <div>
+           <div class="input-group">
+            <input type="text" id="StockAdjustmentItemQty_${index}" class="form-control form-control-sm text-end StockAdjustment-item-qty" value="${Math.abs(obj.Qty)}" 
+            oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})"/>
+            <span class="input-group-text fw-bold">${obj.UnitDesc ?? 'NA'}</span>
+        </div>
     `;
 }
 window.tableStockAdjustmentItemQtyEvent = {
     'input .StockAdjustment-item-qty': (e, value, obj, index) => {
-        obj.Qty = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
+
+        let qty = parseFloat(e.currentTarget.value || 0);
+        let balQty = parseFloat(obj.BalQty || 0);
+
+        let unitId = $(`#StockAdjustmentUnit_${index}`).val();
+        let selectedUnit = obj.UnitList?.find(x => x.UnitId == unitId);
+        let cf = selectedUnit?.ConversionFactor || 1;
+        obj.BaseQty = qty * cf;
+        obj.ConversionFactor = cf;
+        let valuePerUnit = selectedUnit.ValuePerUnit;
+        let avQty = balQty * valuePerUnit;
+        // minus qty check
+        if (qty < 0) {
+            Message.error({ statusText: 'Qty cannot be negative' });
+            e.currentTarget.value = obj.Qty || 0;
+            return;
+        }
+        // available qty check
+        if (qty > avQty) {
+            Message.error({ statusText: `Qty cannot be greater than available qty (${avQty})` });
+            e.currentTarget.value = obj.Qty || 0;
+            return;
+        }
+        obj.Qty = qty;
+        obj.UnitId = unitId;
         obj.Amount = (obj.Rate * obj.Qty).toFixed(2);
-        Table.updateByIndex({ id: '#tableStockAdjustmentItem', index: index, obj: obj, value: obj.Qty, event: e });
+
+        Table.updateByIndex({
+            id: '#tableStockAdjustmentItem',
+            index: index,
+            obj: obj,
+            value: obj.Qty,
+            event: e
+        });
+        StockAdjustment.sumOfTotalStockAdjustmentItem();
+    }
+}
+window.tableStockAdjustmentItemUnitDesc = (value, obj, index) => {
+    return `
+        ${Dropdown.html({
+        id: `StockAdjustmentUnit_${index}`,
+        className: 'StockAdjustment-unit',
+        data: obj.UnitList || [],
+        value: 'UnitId',
+        text: 'UnitDesc',
+        initialValue: [obj.UnitId],
+        json: true,
+        parent: '.modal'
+    })}
+    `;
+}
+window.tableStockAdjustmentItemUnitDescEvent = {
+    'change .StockAdjustment-unit': (e, value, obj, index) => {
+        obj.UnitId = parseInt(e.currentTarget.value) || 0;
+        let unitJson = Dropdown.itemJson({ id: `#${e.currentTarget.id}` });
+        obj.UnitDesc = unitJson?.UnitDesc || null;
+        Table.updateByIndex({
+            id: '#tableStockAdjustmentItem',
+            index: index,
+            obj: obj,
+            event: e
+        });
+
         StockAdjustment.sumOfTotalStockAdjustmentItem();
     }
 }

@@ -129,17 +129,9 @@
 
             if (!Field.isMandatory({ class: '.required' })) return;
             let isEdit = !!$('#Id').val();  
-            let voucherItem = $('#tableRtnItem').bootstrapTable('getData')
-                .filter(x => x.ItemId > 0 && x.Qty > 0)
-                .map(x => {
-                    if (!isEdit && x.ExpiryOn) {
-                        x.Id = 0;
-                        x.VoucherId = 0;
-                        x.ExpiryOn = moment(x.ExpiryOn).format('YYYY-MM-DD');
-                    }
-                    return x;
-                });
 
+
+            let voucherItem = $('#tableRtnItem').bootstrapTable('getData');
 
             if (voucherItem.length === 0) {
                 Message.error({ statusText: 'Add at least one RTN item' });
@@ -215,6 +207,8 @@
             BatchNo: "",
             ExpiryOn: expiryOn,
             Qty: qty,
+            ConversionFactor: 0,
+            BaseQty : qty,
             Rate: 0,
             UnitDesc: null,
             Amount: 0,
@@ -242,7 +236,7 @@
     }
     static sumOfTotalRtnItem() {
         let RtnItem = $('#tableRtnItem').bootstrapTable('getData').filter(x => x.ItemId > 0);
-        let Qty = RtnItem.length == 0 ? 0 : RtnItem.map(x => parseFloat(x.Qty)).reduce((s, v) => s + v, 0);
+        let Qty = RtnItem.map(x => Math.abs(parseFloat(x.Qty) || 0)).reduce((s, v) => s + v, 0);
         let Amount = RtnItem.length == 0 ? 0 : RtnItem.map(x => parseFloat(x.Amount)).reduce((s, v) => s + v, 0);
         let tfoot = `
             <tfoot>
@@ -471,14 +465,19 @@
                                     <td class="text-center">${idx + 1}</td>
                                     <td>${row.ItemDesc}</td>                                     
                                     <td>${row.ExpiryOn ? moment(row.ExpiryOn).format('DD-MMM-YYYY') : '-'}</td> 
-                                     <td>${row.SerialNo}</td>
+                                     <td>${row.SerialNo ? row.SerialNo:'-'}</td>
                                     <td class="text-right">${row.Qty}</td>
                                 </tr>
                             `).join('')}
                             <tr>
                                 <th colspan="4" class="text-right">Total</th>
                                 <th class="text-right">
-                                    ${items.reduce((s, x) => s + Number(x.Qty || 0), 0)}
+                                   ${
+                               (() => {
+                            const uniqueUnits = Data.unique({ data: items, field: 'UnitId' });
+                            return uniqueUnits.length === 1
+                                ? items.reduce((s, x) => s + Number(x.Qty || 0), 0) : '';
+                              })() }
                                 </th>                                
                             </tr>
                         </tbody>
@@ -768,7 +767,7 @@ window.tableRtnItemQty = (value, obj, index) => {
         <input type="text"
                id="RtnItemQty_${index}"
                class="form-control form-control-sm text-right rtn-item-qty"
-               value="${obj.Qty}"
+               value="${Math.abs(obj.Qty)}"
                oninput="this.value = _Number.validate({value: this.value, dp: 3, min: 0, max: 999999})">
     `;
 };
@@ -777,6 +776,7 @@ window.tableRtnItemQtyEvent = {
 
         obj.Qty = e.currentTarget.value === '' ? '0' : e.currentTarget.value;
         obj.Amount = (parseFloat(obj.Rate || 0) * parseFloat(obj.Qty || 0)).toFixed(2);
+
 
         Table.updateByIndex({
             id: '#tableRtnItem',
@@ -819,29 +819,10 @@ window.tableRtnItemAmount = (value, obj, index) => {
 //        }
 //    });
 //};
-window.tableRtnExpiryOn = (value, obj, index) => {
-    let val = obj.ExpiryOn
-        ? moment(obj.ExpiryOn, ['DD-MMM-YYYY', 'YYYY-MM-DD']).format('YYYY-MM-DD')
-        : '';
+window.tableRtnExpiryOn = (value, obj) => {
+    return `${!obj.ExpiryOn ? '-' : moment(obj.ExpiryOn).format('DD-MM-YYYY')}`;
+};
 
-    return `
-        <input type="date"
-            class="form-control form-control-sm mb-0 Rtn-item-expiry"
-            value="${val}">
-    `;
-};
-window.tableRtnExpiryOnEvent = {
-    'input .Rtn-item': (e, value, obj, index) => {
-        obj.ExpiryOn = e.currentTarget.value || "";
-        Table.updateByIndex({
-            id: '#tableRtnItem',
-            index: index,
-            obj: obj,
-            value: obj.ExpiryOn,
-            event: e
-        });
-    }
-};
 window.tableRtnItemDeleteAction = (value, obj, index) => {
     if (obj.Id || obj.Id ==0)
         return `<button type="button" class="btn btn-sm btn-danger rounded-5 btn-delete"><span class="fa fa-trash"></span></button>`;

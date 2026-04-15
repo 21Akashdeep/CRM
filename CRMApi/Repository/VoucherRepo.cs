@@ -80,6 +80,7 @@ namespace CRMApi.Repository
                     UnitId = vci.UnitId,
                     ItemDesc = itm.Description,
                     VoucherDesc = vc.Type,
+                    ReasonCode = vci.ReasonCode,
                     Remarks = vci.Remarks,
                     SerialNo = vci.SerialNo,
                     BatchNo = vci.BatchNo,
