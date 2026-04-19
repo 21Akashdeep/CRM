@@ -99,8 +99,10 @@
                 expiryOn: item.ExpiryOn,
                 serialNo: item.SerialNo,
                 unitDesc: item.UnitDesc,
+                unitId: 1,
                 qty: 1,
-                baseQty:1,
+                baseQty: 1,
+                conversionFactor:1,
                 isScanned: true,
                 callback: (obj) => {
                     Table.add({ id: '#tableGdnScanItem', data: obj, action: 'prepend' });
@@ -113,6 +115,9 @@
 
         $('#GdnScan-BtnAddItem').on('click', () => {
             let scanItem = $('#tableGdnScanItem').bootstrapTable('getData');
+            scanItem.forEach(item => {
+                item.UnitId = 1;
+            });
             if (scanItem.length === 0) {
                 Message.error({ statusText: 'No scanned items found' });
                 return;
@@ -214,7 +219,7 @@
             }
         });
     }
-    static addGdnItem({ itemId = 0, itemDesc = null, serialNo = null, expiryOn = null, qty = 0, baseQty = 0, unitDesc = null, isScanned = false, callback } = {}) {        
+    static addGdnItem({ itemId = 0, itemDesc = null, serialNo = null, expiryOn = null, qty = 0, conversionFactor = 0, baseQty = 0, unitId = 0, unitDesc = null, isScanned = false, callback } = {}) {        
         if (Field.isNullOrEmpty($('#Gdn-StoreId').val()) && Field.isNullOrEmpty($('#Gdn-StockType').val()) ) {
             Message.error({ statusText: 'Please Select Both Store And StockType.' });
             return;
@@ -226,12 +231,12 @@
             StoreId: $('#Gdn-StoreId').val(),
             StoreDesc: $('#Gdn-StoreId option:selected').text(),
             ItemDesc: itemDesc,
-            UnitId: 0,
+            UnitId: unitId,
             SerialNo: serialNo,
             BatchNo: null,
             ExpiryOn: expiryOn,
             Qty: qty,
-            ConversionFactor :0,
+            ConversionFactor: conversionFactor,
             Rate: 0,
             BalQty: 0,
             BaseQty: baseQty,
@@ -720,7 +725,9 @@ window.tableGdnItemQtyEvent = {
 
         // minus qty check
         let unitId = $(`#gdnUnit_${index}`).val();
+        unitId = unitId ? unitId : 1;
         let selectedUnit = obj.UnitList?.find(x => x.UnitId == unitId);
+        selectedUnit = selectedUnit ? selectedUnit : [];
         let cf = selectedUnit?.ConversionFactor || 1;
         obj.BaseQty = qty * cf;
         obj.ConversionFactor = cf;

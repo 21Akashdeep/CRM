@@ -86,6 +86,8 @@ namespace CRMApi.Repository
                     BatchNo = vci.BatchNo,
                     ExpiryOn = vci.ExpiryOn,
                     Qty = vci.Qty,
+                    ConversionFactor = vci.ConversionFactor,
+                    BaseQty = vci.BaseQty,
                     Rate = vci.Rate,
                     Amount = vci.Amount,
                     UnitDesc = un.Description,

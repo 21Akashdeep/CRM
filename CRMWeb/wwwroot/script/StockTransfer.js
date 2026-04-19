@@ -78,6 +78,10 @@
             let scanItems =
                 $('#tableStockTransferScanItem').bootstrapTable('getData');
 
+            scanItems.forEach(item => {
+                item.UnitId = 1;
+            });
+
             if (scanItems.length === 0) {
                 Message.error({ statusText: 'No scanned items found' });
                 return;
@@ -221,14 +225,9 @@
         Data.post({
             url: 'StockTransfer/getStockItemWithSerialNo',
             data: obj,
-            onSuccess: (response) => {
-                if (response.status == Message.Type.success) {
+            onSuccess: (response) => {               
                     Modal.open({ id: '#modalStockTransferItemScan', title: 'StockTransfer / Scan Item' });
-                    StockTransfer.itemWithSerialNo = response.data;
-                }
-                else {
-                    Message.show(response);
-                }
+                    StockTransfer.itemWithSerialNo = response.data;               
             }
         });
     }
@@ -763,7 +762,9 @@ window.tableStockTransferItemQtyEvent = {
         let balQty = parseFloat(obj.BalQty || 0);
 
         let unitId = $(`#stockTransferUnit_${index}`).val();
+        unitId = unitId ? unitId : 1;
         let selectedUnit = obj.UnitList?.find(x => x.UnitId == unitId);
+        selectedUnit = selectedUnit ? selectedUnit : [];
         let cf = selectedUnit?.ConversionFactor || 1;
         obj.BaseQty = qty * cf;
         obj.ConversionFactor = cf;

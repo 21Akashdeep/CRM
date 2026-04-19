@@ -48,17 +48,20 @@
                 let serialNo = $('#GrnScan-ItemSerialNo').val();
                 let countGrnItem = $('#tableGrnItem').bootstrapTable('getData').filter(x => x.SerialNo == serialNo).length;
                 let countScanItem = $('#tableGrnScanItem').bootstrapTable('getData').filter(x => x.SerialNo == serialNo).length;
+                let expiryOn = $('#GrnScan-ItemExpiryOn').val() ? $('#GrnScan-ItemExpiryOn').val() : null;
                 if (countGrnItem > 0 || countScanItem > 0) {
                     Message.error({ statusText: `Serial No. ${serialNo} already added in Scan List or Item List.` });
                     return;
                 }
                 Grn.addGrnItem({
                     itemId: $('#GrnScan-ItemId').val(),
-                    itemDesc: $('#GrnScan-ItemId option:selected').text(),
-                    expiryOn: $('#GrnScan-ItemExpiryOn').val(),
+                    itemDesc: $('#GrnScan-ItemId option:selected').text(),                   
+                    expiryOn,
                     serialNo: serialNo,
                     qty: 1,
-                    baseQty:1,
+                    baseQty: 1,
+                    unitId: 1,
+                    convesionFactor:1,
                     isScanned: true,
                     callback: (obj) => {
                         Table.add({ id: '#tableGrnScanItem', data: obj, action: 'prepend' });
@@ -110,10 +113,14 @@
 
         $('#btnScanItemAdd').on('click', () => {
             let scanItems = $('#tableGrnScanItem').bootstrapTable('getData');
+            scanItems.forEach(item => {
+                item.UnitId = 1;
+            });
             if (scanItems.length === 0) {
                 Message.error({ statusText: 'No scanned items found' });
                 return;
             }
+
             Table.add({ id: '#tableGrnItem', data: scanItems, action: 'append', selectPick: true });
             Grn.sumOfTotalGrnItem();
 
@@ -195,19 +202,19 @@
         $('#Grn-ExpiryOn,#GrnScan-ItemSerialNo').val('');
 
     }
-    static addGrnItem({ itemId = 0, itemDesc = null, serialNo = null, expiryOn = null, qty = 0, baseQty = 0, isScanned = false, callback } = {}) {
+    static addGrnItem({ itemId = 0, itemDesc = null, serialNo = null, expiryOn = null, unitId = 0, qty = 0, convesionFactor = 0, baseQty = 0, isScanned = false, callback } = {}) {
         let obj = {
             Id: 0,
             ItemId: itemId,
             VoucherId: 0,
             StoreId: 0,
             ItemDesc: itemDesc,
-            UnitId: 0,
+            UnitId: unitId,
             SerialNo: serialNo,
             BatchNo: null,
             ExpiryOn: expiryOn,
             Qty: qty,
-            ConversionFactor:0,
+            ConversionFactor: convesionFactor,
             BaseQty: baseQty,
             Rate: 0,
             UnitDesc: null,
@@ -710,7 +717,9 @@ window.tableGrnItemQtyEvent = {
     'input .grn-item-qty': (e, value, obj, index) => {
         obj.Qty = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
         let unitId = $(`#GrnUnit_${index}`).val();
+        unitId = unitId ? unitId : 1;
         let selectedUnit = obj.UnitList?.find(x => x.UnitId == unitId);
+        selectedUnit = selectedUnit ? selectedUnit : [];
         let cf = selectedUnit?.ConversionFactor || 1;
         obj.BaseQty = obj.Qty * cf;
         obj.ConversionFactor = cf;

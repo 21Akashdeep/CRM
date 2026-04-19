@@ -164,17 +164,7 @@
                             <div class="modal-body" style="min-height:75vh;">
                                 <form id="formStockAdjustmentScanItem" autocomplete="off" onsubmit="return false;">
                                     <div class="row">
-                                        <div class="col-md-5">
-                                            <label>Item<span class="text-mandatory">*</span></label>
-                                            <select id="StockAdjustmentScan-ItemId" name="ItemId" class="select-pick scan-required" data-size="4" data-search="true"></select>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label>ExpiryOn</label>
-                                            <div class="input-group input-group-sm">
-                                                <input type="text" id="StockAdjustmentScan-ItemExpiryOn" name="ExpiryOn" class="form-control form-control-sm scan-required" data-date-format="DD-MMM-YYYY" readonly />
-                                                <span class="input-group-text date-picker"><i class="fa fa-calendar"></i></span>
-                                            </div>
-                                        </div>
+                                        
                                         <div class="col-md-3">
                                             <label>Reason<span class="text-mandatory">*</span></label>
                                             <select id="StockAdjustmentScan-ReasonCode" name="ReasonCode" class="select-pick scan-required" data-size="4" data-search="true"></select>
@@ -227,9 +217,6 @@
         </div>
     </div>
 </div>
-
-
-
 
 @section Scripts {
     <script src="~/script/StockAdjustment.js" asp-append-version="true"></script>

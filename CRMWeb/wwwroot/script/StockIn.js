@@ -78,6 +78,7 @@
                 }
 
                 let serialNo = $('#StockInScan-ItemSerialNo').val();
+                let expiryOn = $('#StockInScan-ItemExpiryOn').val() ? $('#StockInScan-ItemExpiryOn').val() : null;
 
                 let countStockInItem =
                     $('#tableStockInItem')
@@ -99,9 +100,11 @@
                 StockIn.addStockInItem({
                     itemId: $('#StockInScan-ItemId').val(),
                     itemDesc: $('#StockInScan-ItemId option:selected').text(),
-                    expiryOn: $('#StockInScan-ItemExpiryOn').val(),
+                    expiryOn,
                     serialNo: serialNo,
                     qty: 1,
+                    unitId: 1,
+                    convesionFactor:1,
                     isScanned: true,
                     callback: (obj) => {
                         Table.add({
@@ -109,7 +112,7 @@
                             data: obj,
                             action: 'prepend'
                         });
-                        $('#StockInScan-ItemSerialNo').val('');
+                        $('#StockInScan-ItemSerialNo,#StockInScan-ItemExpiryOn').val('');
                     }
                 });
             }
@@ -118,6 +121,9 @@
 
             let scanItems =
                 $('#tableStockInScanItem').bootstrapTable('getData');
+            scanItems.forEach(item => {
+                item.UnitId = 1;
+            });
 
             if (scanItems.length === 0) {
                 Message.error({ statusText: 'No scanned items found' });
@@ -218,7 +224,7 @@
 
         $('#StockInScan-ItemSerialNo').val('');
     }
-    static addStockInItem({ itemId = 0, itemDesc = null, serialNo = null, expiryOn = null, qty = 0, isScanned = false, callback } = {}) {
+    static addStockInItem({ itemId = 0, itemDesc = null, serialNo = null, unitId = 0, convesionFactor = 0, expiryOn = null, qty = 0, isScanned = false, callback } = {}) {
         let obj = {
             Id:0,
             StockInId: 0,
@@ -226,12 +232,12 @@
             VoucherId: 0,
             StoreId: 0,
             ItemDesc: itemDesc,
-            UnitId: 0,
+            UnitId: unitId,
             SerialNo: serialNo,
             BatchNo: null,
             ExpiryOn: expiryOn,
             Qty: qty,
-            ConversionFactor:0,
+            ConversionFactor: convesionFactor,
             BaseQty:qty,
             Rate: 0,
             UnitDesc: null,
@@ -748,7 +754,9 @@ window.tableStockInItemQtyEvent = {
     'input .StockIn-item-qty': (e, value, obj, index) => {
         obj.Qty = e.currentTarget.value == '' ? '0' : e.currentTarget.value;
         let unitId = $(`#StockInUnit_${index}`).val();
+        unitId = unitId ? unitId : 1;
         let selectedUnit = obj.UnitList?.find(x => x.UnitId == unitId);
+        selectedUnit = selectedUnit ? selectedUnit : [];
         let cf = selectedUnit?.ConversionFactor || 1;
         obj.BaseQty = obj.Qty * cf;
         obj.ConversionFactor = cf;

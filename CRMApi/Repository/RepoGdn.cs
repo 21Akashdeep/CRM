@@ -218,6 +218,7 @@ namespace CRMApi.Repository
                     BatchNo = vci.BatchNo,
                     ExpiryOn = vci.ExpiryOn,
                     Qty = vci.Qty,
+                    ConversionFactor = vci.ConversionFactor,
                     BaseQty = vci.BaseQty,
                     UnitDesc = un.Description,                  
                     Status = vci.Status,

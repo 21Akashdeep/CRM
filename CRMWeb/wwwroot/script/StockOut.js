@@ -48,6 +48,9 @@
                 serialNo: item.SerialNo,
                 unitDesc: item.UnitDesc,
                 qty: 1,
+                unitId: 1,
+                baseQty: 1,
+                conversionFactor: 1,
                 isScanned: true,
                 callback: (obj) => {
                     Table.add({ id: '#tableStockOutScanItem', data: obj, action: 'prepend' });
@@ -55,9 +58,11 @@
                 }
             });
         });
-
         $('#btnScanItemAdd').on('click', () => {
             let scanItems = $('#tableStockOutScanItem').bootstrapTable('getData');
+            scanItems.forEach(item => {
+                item.UnitId = 1;
+            });
             if (scanItems.length === 0) {
                 Message.error({ statusText: 'No scanned items found' });
                 return;
@@ -155,7 +160,7 @@
             ListStatus: $('#ListStatus').val(),
             FromDate: DateTime.json($('#DateRange').val().split('|')[0]),
             ToDate: DateTime.json($('#DateRange').val().split('|')[1]),
-            ListNo: $('#ListStockOutNo').val()
+            ListNo: $('#ListStockOutNo').val(),
         };
         Data.post({
             url: `StockOut/${method}`,
@@ -189,13 +194,8 @@
             url: 'StockOut/getStockItemWithSerialNo',
             data: obj,
             onSuccess: (response) => {
-                if (response.status == Message.Type.success) {
-                    Modal.open({ id: '#modalStockOutItemScan', title: 'StockOut / Scan Item' });
-                    StockOut.itemWithSerialNo = response.data;
-                }
-                else {
-                    Message.show(response);
-                }
+                Modal.open({ id: '#modalStockOutItemScan', title: 'StockOut / Scan Item' });
+                StockOut.itemWithSerialNo = response.data;
             }
         });
     }
@@ -217,7 +217,7 @@
             }
         });
     }
-    static addStockOutItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, unitDesc = null, isScanned = false, isReturnable = false, callback } = {}) {
+    static addStockOutItem({ itemId = 0, itemDesc = null, serialNo = "", expiryOn = null, qty = 0, conversionFactor, unitDesc = null, unitId = 0, isScanned = false, isReturnable = false, callback } = {}) {
 
         let store = $('#StockOut-StoreId').val() || 0;
         let stockType = $('#StockOut-StockType').val() || 0;
@@ -232,12 +232,12 @@
             VoucherId: 0,
             StoreId: 0,
             ItemDesc: itemDesc,
-            UnitId : 0,
+            UnitId: unitId,
             SerialNo: serialNo,
             BatchNo: "",
             ExpiryOn: expiryOn,
             Qty: qty,
-            ConversionFactor:0,
+            ConversionFactor: conversionFactor,
             BaseQty:qty,
             Rate: 0,
             UnitDesc: unitDesc,
@@ -705,11 +705,13 @@ window.tableStockOutItemQtyEvent = {
         let balQty = parseFloat(obj.BalQty || 0);
 
         let unitId = $(`#StockOutUnit_${index}`).val();
+        unitId = unitId ? unitId : 1;
         let selectedUnit = obj.UnitList?.find(x => x.UnitId == unitId);
+        selectedUnit = selectedUnit ? selectedUnit : [];
         let cf = selectedUnit?.ConversionFactor || 1;
         obj.BaseQty = qty * cf;
         obj.ConversionFactor = cf;
-        let valuePerUnit = selectedUnit.ValuePerUnit;
+        let valuePerUnit = selectedUnit.ValuePerUnit ? selectedUnit.ValuePerUnit:1;
         let avQty = balQty * valuePerUnit;
         // minus qty check
         if (qty < 0) {

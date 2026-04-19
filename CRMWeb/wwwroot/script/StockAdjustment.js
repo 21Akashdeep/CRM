@@ -41,21 +41,24 @@
                 if (!Field.isMandatory({ class: '.scan-required' })) {
                     return;
                 }
-                let serialNo = $('#StockAdjustmentScan-ItemSerialNo').val();
-                let countStockAdjustmentItem = $('#tableStockAdjustmentItem').bootstrapTable('getData').filter(x => x.SerialNo == serialNo).length;
-                let countScanItem = $('#tableStockAdjustmentScanItem').bootstrapTable('getData').filter(x => x.SerialNo == serialNo).length;
-                if (countStockAdjustmentItem > 0 || countScanItem > 0) {
-                    Message.error({ statusText: `Serial No. ${serialNo} already added in Scan List or Item List.` });
+                let item = StockAdjustment.itemWithSerialNo.find(x => x.SerialNo == $('#StockAdjustmentScan-ItemSerialNo').val());
+                if (!item) {
+                    Message.error({ statusText: `Invalid Serial No. (${$('#StockAdjustmentScan-ItemSerialNo').val()})` });
                     return;
                 }
                 StockAdjustment.addStockAdjustmentItem({
-                    itemId: $('#StockAdjustmentScan-ItemId').val(),
-                    itemDesc: $('#StockAdjustmentScan-ItemId option:selected').text(),
-                    expiryOn: $('#StockAdjustmentScan-ItemExpiryOn').val(),
+                    itemId: item.ItemId,
+                    itemDesc: item.ItemDesc,
+                    expiryOn: item.ExpiryOn,
+                    serialNo: item.SerialNo,
+                    unitDesc: item.UnitDesc,
                     reasonCode: $('#StockAdjustmentScan-ReasonCode').val(),
                     reasonCodeDesc: $('#StockAdjustmentScan-ReasonCode option:selected').text(),
-                    serialNo: serialNo,
+                    serialNo: item.SerialNo,
                     qty: 1,
+                    unitId: 1,
+                    baseQty: 1,
+                    conversionFactor: 1,
                     isScanned: true,
                     callback: (obj) => {
                         Table.add({ id: '#tableStockAdjustmentScanItem', data: obj, action: 'prepend' });
@@ -66,6 +69,9 @@
         });
         $('#btnScanItemAdd').on('click', () => {
             let scanItems = $('#tableStockAdjustmentScanItem').bootstrapTable('getData');
+            scanItems.forEach(item => {
+                item.UnitId = 1;
+            });
             if (scanItems.length === 0) {
                 Message.error({ statusText: 'No scanned items found' });
                 return;
@@ -74,24 +80,7 @@
             StockAdjustment.sumOfTotalStockAdjustmentItem();
             Modal.close({ id: '#modalStockAdjustmentItemScan' });
         });
-        //$('#StockAdjustment-StoreId').on('change', () => {
-
-        //    let obj = {
-        //        ListStoreId: [$('#StockAdjustment-StoreId').val()],
-        //    };
-        //    Data.post({
-        //        url: 'StockAdjustment/GetStockItem',
-        //        data: obj,
-        //        onSuccess: (response) => {
-        //            if (response.status == Message.Type.success) {
-        //                StockAdjustment.item = response.data;
-        //            }
-        //            else {
-        //                Message.show(response);
-        //            }
-        //        }
-        //    });
-        //});
+        
         $('#StockAdjustment-StockType').on('change', () => {
 
             let store = $('#StockAdjustment-StoreId').val() || 0;
@@ -116,13 +105,7 @@
             if (!Field.isMandatory({ class: '.required' })) {
                 return;
             }
-            let StockAdjustmentItem = $('#tableStockAdjustmentItem').bootstrapTable('getData').filter(x => x.ItemId > 0)
-                .map(x => {
-                    if (x.ExpiryOn) {
-                        x.ExpiryOn = moment(x.ExpiryOn).format('YYYY-MM-DD');
-                    }
-                    return x;
-                });
+            let StockAdjustmentItem = $('#tableStockAdjustmentItem').bootstrapTable('getData');
             let ZeroQtyItem = StockAdjustmentItem.filter(x => x.Qty == 0);
             if (ZeroQtyItem.length != 0) {
                 Message.error({ statusText: 'Qty Zero Input in Any Item!!!' });
@@ -178,12 +161,30 @@
         });
     }
     static scanner() {
-        Modal.open({ id: '#modalStockAdjustmentItemScan', title: 'StockAdjustment / Scan Item' });
-        Dropdown.bind({ id: '#StockAdjustmentScan-ItemId', data: StockAdjustment.item, value: 'Id', text: 'Description' });
-        Dropdown.bind({ id: '#StockAdjustmentScan-ReasonCode', data: StockAdjustment.reasonCode, value: 'Value', text: 'Description' });
-        $('#StockAdjustment-ExpiryOn,#StockAdjustmentScan-ItemSerialNo').val('');
+        if (Field.isNullOrEmpty($('#StockAdjustment-StoreId').val())) {
+            Message.error({ statusText: 'Store is not selected!!!' });
+            return;
+        }
+        let obj = {
+            ListStoreId: [$('#StockAdjustment-StoreId').val()],
+        };
+        Data.post({
+            url: 'StockAdjustment/getStockItemWithSerialNo',
+            data: obj,
+            onSuccess: (response) => {
+                StockAdjustment.itemWithSerialNo = response.data;
+                Modal.open({ id: '#modalStockAdjustmentItemScan', title: 'StockAdjustment / Scan Item' });
+                Dropdown.bind({ id: '#StockAdjustmentScan-ItemId', data: StockAdjustment.itemWithSerialNo, value: 'ItemId', text: 'ItemDesc' });
+                Dropdown.bind({ id: '#StockAdjustmentScan-ReasonCode', data: StockAdjustment.reasonCode, value: 'Value', text: 'Description' });
+                $('#StockAdjustment-ExpiryOn,#StockAdjustmentScan-ItemSerialNo').val('');
+            }
+        });
+        //Modal.open({ id: '#modalStockAdjustmentItemScan', title: 'StockAdjustment / Scan Item' });
+        //Dropdown.bind({ id: '#StockAdjustmentScan-ItemId', data: StockAdjustment.item, value: 'Id', text: 'Description' });
+        //Dropdown.bind({ id: '#StockAdjustmentScan-ReasonCode', data: StockAdjustment.reasonCode, value: 'Value', text: 'Description' });
+        //$('#StockAdjustment-ExpiryOn,#StockAdjustmentScan-ItemSerialNo').val('');
     }
-    static addStockAdjustmentItem({ itemId = 0, itemDesc = null, serialNo = null, expiryOn = null, qty = 0, reasonCode = "", reasonCodeDesc = "", unitDesc = null, isScanned = false, callback } = {}) {
+    static addStockAdjustmentItem({ itemId = 0, itemDesc = null, serialNo = null, unitId = 0, expiryOn = null, qty = 0, conversionFactor = 0, baseQty = 0, reasonCode = "", reasonCodeDesc = "", unitDesc = null, isScanned = false, callback } = {}) {
 
         let store = $('#StockAdjustment-StoreId').val() || 0;
         let stockType = $('#StockAdjustment-StockType').val() || 0;
@@ -202,12 +203,12 @@
             BatchNo: "",
             ExpiryOn: expiryOn,
             Qty: qty,
-            ConversionFactor: 0,
-            BaseQty : qty,
+            ConversionFactor: conversionFactor,
+            BaseQty: baseQty,
             Rate: 0,
             UnitDesc:unitDesc,
             UnitDesc: null,
-            UnitId : 0,
+            UnitId: unitId,
             Amount: 0,
             DiscountAmount: 0,
             TotalAmount: 0,
@@ -677,7 +678,9 @@ window.tableStockAdjustmentItemQtyEvent = {
         let balQty = parseFloat(obj.BalQty || 0);
 
         let unitId = $(`#StockAdjustmentUnit_${index}`).val();
+        unitId = unitId ? unitId : 1;
         let selectedUnit = obj.UnitList?.find(x => x.UnitId == unitId);
+        selectedUnit = selectedUnit ? selectedUnit : [];
         let cf = selectedUnit?.ConversionFactor || 1;
         obj.BaseQty = qty * cf;
         obj.ConversionFactor = cf;
